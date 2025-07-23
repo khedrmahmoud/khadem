@@ -59,7 +59,7 @@ We welcome contributions of all kinds, from bug fixes to new features and docume
 📜 License
 
 Khadem is released under a **custom MIT-based license**.  
-See [LICENSE](./LICENSE) for details.
+See [LICENSE](./LICENSE.md) for details.
 
 ✅ You may use Khadem freely in your own projects.  
 🚫 You may not create a new backend framework from Khadem.  
