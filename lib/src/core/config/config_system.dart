@@ -47,7 +47,7 @@ class ConfigSystem implements ConfigInterface {
     _loadConfigurations();
   }
 
-   void setEnvironment(String environment) {
+  void setEnvironment(String environment) {
     _environment.clear();
     _environment.write(environment);
     _loadConfigurations();

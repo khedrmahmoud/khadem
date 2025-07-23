@@ -54,3 +54,13 @@ Full documentation is coming soon at: https://github.com/khedrmahmoud/khadem
 ## 🤝 Contributing
 We welcome contributions of all kinds, from bug fixes to new features and documentation improvements. Please read the Contributing Guide to get started.
 
+---
+
+📜 License
+
+Khadem is released under a **custom MIT-based license**.  
+See [LICENSE](./LICENSE) for details.
+
+✅ You may use Khadem freely in your own projects.  
+🚫 You may not create a new backend framework from Khadem.  
+🛠️ To contribute, read the [Contributing Guide](./CONTRIBUTING.md).
