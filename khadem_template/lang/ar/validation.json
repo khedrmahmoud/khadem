@@ -1,0 +1,18 @@
+{
+    "required_validation": "حقل :field مطلوب.",
+    "email_validation": "يجب أن يكون :field بريدًا إلكترونيًا صالحًا.",
+    "min_validation": "يجب أن يكون :field على الأقل :min.",
+    "max_validation": "يجب ألا يزيد :field عن :max.",
+    "int_validation": "يجب أن يكون :field عددًا صحيحًا.",
+    "bool_validation": "يجب أن تكون قيمة :field صحيحة أو خاطئة.",
+    "in_validation": ":field غير صالح. القيم المسموح بها: :values.",
+    "numeric_validation": "يجب أن يكون :field رقمًا.",
+    "regex_validation": "تنسيق :field غير صالح.",
+    "confirmed_validation": "تأكيد :field غير متطابق.",
+    "invalid_json_validation": "تنسيق JSON غير صالح.",
+    "invalid_input_validation": "تم إدخال بيانات غير صالحة.",
+    "unknown_rule_validation": "قاعدة التحقق ':rule' غير معروفة.",
+    "validation_failed_validation": "فشل التحقق.",
+    "field_required_validation": "يرجى إدخال :field.",
+    "invalid_type_validation": "نوع :field غير صالح."
+}

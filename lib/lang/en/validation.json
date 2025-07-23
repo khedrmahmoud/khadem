@@ -1,0 +1,18 @@
+{
+    "required_validation": "The :field field is required.",
+    "email_validation": "The :field must be a valid email address.",
+    "min_validation": "The :field must be at least :min.",
+    "max_validation": "The :field may not be greater than :max.",
+    "int_validation": "The :field must be an integer.",
+    "bool_validation": "The :field field must be true or false.",
+    "in_validation": "The selected :field is invalid. Allowed values: :values.",
+    "numeric_validation": "The :field must be a number.",
+    "regex_validation": "The :field format is invalid.",
+    "confirmed_validation": "The :field confirmation does not match.",
+    "invalid_json_validation": "The JSON body is not valid.",
+    "invalid_input_validation": "Invalid input provided.",
+    "unknown_rule_validation": "The validation rule ':rule' is not recognized.",
+    "validation_failed_validation": "Validation failed.",
+    "field_required_validation": "Please provide the :field.",
+    "invalid_type_validation": "The :field has an invalid type."
+}
