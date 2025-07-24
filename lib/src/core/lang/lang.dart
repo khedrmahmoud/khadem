@@ -1,4 +1,5 @@
 import '../../contracts/lang/lang_provider.dart';
+import '../http/context/request_context.dart';
 import 'file_lang_provider.dart';
 
 /// Class used to translate strings with the currently set locale.
@@ -26,11 +27,26 @@ class Lang {
     _provider = provider;
   }
 
+  /// Sets the global locale.
+  ///
+  /// This method changes the locale for all future calls to [t] and [getField].
+  static void setGlobaleLocale(String locale) {
+    _provider.setLocale(locale);
+  }
+
   /// Sets the current request locale.
   ///
   /// This method changes the locale for all future calls to [t] and [getField].
-  static void setRequestLocale(String locale) {
+  static void setRequestLocale(
+    String locale,
+  ) {
     _provider.setLocale(locale);
+
+    RequestContext.set('locale', locale);
+  }
+
+  static String? _getLocale({String? overrideLocale}) {
+    return RequestContext.get<String?>('locale') ?? overrideLocale;
   }
 
   /// Translates a key with optional field and argument.
@@ -45,7 +61,8 @@ class Lang {
   /// locale instead of the current request locale.
   static String t(String key,
       {String field = '', String? arg, String? locale}) {
-    return _provider.t(key, field: field, arg: arg, locale: locale);
+    return _provider.t(key,
+        field: field, arg: arg, locale: _getLocale(overrideLocale: locale));
   }
 
   /// Translates a field label.
@@ -56,6 +73,6 @@ class Lang {
   /// If the [locale] parameter is not null, the method will use the specified
   /// locale instead of the current request locale.
   static String getField(String field, {String? locale}) {
-    return _provider.field(field, locale: locale);
+    return _provider.field(field, locale: _getLocale(overrideLocale: locale));
   }
 }

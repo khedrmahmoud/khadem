@@ -1,6 +1,5 @@
 import 'dart:async';
 
-
 import '../../../contracts/http/middleware_contract.dart';
 import '../../../support/exceptions/middleware_not_found_exception.dart';
 import '../request/request.dart';
@@ -114,7 +113,7 @@ class MiddlewarePipeline {
         .toList();
 
     if (errorHandlers.isEmpty) {
-      return Future.error(error);
+      throw error;
     }
 
     request.params['error'] = error;

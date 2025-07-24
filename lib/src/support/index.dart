@@ -14,6 +14,11 @@ export 'exceptions/cache_exceptions.dart';
 export 'middlewares/cache_middleware.dart';
 
 // ========================
+// 📦 Set_locale_middleware.dart
+// ========================
+export 'middlewares/set_locale_middleware.dart';
+
+// ========================
 // 📦 Circular_dependency_exception.dart
 // ========================
 export 'exceptions/circular_dependency_exception.dart';

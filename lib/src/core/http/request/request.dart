@@ -14,7 +14,7 @@ class Request {
 
   /// Path parameters extracted from the router.
   Map<String, String> params = {};
-  
+
   String? param(String key) {
     return params[key];
   }
@@ -91,7 +91,7 @@ class Request {
     final validator = Validator(input, rules);
 
     if (!validator.passes()) {
-      return Future.error(ValidationException(validator.errors));
+      throw ValidationException(validator.errors);
     }
 
     return input;

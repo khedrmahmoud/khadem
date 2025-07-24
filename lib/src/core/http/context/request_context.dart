@@ -6,7 +6,7 @@ import '../../../modules/auth/auth.dart';
 
 class RequestContext {
   static final _zoneKey = #requestContext;
-  static get zoneKey => _zoneKey;
+  static Symbol get zoneKey => _zoneKey;
 
   /// Use this to access the current request in the zone.
   ///
@@ -39,6 +39,27 @@ class RequestContext {
   ///
   ///     [Profile] {functionName} took {time}ms
   static R run<R>(Request request, R Function() body) {
-    return runZoned(body, zoneValues: {zoneKey: request});
+    return runZoned(() {
+      final result = body();
+      _customData.remove(request); // Clean up after request finishes
+      return result;
+    }, zoneValues: {zoneKey: request});
+  }
+
+  /// Add storage for per-request custom data
+  static final _customData = <Request, Map<String, dynamic>>{};
+
+  static void set(String key, dynamic value) {
+    final req = request;
+    _customData.putIfAbsent(req, () => {})[key] = value;
+  }
+
+  static T? get<T>(String key) {
+    final req = request;
+    return _customData[req]?[key] as T?;
+  }
+
+  static void clear() {
+    _customData.remove(request);
   }
 }

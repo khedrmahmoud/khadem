@@ -1,6 +1,10 @@
 import 'package:khadem/khadem_dart.dart'
-    show Middleware, ServiceProvider, MigrationFile, LoggingMiddleware;
-
+    show
+        Middleware,
+        ServiceProvider,
+        MigrationFile,
+        LoggingMiddleware,
+        SetLocaleMiddleware;
 import '../app/Providers/event_service_provider.dart';
 import '../app/Providers/scheduler_service_provider.dart';
 import '../app/http/middleware/cors_middleware.dart';
@@ -27,6 +31,7 @@ class Kernel {
   static List<Middleware> get middlewares => [
         CorsMiddleware(),
         LoggingMiddleware(),
+        SetLocaleMiddleware()
         // Add middleware here
       ];
 

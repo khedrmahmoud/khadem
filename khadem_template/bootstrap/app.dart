@@ -20,6 +20,10 @@ Future<void> bootstrap(ContainerInterface container) async {
 
 Future<void> lazyBootStrap() async {
   final config = Khadem.config;
+
+  // 📦 Register the DB services
+  await Khadem.registerDatabaseServices();
+
   // 📦 Register the lazy providers
   Khadem.register(Kernel.lazyProviders);
 
