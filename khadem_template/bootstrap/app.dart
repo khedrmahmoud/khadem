@@ -6,7 +6,7 @@ import '../core/kernel.dart';
 ///
 /// Used for minimal startup in `main()`.
 Future<void> bootstrap(ContainerInterface container) async {
-  // 🧠 Initialize Ignite core with optional light mode
+  // 🧠 Initialize Khadem core with optional light mode
   await Khadem.registerCoreServices();
 
   // 🔌 Register the config registry (static Dart maps)

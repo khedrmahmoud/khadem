@@ -4,7 +4,7 @@ import '../bus/command.dart';
 class DockerBuildCommand extends KhademCommand {
   DockerBuildCommand({required super.logger}) {
     argParser.addOption('tag',
-        abbr: 't', defaultsTo: 'ignite:latest', help: 'Docker image tag');
+        abbr: 't', defaultsTo: 'khadem:latest', help: 'Docker image tag');
   }
 
   @override

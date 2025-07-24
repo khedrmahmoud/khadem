@@ -16,7 +16,7 @@ class MakeControllerCommand extends KhademCommand {
   Future<void> handle(List<String> args) async {
     final name = argResults?['name'] as String?;
     if (name == null) {
-      logger.error('Usage: ignite make:controller --name=PostsController');
+      logger.error('Usage: khadem make:controller --name=PostsController');
       exit(1);
     }
 

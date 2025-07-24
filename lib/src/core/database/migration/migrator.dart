@@ -22,7 +22,6 @@ class Migrator {
   Future<void> upAll() async {
     await _ensureDatabaseExists();
     await _ensureMigrationTable();
-    // await _loadMigrations();
 
     final ran = await _ranMigrations();
     Khadem.logger.warning('Running migrations...');
@@ -42,7 +41,6 @@ class Migrator {
   }
 
   Future<void> downAll() async {
-    // await _loadMigrations();
     final ran = (await _ranMigrations()).reversed.toList();
 
     for (final migration in _migrations.reversed) {
@@ -68,7 +66,6 @@ class Migrator {
   }
 
   Future<void> up(String name) async {
-    await _loadMigrations();
     final migration = _findMigration(name);
     await migration.up(manager.schemaBuilder);
     await _executeSchemaQueries();
@@ -76,7 +73,6 @@ class Migrator {
   }
 
   Future<void> down(String name) async {
-    await _loadMigrations();
     final migration = _findMigration(name);
     await migration.down(manager.schemaBuilder);
     await _executeSchemaQueries();
@@ -84,23 +80,12 @@ class Migrator {
   }
 
   Future<void> status() async {
-    await _loadMigrations();
     final ran = await _ranMigrations();
 
     for (final migration in _migrations) {
       final status = ran.contains(migration.name) ? '✅ Ran' : '❌ Pending';
       Khadem.logger.info(' - ${migration.name}: $status');
     }
-  }
-
-  // 🔽 Internal Methods 🔽
-
-  Future<void> _loadMigrations() async {
-    // final loaded = await loader.load();
-    // _migrations
-    //   ..clear()
-    //   ..addAll(loaded)
-    //   ..sort((a, b) => a.name.compareTo(b.name));
   }
 
   MigrationFile _findMigration(String name) {

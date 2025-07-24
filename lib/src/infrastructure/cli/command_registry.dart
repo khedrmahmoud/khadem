@@ -40,11 +40,11 @@ class CommandRegistry {
       MakeJobCommand(logger: logger),
       //
       ServeCommand(logger: logger),
-      WatchCommand(logger: logger),
+      // WatchCommand(logger: logger),
       //
-      BuildCommand(logger: logger),
-      DockerBuildCommand(logger: logger),
-      DeployCommand(logger: logger),
+      // BuildCommand(logger: logger),
+      // DockerBuildCommand(logger: logger),
+      // DeployCommand(logger: logger),
       //
       // MigrateCommand(logger: logger),
       // DbSeedCommand(logger: logger),

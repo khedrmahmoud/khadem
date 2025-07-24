@@ -49,11 +49,6 @@ export 'scheduler/core/job_registry.dart';
 export 'scheduler/core/scheduled_task.dart';
 
 // ========================
-// 📦 Generator
-// ========================
-export 'cli/generator/generator.dart';
-
-// ========================
 // 📦 Job_registry.dart
 // ========================
 export 'queue/job_registry.dart';
@@ -92,4 +87,3 @@ export 'scheduler/scheduler.dart';
 // 📦 Scheduler_bootstrap.dart
 // ========================
 export 'scheduler/scheduler_bootstrap.dart';
-
