@@ -2,6 +2,7 @@ import '../../contracts/config/config_contract.dart';
 import '../../contracts/env/env_interface.dart';
 import '../../contracts/container/container_interface.dart';
 import '../../contracts/events/event_system_interface.dart';
+import '../../contracts/lang/lang_provider.dart';
 import '../../contracts/provider/service_provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -39,6 +40,7 @@ class CoreServiceProvider extends ServiceProvider {
     container.lazySingleton<MiddlewarePipeline>((c) => MiddlewarePipeline());
 
     container.lazySingleton<StorageManager>((c) => StorageManager());
+    container.lazySingleton<LangProvider>((c) => FileLangProvider());
   }
 
   /// Boot logic for core services such as loading `.env` and logging startup.
@@ -58,7 +60,9 @@ class CoreServiceProvider extends ServiceProvider {
     final storageManager = container.resolve<StorageManager>();
     storageManager.fromConfig(config.section('storage') ?? {});
 
-    Lang.setRequestLocale(envSystem.getOrDefault('APP_LOCALE', 'en'));
+    container
+        .resolve<LangProvider>()
+        .setLocale(envSystem.getOrDefault('APP_LOCALE', 'en'));
 
     final logger = container.resolve<Logger>();
     logger.loadFromConfig(config);

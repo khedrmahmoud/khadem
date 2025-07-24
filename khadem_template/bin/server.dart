@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:khadem/khadem_dart.dart' show Khadem, ServerCluster;
+import 'package:khadem/khadem_dart.dart' show Khadem, ServerCluster, Lang;
 import '../routes/web.dart';
 import '../bootstrap/app.dart';
 
@@ -23,12 +23,12 @@ Future<void> main(List<String> args) async {
   await ServerCluster(
     port: port ?? Khadem.env.getInt("APP_PORT", defaultValue: 9000),
     globalBootstrap: () async {
-      await Khadem.registerDatabaseServices();
       await lazyBootStrap();
     },
     onInit: (server) async {
       server.serveStatic('public');
       await Khadem.use(container); // sync with main isolate container
+      Lang.use(container.resolve());
       Khadem.registerDatabaseServices();
       registerRoutes(server);
     },

@@ -165,8 +165,8 @@ class Server {
 
       Zone.current.fork(
         zoneValues: {
-          RequestContext.zoneKey: RequestContext.run(req, () => null),
-          ResponseContext.zoneKey: ResponseContext.run(res, () => null),
+          RequestContext.zoneKey: req,
+          ResponseContext.zoneKey: res,
           ServerContext.zoneKey: ServerContext(
             request: req,
             response: res,

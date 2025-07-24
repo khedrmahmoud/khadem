@@ -11,6 +11,9 @@ void registerRoutes(Server server) {
   // 🏠 Home Routes
   server.group(
       prefix: '/home',
+      middleware: [
+        // Add any middlewares here
+      ],
       routes: (router) async {
         router.get('', HomeController().index);
         router.get('/welcome', HomeController().welcome);
