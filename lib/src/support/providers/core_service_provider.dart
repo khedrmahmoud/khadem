@@ -8,6 +8,7 @@ import 'package:timezone/data/latest.dart' as tz;
 
 import '../../core/core.dart';
 import '../../core/http/middleware/middleware_pipeline.dart';
+import '../../core/socket/socket_manager.dart';
 import '../../core/storage/storage_manager.dart';
 import '../../infrastructure/cache/cache_manager.dart';
 import '../../infrastructure/logging/logger.dart';
@@ -21,6 +22,8 @@ class CoreServiceProvider extends ServiceProvider {
   }
 
   /// Register all essential Khadem core services.
+  /// Registers all core services of the Khadem framework,
+  /// including configuration, environment, logger, router, cache, and events.
   void _registerCoreBindings(ContainerInterface container) {
     container.lazySingleton<Router>((c) => Router());
     container.lazySingleton<CacheManager>((c) => CacheManager());
@@ -41,6 +44,8 @@ class CoreServiceProvider extends ServiceProvider {
 
     container.lazySingleton<StorageManager>((c) => StorageManager());
     container.lazySingleton<LangProvider>((c) => FileLangProvider());
+
+    container.lazySingleton<SocketManager>((c) => SocketManager());
   }
 
   /// Boot logic for core services such as loading `.env` and logging startup.

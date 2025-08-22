@@ -6,7 +6,7 @@ import '../response/response.dart';
 /// Holds the matched route and request/response pair for processing.
 class ServerContext {
   static final _zoneKey = #serverContext;
-  static get zoneKey => _zoneKey;
+  static Symbol get zoneKey => _zoneKey;
 
   final Request request;
   final Response response;

@@ -8,6 +8,7 @@ import '../core/database/migration/seeder.dart';
 import '../contracts/events/event_system_interface.dart';
 import '../core/http/middleware/middleware_pipeline.dart';
 import '../contracts/provider/service_provider.dart';
+import '../core/socket/socket_manager.dart';
 import '../modules/auth/services/auth_manager.dart';
 import '../support/providers/core_service_provider.dart';
 import '../support/providers/database_service_provider.dart';
@@ -93,4 +94,6 @@ class Khadem {
   static EventSystemInterface get eventBus =>
       container.resolve<EventSystemInterface>();
   static AuthManager get auth => container.resolve<AuthManager>();
+  static SocketManager get socket => container.resolve<SocketManager>();
 }
+ 

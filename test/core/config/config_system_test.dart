@@ -12,7 +12,7 @@ void main() {
     configPath = tempDir.path;
 
     // Create base config
-    final appConfig = Directory('${configPath}/config')
+    final appConfig = Directory('$configPath/config')
       ..createSync(recursive: true);
     File('${appConfig.path}/app.json')
       ..createSync()
@@ -29,7 +29,7 @@ void main() {
       ''');
 
     // Create environment-specific config
-    final devConfig = Directory('${configPath}/config/development')
+    final devConfig = Directory('$configPath/config/development')
       ..createSync(recursive: true);
     File('${devConfig.path}/app.json')
       ..createSync()
@@ -50,7 +50,7 @@ void main() {
   group('ConfigSystem', () {
     test('should load base configuration', () {
       final config = ConfigSystem(
-        configPath: '${configPath}/config',
+        configPath: '$configPath/config',
         environment: 'production',
         useCache: false,
       );
@@ -63,7 +63,7 @@ void main() {
 
     test('should merge environment-specific configuration', () {
       final config = ConfigSystem(
-        configPath: '${configPath}/config',
+        configPath: '$configPath/config',
         environment: 'development',
         useCache: false,
       );
@@ -75,7 +75,7 @@ void main() {
 
     test('should return default value for non-existent key', () {
       final config = ConfigSystem(
-        configPath: '${configPath}/config',
+        configPath: '$configPath/config',
         environment: 'production',
         useCache: false,
       );
@@ -87,7 +87,7 @@ void main() {
     test('should throw ConfigException for invalid config directory', () {
       expect(
         () => ConfigSystem(
-          configPath: '${configPath}/non_existent',
+          configPath: '$configPath/non_existent',
           environment: 'production',
         ),
         throwsA(isA<ConfigException>()),
@@ -96,7 +96,7 @@ void main() {
 
     test('should set and get runtime configuration values', () {
       final config = ConfigSystem(
-        configPath: '${configPath}/config',
+        configPath: '$configPath/config',
         environment: 'production',
         useCache: false,
       );
@@ -107,7 +107,7 @@ void main() {
 
     test('should handle nested configuration values', () {
       final config = ConfigSystem(
-        configPath: '${configPath}/config',
+        configPath: '$configPath/config',
         environment: 'production',
         useCache: false,
       );
@@ -119,7 +119,7 @@ void main() {
 
     test('should check if configuration key exists', () {
       final config = ConfigSystem(
-        configPath: '${configPath}/config',
+        configPath: '$configPath/config',
         environment: 'production',
         useCache: false,
       );
@@ -130,7 +130,7 @@ void main() {
 
     test('should handle environment change', () {
       final config = ConfigSystem(
-        configPath: '${configPath}/config',
+        configPath: '$configPath/config',
         environment: 'production',
         useCache: false,
       );

@@ -7,7 +7,7 @@ import '../response/response.dart';
 
 class ResponseContext {
   static final _zoneKey = #responseContext;
-  static get zoneKey => _zoneKey;
+  static Symbol get zoneKey => _zoneKey;
 
   /// Use this to access the current response in the zone.
   ///

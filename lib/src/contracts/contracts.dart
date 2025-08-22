@@ -82,3 +82,8 @@ export 'validation/rule.dart';
 // 📦 Storage
 // ========================
 export 'storage/storage_disk.dart';
+
+// ========================
+// 📦 Views
+// ========================
+export 'views/directive_contract.dart';

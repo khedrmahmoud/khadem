@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../application/khadem.dart';
 import '../../contracts/events/event_system_interface.dart';
 import 'event_registration.dart';
 
@@ -110,8 +111,7 @@ class EventSystem implements EventSystemInterface {
       }
 
       if (broadcast) {
-        // TODO: Add actual broadcast integration
-        print('[Broadcast] $event → $payload');
+        Khadem.socket.broadcast('event', event, payload);
       }
     }
 

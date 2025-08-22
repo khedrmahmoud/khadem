@@ -1,10 +1,16 @@
 import 'dart:io';
+import 'package:yaml/yaml.dart';
+import 'package:yaml_edit/yaml_edit.dart';
 import '../bus/command.dart';
 
 class DockerBuildCommand extends KhademCommand {
   DockerBuildCommand({required super.logger}) {
-    argParser.addOption('tag',
-        abbr: 't', defaultsTo: 'khadem:latest', help: 'Docker image tag');
+    argParser.addOption(
+      'tag',
+      abbr: 't',
+      defaultsTo: 'khadem:latest',
+      help: 'Docker image tag',
+    );
   }
 
   @override
@@ -12,70 +18,62 @@ class DockerBuildCommand extends KhademCommand {
 
   @override
   String get description =>
-      'Prepare build/output and build Docker image without compiling snapshot';
+      'Prepare build/output and build Docker image with local khadem framework.';
 
   @override
   Future<void> handle(List<String> args) async {
     final tag = argResults?['tag'] as String;
     final outputDir = Directory('build/output');
-    // ✅ Check if Docker is installed
-    await Process.run('docker', ['--version'])
-        .then((value) => value.exitCode)
-        .catchError((e) {
-      logger.error(
-          '❌ Docker is not installed or not found in PATH.\nPlease install Docker and make sure the "docker" command is available.');
-      exit(1);
-    });
 
-    // Clean existing output
+    // ✅ Check if Docker is installed
+    final check = await Process.run('docker', ['--version']);
+    if (check.exitCode != 0) {
+      logger.error('❌ Docker not found in PATH. Please install Docker first.');
+      exit(1);
+    }
+
+    // Clean & recreate output dir
     if (await outputDir.exists()) {
       await outputDir.delete(recursive: true);
     }
     await outputDir.create(recursive: true);
 
-    // Check server.jit exists
-    final snapshot = File('bin/server.jit');
-    if (!await snapshot.exists()) {
-      logger.error(
-          '❌ bin/server.jit not found. Please compile it first manually.');
+    // --- 1️⃣ Read pubspec.yaml and find khadem path ---
+    final pubspecFile = File('pubspec.yaml');
+    if (!await pubspecFile.exists()) {
+      logger.error('❌ pubspec.yaml not found.');
+      exit(1);
+    }
+    final pubspecContent = await pubspecFile.readAsString();
+    final pubspecMap = loadYaml(pubspecContent) as Map;
+    String? khademPath = pubspecMap['dependencies']?['khadem']?['path'];
+
+    if (khademPath == null || !Directory(khademPath).existsSync()) {
+      logger.error('❌ Could not find local khadem path in pubspec.yaml.');
       exit(1);
     }
 
-    // Copy snapshot
-    final binDir = Directory('${outputDir.path}/bin');
-    await binDir.create(recursive: true);
-    await snapshot.copy('${binDir.path}/server.jit');
+    logger.info('📦 Found local khadem at: $khademPath');
 
-    // Copy .env
-    await _copyFileIfExists('.env', '${outputDir.path}/.env');
+    // --- 2️⃣ Copy khadem framework into outputDir ---
+    await _copyDirectory(
+        Directory(khademPath), Directory('${outputDir.path}/khadem'));
 
-    // Copy config/**/*.json
-    final configDir = Directory('config');
-    if (await configDir.exists()) {
-      await _copyJsonFilesRecursively(
-          configDir, Directory('${outputDir.path}/config'));
-    }
+    // --- 3️⃣ Copy all project files ---
+    await _copyDirectory(Directory('.'), outputDir);
 
-    // Copy public/
-    final publicDir = Directory('public');
-    if (await publicDir.exists()) {
-      await _copyDirectory(publicDir, Directory('${outputDir.path}/public'));
-    }
+    // --- 4️⃣ Update pubspec.yaml to use relative path ---
+    final newPubspecPath = '${outputDir.path}/pubspec.yaml';
+    final yamlEditor = YamlEditor(await File(newPubspecPath).readAsString());
+    yamlEditor.update(['dependencies', 'khadem', 'path'], './khadem');
+    await File(newPubspecPath).writeAsString(yamlEditor.toString());
+    logger.info('✏️ Updated pubspec.yaml to use ./khadem');
 
-    // Copy storage/
-    final storageDir = Directory('storage');
-    if (await storageDir.exists()) {
-      await _copyDirectory(storageDir, Directory('${outputDir.path}/storage'));
-    }
-
-    // Create Dockerfile if not exists
+    // --- 5️⃣ Create Dockerfile ---
     final dockerfilePath = File('${outputDir.path}/Dockerfile');
-    if (!await dockerfilePath.exists()) {
-      logger.info('📝 Generating default Dockerfile...');
-      await dockerfilePath.writeAsString(_defaultDockerfile());
-    }
+    await dockerfilePath.writeAsString(_defaultDockerfile());
 
-    // Docker build
+    // --- 6️⃣ Build Docker image ---
     logger.info('🐳 Building Docker image: $tag...');
     final result =
         await Process.run('docker', ['build', '-t', tag, outputDir.path]);
@@ -86,18 +84,14 @@ class DockerBuildCommand extends KhademCommand {
       logger.error('❌ Docker build failed:\n${result.stderr}');
       exit(1);
     }
-
-    exit(0);
   }
 
   Future<void> _copyDirectory(Directory source, Directory destination) async {
     await for (var entity in source.list(recursive: true)) {
       final relativePath = entity.path.substring(source.path.length + 1);
       final newPath = '${destination.path}/$relativePath';
-
       if (entity is File) {
-        final newFile = File(newPath);
-        await newFile.parent.create(recursive: true);
+        await File(newPath).parent.create(recursive: true);
         await entity.copy(newPath);
       } else if (entity is Directory) {
         await Directory(newPath).create(recursive: true);
@@ -105,33 +99,11 @@ class DockerBuildCommand extends KhademCommand {
     }
   }
 
-  Future<void> _copyFileIfExists(String sourcePath, String destPath) async {
-    final file = File(sourcePath);
-    if (await file.exists()) {
-      await File(sourcePath).copy(destPath);
-      logger.info('📄 Included: $sourcePath');
-    }
-  }
-
-  Future<void> _copyJsonFilesRecursively(Directory from, Directory to) async {
-    await for (var entity in from.list(recursive: true)) {
-      if (entity is File && entity.path.endsWith('.json')) {
-        final relative = entity.path.replaceFirst(from.path, '');
-        final dest = File('${to.path}/$relative');
-        await dest.parent.create(recursive: true);
-        await entity.copy(dest.path);
-        logger.info('📄 Included: ${entity.path}');
-      }
-    }
-  }
-
   String _defaultDockerfile() => '''
 FROM dart:stable
-
 WORKDIR /app
-
 COPY . .
-
-CMD ["dart", "bin/server.jit"]
+RUN dart pub get
+CMD ["dart", "run", "bin/server.dart"]
 ''';
 }

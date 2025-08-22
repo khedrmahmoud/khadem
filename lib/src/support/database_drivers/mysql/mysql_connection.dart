@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:mysql1/mysql1.dart';
 import '../../../contracts/database/connection_interface.dart';

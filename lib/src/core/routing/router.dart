@@ -10,7 +10,7 @@ class Router {
   final List<Route> _routes = [];
 
   /// Returns the list of registered routes.
-  get routes => _routes;
+  List<Route> get routes => _routes;
 
   /// Registers a route with the specified [method], [path], [handler], and optional [middleware].
   void register(String method, String path, Handler handler,

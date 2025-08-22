@@ -5,14 +5,11 @@ import 'commands/creators/make_listener_command.dart';
 import 'commands/creators/make_middleware_command.dart';
 import 'commands/new_command.dart';
 import 'commands/creators/make_controller_command.dart';
-import 'commands/build_command.dart';
-import 'commands/deploy_command.dart';
-import 'commands/docker_build_command.dart';
 import 'commands/creators/make_provider_command.dart';
 import 'commands/serve_command.dart';
-import 'commands/watch_command.dart';
 import 'commands/creators/make_model_command.dart';
 import 'commands/creators/make_migration_command.dart';
+import 'commands/docker_build_command.dart';
 // import 'commands/migrate_command.dart';
 // import 'commands/seed_command.dart';
 // import 'commands/queue_work_command.dart';
@@ -43,7 +40,7 @@ class CommandRegistry {
       // WatchCommand(logger: logger),
       //
       // BuildCommand(logger: logger),
-      // DockerBuildCommand(logger: logger),
+      DockerBuildCommand(logger: logger),
       // DeployCommand(logger: logger),
       //
       // MigrateCommand(logger: logger),

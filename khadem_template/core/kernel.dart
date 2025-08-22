@@ -39,5 +39,5 @@ class Kernel {
   static final Map<String, Map<String, dynamic>> configs = AppConfig.configs;
 
   /// Migrations
-  static List<MigrationFile> migrations = migrationFiles;
+  static List<MigrationFile> migrations = migrationsFiles;
 }

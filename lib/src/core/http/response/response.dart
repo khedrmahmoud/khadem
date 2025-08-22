@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:mime/mime.dart';
 
+import '../../view/renderer.dart';
 import '../context/response_context.dart';
 
 /// Represents the HTTP response sent back to the client.
@@ -100,6 +101,17 @@ class Response {
     _raw.response.headers.contentType = ContentType.parse(
         lookupMimeType(file.path) ?? 'application/octet-stream');
     await _raw.response.addStream(file.openRead());
+    await _raw.response.close();
+    _sent = true;
+  }
+
+  Future<void> view(String viewName,
+      {Map<String, dynamic> data = const {}}) async {
+    final renderer = ViewRenderer.instance;
+    final content = await renderer.render(viewName, context: data);
+    if (_sent) return;
+    _raw.response.headers.contentType = ContentType.html;
+    _raw.response.write(content);
     await _raw.response.close();
     _sent = true;
   }

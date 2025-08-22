@@ -1,5 +1,3 @@
-import 'dart:mirrors';
-
 import '../../contracts/container/container_interface.dart';
 import '../../support/exceptions/circular_dependency_exception.dart';
 import '../../support/exceptions/service_not_found_exception.dart';
@@ -65,7 +63,6 @@ class ServiceContainer implements ContainerInterface {
     binding ??= _bindings[T];
 
     if (binding == null) {
-      if (_canAutoResolve<T>()) return _autoResolve<T>();
       throw ServiceNotFoundException('Service $T not registered');
     }
 
@@ -90,9 +87,7 @@ class ServiceContainer implements ContainerInterface {
   List<T> resolveAll<T>() {
     final result = <T>[];
     for (final type in _bindings.keys) {
-      if (_isAssignableTo(type, T)) {
-        result.add(resolve<T>());
-      }
+      result.add(resolve<T>());
     }
     return result;
   }
@@ -127,42 +122,5 @@ class ServiceContainer implements ContainerInterface {
     _bindings.clear();
     _instances.clear();
     _contextualBindings.clear();
-  }
-
-  /// Attempts to automatically resolve a concrete class by analyzing its constructor.
-  T _autoResolve<T>() {
-    final mirror = reflectClass(T);
-    final constructor = mirror.declarations.values
-        .whereType<MethodMirror>()
-        .where((m) => m.isConstructor && m.parameters.isEmpty)
-        .firstOrNull;
-
-    if (constructor == null) {
-      throw ServiceNotFoundException(
-          'Cannot auto-resolve $T: No default constructor found');
-    }
-
-    return mirror.newInstance(Symbol(''), []).reflectee as T;
-  }
-
-  /// Checks if a type can be automatically resolved.
-  bool _canAutoResolve<T>() {
-    try {
-      final mirror = reflectClass(T);
-      return !mirror.isAbstract;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  /// Checks if a type is assignable to another type.
-  bool _isAssignableTo(Type from, Type to) {
-    try {
-      final fromMirror = reflectType(from);
-      final toMirror = reflectType(to);
-      return fromMirror.isSubtypeOf(toMirror);
-    } catch (_) {
-      return false;
-    }
   }
 }
