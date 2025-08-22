@@ -1,0 +1,22 @@
+name: khadem_cache
+description: Caching functionality for the Khadem framework
+version: 1.0.0
+homepage: https://github.com/khadem-dart/khadem
+publish_to: none # Remove when publishing to pub.dev
+
+environment:
+  sdk: '>=3.0.0'
+
+dependencies:
+  khadem_contracts:
+    path: ../khadem_contracts
+  khadem_core:
+    path: ../khadem_core
+  redis: ^4.0.0
+  meta: ^1.9.1
+
+dev_dependencies:
+  very_good_analysis: ^5.1.0
+  test: ^1.24.0
+  mockito: ^5.4.6
+  build_runner: ^2.4.6

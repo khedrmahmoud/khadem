@@ -1,0 +1,14 @@
+name: khadem_contracts
+description: Core contracts/interfaces for the Khadem framework
+version: 1.0.0
+homepage: https://github.com/khadem-dart/khadem
+
+environment:
+  sdk: '>=3.0.0'
+
+dependencies:
+  meta: ^1.9.1
+
+dev_dependencies:
+  very_good_analysis: ^5.1.0
+  test: ^1.24.0
