@@ -17,6 +17,9 @@ class SocketManager {
   final Map<String, _EventEntry> _eventHandlers = {};
   final Map<String, List<SocketMiddleware>> _roomMiddlewares = {};
 
+  // Track which clients are interested in which events
+  final Map<String, Set<SocketClient>> _eventSubscribers = {};
+
   void addClient(SocketClient client) {
     _clients[client.id] = client;
     final user = client.get('user');
@@ -33,6 +36,13 @@ class SocketManager {
         _rooms.remove(room);
       }
     }
+    // Remove client from all event subscriptions
+    for (final subscribers in _eventSubscribers.values) {
+      subscribers.remove(client);
+    }
+    // Clean up empty subscriber sets
+    _eventSubscribers.removeWhere((event, subscribers) => subscribers.isEmpty);
+
     final user = client.get('user');
     if (user != null && user['id'] != null) {
       _userClientMap.remove(user['id']);
@@ -75,6 +85,56 @@ class SocketManager {
     _rooms[room]?.forEach((client) => client.send(event, data));
   }
 
+  /// Subscribe a client to an event for future broadcasts
+  void subscribeToEvent(String event, SocketClient client) {
+    _eventSubscribers.putIfAbsent(event, () => {}).add(client);
+  }
+
+  /// Unsubscribe a client from an event
+  void unsubscribeFromEvent(String event, SocketClient client) {
+    _eventSubscribers[event]?.remove(client);
+    if (_eventSubscribers[event]?.isEmpty ?? false) {
+      _eventSubscribers.remove(event);
+    }
+  }
+
+  /// Broadcast an event to all clients who have subscribed to it
+  void broadcastToEventSubscribers(String event, dynamic data) {
+    final subscribers = _eventSubscribers[event];
+    if (subscribers != null && subscribers.isNotEmpty) {
+      for (final client in subscribers) {
+        client.send(event, data);
+      }
+    }
+  }
+
+  /// Broadcast an event to all clients who have registered interest in it
+  /// This is an alias for broadcastToEventSubscribers for convenience
+  void broadcastEvent(String event, dynamic data) {
+    broadcastToEventSubscribers(event, data);
+  }
+
+  /// Get the number of subscribers for an event
+  int getEventSubscriberCount(String event) {
+    return _eventSubscribers[event]?.length ?? 0;
+  }
+
+  /// Check if a client is subscribed to an event
+  bool isClientSubscribedToEvent(String event, SocketClient client) {
+    return _eventSubscribers[event]?.contains(client) ?? false;
+  }
+
+  /// Get all events a client is subscribed to
+  Set<String> getClientSubscriptions(SocketClient client) {
+    final subscriptions = <String>{};
+    for (final entry in _eventSubscribers.entries) {
+      if (entry.value.contains(client)) {
+        subscriptions.add(entry.key);
+      }
+    }
+    return subscriptions;
+  }
+
   void sendTo(String id, String event, dynamic data) {
     _clients[id]?.send(event, data);
   }
@@ -89,4 +149,10 @@ class SocketManager {
   SocketClient? getClient(String id) => _clients[id];
 
   bool hasRoom(String room) => _rooms.containsKey(room);
+
+  /// Check if an event has any subscribers
+  bool hasEventSubscribers(String event) {
+    return _eventSubscribers.containsKey(event) &&
+           (_eventSubscribers[event]?.isNotEmpty ?? false);
+  }
 }

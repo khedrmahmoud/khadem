@@ -8,9 +8,13 @@ class EmailRule extends Rule {
     String? arg, {
     required Map<String, dynamic> data,
   }) {
+    if (value == null || value is! String) {
+      return 'email_validation';
+    }
+
     final emailRegex =
         RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    if (value is String && !emailRegex.hasMatch(value)) {
+    if (!emailRegex.hasMatch(value)) {
       return 'email_validation';
     }
     return null;

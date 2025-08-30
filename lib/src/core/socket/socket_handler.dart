@@ -1,6 +1,7 @@
 import 'dart:convert';
 import '../../application/khadem.dart';
 import 'socket_client.dart';
+import 'socket_exception_handler.dart';
 import 'socket_manager.dart';
 import 'socket_middleware_pipeline.dart';
 
@@ -33,10 +34,11 @@ class SocketHandler {
         await pipeline.execute(_client, data, () async {
           await eventEntry.handler(_client, data);
         });
-      } catch (e) {
-        Khadem.logger.error('❌ Error handling socket message: $e');
-        _client.send('error', 'Invalid request format or internal error.');
+      } catch (e, stackTrace) {
+        SocketExceptionHandler.handle(_client, e, stackTrace);
       }
+    }, onError: (error, stackTrace) {
+      SocketExceptionHandler.handle(_client, error, stackTrace);
     }, onDone: () {
       _manager.removeClient(_client);
       Khadem.logger.info('🔴 Client disconnected: ${_client.id}');

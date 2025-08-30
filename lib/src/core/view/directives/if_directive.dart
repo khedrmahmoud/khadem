@@ -1,4 +1,4 @@
-import '../../../../khadem_dart.dart';
+import '../../../contracts/views/directive_contract.dart';
 
 class IfDirective implements ViewDirective {
   static final _regex = RegExp(r'@if\s*\((.*?)\)(.*?)@endIf', dotAll: true);

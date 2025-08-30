@@ -1,4 +1,4 @@
-import '../../../../khadem_dart.dart';
+import '../../../contracts/views/directive_contract.dart';
 
 class ForDirective implements ViewDirective {
   static final _forRegex = RegExp(

@@ -1,6 +1,7 @@
 import 'dart:async';
 import '../../contracts/socket/socket_middleware.dart';
 import 'socket_client.dart';
+import 'socket_exception_handler.dart';
 
 class SocketMiddlewarePipeline {
   final List<SocketMiddleware> _middlewares = [];
@@ -25,9 +26,24 @@ class SocketMiddlewarePipeline {
     Future<void> next() async {
       if (index < _middlewares.length) {
         final middleware = _middlewares[index++];
-        await middleware.handler(client, message, next);
+        try {
+          await middleware.handler(client, message, next);
+        } catch (e, stackTrace) {
+          SocketExceptionHandler.handleMiddlewareError(
+            client,
+            e,
+            stackTrace,
+            middleware.name,
+          );
+          // Don't continue with next middleware if one fails
+          return;
+        }
       } else {
-        await handler();
+        try {
+          await handler();
+        } catch (e, stackTrace) {
+          SocketExceptionHandler.handle(client, e, stackTrace);
+        }
       }
     }
 

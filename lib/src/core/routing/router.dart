@@ -1,106 +1,120 @@
 import '../../contracts/http/middleware_contract.dart';
 import '../http/request/request_handler.dart';
-import '../exception/exception_handler.dart';
 import 'route.dart';
-import 'route_group.dart';
 import 'route_match_result.dart';
+import 'routing_group_manager.dart';
+import 'routing_handler.dart';
+import 'routing_matcher.dart';
+import 'routing_registry.dart';
 
 /// Manages routing logic with support for HTTP methods and middleware.
+///
+/// This class orchestrates modular components for better maintainability
+/// and separation of concerns.
 class Router {
-  final List<Route> _routes = [];
+  late final RouteRegistry _registry;
+  late final RouteMatcher _matcher;
+  late final RouteGroupManager _groupManager;
+  late final RouteHandler _handler;
+
+  Router() {
+    _registry = RouteRegistry();
+    _matcher = RouteMatcher(_registry.routes);
+    _groupManager = RouteGroupManager(_registry);
+    _handler = RouteHandler();
+  }
+
+  /// Private constructor for internal use with existing registry
+  Router._withRegistry(RouteRegistry registry) {
+    _registry = registry;
+    _matcher = RouteMatcher(_registry.routes);
+    _groupManager = RouteGroupManager(_registry);
+    _handler = RouteHandler();
+  }
 
   /// Returns the list of registered routes.
-  List<Route> get routes => _routes;
+  List<Route> get routes => _registry.routes;
 
   /// Registers a route with the specified [method], [path], [handler], and optional [middleware].
   void register(String method, String path, RequestHandler handler,
-      List<Middleware> middleware,) {
-    final route = Route(method.toUpperCase(), path, handler, middleware);
-    if (route.isDynamic) {
-      _routes.add(route);
-    } else {
-      _routes.insert(0, route);
-    }
+      List<Middleware> middleware) {
+    _registry.register(method, path, handler, middleware);
   }
 
   /// Registers a GET route.
   void get(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
-      register('GET', path, handler, middleware);
+          {List<Middleware> middleware = const []}) =>
+      _registry.get(path, handler, middleware: middleware);
 
   /// Registers a POST route.
   void post(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
-      register('POST', path, handler, middleware);
+          {List<Middleware> middleware = const []}) =>
+      _registry.post(path, handler, middleware: middleware);
 
   /// Registers a PUT route.
   void put(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
-      register('PUT', path, handler, middleware);
+          {List<Middleware> middleware = const []}) =>
+      _registry.put(path, handler, middleware: middleware);
 
   /// Registers a PATCH route.
   void patch(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
-      register('PATCH', path, handler, middleware);
+          {List<Middleware> middleware = const []}) =>
+      _registry.patch(path, handler, middleware: middleware);
 
   /// Registers a DELETE route.
   void delete(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
-      register('DELETE', path, handler, middleware);
+          {List<Middleware> middleware = const []}) =>
+      _registry.delete(path, handler, middleware: middleware);
 
   /// Registers a HEAD route.
   void head(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
-      register('HEAD', path, handler, middleware);
+          {List<Middleware> middleware = const []}) =>
+      _registry.head(path, handler, middleware: middleware);
 
   /// Registers an OPTIONS route.
   void options(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
-      register('OPTIONS', path, handler, middleware);
+          {List<Middleware> middleware = const []}) =>
+      _registry.options(path, handler, middleware: middleware);
 
   /// Registers a route for any method.
   void any(String path, RequestHandler handler,
-      {List<Middleware> middleware = const [],}) {
-    for (final method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD']) {
-      register(method, path, handler, middleware);
-    }
+      {List<Middleware> middleware = const []}) {
+    _registry.any(path, handler, middleware: middleware);
   }
 
   /// Groups a set of routes under a prefix and optional middleware.
   void group({
     required String prefix,
-    required void Function(Router) routes, List<Middleware> middleware = const [],
+    required void Function(Router) routes,
+    List<Middleware> middleware = const [],
   }) {
-    final group = RouteGroup(
+    _groupManager.group(
       prefix: prefix,
+      routes: (registry) {
+        // Create a temporary router that uses the registry
+        final tempRouter = Router._withRegistry(registry);
+        routes(tempRouter);
+      },
       middleware: middleware,
-      defineRoutes: routes,
     );
-    group.register(this);
   }
 
   /// Matches a route for the given [method] and [path].
   /// Matches the first route that fits the given method and path.
   RouteMatchResult? match(String method, String path) {
-    for (final route in _routes) {
-      if (route.matches(method, path)) {
-        return RouteMatchResult(
-          handler: wrapWithHandler(route.handler),
-          params: route.extractParams(path),
-          middleware: route.middleware,
-        );
-      }
+    final result = _matcher.match(method, path);
+    if (result != null) {
+      return RouteMatchResult(
+        handler: _handler.wrapWithExceptionHandler(result.handler),
+        params: result.params,
+        middleware: result.middleware,
+      );
     }
     return null;
   }
 
-  RequestHandler wrapWithHandler(RequestHandler handler) {
-    return (req, res) async {
-      try {
-        await handler(req, res);
-      } catch (e, s) {
-        ExceptionHandler.handle(res, e, s);
-      }
-    };
+  /// Clears all registered routes.
+  void clear() {
+    _registry.clear();
   }
 }

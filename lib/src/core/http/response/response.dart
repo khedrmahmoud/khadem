@@ -97,7 +97,7 @@ class Response {
     List<int> Function(T)? toBytes,
   }) async {
     await _body.stream(stream,
-        contentType: contentType, headers: headers, toBytes: toBytes);
+        contentType: contentType, headers: headers, toBytes: toBytes,);
     _sent = true;
   }
 
@@ -109,7 +109,7 @@ class Response {
 
   /// Renders a view template (convenience method).
   Future<void> view(String viewName,
-      {Map<String, dynamic> data = const {}}) async {
+      {Map<String, dynamic> data = const {},}) async {
     await _renderer.renderView(viewName, data: data);
     _sent = true;
   }

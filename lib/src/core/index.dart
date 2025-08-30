@@ -174,7 +174,6 @@ export 'validation/rule_registry.dart';
 // 📦 Validator.dart
 // ========================
 export 'validation/validator.dart';
-export 'view/cache/view_cache.dart';
 // ========================
 // 📦 Directive_registry.dart
 // ========================

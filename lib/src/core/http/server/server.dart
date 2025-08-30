@@ -1,29 +1,31 @@
-import 'dart:async';
-import 'dart:io';
-
 import '../../../contracts/http/middleware_contract.dart';
 import '../request/request_handler.dart';
-import '../../exception/exception_handler.dart';
 import '../../routing/router.dart';
-import '../context/request_context.dart';
-import '../context/response_context.dart';
-import '../context/server_context.dart';
-import '../middleware/middleware_pipeline.dart';
-import '../request/request.dart';
-import '../response/response.dart';
-import 'core/http_request_processor.dart';
-import 'core/static_handler.dart';
+import 'server_lifecycle.dart';
+import 'server_middleware.dart';
+import 'server_router.dart';
+import 'server_static.dart';
 
 /// 🔥 The core HTTP server for Khadem.
 ///
 /// Provides routing, middleware pipeline, static file serving,
 /// and request handling similar to frameworks like Express.js or Laravel.
+///
+/// This class orchestrates modular components for better maintainability
+/// and separation of concerns.
 class Server {
-  final Router _router = Router();
-  final MiddlewarePipeline _pipeline = MiddlewarePipeline();
-  static ServerStaticHandler? _staticHandler;
-// Store the initializer function to reload routes/middleware
-  void Function(Server server)? _initializer;
+  late final ServerRouter _router;
+  late final ServerMiddleware _middleware;
+  late final ServerStatic _static;
+  late final ServerLifecycle _lifecycle;
+
+  Server() {
+    _router = ServerRouter();
+    _middleware = ServerMiddleware();
+    _static = ServerStatic();
+    _lifecycle = ServerLifecycle(_router, _middleware, _static);
+  }
+
   // ========================================
   // 📁 Static File Serving
   // ========================================
@@ -35,7 +37,7 @@ class Server {
   /// server.serveStatic('public');
   /// ```
   void serveStatic(String path) {
-    _staticHandler = ServerStaticHandler(path);
+    _static.serveStatic(path);
   }
 
   // ========================================
@@ -46,15 +48,15 @@ class Server {
   ///
   /// Optionally set [priority] or [name] for ordering and debugging.
   void useMiddleware(MiddlewareHandler handler,
-      {MiddlewarePriority priority = MiddlewarePriority.global, String? name,}) {
-    _pipeline.add(handler, priority: priority, name: name);
+      {MiddlewarePriority priority = MiddlewarePriority.global, String? name}) {
+    _middleware.useMiddleware(handler, priority: priority, name: name);
   }
 
   /// Registers multiple global [middlewares].
   ///
   /// These are executed for every incoming request.
   void useMiddlewares(List<Middleware> middlewares) {
-    _pipeline.addMiddlewares(middlewares);
+    _middleware.useMiddlewares(middlewares);
   }
 
   // ========================================
@@ -62,31 +64,31 @@ class Server {
   // ========================================
 
   void get(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+          {List<Middleware> middleware = const []}) =>
       _router.get(path, handler, middleware: middleware);
 
   void post(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+          {List<Middleware> middleware = const []}) =>
       _router.post(path, handler, middleware: middleware);
 
   void put(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+          {List<Middleware> middleware = const []}) =>
       _router.put(path, handler, middleware: middleware);
 
   void patch(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+          {List<Middleware> middleware = const []}) =>
       _router.patch(path, handler, middleware: middleware);
 
   void delete(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+          {List<Middleware> middleware = const []}) =>
       _router.delete(path, handler, middleware: middleware);
 
   void head(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+          {List<Middleware> middleware = const []}) =>
       _router.head(path, handler, middleware: middleware);
 
   void options(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+          {List<Middleware> middleware = const []}) =>
       _router.options(path, handler, middleware: middleware);
 
   // ========================================
@@ -107,38 +109,22 @@ class Server {
   /// ```
   void group({
     required String prefix,
-    required void Function(Router router) routes, List<Middleware> middleware = const [],
+    required void Function(Router router) routes,
+    List<Middleware> middleware = const [],
   }) {
-    final groupRouter = Router();
-    routes(groupRouter);
-
-    for (final route in groupRouter.routes) {
-      _router.register(
-        route.method,
-        '$prefix${route.path}',
-        route.handler,
-        [...middleware, ...route.middleware],
-      );
-    }
+    _router.group(prefix: prefix, routes: routes, middleware: middleware);
   }
 
-// ========================================
+  // ========================================
   // 🔄 Hot Reload Support
   // ========================================
 
-  void setInitializer(void Function(Server server) initializer) {
-    _initializer = initializer;
+  void setInitializer(void Function() initializer) {
+    _lifecycle.setInitializer(initializer);
   }
 
   Future<void> reload() async {
-    if (_initializer != null) {
-      // Reset router and pipeline
-      _router.routes.clear();
-      _pipeline.clear();
-      // Re-run initializer to reload routes and middleware
-      _initializer!(this);
-      print('Routes and middleware reloaded');
-    }
+    await _lifecycle.reload();
   }
 
   // ========================================
@@ -149,37 +135,6 @@ class Server {
   ///
   /// Automatically applies global middleware and routes.
   Future<void> start({int port = 8080}) async {
-    final handler = HttpRequestProcessor(
-      router: _router,
-      globalMiddleware: _pipeline,
-      staticHandler: _staticHandler,
-    );
-
-    final server =
-        await HttpServer.bind(InternetAddress.anyIPv4, port, shared: true);
-
-    await for (final raw in server) {
-      final req = Request(raw);
-      final res = Response(raw);
-
-      Zone.current.fork(
-        zoneValues: {
-          RequestContext.zoneKey: req,
-          ResponseContext.zoneKey: res,
-          ServerContext.zoneKey: ServerContext(
-            request: req,
-            response: res,
-            match: _router.match,
-          ),
-        },
-      ).run(() async {
-        try {
-          await _pipeline.process(req, res);
-          if (!res.sent) await handler.handle(req, res);
-        } catch (e, s) {
-          ExceptionHandler.handle(res, e, s);
-        }
-      });
-    }
+    await _lifecycle.start(port: port);
   }
 }

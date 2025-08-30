@@ -21,7 +21,7 @@ class Validator {
         final name = segments[0];
         final arg = segments.length > 1 ? segments[1] : null;
 
-        final rule = RuleRegistry.resolve(name);
+        final rule = ValidationRuleRepository.resolve(name);
         if (rule != null) {
           final messageKey = rule.validate(field, value, arg, data: data);
           if (messageKey != null) {
