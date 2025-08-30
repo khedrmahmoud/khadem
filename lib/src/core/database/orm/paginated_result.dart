@@ -24,6 +24,6 @@ class PaginatedResult<T> {
           'per_page': perPage,
           'current_page': currentPage,
           'last_page': lastPage,
-        }
+        },
       };
 }

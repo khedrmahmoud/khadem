@@ -1,10 +1,10 @@
  import '../../contracts/config/config_contract.dart';
 import '../../contracts/queue/queue_driver.dart';
+import '../../support/exceptions/queue_exception.dart';
 import '../../support/queue_drivers/file_queue_driver.dart';
 import '../../support/queue_drivers/memory_queue_driver.dart';
 import '../../support/queue_drivers/redis_queue_driver.dart';
 import '../../support/queue_drivers/sync_queue_driver.dart';
-import '../../support/exceptions/queue_exception.dart';
 
 class QueueFactory {
   static final QueueFactory instance = QueueFactory._();

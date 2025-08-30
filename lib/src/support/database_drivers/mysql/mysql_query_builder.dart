@@ -26,7 +26,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   String? _having;
 
   MySQLQueryBuilder(this._connection, this._table,
-      {T Function(Map<String, dynamic>)? modelFactory})
+      {T Function(Map<String, dynamic>)? modelFactory,})
       : _modelFactory = modelFactory;
 
   @override
@@ -37,7 +37,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> where(
-      String column, String operator, dynamic value) {
+      String column, String operator, dynamic value,) {
     _where.add('`$column` $operator ?');
     _bindings.add(value);
     return this;
@@ -52,7 +52,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> orWhere(
-      String column, String operator, dynamic value) {
+      String column, String operator, dynamic value,) {
     if (_where.isEmpty) return where(column, operator, value);
     _where.add('OR `$column` $operator ?');
     _bindings.add(value);
@@ -92,7 +92,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     if (T == Map || _modelFactory == null) {
       return List<T>.from(rawResults.data);
     }
-    final models = List<T>.from(rawResults.data.map((e) => _modelFactory!(e)));
+    final models = List<T>.from(rawResults.data.map((e) => _modelFactory?.call(e)));
     if (_eagerRelations.isNotEmpty) {
       await _eagerLoadRelations(models);
     }
@@ -102,7 +102,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
 
   Future<void> _eagerLoadRelations(List<T> models) async {
     await EagerLoader.loadRelations(
-        models.cast<KhademModel>(), _eagerRelations);
+        models.cast<KhademModel>(), _eagerRelations,);
   }
 
   /// Fetches the first matching result and converts to type `T`.
@@ -151,7 +151,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   /// Fetches a paginated list of results.
   @override
   Future<PaginatedResult<T>> paginate(
-      {int? perPage = 10, int? page = 1}) async {
+      {int? perPage = 10, int? page = 1,}) async {
     perPage ??= 10;
     page ??= 1;
 
@@ -217,7 +217,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   /// Adds a HAVING clause (used with GROUP BY).
   @override
   QueryBuilderInterface<T> having(
-      String column, String operator, dynamic value) {
+      String column, String operator, dynamic value,) {
     _having = '`$column` $operator "$value"';
     return this;
   }

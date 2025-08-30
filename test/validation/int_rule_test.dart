@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:khadem/src/support/validation_rules/int_rule.dart';
+import 'package:test/test.dart';
 
 void main() {
   late IntRule rule;

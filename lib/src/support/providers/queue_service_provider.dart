@@ -1,9 +1,9 @@
-import '../../infrastructure/logging/logger.dart';
-import '../../infrastructure/queue/queue_manager.dart';
-import '../../core/config/config_system.dart';
 import '../../contracts/config/config_contract.dart';
 import '../../contracts/container/container_interface.dart';
 import '../../contracts/provider/service_provider.dart';
+import '../../core/config/config_system.dart';
+import '../../infrastructure/logging/logger.dart';
+import '../../infrastructure/queue/queue_manager.dart';
 
 /// Registers the [QueueManager] which is responsible for initializing and
 /// managing the queue system.

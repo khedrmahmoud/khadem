@@ -1,11 +1,11 @@
 import '../../contracts/http/middleware_contract.dart';
-import '../../types/handler.dart';
+import '../http/request/request_handler.dart';
 
 /// Represents a route in the application.
 class Route {
   final String method;
   final String path;
-  final Handler handler;
+  final RequestHandler handler;
   final RegExp matcher;
   final List<String> paramNames;
   final List<Middleware> middleware;
@@ -35,7 +35,7 @@ class Route {
     final match = matcher.firstMatch(path);
     if (match == null) return {};
     return {
-      for (final name in paramNames) name: match.namedGroup('_$name') ?? ''
+      for (final name in paramNames) name: match.namedGroup('_$name') ?? '',
     };
   }
 }

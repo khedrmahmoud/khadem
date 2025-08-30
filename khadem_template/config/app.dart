@@ -14,7 +14,7 @@ class AppConfig {
           'username': env.get('DB_USERNAME'),
           // 'password': env.get('DB_PASSWORD'),
           'run_migrations': true,
-          'run_seeders': false
+          'run_seeders': false,
         },
 
         /// Cache configuration
@@ -25,7 +25,7 @@ class AppConfig {
             'memory': {'driver': 'memory'},
             'hybrid': {'driver': 'hybrid', 'path': 'storage/cache'},
             'redis': {'driver': 'redis', 'host': '127.0.0.1', 'port': 6379},
-          }
+          },
         },
 
         /// Queue configuration
@@ -73,9 +73,9 @@ class AppConfig {
               'key': 'your-key',
               'secret': 'your-secret',
               'region': 'your-region',
-              'bucket': 'your-bucket'
+              'bucket': 'your-bucket',
             },
-          }
+          },
         },
 
         /// Scheduler configuration
@@ -94,7 +94,7 @@ class AppConfig {
               "retryOnFail": false,
               'cachePath': 'storage/cache',
             }
-          ]
+          ],
         },
 
         /// CORS configuration
@@ -105,7 +105,7 @@ class AppConfig {
           ],
           "allowed_methods": "GET, POST, PUT, DELETE, OPTIONS",
           "allowed_headers":
-              "Accept, Content-Type, Authorization, X-Requested-With"
-        }
+              "Accept, Content-Type, Authorization, X-Requested-With",
+        },
       };
 }

@@ -25,7 +25,7 @@ class Validator {
         if (rule != null) {
           final messageKey = rule.validate(field, value, arg, data: data);
           if (messageKey != null) {
-             errors[field] = Lang.t(messageKey, field: field, arg: arg);
+             errors[field] = Lang.t(messageKey, parameters: {'field': field, 'arg': arg});
             break;
           }
         }

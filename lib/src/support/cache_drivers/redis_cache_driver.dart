@@ -11,7 +11,7 @@ class RedisCacheDriver implements CacheDriver {
 
   Future<Command> _connect() async {
     final conn = RedisConnection();
-    return await conn.connect(host, port);
+    return conn.connect(host, port);
   }
 
   @override

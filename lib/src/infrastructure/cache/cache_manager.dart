@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import '../../contracts/config/config_contract.dart';
 import '../../contracts/cache/cache_driver.dart';
+import '../../contracts/config/config_contract.dart';
 import '../../support/cache_drivers/file_cache_driver.dart';
 import '../../support/cache_drivers/hybrid_cache_driver.dart';
 import '../../support/cache_drivers/memory_cache_driver.dart';
@@ -26,22 +26,30 @@ class CacheManager {
     final defaultDriverName = config.get<String>('cache.default') ?? 'file';
 
     // Built-in drivers
-    driverConfigs.forEach((name, settings) {
+    driverConfigs.forEach(( name, settings) {
       final driverType = settings['driver'];
 
       switch (driverType) {
         case 'file':
-          registerDriver(name, FileCacheDriver());
+          registerDriver(name as String, FileCacheDriver());
           break;
         case 'memory':
-          registerDriver(name, MemoryCacheDriver());
+          registerDriver(name as String, MemoryCacheDriver());
           break;
         case 'hybrid':
-          registerDriver(name, HybridCacheDriver(filePath: settings['path']));
+          registerDriver(
+            name as String,
+            HybridCacheDriver(filePath: settings['path'] as String),
+          );
           break;
         case 'redis':
-          registerDriver(name,
-              RedisCacheDriver(host: settings['host'], port: settings['port']));
+          registerDriver(
+            name as String,
+            RedisCacheDriver(
+              host: settings['host'] as String,
+              port: settings['port'] as int,
+            ),
+          );
           break;
         default:
           throw CacheException('Unknown cache driver: $driverType');
@@ -97,14 +105,14 @@ class CacheManager {
 
   /// Stores a value in the cache forever using the default driver.
   Future<void> forever(String key, dynamic value) {
-    return put(key, value, Duration(days: 365 * 10));
+    return put(key, value, const Duration(days: 365 * 10));
   }
 
   /// Retrieves a value from the cache or stores the default value if it doesn't exist.
   Future<dynamic> remember(
-      String key, Duration ttl, Future<dynamic> Function() callback) async {
+      String key, Duration ttl, Future<dynamic> Function() callback,) async {
     if (await has(key)) {
-      return await get(key);
+      return get(key);
     }
 
     final value = await callback();

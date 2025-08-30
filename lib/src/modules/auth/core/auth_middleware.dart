@@ -1,15 +1,14 @@
  
+import '../../../application/khadem.dart';
 import '../../../contracts/http/middleware_contract.dart';
 import '../../../core/http/request/request.dart';
 import '../../../core/http/response/response.dart';
-import '../../../application/khadem.dart';
-
 import '../exceptions/auth_exception.dart';
 
 /// Middleware that checks for a valid Authorization token in the request.
 class AuthMiddleware implements Middleware {
   Future<void> handle(Request req, Response res, NextFunction next) async {
-    final authHeader = req.headers['Authorization']?.first;
+    final authHeader = req.headers.header('authorization');
     if (authHeader == null || !authHeader.startsWith('Bearer ')) {
       throw AuthException('Missing or invalid authorization header.');
     }
@@ -17,7 +16,7 @@ class AuthMiddleware implements Middleware {
     final token = authHeader.replaceFirst('Bearer ', '').trim();
     final user = await Khadem.auth.verify(token);
     // Attach user info to request for later use in controllers
-    req.attributes['user'] = user;
+    req.setAttribute('user', user);
 
     await next();
   }

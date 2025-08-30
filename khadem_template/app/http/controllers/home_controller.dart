@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:khadem/khadem_dart.dart' show Request, Response;
 
 class HomeController {
@@ -8,12 +7,13 @@ class HomeController {
   }
 
   static Future welcome(Request req, Response res) async {
-    res.file(File('resources/views/home/index.html'));
+    await res.view('welcome');
   }
 
   static Future stream(Request req, Response res) async {
     await res.stream<String>(
-      Stream.periodic(Duration(milliseconds: 500), (i) => "Line $i\n").take(10),
+      Stream.periodic(const Duration(milliseconds: 500), (i) => "Line $i\n")
+          .take(10),
     );
   }
 }

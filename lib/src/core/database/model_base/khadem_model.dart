@@ -1,10 +1,10 @@
 import '../../../application/khadem.dart';
 import '../../../contracts/database/query_builder_interface.dart';
 import '../orm/relation_definition.dart';
+import 'database_model.dart';
+import 'event_model.dart';
 import 'json_model.dart';
 import 'relation_model.dart';
-import 'event_model.dart';
-import 'database_model.dart';
 
 abstract class KhademModel<T> {
   int? id;

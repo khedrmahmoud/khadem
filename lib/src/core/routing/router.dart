@@ -1,6 +1,6 @@
 import '../../contracts/http/middleware_contract.dart';
+import '../http/request/request_handler.dart';
 import '../exception/exception_handler.dart';
-import '../../types/handler.dart';
 import 'route.dart';
 import 'route_group.dart';
 import 'route_match_result.dart';
@@ -13,8 +13,8 @@ class Router {
   List<Route> get routes => _routes;
 
   /// Registers a route with the specified [method], [path], [handler], and optional [middleware].
-  void register(String method, String path, Handler handler,
-      List<Middleware> middleware) {
+  void register(String method, String path, RequestHandler handler,
+      List<Middleware> middleware,) {
     final route = Route(method.toUpperCase(), path, handler, middleware);
     if (route.isDynamic) {
       _routes.add(route);
@@ -24,43 +24,43 @@ class Router {
   }
 
   /// Registers a GET route.
-  void get(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void get(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       register('GET', path, handler, middleware);
 
   /// Registers a POST route.
-  void post(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void post(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       register('POST', path, handler, middleware);
 
   /// Registers a PUT route.
-  void put(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void put(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       register('PUT', path, handler, middleware);
 
   /// Registers a PATCH route.
-  void patch(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void patch(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       register('PATCH', path, handler, middleware);
 
   /// Registers a DELETE route.
-  void delete(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void delete(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       register('DELETE', path, handler, middleware);
 
   /// Registers a HEAD route.
-  void head(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void head(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       register('HEAD', path, handler, middleware);
 
   /// Registers an OPTIONS route.
-  void options(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void options(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       register('OPTIONS', path, handler, middleware);
 
   /// Registers a route for any method.
-  void any(String path, Handler handler,
-      {List<Middleware> middleware = const []}) {
+  void any(String path, RequestHandler handler,
+      {List<Middleware> middleware = const [],}) {
     for (final method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD']) {
       register(method, path, handler, middleware);
     }
@@ -69,8 +69,7 @@ class Router {
   /// Groups a set of routes under a prefix and optional middleware.
   void group({
     required String prefix,
-    List<Middleware> middleware = const [],
-    required void Function(Router) routes,
+    required void Function(Router) routes, List<Middleware> middleware = const [],
   }) {
     final group = RouteGroup(
       prefix: prefix,
@@ -95,7 +94,7 @@ class Router {
     return null;
   }
 
-  Handler wrapWithHandler(Handler handler) {
+  RequestHandler wrapWithHandler(RequestHandler handler) {
     return (req, res) async {
       try {
         await handler(req, res);

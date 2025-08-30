@@ -32,7 +32,7 @@ class DatabaseManager {
 
   /// Gets a query builder for the given table.
   QueryBuilderInterface<T> table<T>(String tableName,
-      {T Function(Map<String, dynamic>)? modelFactory}) {
+      {T Function(Map<String, dynamic>)? modelFactory,}) {
     return _connection.queryBuilder<T>(tableName, modelFactory: modelFactory);
   }
 

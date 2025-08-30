@@ -8,7 +8,7 @@ class SetLocaleMiddleware implements Middleware {
   MiddlewareHandler get handler =>
       (Request req, Response res, NextFunction next) async {
         try {
-          final lang = req.headers['accept-language']?.first;
+          final lang = req.headers.header('accept-language');
           if (lang == null) return await next();
           Lang.setRequestLocale(lang);
           await next();

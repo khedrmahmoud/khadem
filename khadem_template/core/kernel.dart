@@ -31,7 +31,7 @@ class Kernel {
   static List<Middleware> get middlewares => [
         CorsMiddleware(),
         LoggingMiddleware(),
-        SetLocaleMiddleware()
+        SetLocaleMiddleware(),
         // Add middleware here
       ];
 

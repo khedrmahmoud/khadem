@@ -10,7 +10,7 @@ class ServeCommand extends KhademCommand {
 
   ServeCommand({required super.logger}) {
     argParser.addOption('port',
-        abbr: 'p', help: 'Port to run the server on (optional)');
+        abbr: 'p', help: 'Port to run the server on (optional)',);
   }
 
   @override

@@ -1,6 +1,6 @@
-import 'package:test/test.dart';
 import 'package:khadem/src/core/validation/validator.dart';
 import 'package:khadem/src/support/exceptions/validation_exception.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('Validator', () {

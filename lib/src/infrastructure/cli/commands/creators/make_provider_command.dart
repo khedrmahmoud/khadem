@@ -55,7 +55,7 @@ class $className extends ServiceProvider {
   String _snakeCase(String input) {
     return input
         .replaceAllMapped(
-            RegExp(r'[A-Z]'), (match) => '_${match.group(0)!.toLowerCase()}')
+            RegExp(r'[A-Z]'), (match) => '_${match.group(0)!.toLowerCase()}',)
         .replaceFirst('_', '');
   }
 }

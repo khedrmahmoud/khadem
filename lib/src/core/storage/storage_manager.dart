@@ -3,7 +3,7 @@ import '../../support/exceptions/not_found_exception.dart';
 import 'local_disk.dart';
 
 typedef StorageDriverFactory = StorageDisk Function(
-    Map<String, dynamic> options);
+    Map<String, dynamic> options,);
 
 class StorageManager {
   final Map<String, StorageDisk> _disks;
@@ -23,7 +23,7 @@ class StorageManager {
     // Register built-in local driver
     registerDriver('local', (options) {
       final root = options['root'] ?? './storage';
-      return LocalDisk(basePath: root);
+      return LocalDisk(basePath: root as String);
     });
   }
 
@@ -34,7 +34,7 @@ class StorageManager {
 
   /// Loads disks dynamically from a config map.
   void fromConfig(Map<String, dynamic> config) {
-    defaultDisk = config['default'] ?? defaultDisk;
+    defaultDisk = config['default'] is String ? config['default'] as String : defaultDisk;
 
     final disks = config['disks'] as Map<String, dynamic>? ?? {};
 

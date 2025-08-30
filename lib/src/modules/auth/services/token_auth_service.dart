@@ -13,17 +13,16 @@ class TokenAuthService implements AuthDriver {
 
   @override
   Future<Map<String, dynamic>> attemptLogin(
-      Map<String, dynamic> credentials) async {
+      Map<String, dynamic> credentials,) async {
     final config = Khadem.config.section('auth') ?? {};
     final provider = config['providers'][providerKey];
-    final table = provider['table'];
-    final fields = provider['fields'];
-
+    final table = provider['table'] as String;
+    final fields = provider['fields'] as List<dynamic>;
     final query = Khadem.db.table(table);
 
     for (final field in fields) {
       if (credentials.containsKey(field)) {
-        query.where(field, '=', credentials[field]);
+        query.where(field as String, '=', credentials[field]);
       }
     }
 
@@ -33,7 +32,7 @@ class TokenAuthService implements AuthDriver {
     }
 
     // 🔐 Check password (use secure hash compare)
-    if (!HashHelper.verify(credentials['password'], user['password'])) {
+    if (!HashHelper.verify(credentials['password'] as String, user['password'] as String)) {
       throw AuthException('Invalid credentials');
     }
 
@@ -55,8 +54,8 @@ class TokenAuthService implements AuthDriver {
   Future<Map<String, dynamic>> verifyToken(String token) async {
     final config = Khadem.config.section('auth') ?? {};
     final provider = config['providers'][providerKey];
-    final table = provider['table'];
-    final primaryKey = provider['primary_key'];
+    final table = provider['table'] as String;
+    final primaryKey = provider['primary_key'] as String;
 
     // 🔍 1. Find the token
     final tokenRow = await Khadem.db
@@ -77,7 +76,7 @@ class TokenAuthService implements AuthDriver {
       throw AuthException('$providerKey not found');
     }
 
-    return user;
+    return user as Map<String, dynamic>;
   }
 
   @override

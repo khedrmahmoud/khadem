@@ -1,7 +1,7 @@
+import '../../../application/khadem.dart';
 import '../../../core/core.dart';
 import '../../../core/database/orm/relation_meta.dart';
-import '../../../application/khadem.dart';
-import '../../../types/relation_type.dart';
+import '../../../core/database/orm/relation_type.dart';
 
 class EagerLoader {
   /// Parses a raw list of relation inputs into a list of [RelationMeta].
@@ -38,7 +38,7 @@ class EagerLoader {
           page: page,
           perPage: perPage,
           nested: nested,
-        ));
+        ),);
       } else if (entry is Map<String, dynamic>) {
         for (final key in entry.keys) {
           final val = entry[key] as Map<String, dynamic>;
@@ -48,7 +48,7 @@ class EagerLoader {
             page: val['page'],
             perPage: val['perPage'],
             nested: val['with'] ?? [],
-          ));
+          ),);
         }
       }
     }
@@ -58,7 +58,7 @@ class EagerLoader {
 
   /// Loads relations based on parsed metadata.
   static Future<void> loadRelations(
-      List<KhademModel> models, List<dynamic> relations) async {
+      List<KhademModel> models, List<dynamic> relations,) async {
     if (models.isEmpty) return;
 
     final parsed = parseRelations(relations);
@@ -114,7 +114,7 @@ class EagerLoader {
     if (parentIds.isEmpty) return;
 
     final placeholders = List.filled(parentIds.length, '?').join(', ');
-    var query = Khadem.db
+    final query = Khadem.db
         .table<Map<String, dynamic>>(def.relatedTable)
         .whereRaw('${def.foreignKey} IN ($placeholders)', parentIds);
 
@@ -146,7 +146,7 @@ class EagerLoader {
             'perPage': pagination.perPage,
             'total': pagination.total,
             'lastPage': pagination.lastPage,
-          }
+          },
         });
       }
     } else {
@@ -216,7 +216,7 @@ class EagerLoader {
     }
 
     final lookup = {
-      for (var model in related) model.toJson()[def.foreignKey]: model
+      for (var model in related) model.toJson()[def.foreignKey]: model,
     };
 
     for (var child in children) {
@@ -246,7 +246,7 @@ class EagerLoader {
     final relatedRows = await Khadem.db
         .table<Map<String, dynamic>>(relation.relatedTable)
         .whereRaw('id IN (${List.filled(relatedIds.length, '?').join(', ')})',
-            relatedIds)
+            relatedIds,)
         .get();
 
     final relatedModels = relatedRows.map((row) {

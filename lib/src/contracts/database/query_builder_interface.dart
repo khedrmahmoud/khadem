@@ -36,11 +36,11 @@ abstract class QueryBuilderInterface<T> {
 
   /// Adds a raw SQL WHERE clause.
   QueryBuilderInterface<T> whereRaw(String sql,
-      [List<dynamic> bindings = const []]);
+      [List<dynamic> bindings = const [],]);
 
   /// Adds an OR WHERE clause.
   QueryBuilderInterface<T> orWhere(
-      String column, String operator, dynamic value);
+      String column, String operator, dynamic value,);
 
   /// Limits the number of results.
   QueryBuilderInterface<T> limit(int number);
@@ -56,7 +56,7 @@ abstract class QueryBuilderInterface<T> {
 
   /// Adds HAVING clause.
   QueryBuilderInterface<T> having(
-      String column, String operator, dynamic value);
+      String column, String operator, dynamic value,);
 
   // ---------------------------- Result Execution ----------------------------
 
@@ -106,7 +106,7 @@ abstract class QueryBuilderInterface<T> {
 
   /// Conditionally adds clauses based on [condition].
   QueryBuilderInterface<T> when(bool condition,
-      QueryBuilderInterface<T> Function(QueryBuilderInterface<T> q) builder);
+      QueryBuilderInterface<T> Function(QueryBuilderInterface<T> q) builder,);
 
   /// Eagerly loads relations for the query.
   ///

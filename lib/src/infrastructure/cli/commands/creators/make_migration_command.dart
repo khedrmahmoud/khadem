@@ -86,7 +86,7 @@ class $className extends MigrationFile {
       buffer.writeln("import '$fileName';");
     }
 
-    buffer.writeln('\nList<MigrationFile> migrations = <MigrationFile>[');
+    buffer.writeln('\nList<MigrationFile> migrationsFiles = <MigrationFile>[');
     for (final className in classNames) {
       buffer.writeln('  $className(),');
     }

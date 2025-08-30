@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../contracts/logging/log_handler.dart';
-import '../../infrastructure/logging/log_level.dart';
+import '../../contracts/logging/log_level.dart';
 
 /// File-based log handler.
 class FileLogHandler implements LogHandler {
@@ -38,7 +38,7 @@ class FileLogHandler implements LogHandler {
 
   @override
   void log(LogLevel level, String message,
-      {Map<String, dynamic>? context, StackTrace? stackTrace}) {
+      {Map<String, dynamic>? context, StackTrace? stackTrace,}) {
     _rotateLogIfNeeded();
 
     final logEntry = _formatJson
@@ -49,7 +49,7 @@ class FileLogHandler implements LogHandler {
   }
 
   String _formatJsonLog(LogLevel level, String message,
-      Map<String, dynamic>? context, StackTrace? stackTrace) {
+      Map<String, dynamic>? context, StackTrace? stackTrace,) {
     final logEntry = {
       'timestamp': DateTime.now().toIso8601String(),
       'level': level.toString().split('.').last.toUpperCase(),
@@ -61,7 +61,7 @@ class FileLogHandler implements LogHandler {
   }
 
   String _formatTextLog(LogLevel level, String message,
-      Map<String, dynamic>? context, StackTrace? stackTrace) {
+      Map<String, dynamic>? context, StackTrace? stackTrace,) {
     final timestamp = DateTime.now().toIso8601String();
     final levelStr = level.toString().split('.').last.toUpperCase();
     var log = '[$timestamp] [$levelStr] $message';

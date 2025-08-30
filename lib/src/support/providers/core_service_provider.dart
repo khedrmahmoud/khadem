@@ -1,11 +1,11 @@
+import 'package:timezone/data/latest.dart' as tz;
+
 import '../../contracts/config/config_contract.dart';
-import '../../contracts/env/env_interface.dart';
 import '../../contracts/container/container_interface.dart';
+import '../../contracts/env/env_interface.dart';
 import '../../contracts/events/event_system_interface.dart';
 import '../../contracts/lang/lang_provider.dart';
 import '../../contracts/provider/service_provider.dart';
-import 'package:timezone/data/latest.dart' as tz;
-
 import '../../core/core.dart';
 import '../../core/http/middleware/middleware_pipeline.dart';
 import '../../core/socket/socket_manager.dart';
@@ -36,7 +36,7 @@ class CoreServiceProvider extends ServiceProvider {
           configPath: 'config',
           environment:
               c.resolve<EnvInterface>().getOrDefault('APP_ENV', 'development'),
-        ));
+        ),);
 
     container.lazySingleton<Logger>((c) => Logger());
 

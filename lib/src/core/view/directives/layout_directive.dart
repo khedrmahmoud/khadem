@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:khadem/khadem_dart.dart';
 
-import 'section_directive.dart';
 
 class LayoutDirective implements ViewDirective {
   static final _layoutRegex = RegExp(r"""@layout\s*\(\s*["'](.+?)["']\s*\)""");

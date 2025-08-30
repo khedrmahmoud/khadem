@@ -48,7 +48,7 @@ class MySQLConnection implements ConnectionInterface {
 
   @override
   Future<DatabaseResponse> execute(String sql,
-      [List<dynamic> bindings = const []]) async {
+      [List<dynamic> bindings = const [],]) async {
     if (_connection == null) {
       throw DatabaseException('MySQL connection is not established');
     }
@@ -58,12 +58,12 @@ class MySQLConnection implements ConnectionInterface {
     return DatabaseResponse(
         insertId: results.insertId,
         affectedRows: results.affectedRows,
-        data: results.map((row) => row.fields).toList());
+        data: results.map((row) => row.fields).toList(),);
   }
 
   @override
   QueryBuilderInterface<T> queryBuilder<T>(String table,
-      {T Function(Map<String, dynamic>)? modelFactory}) {
+      {T Function(Map<String, dynamic>)? modelFactory,}) {
     return MySQLQueryBuilder<T>(this, table, modelFactory: modelFactory);
   }
 
@@ -99,7 +99,7 @@ class MySQLConnection implements ConnectionInterface {
         if (attempt >= maxRetries) {
           if (onFailure != null) await onFailure(e);
           throw DatabaseException(
-              'Transaction failed after $maxRetries retries: $e');
+              'Transaction failed after $maxRetries retries: $e',);
         }
 
         await Future.delayed(retryDelay * attempt);

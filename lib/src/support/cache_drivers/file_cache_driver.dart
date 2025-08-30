@@ -7,7 +7,7 @@ class FileCacheDriver implements CacheDriver {
   late final String _cacheDir;
 
   FileCacheDriver({Map<String, dynamic>? config}) {
-    _cacheDir = config?['path'] ?? 'storage/cache';
+    _cacheDir = (config?['path'] as String?) ?? 'storage/cache';
     Directory(_cacheDir).createSync(recursive: true);
   }
 
@@ -17,7 +17,7 @@ class FileCacheDriver implements CacheDriver {
     final data = {
       'value': value,
       'expires_at': DateTime.now().add(ttl).toIso8601String(),
-      'ttl': ttl.inSeconds
+      'ttl': ttl.inSeconds,
     };
     await file.writeAsString(jsonEncode(data));
   }

@@ -29,13 +29,13 @@ class JWTAuthService implements AuthDriver {
   Future<Map<String, dynamic>> attemptLogin(
       Map<String, dynamic> credentials) async {
     final provider = Khadem.config.get('auth.providers')[providerKey];
-    final table = provider['table'];
+    final table = provider['table'] as String;
     final fields = provider['fields'];
     final primaryKey = provider['primary_key'];
 
-    final query = Khadem.db.table(table);
+    final query = Khadem.db.table(table );
 
-    for (final field in fields) {
+    for (final field in fields as List<String>) {
       if (credentials.containsKey(field)) {
         query.where(field, '=', credentials[field]);
       }
@@ -46,7 +46,7 @@ class JWTAuthService implements AuthDriver {
       throw AuthException('Invalid credentials');
     }
 
-    if (!HashHelper.verify(credentials['password'], user['password'])) {
+    if (!HashHelper.verify(credentials['password'] as String, user['password'] as String)) {
       throw AuthException('Invalid credentials');
     }
 
@@ -87,8 +87,8 @@ class JWTAuthService implements AuthDriver {
   Future<Map<String, dynamic>> verifyToken(String token) async {
     final config = Khadem.config.section('auth') ?? {};
     final provider = config['providers'][providerKey];
-    final table = provider['table'];
-    final primaryKey = provider['primary_key'];
+    final table = provider['table'] as String;
+    final primaryKey = provider['primary_key'] as String;
 
     try {
       final jwt = JWT.verify(token, SecretKey(secret));
@@ -106,7 +106,7 @@ class JWTAuthService implements AuthDriver {
         throw AuthException('$providerKey not found');
       }
 
-      return user;
+      return user as Map<String, dynamic>;
     } catch (e) {
       throw AuthException('Invalid or expired token');
     }
@@ -123,7 +123,7 @@ class JWTAuthService implements AuthDriver {
       throw AuthException('Invalid refresh token');
     }
 
-    final expiresAt = DateTime.parse(tokenRow['expires_at']);
+    final expiresAt = DateTime.parse(tokenRow['expires_at'] as String);
     if (DateTime.now().isAfter(expiresAt)) {
       throw AuthException('Refresh token expired');
     }

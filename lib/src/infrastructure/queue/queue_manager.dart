@@ -39,7 +39,7 @@ class QueueManager {
     final start = DateTime.now();
     bool running = true;
 
-    workerLogic() async {
+    Future<void> workerLogic() async {
       while (running) {
         try {
           await _default.process();

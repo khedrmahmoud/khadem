@@ -1,8 +1,7 @@
 import 'dart:io';
 
- 
-import '../../support/providers/cli_service_provider.dart';
 import '../../application/khadem.dart';
+import '../../support/providers/cli_service_provider.dart';
 
 class CommandBootstrapper {
   static bool _booted = false;

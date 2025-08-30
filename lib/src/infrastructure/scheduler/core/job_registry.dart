@@ -15,7 +15,7 @@ class SchedulerJobRegistry {
     register(JobDefinition(
       name: 'ttl_cleaner',
       factory: (config) => TTLFileCleanerJob(
-        cachePath: config['cachePath'] ?? 'storage/cache',
+        cachePath: (config['cachePath'] ?? 'storage/cache') as String,
       ),
     ));
   }

@@ -9,7 +9,7 @@ class CookieHelper {
       {int maxAge = 3600,
       String path = '/',
       bool httpOnly = true,
-      bool secure = false}) {
+      bool secure = false,}) {
     final cookie = Cookie(name, value)
       ..maxAge = maxAge
       ..path = path
@@ -22,7 +22,7 @@ class CookieHelper {
   static void deleteCookie(HttpResponse res, String name) {
     final expired = Cookie(name, '')
       ..maxAge = 0
-      ..expires = DateTime.now().subtract(Duration(days: 1));
+      ..expires = DateTime.now().subtract(const Duration(days: 1));
     res.cookies.add(expired);
   }
 }

@@ -11,14 +11,14 @@ class AuthManager {
   AuthManager({String? guard}) {
     final config = Khadem.config.section('auth');
     if (config != null) {
-      _guard = guard ?? config['default'];
+      _guard = guard ?? config['default'] as String;
 
       final guardConf = config['guards'][_guard];
 
       if (guardConf['driver'] == 'jwt') {
-        _driver = JWTAuthService(providerKey: guardConf['provider']);
+        _driver = JWTAuthService(providerKey: guardConf['provider'] as String);
       } else {
-        _driver = TokenAuthService(providerKey: guardConf['provider']);
+        _driver = TokenAuthService(providerKey: guardConf['provider'] as String);
       }
     } else {
       throw AuthException('Auth config not found');

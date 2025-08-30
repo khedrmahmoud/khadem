@@ -14,10 +14,9 @@ class WatchCommand extends KhademCommand {
 
   WatchCommand({required super.logger}) {
     argParser.addOption('port',
-        abbr: 'p', help: 'Port to run the server on', defaultsTo: '8080');
+        abbr: 'p', help: 'Port to run the server on', defaultsTo: '8080',);
     argParser.addFlag('reload',
-        help: 'Attempt hot reload instead of restart (experimental)',
-        defaultsTo: false);
+        help: 'Attempt hot reload instead of restart (experimental)',);
   }
 
   Process? _serverProcess;
@@ -71,14 +70,14 @@ class WatchCommand extends KhademCommand {
     try {
       if (_serverProcess != null) {
         logger.info('🔁 Restarting server...');
-        _serverProcess!.kill(ProcessSignal.sigterm);
-        await _serverProcess!.exitCode.timeout(Duration(seconds: 5),
+        _serverProcess!.kill();
+        await _serverProcess!.exitCode.timeout(const Duration(seconds: 5),
             onTimeout: () {
           _serverProcess!.kill(ProcessSignal.sigkill);
           logger.warning(
-              '⚠️ Forced termination of server process (PID: ${_serverProcess!.pid})');
+              '⚠️ Forced termination of server process (PID: ${_serverProcess!.pid})',);
           return 0;
-        });
+        },);
       }
 
       // Check port availability
@@ -97,7 +96,6 @@ class WatchCommand extends KhademCommand {
         'dart',
         args,
         runInShell: true,
-        mode: ProcessStartMode.normal,
       );
 
       _serverProcess!.stdout.transform(utf8.decoder).listen(
@@ -157,7 +155,7 @@ class WatchCommand extends KhademCommand {
         });
       }, onError: (e) {
         logger.error('❌ Watcher error in $dir: $e');
-      });
+      },);
 
       _watchers.add(watcher);
     }
@@ -176,7 +174,7 @@ class WatchCommand extends KhademCommand {
         logger.info('✅ Hot reload successful: $body');
       } else {
         logger.warning(
-            '⚠️ Hot reload failed (status: ${response.statusCode}), falling back to restart...');
+            '⚠️ Hot reload failed (status: ${response.statusCode}), falling back to restart...',);
         await _startServer(_port, false);
       }
       client.close();
@@ -206,12 +204,12 @@ class WatchCommand extends KhademCommand {
 
     if (_serverProcess != null) {
       _serverProcess!.kill(
-          Platform.isWindows ? ProcessSignal.sigint : ProcessSignal.sigterm);
-      await _serverProcess!.exitCode.timeout(Duration(seconds: 5),
+          Platform.isWindows ? ProcessSignal.sigint : ProcessSignal.sigterm,);
+      await _serverProcess!.exitCode.timeout(const Duration(seconds: 5),
           onTimeout: () {
         _serverProcess!.kill(ProcessSignal.sigkill);
         return 0;
-      });
+      },);
       _serverProcess = null;
     }
 

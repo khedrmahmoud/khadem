@@ -24,7 +24,7 @@ class HybridCacheDriver implements CacheDriver {
 
     final fromFile = await file.get(key);
     if (fromFile != null) {
-      await memory.put(key, fromFile, Duration(seconds: 30));
+      await memory.put(key, fromFile, const Duration(seconds: 30));
     }
     return fromFile;
   }

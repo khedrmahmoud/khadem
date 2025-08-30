@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import '../../contracts/logging/log_handler.dart';
-import '../../infrastructure/logging/log_level.dart';
+import '../../contracts/logging/log_level.dart';
 
 /// Console-based log handler.
 class ConsoleLogHandler implements LogHandler {
@@ -11,7 +11,7 @@ class ConsoleLogHandler implements LogHandler {
 
   @override
   void log(LogLevel level, String message,
-      {Map<String, dynamic>? context, StackTrace? stackTrace}) {
+      {Map<String, dynamic>? context, StackTrace? stackTrace,}) {
     final timestamp = DateTime.now().toIso8601String();
     final levelStr = level.toString().split('.').last.toUpperCase();
 

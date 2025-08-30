@@ -1,9 +1,9 @@
 import '../../contracts/config/config_contract.dart';
 import '../../contracts/container/container_interface.dart';
+import '../../contracts/provider/service_provider.dart';
 import '../../core/database/database.dart';
 import '../../core/database/migration/migrator.dart';
 import '../../core/database/migration/seeder.dart';
-import '../../contracts/provider/service_provider.dart';
 
 /// Database service provider that handles database connections,
 /// migrations, and seeders.

@@ -12,7 +12,7 @@ class SectionDirective implements ViewDirective {
 
   Map<String, String> extractSections(String content) {
     final sectionRegex = RegExp(
-        r"""@section\s*\(\s*['"](.+?)['"]\s*\)\s*([\s\S]+?)@endsection""");
+        r"""@section\s*\(\s*['"](.+?)['"]\s*\)\s*([\s\S]+?)@endsection""",);
 
     sections.clear(); // clear old values
 
@@ -27,7 +27,7 @@ class SectionDirective implements ViewDirective {
 
   String _removeSections(String content) {
     final sectionRegex = RegExp(
-        r"""@section\s*\(\s*['"](.+?)['"]\s*\)\s*([\s\S]+?)@endsection""");
+        r"""@section\s*\(\s*['"](.+?)['"]\s*\)\s*([\s\S]+?)@endsection""",);
     return content.replaceAll(sectionRegex, '');
   }
 }

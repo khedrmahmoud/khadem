@@ -14,8 +14,8 @@ class SocketHandler {
   void init() {
     _client.socket.listen((raw) async {
       try {
-        final Map<String, dynamic> message = jsonDecode(raw);
-        final String event = message['event'];
+          final Map<String, dynamic> message = jsonDecode(raw as String) as Map<String, dynamic>;
+          final String event = message['event'] as String;
         final dynamic data = message['data'];
 
         final eventEntry = _manager.getEvent(event);
@@ -40,6 +40,6 @@ class SocketHandler {
     }, onDone: () {
       _manager.removeClient(_client);
       Khadem.logger.info('🔴 Client disconnected: ${_client.id}');
-    });
+    },);
   }
 }

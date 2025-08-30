@@ -25,7 +25,7 @@ class User extends KhademModel<User> with Timestamps, HasRelationships {
   @override
   List<String> get appends => [];
   @override
-  getField(String key) {
+  Object? getField(String key) {
     return switch (key) {
       'id' => id,
       'name' => name,
@@ -39,26 +39,15 @@ class User extends KhademModel<User> with Timestamps, HasRelationships {
 
   @override
   void setField(String key, dynamic value) {
-    switch (key) {
-      case 'id':
-        id = value;
-        break;
-      case 'name':
-        name = value;
-        break;
-      case 'email':
-        email = value;
-        break;
-      case 'password':
-        password = value;
-        break;
-      case 'created_at':
-        createdAt = value;
-        break;
-      case 'updated_at':
-        updatedAt = value;
-        break;
-    }
+    return switch (key) {
+      'id' => id = value,
+      'name' => name = value,
+      'email' => email = value,
+      'password' => password = value,
+      'created_at' => createdAt = value,
+      'updated_at' => updatedAt = value,
+      _ => null
+    };
   }
 
   @override

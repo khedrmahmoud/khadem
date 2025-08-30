@@ -1,4 +1,4 @@
-import '../../../types/relation_type.dart';
+import 'relation_type.dart';
 import '../model_base/khadem_model.dart';
 
 class RelationDefinition<T extends KhademModel<T>> {

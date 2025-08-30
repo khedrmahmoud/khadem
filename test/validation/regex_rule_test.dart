@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:khadem/src/support/validation_rules/regex.dart';
+import 'package:test/test.dart';
 
 void main() {
   late RegexRule rule;

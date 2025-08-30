@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import '../../../core/database/migration/seeder.dart';
 import '../../../application/khadem.dart';
+import '../../../core/database/migration/seeder.dart';
 import '../bus/command.dart';
 
 class DbSeedCommand extends KhademCommand {

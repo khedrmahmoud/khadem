@@ -12,7 +12,7 @@ class ViewRenderer {
   ViewRenderer({this.viewsDirectory = 'resources/views'});
 
   Future<String> render(String viewName,
-      {Map<String, dynamic> context = const {}}) async {
+      {Map<String, dynamic> context = const {},}) async {
     final path = p.join(viewsDirectory, '$viewName.khdm.html');
     final file = File(path);
 

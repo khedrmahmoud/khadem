@@ -1,14 +1,12 @@
-import '../../../../types/relation_type.dart';
-import '../relation_definition.dart';
+import '../relation_type.dart';
 import '../../model_base/khadem_model.dart';
+import '../relation_definition.dart';
 
 /// Utilities to define Eloquent-style relationships.
 mixin HasRelationships {
   RelationDefinition hasOne<T extends KhademModel<T>>({
     required String foreignKey,
-    String localKey = 'id',
-    required String relatedTable,
-    required T Function() factory,
+    required String relatedTable, required T Function() factory, String localKey = 'id',
   }) {
     return RelationDefinition<T>(
       type: RelationType.hasOne,
@@ -21,9 +19,7 @@ mixin HasRelationships {
 
   RelationDefinition hasMany<T extends KhademModel<T>>({
     required String foreignKey,
-    String localKey = 'id',
-    required String relatedTable,
-    required T Function() factory,
+    required String relatedTable, required T Function() factory, String localKey = 'id',
   }) {
     return RelationDefinition<T>(
       type: RelationType.hasMany,
@@ -36,9 +32,7 @@ mixin HasRelationships {
 
   RelationDefinition belongsTo<T extends KhademModel<T>>({
     required String localKey,
-    String foreignKey = 'id',
-    required String relatedTable,
-    required T Function() factory,
+    required String relatedTable, required T Function() factory, String foreignKey = 'id',
   }) {
     return RelationDefinition<T>(
       type: RelationType.belongsTo,

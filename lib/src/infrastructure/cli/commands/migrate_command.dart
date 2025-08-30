@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import '../../../core/database/migration/migrator.dart';
 import '../../../application/khadem.dart';
+import '../../../core/database/migration/migrator.dart';
 import '../bus/command.dart';
 
 class MigrateCommand extends KhademCommand {
@@ -14,7 +14,7 @@ class MigrateCommand extends KhademCommand {
     argParser
       ..addFlag('reset', abbr: 'r', help: 'Reset migrations')
       ..addFlag('fresh',
-          abbr: 'f', help: 'Drop all tables and rerun all migrations');
+          abbr: 'f', help: 'Drop all tables and rerun all migrations',);
   }
 
   @override

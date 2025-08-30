@@ -40,7 +40,7 @@ class SocketManager {
   }
 
   void on(String event, SocketEventHandler handler,
-      {List<SocketMiddleware> middlewares = const []}) {
+      {List<SocketMiddleware> middlewares = const [],}) {
     _eventHandlers[event] = _EventEntry(handler, List.from(middlewares));
   }
 

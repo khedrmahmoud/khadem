@@ -17,5 +17,5 @@ void registerRoutes(Server server) {
         router.get('/welcome', HomeController.welcome);
         // 🔁 Stream test route
         router.get('/stream', HomeController.stream);
-      });
+      },);
 }

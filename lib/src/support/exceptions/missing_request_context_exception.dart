@@ -5,6 +5,6 @@ class MissingRequestContextException extends AppException {
       {String message =
           'Request is not available in the current context (zone).',
       super.statusCode = 500,
-      super.details})
+      super.details,})
       : super(message);
 }

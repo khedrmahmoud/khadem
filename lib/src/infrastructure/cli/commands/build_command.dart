@@ -6,12 +6,12 @@ import '../bus/command.dart';
 class BuildCommand extends KhademCommand {
   BuildCommand({required super.logger}) {
     argParser.addOption('output',
-        abbr: 'o', defaultsTo: 'bin/server.jit', help: 'Output path');
+        abbr: 'o', defaultsTo: 'bin/server.jit', help: 'Output path',);
     argParser.addFlag('archive',
-        abbr: 'a', defaultsTo: false, help: 'Create a tar.gz archive');
+        abbr: 'a',  help: 'Create a tar.gz archive',);
     //delete temp directory
     argParser.addFlag('delete-temp',
-        abbr: 'd', defaultsTo: true, help: 'Delete temp directory');
+        abbr: 'd', defaultsTo: true, help: 'Delete temp directory',);
   }
 
   Future<void> _copyDirectory(Directory source, Directory destination) async {
@@ -51,17 +51,17 @@ class BuildCommand extends KhademCommand {
 
   @override
   Future<void> handle(List<String> args) async {
-    final output = argResults?['output'] ?? 'bin/server.jit';
+    final String output = (argResults?['output']  as String?)?? 'bin/server.jit';
     final createArchive = (argResults?['archive'] ?? false) as bool;
     final deleteTemp = (argResults?['delete-temp'] ?? true) as bool;
-    final outputDir = Directory(output).parent;
+    final outputDir = Directory(output ).parent;
 
     await outputDir.create(recursive: true);
 
     // Progress spinner simulation
     var seconds = 0;
     stdout.write('🛠️ Compiling project to snapshot');
-    final timer = Timer.periodic(Duration(seconds: 1), (_) {
+    final timer = Timer.periodic(const Duration(seconds: 1), (_) {
       seconds++;
       stdout.write('.');
     });
@@ -111,7 +111,7 @@ class BuildCommand extends KhademCommand {
       final configDir = Directory('config');
       if (await configDir.exists()) {
         await _copyJsonFilesRecursively(
-            configDir, Directory('${tempDir.path}/config'));
+            configDir, Directory('${tempDir.path}/config'),);
       }
 
       // Copy public/

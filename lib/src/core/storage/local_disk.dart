@@ -26,13 +26,13 @@ class LocalDisk implements StorageDisk {
   @override
   Future<String> readString(String path) async {
     final file = _file(path);
-    return await file.readAsString();
+    return file.readAsString();
   }
 
   @override
   Future<List<int>> get(String path) async {
     final file = _file(path);
-    return await file.readAsBytes();
+    return file.readAsBytes();
   }
 
   @override
@@ -43,7 +43,7 @@ class LocalDisk implements StorageDisk {
 
   @override
   Future<bool> exists(String path) async {
-    return await _file(path).exists();
+    return _file(path).exists();
   }
 
   @override
@@ -72,7 +72,7 @@ class LocalDisk implements StorageDisk {
   @override
   Future<DateTime> lastModified(String path) async {
     final file = _file(path);
-    return await file.lastModified();
+    return file.lastModified();
   }
 
   @override
@@ -80,7 +80,7 @@ class LocalDisk implements StorageDisk {
     final dir = Directory('$basePath/$directoryPath');
     if (!await dir.exists()) return [];
     return dir
-        .list(recursive: false)
+        .list()
         .where((e) => e is File)
         .map((e) => e.path.replaceFirst('$basePath/', ''))
         .toList();

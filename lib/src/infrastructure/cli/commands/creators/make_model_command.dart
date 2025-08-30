@@ -11,7 +11,7 @@ class MakeModelCommand extends KhademCommand {
 
   MakeModelCommand({required super.logger}) {
     argParser.addOption('name',
-        abbr: 'n', help: 'Model name with optional path (e.g. Auth/User)');
+        abbr: 'n', help: 'Model name with optional path (e.g. Auth/User)',);
   }
 
   @override
@@ -30,7 +30,7 @@ class MakeModelCommand extends KhademCommand {
     final file = File(filePath);
     await file.create(recursive: true);
 
-    final imports = '''
+    const imports = '''
 import 'package:khadem/khadem_dart.dart' show KhademModel, RelationDefinition, HasRelationships, Timestamps;
 ''';
 

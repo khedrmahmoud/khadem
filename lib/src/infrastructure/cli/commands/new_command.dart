@@ -59,7 +59,7 @@ class NewCommand extends KhademCommand {
 
     if (khademIndex == -1) {
       throw Exception(
-          '❌ Unable to locate "khadem" directory in the script path.');
+          '❌ Unable to locate "khadem" directory in the script path.',);
     }
 
     final khademPath =
@@ -68,12 +68,12 @@ class NewCommand extends KhademCommand {
   }
 
   Future<void> _copyAndReplace(
-      Directory source, Directory target, String projectName) async {
+      Directory source, Directory target, String projectName,) async {
     if (!target.existsSync()) {
       target.createSync(recursive: true);
     }
 
-    await for (final entity in source.list(recursive: false)) {
+    await for (final entity in source.list()) {
       final name = p.basename(entity.path);
       final newPath = p.join(target.path, name);
 

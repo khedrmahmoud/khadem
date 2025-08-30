@@ -11,7 +11,7 @@ class JsonModel<T> {
 
   void fromJson(Map<String, dynamic> json) {
     _rawData = Map<String, dynamic>.from(json); // Store raw data
-    model.id = json['id'];
+    model.id = json['id'] as int?;
     for (final key in json.keys) {
       var value = json[key];
       final cast = model.casts[key];

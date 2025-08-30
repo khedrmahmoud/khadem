@@ -5,6 +5,7 @@ import '../../contracts/provider/service_provider.dart';
 class ServiceProviderManager {
   final List<ServiceProvider> _providers = [];
   final ContainerInterface _container;
+  bool _booted = false;
 
   ServiceProviderManager(this._container);
 
@@ -26,8 +27,12 @@ class ServiceProviderManager {
     for (final provider in _providers) {
       await provider.boot(_container);
     }
+    _booted = true;
   }
 
   /// Returns the list of all providers.
   List<ServiceProvider> get allProviders => List.unmodifiable(_providers);
+
+  /// Checks if all providers have been booted.
+  bool get isBooted => _booted;
 }

@@ -2,16 +2,16 @@ import 'dart:async';
 import 'dart:io';
 
 import '../../../contracts/http/middleware_contract.dart';
+import '../request/request_handler.dart';
 import '../../exception/exception_handler.dart';
 import '../../routing/router.dart';
 import '../context/request_context.dart';
 import '../context/response_context.dart';
-import '../../../types/handler.dart';
 import '../context/server_context.dart';
 import '../middleware/middleware_pipeline.dart';
 import '../request/request.dart';
 import '../response/response.dart';
-import 'core/request_handler.dart';
+import 'core/http_request_processor.dart';
 import 'core/static_handler.dart';
 
 /// 🔥 The core HTTP server for Khadem.
@@ -46,7 +46,7 @@ class Server {
   ///
   /// Optionally set [priority] or [name] for ordering and debugging.
   void useMiddleware(MiddlewareHandler handler,
-      {MiddlewarePriority priority = MiddlewarePriority.global, String? name}) {
+      {MiddlewarePriority priority = MiddlewarePriority.global, String? name,}) {
     _pipeline.add(handler, priority: priority, name: name);
   }
 
@@ -61,32 +61,32 @@ class Server {
   // 🔁 Route Registration
   // ========================================
 
-  void get(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void get(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       _router.get(path, handler, middleware: middleware);
 
-  void post(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void post(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       _router.post(path, handler, middleware: middleware);
 
-  void put(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void put(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       _router.put(path, handler, middleware: middleware);
 
-  void patch(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void patch(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       _router.patch(path, handler, middleware: middleware);
 
-  void delete(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void delete(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       _router.delete(path, handler, middleware: middleware);
 
-  void head(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void head(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       _router.head(path, handler, middleware: middleware);
 
-  void options(String path, Handler handler,
-          {List<Middleware> middleware = const []}) =>
+  void options(String path, RequestHandler handler,
+          {List<Middleware> middleware = const [],}) =>
       _router.options(path, handler, middleware: middleware);
 
   // ========================================
@@ -107,8 +107,7 @@ class Server {
   /// ```
   void group({
     required String prefix,
-    List<Middleware> middleware = const [],
-    required void Function(Router router) routes,
+    required void Function(Router router) routes, List<Middleware> middleware = const [],
   }) {
     final groupRouter = Router();
     routes(groupRouter);
@@ -150,7 +149,7 @@ class Server {
   ///
   /// Automatically applies global middleware and routes.
   Future<void> start({int port = 8080}) async {
-    final handler = RequestHandler(
+    final handler = HttpRequestProcessor(
       router: _router,
       globalMiddleware: _pipeline,
       staticHandler: _staticHandler,

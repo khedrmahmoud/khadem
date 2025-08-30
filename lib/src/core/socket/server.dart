@@ -25,7 +25,7 @@ class SocketServer {
   }
 
   void on(String event, SocketEventHandler handler,
-      {List<SocketMiddleware> middlewares = const []}) {
+      {List<SocketMiddleware> middlewares = const [],}) {
     _manager.on(event, handler, middlewares: middlewares);
   }
 
