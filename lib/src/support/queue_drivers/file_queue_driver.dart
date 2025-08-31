@@ -4,7 +4,7 @@ import 'dart:io';
 import '../../application/khadem.dart';
 import '../../contracts/queue/queue_driver.dart';
 import '../../contracts/queue/queue_job.dart';
-import '../../infrastructure/queue/job_registry.dart';
+import '../../core/queue/job_registry.dart';
 
 class FileQueueDriver implements QueueDriver {
   final String filePath = 'storage/queue/jobs.json';

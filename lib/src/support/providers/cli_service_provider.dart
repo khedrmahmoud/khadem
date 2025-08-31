@@ -7,8 +7,8 @@ import '../../core/config/env_system.dart';
 import '../../core/database/database.dart';
 import '../../core/database/migration/migrator.dart';
 import '../../core/database/migration/seeder.dart';
-import '../../infrastructure/logging/logger.dart';
-import '../../infrastructure/queue/queue_manager.dart';
+import '../../core/logging/logger.dart';
+import '../../core/queue/queue_manager.dart';
 import '../logging_writers/console_writer.dart';
 
 /// A lightweight service provider for CLI-only context.

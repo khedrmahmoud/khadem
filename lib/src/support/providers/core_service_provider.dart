@@ -10,8 +10,8 @@ import '../../core/core.dart';
 import '../../core/http/middleware/middleware_pipeline.dart';
 import '../../core/socket/socket_manager.dart';
 import '../../core/storage/storage_manager.dart';
-import '../../infrastructure/cache/cache_manager.dart';
-import '../../infrastructure/logging/logger.dart';
+import '../../core/cache/cache_manager.dart';
+import '../../core/logging/logger.dart';
 
 /// Registers all core services of the Khadem framework,
 /// including configuration, environment, logger, router, cache, and events.

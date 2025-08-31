@@ -1,25 +1,71 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import '../../../application/khadem.dart';
 import '../core/auth_driver.dart';
 import '../exceptions/auth_exception.dart';
 import '../../../support/helpers/hash_helper.dart';
-import 'dart:math';
 
+/// JWT-based authentication service
+///
+/// This service provides JWT (JSON Web Token) authentication with support for
+/// access tokens and refresh tokens. It handles user authentication, token
+/// generation, verification, and refresh operations.
+///
+/// Features:
+/// - JWT access token generation and verification
+/// - Refresh token support with configurable expiry
+/// - Secure token storage in database
+/// - Password hashing verification
+/// - Configurable token expiry times
+/// - Comprehensive error handling
+///
+/// Configuration requirements:
+/// ```yaml
+/// auth:
+///   providers:
+///     users:
+///       table: users
+///       primary_key: id
+///       fields: [email, username]
+///   guards:
+///     web:
+///       driver: jwt
+///       provider: users
+/// ```
+///
+/// Environment variables:
+/// - JWT_SECRET: Secret key for JWT signing
+/// - JWT_ACCESS_EXPIRY_MINUTES: Access token expiry (default: 15)
+/// - JWT_REFRESH_EXPIRY_DAYS: Refresh token expiry (default: 7)
 class JWTAuthService implements AuthDriver {
+  /// The provider key for user data
   final String providerKey;
-  late final String secret;
-  late final Duration accessTokenExpiry;
-  late final Duration refreshTokenExpiry;
 
+  /// JWT secret key for token signing
+  late final String _secret;
+
+  /// Access token expiry duration
+  late final Duration _accessTokenExpiry;
+
+  /// Refresh token expiry duration
+  late final Duration _refreshTokenExpiry;
+
+  /// Creates a JWT authentication service
+  ///
+  /// [providerKey] The key identifying the user provider configuration
   JWTAuthService({required this.providerKey}) {
-    secret = Khadem.env.getOrDefault('JWT_SECRET', 'secret');
-    accessTokenExpiry = Duration(
-      minutes:
-          int.parse(Khadem.env.getOrDefault('JWT_ACCESS_EXPIRY_MINUTES', '15')),
+    _initializeConfiguration();
+  }
+
+  /// Initializes JWT configuration from environment and defaults
+  void _initializeConfiguration() {
+    _secret = Khadem.env.getOrDefault('JWT_SECRET', 'default_jwt_secret_change_in_production');
+    _accessTokenExpiry = Duration(
+      minutes: int.parse(Khadem.env.getOrDefault('JWT_ACCESS_EXPIRY_MINUTES', '15')),
     );
-    refreshTokenExpiry = Duration(
+    _refreshTokenExpiry = Duration(
       days: int.parse(Khadem.env.getOrDefault('JWT_REFRESH_EXPIRY_DAYS', '7')),
     );
   }
@@ -56,8 +102,8 @@ class JWTAuthService implements AuthDriver {
     };
 
     final accessToken = JWT(payload).sign(
-      SecretKey(secret),
-      expiresIn: accessTokenExpiry,
+      SecretKey(_secret),
+      expiresIn: _accessTokenExpiry,
     );
 
     final refreshToken = _generateRefreshToken();
@@ -67,7 +113,7 @@ class JWTAuthService implements AuthDriver {
       'tokenable_id': user[primaryKey],
       'guard': providerKey,
       'created_at': DateTime.now().toIso8601String(),
-      'expires_at': DateTime.now().add(refreshTokenExpiry).toIso8601String(),
+      'expires_at': DateTime.now().add(_refreshTokenExpiry).toIso8601String(),
     });
 
     return {
@@ -76,8 +122,8 @@ class JWTAuthService implements AuthDriver {
         'access_token': accessToken,
         'refresh_token': refreshToken,
         'token_type': 'Bearer',
-        'expires_in_minutes': accessTokenExpiry.inMinutes.toString(),
-        'refresh_expires_in_days': refreshTokenExpiry.inDays.toString(),
+        'expires_in_minutes': _accessTokenExpiry.inMinutes.toString(),
+        'refresh_expires_in_days': _refreshTokenExpiry.inDays.toString(),
       }
     };
   }
@@ -91,7 +137,7 @@ class JWTAuthService implements AuthDriver {
     final primaryKey = provider['primary_key'] as String;
 
     try {
-      final jwt = JWT.verify(token, SecretKey(secret));
+      final jwt = JWT.verify(token, SecretKey(_secret));
       final payload = jwt.payload;
       if (payload == null) {
         throw AuthException('Invalid token');
@@ -136,8 +182,8 @@ class JWTAuthService implements AuthDriver {
     };
 
     return JWT(payload).sign(
-      SecretKey(secret),
-      expiresIn: accessTokenExpiry,
+      SecretKey(_secret),
+      expiresIn: _accessTokenExpiry,
     );
   }
 

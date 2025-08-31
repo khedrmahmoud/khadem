@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:redis/redis.dart';
 import '../../contracts/queue/queue_driver.dart';
 import '../../contracts/queue/queue_job.dart';
-import '../../infrastructure/queue/job_registry.dart';
+import '../../core/queue/job_registry.dart';
 
 class RedisQueueDriver implements QueueDriver {
   final String channel = 'jobs';

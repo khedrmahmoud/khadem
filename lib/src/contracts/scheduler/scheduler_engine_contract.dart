@@ -1,4 +1,4 @@
-import '../../infrastructure/scheduler/core/scheduled_task.dart';
+import '../../core/scheduler/core/scheduled_task.dart';
 import 'task_stats.dart';
 
 /// Contract for the Scheduler Engine

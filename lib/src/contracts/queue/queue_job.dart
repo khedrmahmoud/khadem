@@ -1,4 +1,4 @@
-import '../../infrastructure/queue/job_registry.dart';
+import '../../core/queue/job_registry.dart';
 
 /// Represents a job that can be queued and processed asynchronously.
 ///
