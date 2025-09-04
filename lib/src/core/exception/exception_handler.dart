@@ -210,7 +210,7 @@ class ExceptionHandler {
     Object error,
     StackTrace? stackTrace,
   ) {
-    final xml = _buildXmlErrorResponse(error, stackTrace, 500);
+    final xml = _buildXmlErrorResponse(error, stackTrace);
     res.status(500)
        .header('Content-Type', 'application/xml')
        .send(xml);
@@ -234,7 +234,7 @@ class ExceptionHandler {
     Object error,
     StackTrace? stackTrace,
   ) {
-    final html = _buildHtmlErrorResponse(error, stackTrace, 500);
+    final html = _buildHtmlErrorResponse(error, stackTrace);
     res.status(500)
        .header('Content-Type', 'text/html')
        .send(html);

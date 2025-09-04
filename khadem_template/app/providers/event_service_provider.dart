@@ -1,7 +1,6 @@
 import 'package:khadem/khadem_dart.dart'
     show ServiceProvider, registerSubscribers;
 
-import '../jobs/send_user_notification_job.dart';
 import '../listeners/user_events_handler.dart';
 
 class EventServiceProvider extends ServiceProvider {
@@ -12,8 +11,7 @@ class EventServiceProvider extends ServiceProvider {
       // add more subscribers here
     ];
     registerSubscribers(subscribers);
-    // 
-    SendUserNotificationJob('').register();
+
   }
 
   @override

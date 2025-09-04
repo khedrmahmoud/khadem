@@ -6,10 +6,10 @@ import '../../contracts/exceptions/app_exception.dart';
 /// requests within a given time period.
 class TooManyRequestsException extends AppException {
   TooManyRequestsException([
-    String message = 'Too many requests',
+    super.message = 'Too many requests',
     dynamic details,
     this.retryAfter,
-  ]) : super(message, statusCode: 429, details: details);
+  ]) : super(statusCode: 429, details: details);
 
   /// Number of seconds to wait before retrying
   final int? retryAfter;

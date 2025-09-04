@@ -37,13 +37,13 @@ void main() {
 
     test('should throw when registering driver with empty name', () {
       expect(() => cacheManager.registerDriver('', memoryDriver),
-             throwsA(isA<CacheException>()));
+             throwsA(isA<CacheException>()),);
     });
 
     test('should throw when registering duplicate driver', () {
       cacheManager.registerDriver('memory', memoryDriver);
       expect(() => cacheManager.registerDriver('memory', memoryDriver),
-             throwsA(isA<CacheException>()));
+             throwsA(isA<CacheException>()),);
     });
 
     test('should set default driver successfully', () {
@@ -59,7 +59,7 @@ void main() {
 
     test('should throw when setting non-existent driver as default', () {
       expect(() => cacheManager.setDefaultDriver('nonexistent'),
-             throwsA(isA<CacheException>()));
+             throwsA(isA<CacheException>()),);
     });
 
     test('should get specific driver', () {
@@ -75,7 +75,7 @@ void main() {
 
     test('should throw when getting non-existent driver', () {
       expect(() => cacheManager.driver('nonexistent'),
-             throwsA(isA<CacheException>()));
+             throwsA(isA<CacheException>()),);
     });
 
     test('should get default driver when no name provided', () {
@@ -86,7 +86,7 @@ void main() {
     test('should put and get value successfully', () async {
       cacheManager.registerDriver('memory', memoryDriver);
 
-      await cacheManager.put('key', 'value', Duration(minutes: 5));
+      await cacheManager.put('key', 'value', const Duration(minutes: 5));
       final result = await cacheManager.get('key');
 
       expect(result, equals('value'));
@@ -95,21 +95,21 @@ void main() {
     test('should throw when putting with empty key', () async {
       cacheManager.registerDriver('memory', memoryDriver);
 
-      expect(() => cacheManager.put('', 'value', Duration(minutes: 5)),
-             throwsA(isA<CacheException>()));
+      expect(() => cacheManager.put('', 'value', const Duration(minutes: 5)),
+             throwsA(isA<CacheException>()),);
     });
 
     test('should throw when getting with empty key', () async {
       cacheManager.registerDriver('memory', memoryDriver);
 
       expect(() => cacheManager.get(''),
-             throwsA(isA<CacheException>()));
+             throwsA(isA<CacheException>()),);
     });
 
     test('should forget value successfully', () async {
       cacheManager.registerDriver('memory', memoryDriver);
 
-      await cacheManager.put('key', 'value', Duration(minutes: 5));
+      await cacheManager.put('key', 'value', const Duration(minutes: 5));
       expect(await cacheManager.has('key'), isTrue);
 
       await cacheManager.forget('key');
@@ -120,7 +120,7 @@ void main() {
       cacheManager.registerDriver('memory', memoryDriver);
 
       expect(() => cacheManager.forget(''),
-             throwsA(isA<CacheException>()));
+             throwsA(isA<CacheException>()),);
     });
 
     test('should check if key exists', () async {
@@ -128,7 +128,7 @@ void main() {
 
       expect(await cacheManager.has('nonexistent'), isFalse);
 
-      await cacheManager.put('key', 'value', Duration(minutes: 5));
+      await cacheManager.put('key', 'value', const Duration(minutes: 5));
       expect(await cacheManager.has('key'), isTrue);
     });
 
@@ -136,14 +136,14 @@ void main() {
       cacheManager.registerDriver('memory', memoryDriver);
 
       expect(() => cacheManager.has(''),
-             throwsA(isA<CacheException>()));
+             throwsA(isA<CacheException>()),);
     });
 
     test('should clear cache successfully', () async {
       cacheManager.registerDriver('memory', memoryDriver);
 
-      await cacheManager.put('key1', 'value1', Duration(minutes: 5));
-      await cacheManager.put('key2', 'value2', Duration(minutes: 5));
+      await cacheManager.put('key1', 'value1', const Duration(minutes: 5));
+      await cacheManager.put('key2', 'value2', const Duration(minutes: 5));
 
       expect(await cacheManager.has('key1'), isTrue);
       expect(await cacheManager.has('key2'), isTrue);
@@ -157,8 +157,8 @@ void main() {
     test('should remember pattern work when cache miss', () async {
       cacheManager.registerDriver('memory', memoryDriver);
 
-      final result = await cacheManager.remember('key', Duration(minutes: 5),
-          () async => 'computed_value');
+      final result = await cacheManager.remember('key', const Duration(minutes: 5),
+          () async => 'computed_value',);
 
       expect(result, equals('computed_value'));
 
@@ -170,10 +170,10 @@ void main() {
     test('should remember pattern work when cache hit', () async {
       cacheManager.registerDriver('memory', memoryDriver);
 
-      await cacheManager.put('key', 'cached_value', Duration(minutes: 5));
+      await cacheManager.put('key', 'cached_value', const Duration(minutes: 5));
 
-      final result = await cacheManager.remember('key', Duration(minutes: 5),
-          () async => 'computed_value');
+      final result = await cacheManager.remember('key', const Duration(minutes: 5),
+          () async => 'computed_value',);
 
       expect(result, equals('cached_value'));
     });
@@ -191,8 +191,8 @@ void main() {
     test('should forget by tag', () async {
       cacheManager.registerDriver('memory', memoryDriver);
 
-      await cacheManager.put('key1', 'value1', Duration(minutes: 5));
-      await cacheManager.put('key2', 'value2', Duration(minutes: 5));
+      await cacheManager.put('key1', 'value1', const Duration(minutes: 5));
+      await cacheManager.put('key2', 'value2', const Duration(minutes: 5));
 
       await cacheManager.tag('key1', ['tag1']);
       await cacheManager.tag('key2', ['tag1']);
@@ -209,7 +209,7 @@ void main() {
     test('should track cache statistics', () async {
       cacheManager.registerDriver('memory', memoryDriver);
 
-      await cacheManager.put('key', 'value', Duration(minutes: 5));
+      await cacheManager.put('key', 'value', const Duration(minutes: 5));
       await cacheManager.get('key');
       await cacheManager.has('key');
 
@@ -223,7 +223,7 @@ void main() {
       cacheManager.registerDriver('memory', memoryDriver);
 
       await cacheManager.get('hit'); // miss
-      await cacheManager.put('hit', 'value', Duration(minutes: 5));
+      await cacheManager.put('hit', 'value', const Duration(minutes: 5));
       await cacheManager.get('hit'); // hit
 
       final stats = cacheManager.stats;

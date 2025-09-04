@@ -33,7 +33,7 @@ class RouteMatcher {
           handler: route.handler,
           params: route.extractParams(path),
           middleware: route.middleware,
-        ));
+        ),);
       }
     }
 

@@ -39,15 +39,13 @@ void main() {
     test('should create task with correct properties', () {
       final task = ScheduledTask(
         name: 'test_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: mockJob,
         retryOnFail: true,
-        runOnce: false,
-        maxRetries: 3,
       );
 
       expect(task.name, equals('test_task'));
-      expect(task.interval, equals(Duration(seconds: 30)));
+      expect(task.interval, equals(const Duration(seconds: 30)));
       expect(task.retryOnFail, isTrue);
       expect(task.runOnce, isFalse);
       expect(task.maxRetries, equals(3));
@@ -56,7 +54,7 @@ void main() {
     test('should initialize stats correctly', () {
       final task = ScheduledTask(
         name: 'test_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: mockJob,
       );
 
@@ -89,13 +87,13 @@ void main() {
       };
 
       expect(() => ScheduledTask.fromConfig(config),
-          throwsA(isA<ArgumentError>()));
+          throwsA(isA<ArgumentError>()),);
     });
 
     test('should handle successful job execution', () async {
       final task = ScheduledTask(
         name: 'success_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: mockJob,
       );
 
@@ -116,9 +114,8 @@ void main() {
     test('should handle job failure without retry', () async {
       final task = ScheduledTask(
         name: 'fail_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: failingJob,
-        retryOnFail: false,
       );
 
       bool scheduledNext = false;
@@ -138,7 +135,7 @@ void main() {
     test('should handle job failure with retry', () async {
       final task = ScheduledTask(
         name: 'retry_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: failingJob,
         retryOnFail: true,
         maxRetries: 2,
@@ -162,7 +159,7 @@ void main() {
     test('should pause and resume task', () {
       final task = ScheduledTask(
         name: 'pause_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: mockJob,
       );
 
@@ -182,7 +179,7 @@ void main() {
     test('should stop task', () {
       final task = ScheduledTask(
         name: 'stop_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: mockJob,
       );
 
@@ -193,7 +190,7 @@ void main() {
     test('should calculate average execution time', () async {
       final task = ScheduledTask(
         name: 'timing_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: mockJob,
       );
 
@@ -211,7 +208,7 @@ void main() {
     test('should handle runOnce tasks', () async {
       final task = ScheduledTask(
         name: 'once_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: mockJob,
         runOnce: true,
       );

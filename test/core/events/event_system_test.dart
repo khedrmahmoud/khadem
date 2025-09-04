@@ -60,19 +60,19 @@ void main() {
 
         events.on('priority.test', (payload) async {
           executionOrder.add('low');
-        }, priority: EventPriority.low);
+        }, priority: EventPriority.low,);
 
         events.on('priority.test', (payload) async {
           executionOrder.add('normal');
-        }, priority: EventPriority.normal);
+        },);
 
         events.on('priority.test', (payload) async {
           executionOrder.add('high');
-        }, priority: EventPriority.high);
+        }, priority: EventPriority.high,);
 
         events.on('priority.test', (payload) async {
           executionOrder.add('critical');
-        }, priority: EventPriority.critical);
+        }, priority: EventPriority.critical,);
 
         await events.emit('priority.test');
 
@@ -82,9 +82,9 @@ void main() {
       test('should maintain priority order with multiple listeners at same level', () async {
         final executionOrder = <int>[];
 
-        events.on('same.priority', (payload) async => executionOrder.add(1), priority: EventPriority.normal);
-        events.on('same.priority', (payload) async => executionOrder.add(2), priority: EventPriority.normal);
-        events.on('same.priority', (payload) async => executionOrder.add(3), priority: EventPriority.normal);
+        events.on('same.priority', (payload) async => executionOrder.add(1));
+        events.on('same.priority', (payload) async => executionOrder.add(2));
+        events.on('same.priority', (payload) async => executionOrder.add(3));
 
         await events.emit('same.priority');
 
@@ -118,7 +118,7 @@ void main() {
         final executionOrder = <String>[];
 
         events.once('once.priority', (payload) async => executionOrder.add('once-high'), priority: EventPriority.high);
-        events.on('once.priority', (payload) async => executionOrder.add('normal'), priority: EventPriority.normal);
+        events.on('once.priority', (payload) async => executionOrder.add('normal'));
 
         await events.emit('once.priority');
         await events.emit('once.priority'); // Second emit should only trigger normal listener
@@ -152,7 +152,7 @@ void main() {
         var completed = false;
 
         events.on('async.test', (payload) async {
-          await Future.delayed(Duration(milliseconds: 10));
+          await Future.delayed(const Duration(milliseconds: 10));
           completed = true;
         });
 
@@ -179,19 +179,19 @@ void main() {
 
     group('emit() - Queue option', () {
       test('should execute listeners asynchronously when queued', () async {
-        var executionOrder = <String>[];
+        final executionOrder = <String>[];
 
         events.on('queue.test', (payload) async {
           executionOrder.add('sync-start');
-          await Future.delayed(Duration(milliseconds: 5));
+          await Future.delayed(const Duration(milliseconds: 5));
           executionOrder.add('sync-end');
-        }, priority: EventPriority.normal);
+        },);
 
         events.on('queue.test', (payload) async {
           executionOrder.add('queued-start');
-          await Future.delayed(Duration(milliseconds: 1));
+          await Future.delayed(const Duration(milliseconds: 1));
           executionOrder.add('queued-end');
-        }, priority: EventPriority.low);
+        }, priority: EventPriority.low,);
 
         await events.emit('queue.test', null, true); // queue = true
 
@@ -201,21 +201,21 @@ void main() {
       });
 
       test('should execute listeners synchronously when not queued', () async {
-        var executionOrder = <String>[];
+        final executionOrder = <String>[];
 
         events.on('sync.test', (payload) async {
           executionOrder.add('first');
-          await Future.delayed(Duration(milliseconds: 5));
+          await Future.delayed(const Duration(milliseconds: 5));
           executionOrder.add('first-done');
         });
 
         events.on('sync.test', (payload) async {
           executionOrder.add('second');
-          await Future.delayed(Duration(milliseconds: 1));
+          await Future.delayed(const Duration(milliseconds: 1));
           executionOrder.add('second-done');
         });
 
-        await events.emit('sync.test', null, false); // queue = false
+        await events.emit('sync.test', null); // queue = false
 
         // Should execute in order
         expect(executionOrder, equals(['first', 'first-done', 'second', 'second-done']));
@@ -425,7 +425,7 @@ void main() {
         final executionLog = <String>[];
 
         // Set up listeners with different priorities
-        events.on('complex.test', (payload) async => executionLog.add('normal-1'), priority: EventPriority.normal);
+        events.on('complex.test', (payload) async => executionLog.add('normal-1'));
         events.on('complex.test', (payload) async => executionLog.add('high-1'), priority: EventPriority.high);
         events.once('complex.test', (payload) async => executionLog.add('once-critical'), priority: EventPriority.critical);
 

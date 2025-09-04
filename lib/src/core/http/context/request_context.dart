@@ -110,7 +110,7 @@ class RequestContext {
         final result = body();
         _customData.remove(request); // Clean up after request finishes
         return result;
-      }, zoneValues: {zoneKey: request});
+      }, zoneValues: {zoneKey: request},);
     } finally {
       stopwatch.stop();
       // Optional: Log slow requests

@@ -81,6 +81,6 @@ class ServerContext {
         print('[ServerContext] Request processed in ${duration.inMilliseconds}ms');
       }
       return result;
-    }, zoneValues: {zoneKey: this});
+    }, zoneValues: {zoneKey: this},);
   }
 }

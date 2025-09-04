@@ -64,7 +64,7 @@ void main() {
         final userData = {
           'id': 1,
           'name': 'John',
-          'roles': ['admin', 'user', 'moderator']
+          'roles': ['admin', 'user', 'moderator'],
         };
         auth.setUser(userData);
 
@@ -78,7 +78,7 @@ void main() {
         final userData = {
           'id': 1,
           'name': 'John',
-          'roles': ['user', 'moderator']
+          'roles': ['user', 'moderator'],
         };
         auth.setUser(userData);
 
@@ -91,7 +91,7 @@ void main() {
         final userData = {
           'id': 1,
           'name': 'John',
-          'roles': ['admin', 'user', 'moderator']
+          'roles': ['admin', 'user', 'moderator'],
         };
         auth.setUser(userData);
 

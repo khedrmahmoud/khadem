@@ -4,17 +4,18 @@ import '../../lib/src/modules/auth/exceptions/auth_exception.dart';
 import '../../lib/src/modules/auth/services/token_auth_service.dart';
 
 void main() {
-  late TokenAuthService tokenAuthService;
+  late EnhancedTokenAuthService tokenAuthService;
 
   setUp(() {
-    tokenAuthService = TokenAuthService(providerKey: 'users');
+    tokenAuthService = EnhancedTokenAuthService.create('users');
   });
 
-  group('TokenAuthService', () {
-    group('Constructor', () {
+  group('EnhancedTokenAuthService', () {
+    group('Factory Constructor', () {
       test('should create instance with provider key', () {
-        final service = TokenAuthService(providerKey: 'test_provider');
+        final service = EnhancedTokenAuthService.create('test_provider');
         expect(service, isNotNull);
+        expect(service.providerKey, equals('test_provider'));
       });
     });
 
@@ -47,6 +48,24 @@ void main() {
           },
           throwsA(isA<AuthException>()),
         );
+      });
+    });
+
+    group('Service Interface', () {
+      test('should implement refreshAccessToken method', () {
+        expect(tokenAuthService.refreshAccessToken, isA<Function>());
+      });
+
+      test('should implement attemptLogin method', () {
+        expect(tokenAuthService.attemptLogin, isA<Function>());
+      });
+
+      test('should implement verifyToken method', () {
+        expect(tokenAuthService.verifyToken, isA<Function>());
+      });
+
+      test('should implement logout method', () {
+        expect(tokenAuthService.logout, isA<Function>());
       });
     });
   });

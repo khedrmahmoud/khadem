@@ -10,37 +10,37 @@ class ServerRouter {
 
   /// Registers a GET route.
   void get(String path, RequestHandler handler,
-      {List<Middleware> middleware = const []}) =>
+      {List<Middleware> middleware = const [],}) =>
     _router.get(path, handler, middleware: middleware);
 
   /// Registers a POST route.
   void post(String path, RequestHandler handler,
-      {List<Middleware> middleware = const []}) =>
+      {List<Middleware> middleware = const [],}) =>
     _router.post(path, handler, middleware: middleware);
 
   /// Registers a PUT route.
   void put(String path, RequestHandler handler,
-      {List<Middleware> middleware = const []}) =>
+      {List<Middleware> middleware = const [],}) =>
     _router.put(path, handler, middleware: middleware);
 
   /// Registers a PATCH route.
   void patch(String path, RequestHandler handler,
-      {List<Middleware> middleware = const []}) =>
+      {List<Middleware> middleware = const [],}) =>
     _router.patch(path, handler, middleware: middleware);
 
   /// Registers a DELETE route.
   void delete(String path, RequestHandler handler,
-      {List<Middleware> middleware = const []}) =>
+      {List<Middleware> middleware = const [],}) =>
     _router.delete(path, handler, middleware: middleware);
 
   /// Registers a HEAD route.
   void head(String path, RequestHandler handler,
-      {List<Middleware> middleware = const []}) =>
+      {List<Middleware> middleware = const [],}) =>
     _router.head(path, handler, middleware: middleware);
 
   /// Registers an OPTIONS route.
   void options(String path, RequestHandler handler,
-      {List<Middleware> middleware = const []}) =>
+      {List<Middleware> middleware = const [],}) =>
     _router.options(path, handler, middleware: middleware);
 
   /// Groups multiple routes under a common prefix and optional middleware.

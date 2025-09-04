@@ -61,23 +61,23 @@ void main() {
 
     test('should record job completed', () {
       monitor.jobStarted(job1);
-      monitor.jobCompleted(job1, Duration(seconds: 2));
+      monitor.jobCompleted(job1, const Duration(seconds: 2));
 
       final metrics = monitor.getMetrics();
       expect(metrics.totalCompleted, equals(1));
       expect(metrics.currentlyProcessing, equals(0));
-      expect(metrics.totalProcessingTime, equals(Duration(seconds: 2)));
+      expect(metrics.totalProcessingTime, equals(const Duration(seconds: 2)));
       expect(metrics.completedByType['TestQueueJob'], equals(1));
     });
 
     test('should record job failed', () {
       monitor.jobStarted(job1);
-      monitor.jobFailed(job1, 'Test error', Duration(seconds: 1));
+      monitor.jobFailed(job1, 'Test error', const Duration(seconds: 1));
 
       final metrics = monitor.getMetrics();
       expect(metrics.totalFailed, equals(1));
       expect(metrics.currentlyProcessing, equals(0));
-      expect(metrics.totalProcessingTime, equals(Duration(seconds: 1)));
+      expect(metrics.totalProcessingTime, equals(const Duration(seconds: 1)));
       expect(metrics.failedByType['TestQueueJob'], equals(1));
     });
 
@@ -106,17 +106,17 @@ void main() {
     });
 
     test('should calculate average processing time', () {
-      monitor.jobCompleted(job1, Duration(seconds: 1));
-      monitor.jobCompleted(job2, Duration(seconds: 3));
+      monitor.jobCompleted(job1, const Duration(seconds: 1));
+      monitor.jobCompleted(job2, const Duration(seconds: 3));
 
       final metrics = monitor.getMetrics();
-      expect(metrics.averageProcessingTime, equals(Duration(seconds: 2)));
+      expect(metrics.averageProcessingTime, equals(const Duration(seconds: 2)));
     });
 
     test('should reset metrics', () {
       monitor.jobQueued(job1);
       monitor.jobStarted(job1);
-      monitor.jobCompleted(job1, Duration(seconds: 1));
+      monitor.jobCompleted(job1, const Duration(seconds: 1));
 
       monitor.reset();
 

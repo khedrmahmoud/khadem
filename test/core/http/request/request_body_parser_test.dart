@@ -21,7 +21,7 @@ class FakeHttpRequest implements HttpRequest {
     if (body != null) {
       this.body = Stream.fromIterable([utf8.encode(body)]);
     } else {
-      this.body = Stream.empty();
+      this.body = const Stream.empty();
     }
   }
 

@@ -39,7 +39,7 @@ class ResponseRenderer {
     Map<String, dynamic> data = const {},
   }) async {
     final renderer = ViewRenderer.instance;
-    return await renderer.render(viewName, context: data);
+    return renderer.render(viewName, context: data);
   }
 
   /// Sends a template with layout.

@@ -44,7 +44,7 @@ void main() {
 
       final task = ScheduledTask(
         name: 'integration_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: IntegrationTestJob('test_job'),
       );
 
@@ -69,7 +69,7 @@ void main() {
       final testJob = IntegrationTestJob('execution_test');
       final task = ScheduledTask(
         name: 'execution_task',
-        interval: Duration(seconds: 1), // Short interval for testing
+        interval: const Duration(seconds: 1), // Short interval for testing
         job: testJob,
         runOnce: true, // Only run once for predictable testing
       );
@@ -77,7 +77,7 @@ void main() {
       scheduler.add(task);
 
       // Wait for task to execute
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
 
       // Task should have been executed
       expect(testJob.executed, isTrue);
@@ -89,14 +89,14 @@ void main() {
 
       final task1 = ScheduledTask(
         name: 'task1',
-        interval: Duration(milliseconds: 50),
+        interval: const Duration(milliseconds: 50),
         job: job1,
         runOnce: true,
       );
 
       final task2 = ScheduledTask(
         name: 'task2',
-        interval: Duration(milliseconds: 100),
+        interval: const Duration(milliseconds: 100),
         job: job2,
         runOnce: true,
       );
@@ -105,7 +105,7 @@ void main() {
       scheduler.add(task2);
 
       // Wait for both tasks to execute
-      await Future.delayed(Duration(milliseconds: 150));
+      await Future.delayed(const Duration(milliseconds: 150));
 
       expect(job1.executed, isTrue);
       expect(job2.executed, isTrue);
@@ -115,7 +115,7 @@ void main() {
       final testJob = IntegrationTestJob('stats_job');
       final task = ScheduledTask(
         name: 'stats_task',
-        interval: Duration(milliseconds: 50),
+        interval: const Duration(milliseconds: 50),
         job: testJob,
         runOnce: true,
       );
@@ -123,7 +123,7 @@ void main() {
       scheduler.add(task);
 
       // Wait for task to complete
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
 
       final stats = scheduler.getStats();
       expect(stats.containsKey('stats_task'), isTrue);
@@ -137,7 +137,7 @@ void main() {
     test('should handle task lifecycle operations', () {
       final task = ScheduledTask(
         name: 'lifecycle_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: IntegrationTestJob('lifecycle_job'),
       );
 
@@ -158,13 +158,13 @@ void main() {
     test('should manage active tasks list', () {
       final task1 = ScheduledTask(
         name: 'active_task1',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: IntegrationTestJob('active_job1'),
       );
 
       final task2 = ScheduledTask(
         name: 'active_task2',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: IntegrationTestJob('active_job2'),
       );
 
@@ -186,7 +186,7 @@ void main() {
     test('should handle task removal', () {
       final task = ScheduledTask(
         name: 'removal_task',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: IntegrationTestJob('removal_job'),
       );
 
@@ -202,17 +202,17 @@ void main() {
       final jobs = List.generate(5, (i) => IntegrationTestJob('concurrent_job_$i'));
       final tasks = jobs.map((job) => ScheduledTask(
         name: 'concurrent_task_${jobs.indexOf(job)}',
-        interval: Duration(milliseconds: 10),
+        interval: const Duration(milliseconds: 10),
         job: job,
         runOnce: true,
-      )).toList();
+      ),).toList();
 
       for (final task in tasks) {
         scheduler.add(task);
       }
 
       // Wait for all tasks to complete
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
 
       // All jobs should have executed
       for (final job in jobs) {

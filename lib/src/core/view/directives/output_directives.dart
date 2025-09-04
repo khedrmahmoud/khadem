@@ -1,5 +1,6 @@
 import 'dart:convert';
-import '../../../contracts/views/directive_contract.dart';
+import 'package:khadem/src/contracts/views/directive_contract.dart';
+
 
 /// Output and debugging directives
 class JsonDirective implements ViewDirective {

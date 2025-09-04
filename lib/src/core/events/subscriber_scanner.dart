@@ -33,7 +33,7 @@ import '../../contracts/events/event_system_interface.dart';
 /// [subscribers] - A list of event subscriber instances to register
 /// [eventSystem] - Optional event system instance to use (defaults to global Khadem event bus)
 void registerSubscribers(List<EventSubscriberInterface> subscribers,
-    [EventSystemInterface? eventSystem]) {
+    [EventSystemInterface? eventSystem,]) {
   final bus = eventSystem ?? Khadem.eventBus;
   for (final subscriber in subscribers) {
     for (final method in subscriber.getEventHandlers()) {

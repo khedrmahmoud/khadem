@@ -166,7 +166,7 @@ void main() {
         final method = EventMethod(
           eventName: 'async.handler',
           handler: (payload) async {
-            await Future.delayed(Duration(milliseconds: 10));
+            await Future.delayed(const Duration(milliseconds: 10));
             completed = true;
           },
         );
@@ -183,7 +183,7 @@ void main() {
           },
         );
 
-        expect(() async => await method.handler('test'), throwsA(isA<Exception>()));
+        expect(() async => method.handler('test'), throwsA(isA<Exception>()));
       });
     });
 
@@ -193,7 +193,6 @@ void main() {
           EventMethod(
             eventName: 'user.created',
             handler: (user) async => print('User created: $user'),
-            priority: EventPriority.normal,
           ),
           EventMethod(
             eventName: 'user.updated',

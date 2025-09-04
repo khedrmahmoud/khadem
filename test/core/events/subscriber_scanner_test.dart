@@ -14,14 +14,14 @@ class MockEventSystem implements EventSystemInterface {
   void on(String event, EventListener listener,
       {EventPriority priority = EventPriority.normal,
       bool once = false,
-      Object? subscriber}) {
+      Object? subscriber,}) {
     _listeners[event] ??= [];
     _listeners[event]!.add(EventRegistration(listener, priority, once));
   }
 
   @override
   void once(String event, EventListener listener,
-      {EventPriority priority = EventPriority.normal, Object? subscriber}) {}
+      {EventPriority priority = EventPriority.normal, Object? subscriber,}) {}
 
   @override
   void addToGroup(String groupName, String event) {}
@@ -31,11 +31,11 @@ class MockEventSystem implements EventSystemInterface {
 
   @override
   Future<void> emit(String event,
-      [dynamic payload, bool queue = false, bool broadcast = false]) async {}
+      [dynamic payload, bool queue = false, bool broadcast = false,]) async {}
 
   @override
   Future<void> emitGroup(String groupName,
-      [dynamic payload, bool queue = false, bool broadcast = false]) async {}
+      [dynamic payload, bool queue = false, bool broadcast = false,]) async {}
 
   @override
   void off(String event, EventListener listener) {}
@@ -89,7 +89,6 @@ class TestEventSubscriber implements EventSubscriberInterface {
         EventMethod(
           eventName: 'user.created',
           handler: (user) async => print('$name: User created - $user'),
-          priority: EventPriority.normal,
         ),
         EventMethod(
           eventName: 'user.updated',
@@ -216,7 +215,6 @@ void main() {
             eventName: 'test.event1',
             handler: (payload) async => print('event1'),
             priority: EventPriority.low,
-            once: false,
           ),
           EventMethod(
             eventName: 'test.event2',
@@ -278,7 +276,6 @@ class _ComplexTestSubscriber implements EventSubscriberInterface {
               // Process complex payload
             }
           },
-          priority: EventPriority.normal,
         ),
       ];
 }

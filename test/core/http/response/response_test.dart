@@ -231,7 +231,6 @@ void main() {
       test('should provide security convenience methods', () {
         response.security(
           enableHsts: true,
-          enableXFrameOptions: true,
         );
         expect(response.headers, isNotNull);
       });

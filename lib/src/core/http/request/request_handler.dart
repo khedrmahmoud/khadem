@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'request.dart';
 import '../response/response.dart';
+import 'request.dart';
 
 /// A handler is a function that takes in a [Request] and [Response] and performs
 /// any necessary logic to complete the request. This can include database

@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
+import '../../../lib/src/contracts/http/middleware_contract.dart';
 import '../../../lib/src/core/http/request/request.dart';
 import '../../../lib/src/core/http/response/index.dart';
 import '../../../lib/src/core/routing/index.dart';
-import '../../../lib/src/contracts/http/middleware_contract.dart';
 
 class FakeHttpRequest implements HttpRequest {
   @override

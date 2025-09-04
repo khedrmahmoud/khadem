@@ -4,8 +4,8 @@ import '../../../lib/src/contracts/exceptions/app_exception.dart';
 import '../../../lib/src/core/exception/exception_reporter.dart';
 
 class TestException extends AppException {
-  TestException([String message = 'Test error', dynamic details])
-      : super(message, statusCode: 400, details: details);
+  TestException([super.message = 'Test error', dynamic details])
+      : super(statusCode: 400, details: details);
 }
 
 void main() {
@@ -13,11 +13,7 @@ void main() {
     setUp(() {
       // Reset configuration before each test
       ExceptionReporter.configure(
-        includeStackTraces: true,
         includeUserContext: true,
-        includeRequestContext: true,
-        includeEnvironmentInfo: true,
-        minimumReportLevel: 'error',
       );
     });
 
@@ -66,7 +62,7 @@ void main() {
     group('Context Building', () {
       test('should build exception context with all information', () {
         // Test that configuration affects context building
-        ExceptionReporter.configure(includeStackTraces: true);
+        ExceptionReporter.configure();
         final config = ExceptionReporter.getConfiguration();
         expect(config['includeStackTraces'], isTrue);
         expect(config['globalContext'], isEmpty);
@@ -74,7 +70,7 @@ void main() {
 
       test('should include timestamp in context', () {
         // Test that configuration is properly stored
-        ExceptionReporter.configure(includeEnvironmentInfo: true);
+        ExceptionReporter.configure();
         final config = ExceptionReporter.getConfiguration();
         expect(config['includeEnvironmentInfo'], isTrue);
       });

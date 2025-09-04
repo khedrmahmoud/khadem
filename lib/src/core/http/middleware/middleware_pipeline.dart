@@ -141,11 +141,7 @@ class MiddlewarePipeline {
 
     if (errorHandlers.isEmpty) {
       // If no terminating middleware, rethrow the original error
-      if (error is MiddlewareNotFoundException) {
-        throw error;
-      }
-      throw MiddlewareNotFoundException(
-          'No terminating middleware found to handle error: ${error.toString()}');
+      throw error;
     }
 
     // Store error information in request attributes for terminating middleware
@@ -213,14 +209,14 @@ class MiddlewarePipeline {
   void addConditional(MiddlewareHandler handler,
       {required bool Function(Request request) condition,
       MiddlewarePriority priority = MiddlewarePriority.business,
-      String? name}) {
+      String? name,}) {
     add((req, res, next) async {
       if (condition(req)) {
         await handler(req, res, next);
       } else {
         await next();
       }
-    }, priority: priority, name: name);
+    }, priority: priority, name: name,);
   }
 
   /// Checks if a named middleware exists.

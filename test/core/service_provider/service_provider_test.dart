@@ -32,7 +32,7 @@ class MockContainer implements ContainerInterface {
 
   @override
   void bindWhen<T>(String context, dynamic Function(ContainerInterface) factory,
-      {bool singleton = false}) {
+      {bool singleton = false,}) {
     // Not implemented for this test
   }
 

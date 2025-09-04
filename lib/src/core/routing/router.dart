@@ -37,48 +37,48 @@ class Router {
 
   /// Registers a route with the specified [method], [path], [handler], and optional [middleware].
   void register(String method, String path, RequestHandler handler,
-      List<Middleware> middleware) {
+      List<Middleware> middleware,) {
     _registry.register(method, path, handler, middleware);
   }
 
   /// Registers a GET route.
   void get(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _registry.get(path, handler, middleware: middleware);
 
   /// Registers a POST route.
   void post(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _registry.post(path, handler, middleware: middleware);
 
   /// Registers a PUT route.
   void put(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _registry.put(path, handler, middleware: middleware);
 
   /// Registers a PATCH route.
   void patch(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _registry.patch(path, handler, middleware: middleware);
 
   /// Registers a DELETE route.
   void delete(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _registry.delete(path, handler, middleware: middleware);
 
   /// Registers a HEAD route.
   void head(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _registry.head(path, handler, middleware: middleware);
 
   /// Registers an OPTIONS route.
   void options(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _registry.options(path, handler, middleware: middleware);
 
   /// Registers a route for any method.
   void any(String path, RequestHandler handler,
-      {List<Middleware> middleware = const []}) {
+      {List<Middleware> middleware = const [],}) {
     _registry.any(path, handler, middleware: middleware);
   }
 

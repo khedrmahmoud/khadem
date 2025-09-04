@@ -1,4 +1,5 @@
-import '../../../contracts/views/directive_contract.dart';
+import 'package:khadem/src/contracts/views/directive_contract.dart';
+
 
 /// Array and data checking directives
 class CountDirective implements ViewDirective {

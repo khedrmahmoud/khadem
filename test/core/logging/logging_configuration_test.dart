@@ -53,7 +53,7 @@ void main() {
         'console': {
           'enabled': true,
           'colorize': false,
-        }
+        },
       });
 
       final handlers = loggingConfig.handlers;
@@ -71,7 +71,7 @@ void main() {
           'rotate_on_size': false,
           'max_size': 1024,
           'max_backups': 3,
-        }
+        },
       });
 
       final handlers = loggingConfig.handlers;

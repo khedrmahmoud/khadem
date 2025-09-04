@@ -1,4 +1,5 @@
-import '../../../contracts/views/directive_contract.dart';
+import 'package:khadem/src/contracts/views/directive_contract.dart';
+
 
 /// Data manipulation directives
 class SetDirective implements ViewDirective {

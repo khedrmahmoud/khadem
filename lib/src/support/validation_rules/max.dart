@@ -11,7 +11,7 @@ class MaxRule extends Rule {
     final max = int.tryParse(arg ?? '') ?? 9999;
     if (value is String || value is List || value is Map) {
       if (value.length > max) {
-        return 'max _validation';
+        return 'max_validation';
       }
     } else if (value is num) {
       if (value > max) {

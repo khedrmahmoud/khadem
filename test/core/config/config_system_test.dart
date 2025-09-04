@@ -556,8 +556,7 @@ void main() {
         final config = ConfigSystem(
           configPath: configPath,
           environment: 'production',
-          useCache: true,
-          cacheTtl: Duration(milliseconds: 100),
+          cacheTtl: const Duration(milliseconds: 100),
         );
 
         expect(config.get<String>('app.name'), equals('CachedApp'));
@@ -570,7 +569,7 @@ void main() {
         expect(config.get<String>('app.name'), equals('CachedApp'));
 
         // Wait for cache to expire
-        await Future.delayed(Duration(milliseconds: 150));
+        await Future.delayed(const Duration(milliseconds: 150));
 
         // Should reload and return new value
         expect(config.get<String>('app.name'), equals('ModifiedApp'));

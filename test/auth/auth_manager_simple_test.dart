@@ -26,7 +26,7 @@ void main() {
       test('should expose guard property', () {
         // This would require mocking the config system
         // For now, we test that the property exists conceptually
-        final authManagerType = AuthManager;
+        const authManagerType = AuthManager;
         expect(authManagerType, isNotNull);
       });
     });

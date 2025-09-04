@@ -56,15 +56,15 @@ void main() {
 
     test('should dispatch job successfully', () async {
       await manager.init();
-      when(manager.driver.push(testJob, delay: null)).thenAnswer((_) async {});
+      when(manager.driver.push(testJob)).thenAnswer((_) async {});
 
       await expectLater(manager.dispatch(testJob), completes);
-      verify(manager.driver.push(testJob, delay: null)).called(1);
+      verify(manager.driver.push(testJob)).called(1);
     });
 
     test('should dispatch job with delay', () async {
       await manager.init();
-      final delay = Duration(seconds: 30);
+      const delay = Duration(seconds: 30);
       when(manager.driver.push(testJob, delay: delay)).thenAnswer((_) async {});
 
       await expectLater(manager.dispatch(testJob, delay: delay), completes);
@@ -73,7 +73,7 @@ void main() {
 
     test('should handle dispatch errors', () async {
       await manager.init();
-      when(manager.driver.push(testJob, delay: null))
+      when(manager.driver.push(testJob))
           .thenThrow(Exception('Dispatch failed'));
 
       expect(() => manager.dispatch(testJob), throwsException);
@@ -108,10 +108,9 @@ void main() {
 
       await expectLater(manager.startWorker(
         maxJobs: 5,
-        delay: Duration(seconds: 2),
-        timeout: Duration(minutes: 1),
-        runInBackground: false,
-      ), completes);
+        delay: const Duration(seconds: 2),
+        timeout: const Duration(minutes: 1),
+      ), completes,);
     });
 
     test('should get metrics', () async {

@@ -48,7 +48,7 @@ class Server {
   ///
   /// Optionally set [priority] or [name] for ordering and debugging.
   void useMiddleware(MiddlewareHandler handler,
-      {MiddlewarePriority priority = MiddlewarePriority.global, String? name}) {
+      {MiddlewarePriority priority = MiddlewarePriority.global, String? name,}) {
     _middleware.useMiddleware(handler, priority: priority, name: name);
   }
 
@@ -64,31 +64,31 @@ class Server {
   // ========================================
 
   void get(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _router.get(path, handler, middleware: middleware);
 
   void post(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _router.post(path, handler, middleware: middleware);
 
   void put(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _router.put(path, handler, middleware: middleware);
 
   void patch(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _router.patch(path, handler, middleware: middleware);
 
   void delete(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _router.delete(path, handler, middleware: middleware);
 
   void head(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _router.head(path, handler, middleware: middleware);
 
   void options(String path, RequestHandler handler,
-          {List<Middleware> middleware = const []}) =>
+          {List<Middleware> middleware = const [],}) =>
       _router.options(path, handler, middleware: middleware);
 
   // ========================================

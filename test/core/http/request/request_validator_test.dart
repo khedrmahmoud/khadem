@@ -46,7 +46,7 @@ void main() {
 
         final rules = {'name': 'required', 'email': 'required|email'};
 
-        expect(() async => await validator.validateBody(rules), throwsException);
+        expect(() async => validator.validateBody(rules), throwsException);
       });
     });
 

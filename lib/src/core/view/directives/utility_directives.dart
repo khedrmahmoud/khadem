@@ -1,5 +1,6 @@
-import '../../../contracts/views/directive_contract.dart';
 import '../../../application/khadem.dart';
+import 'package:khadem/src/contracts/views/directive_contract.dart';
+
 
 /// Environment and configuration directives
 class EnvDirective implements ViewDirective {

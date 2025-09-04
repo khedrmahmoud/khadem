@@ -20,14 +20,14 @@ class SchedulerJobRegistry {
     register(JobDefinition(
       name: 'ping',
       factory: (config) => PingJob(),
-    ));
+    ),);
 
     register(JobDefinition(
       name: 'ttl_cleaner',
       factory: (config) => TTLFileCleanerJob(
         cachePath: (config['cachePath'] ?? 'storage/cache') as String,
       ),
-    ));
+    ),);
   }
 
   /// Register a new job definition

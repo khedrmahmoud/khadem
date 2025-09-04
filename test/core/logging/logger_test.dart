@@ -58,8 +58,7 @@ void main() {
         LogLevel.debug,
         'Debug message',
         context: {'key': 'value'},
-        stackTrace: null,
-      )).called(1);
+      ),).called(1);
     });
 
     test('should log info message', () {
@@ -69,9 +68,7 @@ void main() {
         'app',
         LogLevel.info,
         'Info message',
-        context: null,
-        stackTrace: null,
-      )).called(1);
+      ),).called(1);
     });
 
     test('should log warning message', () {
@@ -81,9 +78,7 @@ void main() {
         'custom',
         LogLevel.warning,
         'Warning message',
-        context: null,
-        stackTrace: null,
-      )).called(1);
+      ),).called(1);
     });
 
     test('should log error message', () {
@@ -94,9 +89,8 @@ void main() {
         'app',
         LogLevel.error,
         'Error message',
-        context: null,
         stackTrace: stackTrace,
-      )).called(1);
+      ),).called(1);
     });
 
     test('should log critical message', () {
@@ -106,9 +100,7 @@ void main() {
         'app',
         LogLevel.critical,
         'Critical message',
-        context: null,
-        stackTrace: null,
-      )).called(1);
+      ),).called(1);
     });
 
     test('should log with specific level', () {
@@ -118,9 +110,7 @@ void main() {
         'app',
         LogLevel.warning,
         'Custom level message',
-        context: null,
-        stackTrace: null,
-      )).called(1);
+      ),).called(1);
     });
 
     test('should filter messages below minimum level', () {
@@ -134,21 +124,19 @@ void main() {
         'app',
         LogLevel.debug,
         'Debug message',
-      ));
+      ),);
 
       verifyNever(channelManager.logToChannel(
         'app',
         LogLevel.info,
         'Info message',
-      ));
+      ),);
 
       verify(channelManager.logToChannel(
         'app',
         LogLevel.warning,
         'Warning message',
-        context: null,
-        stackTrace: null,
-      )).called(1);
+      ),).called(1);
     });
 
     test('should close channel manager', () {

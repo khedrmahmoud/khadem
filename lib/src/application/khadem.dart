@@ -3,19 +3,19 @@ import '../contracts/container/container_interface.dart';
 import '../contracts/env/env_interface.dart';
 import '../contracts/events/event_system_interface.dart';
 import '../contracts/provider/service_provider.dart';
+import '../core/cache/cache_manager.dart';
 import '../core/container/container_provider.dart';
 import '../core/database/database.dart';
 import '../core/database/migration/migrator.dart';
 import '../core/database/migration/seeder.dart';
 import '../core/http/middleware/middleware_pipeline.dart';
 import '../core/lang/lang.dart';
-import '../core/service_provider/service_provider_manager.dart';
-import '../core/socket/socket_manager.dart';
-import '../core/view/renderer.dart';
-import '../core/cache/cache_manager.dart';
 import '../core/logging/logger.dart';
 import '../core/queue/queue_manager.dart';
 import '../core/scheduler/scheduler.dart';
+import '../core/service_provider/service_provider_manager.dart';
+import '../core/socket/socket_manager.dart';
+import '../core/view/renderer.dart';
 import '../modules/auth/core/auth_service_provider.dart';
 import '../modules/auth/services/auth_manager.dart';
 import '../support/providers/core_service_provider.dart';
@@ -260,6 +260,12 @@ class Khadem {
 
   /// Checks if the framework is fully booted.
   static bool get isBooted => providers.isBooted;
+
+  /// Checks if the application is running in production mode.
+  static bool get isProduction => env.getOrDefault('APP_ENV', 'production') == 'production';
+
+  /// Checks if the application is running in development mode.
+  static bool get isDevelopment => env.getOrDefault('APP_ENV', 'production') == 'development';
 
   /// Shuts down all services (e.g., stops schedulers, closes DB connections).
   static Future<void> shutdown() async {

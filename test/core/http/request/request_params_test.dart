@@ -123,7 +123,7 @@ void main() {
         final complexData = {
           'user': {'id': 1, 'roles': ['admin', 'user']},
           'permissions': ['read', 'write', 'delete'],
-          'metadata': {'created_at': DateTime.now(), 'version': 1.0}
+          'metadata': {'created_at': DateTime.now(), 'version': 1.0},
         };
 
         params.setAttribute('data', complexData);

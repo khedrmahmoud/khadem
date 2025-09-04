@@ -11,7 +11,7 @@ class ServerMiddleware {
   ///
   /// Optionally set priority or name for ordering and debugging.
   void useMiddleware(MiddlewareHandler handler,
-      {MiddlewarePriority priority = MiddlewarePriority.global, String? name}) {
+      {MiddlewarePriority priority = MiddlewarePriority.global, String? name,}) {
     _pipeline.add(handler, priority: priority, name: name);
   }
 

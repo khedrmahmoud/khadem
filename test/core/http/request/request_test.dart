@@ -18,11 +18,11 @@ class FakeHttpRequest extends Stream<Uint8List> implements HttpRequest {
 
   @override
   StreamSubscription<Uint8List> listen(void Function(Uint8List event)? onData,
-      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+      {Function? onError, void Function()? onDone, bool? cancelOnError,}) {
     // Return a subscription with some dummy JSON data
     final data = Uint8List.fromList('{"name": "test", "value": 123}'.codeUnits);
     return Stream<Uint8List>.fromIterable([data]).listen(onData,
-        onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+        onError: onError, onDone: onDone, cancelOnError: cancelOnError,);
   }
 
   @override

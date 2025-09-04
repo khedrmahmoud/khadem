@@ -30,13 +30,13 @@ void main() {
 
       task1 = ScheduledTask(
         name: 'task1',
-        interval: Duration(seconds: 30),
+        interval: const Duration(seconds: 30),
         job: mockJob,
       );
 
       task2 = ScheduledTask(
         name: 'task2',
-        interval: Duration(seconds: 60),
+        interval: const Duration(seconds: 60),
         job: mockJob,
       );
     });

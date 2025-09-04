@@ -32,7 +32,7 @@ class MySQLConnection implements ConnectionInterface {
       await execute('USE $dbName');
     } catch (_) {
 
-      throw DatabaseException('❌ Database "$dbName" must exist to connect.');
+      //throw DatabaseException('❌ Database "$dbName" must exist to connect.');
 
     }
   }

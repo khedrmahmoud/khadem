@@ -34,7 +34,7 @@ class RequestBodyParser {
     try {
       return jsonDecode(bodyString) as Map<String, dynamic>;
     } catch (_) {
-      throw FormatException('Invalid JSON format in request body');
+      throw const FormatException('Invalid JSON format in request body');
     }
   }
 

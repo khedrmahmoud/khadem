@@ -1,16 +1,19 @@
-import 'dart:convert';
-import 'dart:math';
-
-import '../../../application/khadem.dart';
-import '../../../support/helpers/hash_helper.dart';
-import '../core/auth_driver.dart';
+import '../config/khadem_auth_config.dart';
+import '../contracts/auth_config.dart';
+import '../contracts/auth_repository.dart';
+import '../contracts/password_verifier.dart';
+import '../contracts/token_generator.dart';
 import '../exceptions/auth_exception.dart';
+import '../repositories/database_auth_repository.dart';
+import '../services/hash_password_verifier.dart';
+import '../services/secure_token_generator.dart';
+import 'base_auth_service.dart';
 
-/// Token-based authentication service
+/// Enhanced Token-based authentication service
 ///
 /// This service provides simple token-based authentication without JWT complexity.
 /// It generates secure random tokens for user sessions and stores them in the database.
-/// Suitable for simpler applications or when JWT complexity is not needed.
+/// It extends BaseAuthService and implements SOLID principles for better maintainability.
 ///
 /// Features:
 /// - Secure random token generation
@@ -18,6 +21,8 @@ import '../exceptions/auth_exception.dart';
 /// - Password hashing verification
 /// - Simple token validation
 /// - Automatic token cleanup
+/// - Token expiry support
+/// - Multiple token types (access, refresh, API)
 ///
 /// Configuration requirements:
 /// ```yaml
@@ -32,227 +37,313 @@ import '../exceptions/auth_exception.dart';
 ///       driver: token
 ///       provider: users
 /// ```
-class TokenAuthService implements AuthDriver {
-  /// The provider key for user data
-  final String providerKey;
+class EnhancedTokenAuthService extends BaseAuthService {
+  /// Token expiry duration (if configured)
+  final Duration? _tokenExpiry;
 
-  /// Creates a token authentication service
+  /// Creates an enhanced token authentication service
   ///
-  /// [providerKey] The key identifying the user provider configuration
-  TokenAuthService({required this.providerKey});
+  /// All dependencies are injected for better testability
+  EnhancedTokenAuthService({
+    required super.providerKey,
+    AuthRepository? repository,
+    AuthConfig? config,
+    PasswordVerifier? passwordVerifier,
+    TokenGenerator? tokenGenerator,
+    Duration? tokenExpiry,
+  })  : _tokenExpiry = tokenExpiry,
+        super(
+          repository: repository ?? DatabaseAuthRepository(),
+          config: config ?? KhademAuthConfig(),
+          passwordVerifier: passwordVerifier ?? HashPasswordVerifier(),
+          tokenGenerator: tokenGenerator ?? SecureTokenGenerator(),
+        );
 
-  /// Attempts to authenticate a user with credentials
-  ///
-  /// [credentials] Map containing user credentials (email/username and password)
-  /// Returns authentication result with user data and token
-  /// Throws [AuthException] for invalid credentials or configuration errors
+  /// Factory constructor for easy instantiation
+  factory EnhancedTokenAuthService.create(String providerKey) {
+    return EnhancedTokenAuthService(providerKey: providerKey);
+  }
+
   @override
-  Future<Map<String, dynamic>> attemptLogin(Map<String, dynamic> credentials) async {
-    try {
-      final provider = _getAuthProvider();
-      final user = await _findUserByCredentials(credentials, provider);
-      await _verifyPassword(credentials, user);
-      final token = await _generateAndStoreToken(user, provider);
-
-      return {
-        'token': token,
-        'user': user,
-      };
-    } catch (e) {
-      if (e is AuthException) {
-        rethrow;
-      }
-      throw AuthException(
-        'Login failed: ${e.toString()}',
-        stackTrace: StackTrace.current.toString(),
-      );
-    }
-  }
-
-  /// Gets the authentication provider configuration
-  ///
-  /// Returns the provider configuration for the current provider key
-  /// Throws [AuthException] if provider is not configured
-  Map<String, dynamic> _getAuthProvider() {
-    final config = Khadem.config.section('auth');
-    if (config == null) {
-      throw AuthException('Authentication configuration not found');
-    }
-
-    final provider = config['providers']?[providerKey];
-    if (provider == null) {
-      throw AuthException('Authentication provider "$providerKey" not found');
-    }
-
-    return provider as Map<String, dynamic>;
-  }
-
-  /// Finds a user by their credentials
-  ///
-  /// [credentials] User login credentials
-  /// [provider] Authentication provider configuration
-  /// Returns the user record if found
-  /// Throws [AuthException] if user is not found
-  Future<Map<String, dynamic>> _findUserByCredentials(
-    Map<String, dynamic> credentials,
+  Future<Map<String, dynamic>> generateAuthResult(
+    Map<String, dynamic> user,
     Map<String, dynamic> provider,
   ) async {
-    final table = provider['table'] as String;
-    final fields = provider['fields'] as List<dynamic>;
-
-    final query = Khadem.db.table(table);
-    bool hasValidField = false;
-
-    for (final field in fields) {
-      final fieldName = field as String;
-      if (credentials.containsKey(fieldName) && credentials[fieldName] != null) {
-        query.where(fieldName, '=', credentials[fieldName]);
-        hasValidField = true;
-      }
-    }
-
-    if (!hasValidField) {
-      throw AuthException('No valid login field provided');
-    }
-
-    final user = await query.first();
-    if (user == null) {
-      throw AuthException('Invalid credentials');
-    }
-
-    return user as Map<String, dynamic>;
-  }
-
-  /// Verifies the user's password
-  ///
-  /// [credentials] User credentials containing password
-  /// [user] User record from database
-  /// Throws [AuthException] if password is invalid
-  Future<void> _verifyPassword(Map<String, dynamic> credentials, Map<String, dynamic> user) async {
-    final password = credentials['password'] as String?;
-    if (password == null || password.isEmpty) {
-      throw AuthException('Password is required');
-    }
-
-    final hashedPassword = user['password'] as String?;
-    if (hashedPassword == null) {
-      throw AuthException('User password not found');
-    }
-
-    final isValidPassword = await HashHelper.verify(password, hashedPassword);
-    if (!isValidPassword) {
-      throw AuthException('Invalid credentials');
-    }
-  }
-
-  /// Generates and stores a secure token for the user
-  ///
-  /// [user] User data
-  /// [provider] Provider configuration
-  /// Returns the generated token
-  Future<String> _generateAndStoreToken(Map<String, dynamic> user, Map<String, dynamic> provider) async {
     final primaryKey = provider['primary_key'] as String;
-    final token = _generateSecureToken(id: user[primaryKey].toString());
+    final userId = user[primaryKey];
 
-    await Khadem.db.table('personal_access_tokens').insert({
-      'token': token,
-      'tokenable_id': user[primaryKey],
-      'guard': providerKey,
-      'created_at': DateTime.now().toIso8601String(),
-    });
+    final accessToken = tokenGenerator.generateToken(
+      prefix: userId.toString(),
+    );
 
-    return token;
+    return {
+      'user': user,
+      'token': accessToken,
+      'token_type': 'Bearer',
+      'expires_in': _tokenExpiry?.inSeconds,
+      '_access_token': accessToken, // For internal storage
+    };
   }
 
-  /// Verifies a token and returns user data
-  ///
-  /// [token] The token to verify
-  /// Returns the user data associated with the token
-  /// Throws [AuthException] if token is invalid
   @override
-  Future<Map<String, dynamic>> verifyToken(String token) async {
-    try {
-      final provider = _getAuthProvider();
-      final tokenRecord = await _findTokenRecord(token);
-      return await _findUserByToken(tokenRecord, provider);
-    } catch (e) {
-      if (e is AuthException) {
-        rethrow;
-      }
-      throw AuthException(
-        'Token verification failed: ${e.toString()}',
-        stackTrace: StackTrace.current.toString(),
-      );
+  Future<void> storeAuthSession(
+    Map<String, dynamic> authResult,
+    Map<String, dynamic> user,
+    Map<String, dynamic> provider,
+  ) async {
+    final primaryKey = provider['primary_key'] as String;
+    final userId = user[primaryKey];
+    final accessToken = authResult['_access_token'] as String;
+
+    final tokenData = {
+      'token': accessToken,
+      'tokenable_id': userId,
+      'guard': providerKey,
+      'type': 'access',
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    // Add expiry if configured
+    if (_tokenExpiry != null) {
+      tokenData['expires_at'] =
+          DateTime.now().add(_tokenExpiry!).toIso8601String();
     }
+
+    await repository.storeToken(tokenData);
   }
 
-  /// Finds the token record in the database
-  ///
-  /// [token] The token to find
-  /// Returns the token record
-  /// Throws [AuthException] if token is not found
-  Future<Map<String, dynamic>> _findTokenRecord(String token) async {
-    final tokenRecord = await Khadem.db
-        .table('personal_access_tokens')
-        .where('token', '=', token)
-        .first();
+  @override
+  Future<Map<String, dynamic>> findUserByToken(
+    String token,
+    Map<String, dynamic> provider,
+  ) async {
+    final tokenRecord = await repository.findToken(token);
 
     if (tokenRecord == null) {
       throw AuthException('Invalid token');
     }
 
-    return tokenRecord as Map<String, dynamic>;
-  }
+    // Check token expiry if configured
+    final expiresAt = tokenRecord['expires_at'] as String?;
+    if (expiresAt != null) {
+      final expiry = DateTime.parse(expiresAt);
+      if (DateTime.now().isAfter(expiry)) {
+        // Clean up expired token
+        await repository.deleteToken(token);
+        throw AuthException('Token has expired');
+      }
+    }
 
-  /// Finds a user by token record
-  ///
-  /// [tokenRecord] The token record from database
-  /// [provider] Provider configuration
-  /// Returns the user record
-  /// Throws [AuthException] if user is not found
-  Future<Map<String, dynamic>> _findUserByToken(
-    Map<String, dynamic> tokenRecord,
-    Map<String, dynamic> provider,
-  ) async {
     final table = provider['table'] as String;
     final primaryKey = provider['primary_key'] as String;
     final userId = tokenRecord['tokenable_id'];
 
-    final user = await Khadem.db.table(table).where(primaryKey, '=', userId).first();
+    final user = await repository.findUserById(userId, table, primaryKey);
 
     if (user == null) {
       throw AuthException('User not found');
     }
 
-    return user as Map<String, dynamic>;
+    return user;
   }
 
-  /// Logs out a user by removing their token
-  ///
-  /// [token] The token to invalidate
   @override
-  Future<void> logout(String token) async {
-    try {
-      await Khadem.db
-          .table('personal_access_tokens')
-          .where('token', '=', token)
-          .delete();
-    } catch (e) {
-      throw AuthException(
-        'Logout failed: ${e.toString()}',
-        stackTrace: StackTrace.current.toString(),
-      );
+  Future<void> invalidateToken(String token) async {
+    await repository.deleteToken(token);
+  }
+
+  /// Generates an API token for long-term access
+  ///
+  /// [user] The user to generate token for
+  /// [name] Optional name for the token
+  /// [expiresAt] Optional expiry date
+  /// Returns the API token data
+  Future<Map<String, dynamic>> generateApiToken(
+    Map<String, dynamic> user, {
+    String? name,
+    DateTime? expiresAt,
+  }) async {
+    final provider = config.getProvider(providerKey);
+    final primaryKey = provider['primary_key'] as String;
+    final userId = user[primaryKey];
+
+    final token = tokenGenerator.generateToken(length: 80);
+
+    final tokenData = {
+      'token': token,
+      'tokenable_id': userId,
+      'guard': providerKey,
+      'type': 'api',
+      'name': name ?? 'API Token',
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    if (expiresAt != null) {
+      tokenData['expires_at'] = expiresAt.toIso8601String();
+    }
+
+    await repository.storeToken(tokenData);
+
+    return {
+      'token': token,
+      'name': name ?? 'API Token',
+      'expires_at': expiresAt?.toIso8601String(),
+    };
+  }
+
+  /// Revokes all tokens for a user
+  ///
+  /// [userId] The user ID
+  /// Returns the number of revoked tokens
+  Future<int> revokeAllUserTokens(dynamic userId) async {
+    return repository.deleteUserTokens(userId, providerKey);
+  }
+
+  /// Lists all active tokens for a user
+  ///
+  /// [userId] The user ID
+  /// Returns a list of token information (without the actual tokens)
+  Future<List<Map<String, dynamic>>> getUserTokens(dynamic userId) async {
+    // This would require additional repository method
+    // For now, return empty list as placeholder
+    return [];
+  }
+
+  /// Revokes a specific token by its value
+  ///
+  /// [token] The token to revoke
+  /// Returns true if token was found and revoked
+  Future<bool> revokeToken(String token) async {
+    final deletedCount = await repository.deleteToken(token);
+    return deletedCount > 0;
+  }
+
+  /// Updates token's last used timestamp
+  ///
+  /// [token] The token that was used
+  Future<void> updateTokenLastUsed(String token) async {
+    // This would require additional repository method
+    // For now, this is a placeholder for the functionality
+  }
+
+  /// Validates token format and structure
+  @override
+  Future<void> validateToken(String token) async {
+    await super.validateToken(token);
+
+    // Additional token-specific validation
+    if (token.length < 32) {
+      throw AuthException('Token too short');
     }
   }
 
-  /// Generates a secure random token
+  /// Refreshes an access token using a refresh token
   ///
-  /// [length] The length of the token to generate
-  /// Returns a base64 URL-encoded secure random token
-  String _generateSecureToken({int length = 64, String id = ''}) {
-    final random = Random.secure();
-    final bytes = List<int>.generate(length, (_) => random.nextInt(256));
-    final tokenPart = base64UrlEncode(bytes).substring(0, length);
-    return id.isEmpty ? tokenPart : "$id|$tokenPart";
+  /// For simple token authentication, this generates both a new access token
+  /// and a new refresh token, then invalidates the old refresh token for security
+  ///
+  /// [refreshToken] The refresh token
+  /// Returns a new access token and refresh token
+  /// Throws [AuthException] if refresh token is invalid or expired
+  @override
+  Future<Map<String, dynamic>> refreshAccessToken(String refreshToken) async {
+    final tokenRecord = await repository.findToken(refreshToken);
+
+    if (tokenRecord == null) {
+      throw AuthException('Invalid refresh token');
+    }
+
+    // Check if it's actually a refresh token
+    final tokenType = tokenRecord['type'] as String?;
+    if (tokenType != 'refresh' && tokenType != 'access') {
+      throw AuthException('Invalid token type for refresh');
+    }
+
+    // Check token expiry if configured
+    final expiresAt = tokenRecord['expires_at'] as String?;
+    if (expiresAt != null) {
+      final expiry = DateTime.parse(expiresAt);
+      if (DateTime.now().isAfter(expiry)) {
+        // Clean up expired token
+        await repository.deleteToken(refreshToken);
+        throw AuthException('Refresh token has expired');
+      }
+    }
+
+    final userId = tokenRecord['tokenable_id'];
+
+    // Get user information
+    final provider = config.getProvider(providerKey);
+    final table = provider['table'] as String;
+    final primaryKey = provider['primary_key'] as String;
+
+    final user = await repository.findUserById(userId, table, primaryKey);
+    if (user == null) {
+      throw AuthException('User not found');
+    }
+
+    // Generate new access token
+    final newAccessToken = tokenGenerator.generateToken(
+      prefix: userId.toString(),
+    );
+
+    // Generate new refresh token for security
+    final newRefreshToken = tokenGenerator.generateRefreshToken();
+
+    // Store the new access token
+    final accessTokenData = {
+      'token': newAccessToken,
+      'tokenable_id': userId,
+      'guard': providerKey,
+      'type': 'access',
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    // Add expiry if configured
+    if (_tokenExpiry != null) {
+      accessTokenData['expires_at'] =
+          DateTime.now().add(_tokenExpiry!).toIso8601String();
+    }
+
+    await repository.storeToken(accessTokenData);
+
+    // Store the new refresh token
+    final refreshTokenData = {
+      'token': newRefreshToken,
+      'tokenable_id': userId,
+      'guard': providerKey,
+      'type': 'refresh',
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    // Refresh tokens typically have longer expiry
+    final refreshExpiry = _tokenExpiry != null
+        ? _tokenExpiry!.inHours > 24
+            ? _tokenExpiry!
+            : const Duration(days: 7) // Default 7 days for refresh tokens
+        : const Duration(days: 7);
+
+    refreshTokenData['expires_at'] =
+        DateTime.now().add(refreshExpiry).toIso8601String();
+
+    await repository.storeToken(refreshTokenData);
+
+    // Invalidate the old refresh token for security
+    await repository.deleteToken(refreshToken);
+
+    return {
+      'access_token': newAccessToken,
+      'refresh_token': newRefreshToken,
+      'token_type': 'Bearer',
+      'expires_in': _tokenExpiry?.inSeconds,
+      'refresh_expires_in': refreshExpiry.inSeconds,
+    };
+  }
+
+  /// Cleanup expired tokens
+  ///
+  /// Returns the number of cleaned up tokens
+  Future<int> cleanupExpiredTokens() async {
+    return repository.cleanupExpiredTokens();
   }
 }

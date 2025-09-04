@@ -1,6 +1,6 @@
-import '../relation_type.dart';
 import '../../model_base/khadem_model.dart';
 import '../relation_definition.dart';
+import '../relation_type.dart';
 
 /// Utilities to define Eloquent-style relationships.
 mixin HasRelationships {

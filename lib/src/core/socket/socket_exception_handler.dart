@@ -1,5 +1,6 @@
-import '../../application/khadem.dart';
-import '../socket/socket_client.dart';
+
+import 'package:khadem/khadem_dart.dart';
+
 
 /// Handles exceptions in socket operations and sends appropriate error responses.
 class SocketExceptionHandler {
@@ -56,9 +57,9 @@ class SocketExceptionHandler {
     };
 
     // In development, include more details
-    final isDevelopment = Khadem.env.getOrDefault('APP_ENV', 'production') == 'development';
+    final isDevelopment = Khadem.isDevelopment;
     if (isDevelopment) {
-      response['message'] = error.toString();
+      response['message'] = error is AppException ? error.message : error.toString();
       response['type'] = error.runtimeType.toString();
       if (stackTrace != null) {
         response['stack_trace'] = stackTrace.toString();
@@ -94,7 +95,10 @@ class SocketExceptionHandler {
     if (stackTrace != null) {
       Khadem.logger.debug('Middleware stack trace: $stackTrace');
     }
-
-    handle(client, 'Middleware execution failed', stackTrace);
+    if (error is AppException) {
+      handle(client, error, stackTrace);
+    } else {
+      handle(client, 'Middleware execution failed', stackTrace);
+    }
   }
 }

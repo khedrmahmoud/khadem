@@ -23,6 +23,12 @@
 ///   Future<void> logout(String token) async {
 ///     // Custom logout logic
 ///   }
+///
+///   @override
+///   Future<Map<String, dynamic>> refreshAccessToken(String refreshToken) async {
+///     // Custom token refresh logic
+///     return {'access_token': newToken, 'expires_in': 3600};
+///   }
 /// }
 /// ```
 abstract class AuthDriver {
@@ -45,4 +51,11 @@ abstract class AuthDriver {
   /// [token] The authentication token to invalidate
   /// Throws [AuthException] if logout fails
   Future<void> logout(String token);
+
+  /// Refreshes an access token using a refresh token
+  ///
+  /// [refreshToken] The refresh token to use for generating a new access token
+  /// Returns a new access token data
+  /// Throws [AuthException] if refresh token is invalid or expired
+  Future<Map<String, dynamic>> refreshAccessToken(String refreshToken);
 }

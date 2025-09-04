@@ -100,18 +100,18 @@ void main() {
         'Test message',
         context: {'key': 'value'},
         stackTrace: anyNamed('stackTrace'),
-      )).called(1);
+      ),).called(1);
 
       verify(handler2.log(
         LogLevel.info,
         'Test message',
         context: {'key': 'value'},
         stackTrace: anyNamed('stackTrace'),
-      )).called(1);
+      ),).called(1);
     });
 
     test('should handle handler errors gracefully', () {
-      when(handler1.log(LogLevel.info, 'Test', context: null, stackTrace: null))
+      when(handler1.log(LogLevel.info, 'Test'))
           .thenThrow(Exception('Handler error'));
       manager.addHandler(handler1, channel: 'test');
       manager.addHandler(handler2, channel: 'test');
@@ -120,7 +120,7 @@ void main() {
       expect(() => manager.logToChannel('test', LogLevel.info, 'Test'), returnsNormally);
 
       // Second handler should still be called
-      verify(handler2.log(LogLevel.info, 'Test', context: null, stackTrace: null)).called(1);
+      verify(handler2.log(LogLevel.info, 'Test')).called(1);
     });
 
     test('should close all handlers', () {

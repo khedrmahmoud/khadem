@@ -31,7 +31,7 @@ void main() {
 
     test('should throw when registering disk with empty name', () {
       expect(() => storageManager.registerDisk('', localDisk),
-             throwsA(isA<StorageException>()));
+             throwsA(isA<StorageException>()),);
     });
 
     test('should get disk by name', () {
@@ -50,7 +50,7 @@ void main() {
 
     test('should throw when getting non-existent disk', () {
       expect(() => storageManager.disk('nonexistent'),
-             throwsA(isA<NotFoundException>()));
+             throwsA(isA<NotFoundException>()),);
     });
 
     test('should remove disk successfully', () {
@@ -63,7 +63,7 @@ void main() {
 
     test('should throw when removing non-existent disk', () {
       expect(() => storageManager.removeDisk('nonexistent'),
-             throwsA(isA<NotFoundException>()));
+             throwsA(isA<NotFoundException>()),);
     });
 
     test('should set default disk successfully', () {
@@ -75,7 +75,7 @@ void main() {
 
     test('should throw when setting non-existent disk as default', () {
       expect(() => storageManager.setDefaultDisk('nonexistent'),
-             throwsA(isA<NotFoundException>()));
+             throwsA(isA<NotFoundException>()),);
     });
 
     test('should register driver successfully', () {
@@ -86,7 +86,7 @@ void main() {
 
     test('should throw when registering driver with empty name', () {
       expect(() => storageManager.registerDriver('', (options) => LocalDisk(basePath: './test')),
-             throwsA(isA<StorageException>()));
+             throwsA(isA<StorageException>()),);
     });
 
     test('should load configuration successfully', () {
@@ -95,9 +95,9 @@ void main() {
         'disks': {
           'test': {
             'driver': 'local',
-            'root': './test-storage'
-          }
-        }
+            'root': './test-storage',
+          },
+        },
       };
 
       storageManager.fromConfig(config);
@@ -110,10 +110,10 @@ void main() {
       final config = {
         'disks': {
           'test': {
-            'root': './test-storage'
+            'root': './test-storage',
             // missing 'driver' key
-          }
-        }
+          },
+        },
       };
 
       expect(() => storageManager.fromConfig(config),
@@ -125,13 +125,13 @@ void main() {
         'disks': {
           'test': {
             'driver': 'unsupported',
-            'root': './test-storage'
-          }
-        }
+            'root': './test-storage',
+          },
+        },
       };
 
       expect(() => storageManager.fromConfig(config),
-             throwsA(isA<NotFoundException>()));
+             throwsA(isA<NotFoundException>()),);
     });
 
     test('should flush all disks', () {
@@ -156,7 +156,7 @@ void main() {
 
     test('should handle configuration without disks', () {
       final config = {
-        'default': 'local'
+        'default': 'local',
       };
 
       storageManager.fromConfig(config);
@@ -168,9 +168,9 @@ void main() {
         'disks': {
           'local': {
             'driver': 'local',
-            'root': './storage'
-          }
-        }
+            'root': './storage',
+          },
+        },
       };
 
       storageManager.fromConfig(config);

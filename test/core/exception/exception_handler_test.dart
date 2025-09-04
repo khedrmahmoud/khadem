@@ -4,8 +4,8 @@ import '../../../lib/src/contracts/exceptions/app_exception.dart';
 import '../../../lib/src/core/exception/exception_handler.dart';
 
 class TestException extends AppException {
-  TestException([String message = 'Test error', dynamic details])
-      : super(message, statusCode: 400, details: details);
+  TestException([super.message = 'Test error', dynamic details])
+      : super(statusCode: 400, details: details);
 }
 
 void main() {
@@ -13,7 +13,6 @@ void main() {
     setUp(() {
       // Reset configuration before each test
       ExceptionHandler.configure(
-        showDetailedErrors: true,
         includeStackTracesInResponse: false,
       );
     });
@@ -21,7 +20,6 @@ void main() {
     tearDown(() {
       // Reset configuration after each test
       ExceptionHandler.configure(
-        showDetailedErrors: true,
         includeStackTracesInResponse: false,
       );
     });
@@ -44,7 +42,6 @@ void main() {
         }
 
         ExceptionHandler.configure(
-          showDetailedErrors: true,
           includeStackTracesInResponse: false,
           customFormatter: customFormatter,
         );
