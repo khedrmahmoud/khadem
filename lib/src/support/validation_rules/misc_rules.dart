@@ -105,8 +105,10 @@ class NullableRule extends Rule {
     String? arg, {
     required Map<String, dynamic> data,
   }) {
-    // Nullable rule always passes - it just indicates that null values are allowed
-    // This is typically used in combination with other rules
+    // Nullable rule always passes validation.
+    // When used in combination with other rules, it indicates that null values are allowed
+    // and other validation rules should be skipped if the field value is null.
+    // The actual nullable logic is handled in the Validator class.
     return null;
   }
 }

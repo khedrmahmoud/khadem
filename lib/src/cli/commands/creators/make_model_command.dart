@@ -24,10 +24,20 @@ class MakeModelCommand extends KhademCommand {
 
     final normalized = input.replaceAll('\\', '/');
     final parts = normalized.split('/');
-    final className = _capitalize(parts.last).replaceFirst('_', '');
-    final filePath = 'app/models/$normalized.dart';
+    final name = parts.last;
+    final folderParts = parts.sublist(0, parts.length - 1);
+    final folder = folderParts.map((e) => e.toLowerCase()).join('/');
+
+    final className = _toPascalCase(name);
+    final fileName = _toSnakeCase(name);
+    final filePath = 'app/models/${folder.isEmpty ? '' : '$folder/'}$fileName.dart';
 
     final file = File(filePath);
+    if (await file.exists()) {
+      logger.error('❌ Model file already exists at $filePath');
+      exit(1);
+    }
+
     await file.create(recursive: true);
 
     const imports = '''
@@ -96,6 +106,13 @@ class $className extends KhademModel<$className> with Timestamps, HasRelationshi
     exit(0);
   }
 
-  String _capitalize(String input) =>
-      input.isEmpty ? input : input[0].toUpperCase() + input.substring(1);
+  String _toPascalCase(String input) {
+    if (input.isEmpty) return input;
+    return input.split('_').map((e) => e.isEmpty ? '' : e[0].toUpperCase() + e.substring(1).toLowerCase()).join('');
+  }
+
+  String _toSnakeCase(String input) {
+    if (input.isEmpty) return input;
+    return input.replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]}_${m[2]}').toLowerCase();
+  }
 }

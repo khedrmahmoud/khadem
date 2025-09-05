@@ -58,6 +58,7 @@ class DirectiveRegistry {
     JsDirective(),
     InlineCssDirective(),
     InlineJsDirective(),
+    UrlRouteDirective(),
 
     // Authentication directives
     AuthDirective(),

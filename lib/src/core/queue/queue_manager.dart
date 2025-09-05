@@ -1,58 +1,75 @@
 import '../../contracts/config/config_contract.dart';
 import '../../contracts/queue/queue_driver.dart';
 import '../../contracts/queue/queue_job.dart';
+import '../../contracts/queue/queue_monitor.dart';
 import 'queue_driver_registry.dart';
 import 'queue_factory.dart';
-import 'queue_job_serializer.dart';
 import 'queue_monitor.dart';
 import 'queue_worker.dart';
 
-/// Enhanced queue manager with separated concerns.
-/// Manages queue operations while delegating specific responsibilities
-/// to dedicated components.
+/// Simplified queue manager that handles job dispatch and processing
+/// without requiring job registration.
 class QueueManager {
-  late QueueDriver _defaultDriver;
-  late String _defaultDriverName;
+  QueueDriver? _defaultDriver;
+  String? _defaultDriverName;
   final ConfigInterface _config;
   final QueueMonitor _monitor;
 
   QueueManager(
     this._config, {
     QueueMonitor? monitor,
-  }) : _monitor = monitor ?? BasicQueueMonitor();
+    QueueDriver? driver,
+    String? driverName,
+  }) : _monitor = monitor ?? BasicQueueMonitor() {
+    if (driver != null) {
+      _defaultDriver = driver;
+      _defaultDriverName = driverName ?? 'mock';
+    }
+  }
 
   /// Gets the default queue driver.
-  QueueDriver get driver => _defaultDriver;
+  QueueDriver get driver => _defaultDriver!;
 
   /// Gets the name of the default driver.
-  String get defaultDriverName => _defaultDriverName;
+  String get defaultDriverName => _defaultDriverName!;
 
   /// Gets the queue monitor for metrics.
   QueueMonitor get monitor => _monitor;
 
   /// Initializes the queue manager and resolves the driver.
   Future<void> init() async {
-    final (defaultDriver, defaultDriverName) = QueueFactory.resolve(_config);
-    _defaultDriver = defaultDriver;
-    _defaultDriverName = defaultDriverName;
+    // Only resolve driver if not already set (for testing)
+    if (_defaultDriverName == null) {
+      final (defaultDriver, defaultDriverName) = QueueFactory.resolve(_config);
+      _defaultDriver = defaultDriver;
+      _defaultDriverName = defaultDriverName;
+    }
   }
 
   /// Dispatches a job to the queue with optional delay.
+  /// This is the main method - just dispatch any job without registration!
   Future<void> dispatch(QueueJob job, {Duration? delay}) async {
     _monitor.jobQueued(job);
 
     try {
-      await _defaultDriver.push(job, delay: delay);
+      await _defaultDriver!.push(job, delay: delay);
     } catch (e) {
       _monitor.jobFailed(job, e, Duration.zero);
       rethrow;
     }
   }
 
+  /// Convenient method to dispatch multiple jobs at once.
+  Future<void> dispatchBatch(List<QueueJob> jobs, {Duration? delay}) async {
+    for (final job in jobs) {
+      await dispatch(job, delay: delay);
+    }
+  }
+
   /// Processes jobs from the queue.
   Future<void> process() async {
     try {
-      await _defaultDriver.process();
+      await _defaultDriver!.process();
     } catch (e) {
       // Log error but don't rethrow to keep worker running
       print('Queue processing error: $e');
@@ -81,7 +98,7 @@ class QueueManager {
       onJobError: onJobError,
     );
 
-    final worker = QueueWorker(_defaultDriver, config);
+    final worker = QueueWorker(_defaultDriver!, config);
     await worker.start();
   }
 
@@ -94,9 +111,6 @@ class QueueManager {
   void resetMetrics() {
     _monitor.reset();
   }
-
-  /// Gets the job serializer for serialization operations.
-  static QueueJobSerializer get serializer => QueueFactory.instance.serializer;
 
   /// Gets the driver registry for driver management.
   static QueueDriverRegistry get registry => QueueFactory.instance.registry;

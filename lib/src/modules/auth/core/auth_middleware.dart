@@ -3,6 +3,7 @@ import '../../../contracts/http/middleware_contract.dart';
 import '../../../core/http/request/request.dart';
 import '../../../core/http/response/response.dart';
 import '../exceptions/auth_exception.dart';
+import '../services/auth_manager.dart';
 
 /// Authentication middleware for protecting routes
 ///
@@ -32,8 +33,7 @@ import '../exceptions/auth_exception.dart';
 /// ```
 class AuthMiddleware extends Middleware {
   /// Creates an authentication middleware instance
-  AuthMiddleware()
-      : super(_handleAuth);
+  AuthMiddleware() : super(_handleAuth);
 
   /// Handles the authentication middleware logic
   ///
@@ -42,7 +42,8 @@ class AuthMiddleware extends Middleware {
   /// [next] Function to call the next middleware or route handler
   ///
   /// Throws [AuthException] if authentication fails
-  static Future<void> _handleAuth(Request req, Response res, NextFunction next) async {
+  static Future<void> _handleAuth(
+      Request req, Response res, NextFunction next) async {
     try {
       // Extract and validate authorization header
       final authHeader = _extractAuthHeader(req);
@@ -80,7 +81,7 @@ class AuthMiddleware extends Middleware {
   /// Returns the authorization header value
   /// Throws [AuthException] if header is missing or invalid
   static String _extractAuthHeader(Request request) {
-    final authHeader = request.headers.header('authorization');
+    final authHeader = request.header('authorization');
 
     if (authHeader == null || authHeader.isEmpty) {
       throw AuthException(
@@ -118,14 +119,8 @@ class AuthMiddleware extends Middleware {
   /// Returns the user data associated with the token
   /// Throws [AuthException] if token verification fails
   static Future<Map<String, dynamic>> _verifyToken(String token) async {
-    try {
-      return await Khadem.auth.verify(token);
-    } catch (e) {
-      throw AuthException(
-        'Token verification failed: ${e.toString()}',
-        stackTrace: StackTrace.current.toString(),
-      );
-    }
+    final authManager = Khadem.container.resolve<AuthManager>();
+    return await authManager.verify(token);
   }
 
   /// Attaches user data to the request

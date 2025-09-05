@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:khadem/khadem_dart.dart';
 import 'package:khadem/src/core/exception/exception_handler.dart';
 
 import '../context/request_context.dart';
@@ -30,12 +31,14 @@ class ServerLifecycle {
   /// Reloads routes and middleware using the stored initializer.
   Future<void> reload() async {
     if (_initializer != null) {
-      // Reset router and pipeline
+      // Reset router, middleware, and static handler
       _router.clear();
       _middleware.clear();
+      _static.clear();
+
       // Re-run initializer to reload routes and middleware
       _initializer!();
-      print('Routes and middleware reloaded');
+      Khadem.logger.info('Routes, middleware, and static files reloaded');
     }
   }
 
@@ -51,7 +54,7 @@ class ServerLifecycle {
 
     final server =
         await HttpServer.bind(InternetAddress.anyIPv4, port, shared: true);
-
+    Khadem.logger.info('🟢 HTTP Server started on http://localhost:$port');
     await for (final raw in server) {
       final req = Request(raw);
       final res = Response(raw);

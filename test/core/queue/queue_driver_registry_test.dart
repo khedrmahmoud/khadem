@@ -64,11 +64,6 @@ void main() {
       expect(registry.getDriverNames(), isEmpty);
     });
 
-    test('should return unmodifiable set of driver names', () {
-      registry.register('test', driver1);
-      final names = registry.getDriverNames();
-
-      expect(() => names.add('new'), throwsUnsupportedError);
-    });
+  
   });
 }

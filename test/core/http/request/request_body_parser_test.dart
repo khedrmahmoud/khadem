@@ -8,7 +8,6 @@ class FakeHttpRequest implements HttpRequest {
   @override
   HttpHeaders headers = FakeHttpHeaders();
 
-  @override
   late Stream<List<int>> body;
 
   @override

@@ -7,8 +7,15 @@ import '../../../../lib/src/core/http/request/request_validator.dart';
 
 class FakeRequestBodyParser implements RequestBodyParser {
   final Map<String, dynamic> _data;
+  final Map<String, dynamic>? _files;
 
-  FakeRequestBodyParser(this._data);
+  FakeRequestBodyParser(this._data, [this._files]);
+
+  @override
+  Map<String, UploadedFile>? get files {
+    if (_files == null) return null;
+    return _files!.map((key, value) => MapEntry(key, value as UploadedFile));
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) {

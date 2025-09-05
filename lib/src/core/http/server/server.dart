@@ -36,7 +36,7 @@ class Server {
   /// ```dart
   /// server.serveStatic('public');
   /// ```
-  void serveStatic(String path) {
+  void serveStatic([String path = 'public']) {
     _static.serveStatic(path);
   }
 
@@ -47,8 +47,11 @@ class Server {
   /// Registers a single global middleware [handler].
   ///
   /// Optionally set [priority] or [name] for ordering and debugging.
-  void useMiddleware(MiddlewareHandler handler,
-      {MiddlewarePriority priority = MiddlewarePriority.global, String? name,}) {
+  void useMiddleware(
+    MiddlewareHandler handler, {
+    MiddlewarePriority priority = MiddlewarePriority.global,
+    String? name,
+  }) {
     _middleware.useMiddleware(handler, priority: priority, name: name);
   }
 
@@ -63,32 +66,53 @@ class Server {
   // 🔁 Route Registration
   // ========================================
 
-  void get(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+  void get(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+  }) =>
       _router.get(path, handler, middleware: middleware);
 
-  void post(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+  void post(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+  }) =>
       _router.post(path, handler, middleware: middleware);
 
-  void put(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+  void put(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+  }) =>
       _router.put(path, handler, middleware: middleware);
 
-  void patch(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+  void patch(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+  }) =>
       _router.patch(path, handler, middleware: middleware);
 
-  void delete(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+  void delete(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+  }) =>
       _router.delete(path, handler, middleware: middleware);
 
-  void head(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+  void head(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+  }) =>
       _router.head(path, handler, middleware: middleware);
 
-  void options(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [],}) =>
+  void options(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+  }) =>
       _router.options(path, handler, middleware: middleware);
 
   // ========================================
@@ -125,16 +149,29 @@ class Server {
 
   Future<void> reload() async {
     await _lifecycle.reload();
+    _injectReload();
   }
 
-  // ========================================
-  // 🚀 Start the Server
-  // ========================================
+  /// Reloading enpoint when call reload the server
+  ///
+  /// Injects a reloading endpoint when the server is reloaded.
+  void _injectReload() {
+    // Add a POST endpoint for triggering reload
+    _router.post('/reload', (req, res) async {
+      await _lifecycle.reload();
+      res.sendJson({'message': 'Server reloaded successfully'});
+    });
+  }
+
+// ========================================
+// 🚀 Start the Server
+// ========================================
 
   /// Starts the HTTP server on the specified [port].
   ///
   /// Automatically applies global middleware and routes.
   Future<void> start({int port = 8080}) async {
+    _injectReload(); // Inject the reload endpoint
     await _lifecycle.start(port: port);
   }
 }

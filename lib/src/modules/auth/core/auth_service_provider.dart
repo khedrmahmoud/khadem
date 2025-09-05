@@ -9,7 +9,7 @@ import '../repositories/database_auth_repository.dart';
 import '../services/auth_manager.dart';
 import '../services/hash_password_verifier.dart';
 import '../services/jwt_auth_service.dart';
-import '../services/secure_token_generator.dart';
+import '../../../support/services/secure_token_generator.dart';
 import '../services/token_auth_service.dart';
 
 /// Enhanced Authentication Service Provider

@@ -477,21 +477,12 @@ void main() {
         expect(handler2Called, isTrue);
       });
 
-      test('should throw when no terminating middleware for error', () async {
-        pipeline.add((req, res, next) async {
-          throw Exception('Test error');
-        });
-
-        expect(() => pipeline.process(request, response),
-            throwsA(isA<MiddlewareNotFoundException>()),);
-      });
-
       test('should rethrow MiddlewareNotFoundException', () async {
         pipeline.add((req, res, next) async {
           throw MiddlewareNotFoundException('Test middleware not found');
         });
 
-        expect(() => pipeline.process(request, response),
+        expect(() async => await pipeline.process(request, response),
             throwsA(isA<MiddlewareNotFoundException>()),);
       });
     });

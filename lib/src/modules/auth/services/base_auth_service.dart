@@ -13,16 +13,16 @@ import '../exceptions/auth_exception.dart';
 abstract class BaseAuthService implements AuthDriver {
   /// Authentication repository for data access
   final AuthRepository repository;
-  
+
   /// Authentication configuration
   final AuthConfig config;
-  
+
   /// Password verification service
   final PasswordVerifier passwordVerifier;
-  
+
   /// Token generation service
   final TokenGenerator tokenGenerator;
-  
+
   /// The provider key for this service
   final String providerKey;
 
@@ -38,7 +38,8 @@ abstract class BaseAuthService implements AuthDriver {
   });
 
   @override
-  Future<Map<String, dynamic>> attemptLogin(Map<String, dynamic> credentials) async {
+  Future<Map<String, dynamic>> attemptLogin(
+      Map<String, dynamic> credentials) async {
     try {
       // Template method pattern - define the algorithm structure
       await validateCredentials(credentials);
@@ -47,7 +48,7 @@ abstract class BaseAuthService implements AuthDriver {
       await verifyUserPassword(credentials, user);
       final authResult = await generateAuthResult(user, provider);
       await storeAuthSession(authResult, user, provider);
-      
+
       return authResult;
     } catch (e) {
       await handleLoginFailure(e, credentials);
@@ -62,7 +63,7 @@ abstract class BaseAuthService implements AuthDriver {
       final provider = config.getProvider(providerKey);
       final user = await findUserByToken(token, provider);
       await validateUserStatus(user);
-      
+
       return user;
     } catch (e) {
       await handleTokenVerificationFailure(e, token);
@@ -109,8 +110,9 @@ abstract class BaseAuthService implements AuthDriver {
     final table = provider['table'] as String;
     final fields = List<String>.from(provider['fields'] as List);
 
-    final user = await repository.findUserByCredentials(credentials, fields, table);
-    
+    final user =
+        await repository.findUserByCredentials(credentials, fields, table);
+
     if (user == null) {
       throw AuthException('Invalid credentials');
     }
@@ -158,7 +160,10 @@ abstract class BaseAuthService implements AuthDriver {
   /// Override for custom user status validation
   Future<void> validateUserStatus(Map<String, dynamic> user) async {
     // Default implementation - can be overridden
-    final isActive = user['is_active'] as bool? ?? true;
+    final isActive = user['is_active'] == true ||
+        user['is_active'] == 1 ||
+        user['is_active'] == '1' ||
+        user['is_active'] == null;
     if (!isActive) {
       throw AuthException('User account is deactivated');
     }
@@ -169,7 +174,8 @@ abstract class BaseAuthService implements AuthDriver {
   /// [error] The error that occurred
   /// [credentials] The credentials that were attempted
   /// Override for custom failure handling (logging, rate limiting, etc.)
-  Future<void> handleLoginFailure(dynamic error, Map<String, dynamic> credentials) async {
+  Future<void> handleLoginFailure(
+      dynamic error, Map<String, dynamic> credentials) async {
     // Default implementation - can be overridden for logging, etc.
   }
 
@@ -177,7 +183,8 @@ abstract class BaseAuthService implements AuthDriver {
   ///
   /// [error] The error that occurred
   /// [token] The token that failed verification
-  Future<void> handleTokenVerificationFailure(dynamic error, String token) async {
+  Future<void> handleTokenVerificationFailure(
+      dynamic error, String token) async {
     // Default implementation - can be overridden for logging, etc.
   }
 

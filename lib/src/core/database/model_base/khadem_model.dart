@@ -56,4 +56,8 @@ abstract class KhademModel<T> {
   /// Persistence
   Future<void> save() => db.save();
   Future<void> delete() => db.delete();
+  Future<void> refresh() => db.refresh();
+  Future<T?> findById(dynamic id) => db.findById(id);
+  Future<List<T>> findWhere(String column, String operator, dynamic value) =>
+      db.findWhere(column, operator, value);
 }

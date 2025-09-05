@@ -1,6 +1,38 @@
 import 'package:khadem/src/core/validation/rule_registry.dart';
 import 'package:khadem/src/core/validation/validator.dart';
+import 'package:khadem/src/core/http/request/request_body_parser.dart';
 import 'package:test/test.dart';
+
+// Mock UploadedFile for testing
+class MockUploadedFile implements UploadedFile {
+  @override
+  final String filename;
+  @override
+  final String? contentType;
+  @override
+  final List<int> data;
+  @override
+  final String fieldName;
+  @override
+  final String extension;
+  @override
+  final int size;
+
+  MockUploadedFile(this.filename, this.contentType, this.data, this.fieldName)
+      : extension = filename.split('.').last.toLowerCase(),
+        size = data.length;
+
+  @override
+  Future<String> saveTo(String path) async {
+    // Mock implementation
+    return path;
+  }
+
+  @override
+  String asString() {
+    return String.fromCharCodes(data);
+  }
+}
 
 void main() {
   group('Enhanced Validation System', () {
@@ -15,8 +47,22 @@ void main() {
     });
 
     test('should validate with file rules', () {
+      final mockImageFile = MockUploadedFile(
+        'profile.jpg',
+        'image/jpeg',
+        [1, 2, 3, 4, 5], // Mock file data
+        'avatar',
+      );
+
+      final mockDocFile = MockUploadedFile(
+        'resume.pdf',
+        'application/pdf',
+        [1, 2, 3, 4, 5], // Mock file data
+        'document',
+      );
+
       final validator = Validator(
-        {'avatar': 'profile.jpg', 'document': 'resume.pdf'},
+        {'avatar': mockImageFile, 'document': mockDocFile},
         {'avatar': 'image', 'document': 'mimes:pdf,doc,docx'},
       );
 

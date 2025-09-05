@@ -5,6 +5,7 @@ import '../http/request/request_handler.dart';
 class Route {
   final String method;
   final String path;
+  final String? name;
   final RequestHandler handler;
   final RegExp matcher;
   final List<String> paramNames;
@@ -13,7 +14,10 @@ class Route {
   /// Checks if the route is dynamic (contains parameters).
   bool get isDynamic => path.contains(RegExp(r':\w+'));
 
-  Route(this.method, this.path, this.handler, this.middleware)
+  /// Checks if the route has a name
+  bool get isNamed => name != null && name!.isNotEmpty;
+
+  Route(this.method, this.path, this.handler, this.middleware, {this.name})
       : matcher = _createMatcher(path),
         paramNames = _extractParamNames(path);
 

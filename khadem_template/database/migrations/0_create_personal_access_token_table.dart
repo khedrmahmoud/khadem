@@ -8,6 +8,7 @@ class CreatePersonalAccessTokenTable extends MigrationFile {
       table.id();
       table.foreignId('tokenable_id');
       table.string("token").unique();
+      table.string('type', length: 50);
       table.string('guard', length: 50);
       table.date('created_at').nullable();
       table.date('expires_at').nullable();

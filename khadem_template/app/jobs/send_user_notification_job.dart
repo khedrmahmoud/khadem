@@ -1,10 +1,9 @@
-import 'package:khadem/khadem_dart.dart' show QueueJob,AutoRegisteredQueueJob ;
+import 'package:khadem/khadem_dart.dart' show QueueJob;
 
-class SendUserNotificationJob extends AutoRegisteredQueueJob {
+class SendUserNotificationJob extends QueueJob {
   final String event;
 
-  SendUserNotificationJob(this.event) {
-   }
+  SendUserNotificationJob(this.event) {}
 
   @override
   Future<void> handle() async {
@@ -23,6 +22,4 @@ class SendUserNotificationJob extends AutoRegisteredQueueJob {
   QueueJob fromJson(Map<String, dynamic> json) {
     return SendUserNotificationJob(json['event']);
   }
-
- 
 }

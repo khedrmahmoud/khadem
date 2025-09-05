@@ -22,7 +22,7 @@ class QueueDriverRegistry {
 
   /// Gets all registered driver names.
   Set<String> getDriverNames() {
-    return _drivers.keys.toSet();
+    return Set.from(_drivers.keys);
   }
 
   /// Checks if a driver is registered.

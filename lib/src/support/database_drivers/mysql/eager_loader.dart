@@ -48,6 +48,7 @@ class EagerLoader {
             page: val['page'],
             perPage: val['perPage'],
             nested: val['with'] ?? [],
+            query: val['query'],
           ),);
         }
       }
@@ -73,24 +74,22 @@ class EagerLoader {
             models,
             def,
             meta.key,
-            paginated: meta.paginate,
-            page: meta.page,
-            perPage: meta.perPage,
+            meta,
             nested: meta.nested,
           );
           break;
 
         case RelationType.belongsTo:
-          await _loadBelongsTo(models, def, meta.key, nested: meta.nested);
+          await _loadBelongsTo(models, def, meta.key, meta, nested: meta.nested);
           break;
 
         case RelationType.belongsToMany:
-          await _loadBelongsToMany(models, def, meta.key, nested: meta.nested);
+          await _loadBelongsToMany(models, def, meta.key, meta, nested: meta.nested);
           break;
 
         case RelationType.morphOne:
         case RelationType.morphMany:
-          await _loadMorph(models, def, meta.key, nested: meta.nested);
+          await _loadMorph(models, def, meta.key, meta, nested: meta.nested);
           break;
 
         case RelationType.morphTo:
@@ -103,10 +102,8 @@ class EagerLoader {
   static Future<void> _loadHasOneOrMany(
     List<KhademModel> parents,
     RelationDefinition def,
-    String relationKey, {
-    bool paginated = false,
-    int? page,
-    int? perPage,
+    String relationKey,
+    RelationMeta meta, {
     List<dynamic> nested = const [],
   }) async {
     final parentIds =
@@ -118,8 +115,13 @@ class EagerLoader {
         .table<Map<String, dynamic>>(def.relatedTable)
         .whereRaw('${def.foreignKey} IN ($placeholders)', parentIds);
 
-    if (paginated && page != null && perPage != null) {
-      final pagination = await query.paginate(page: page, perPage: perPage);
+    // Apply query constraints if provided
+    if (meta.query != null) {
+      meta.query!(query);
+    }
+
+    if (meta.paginate && meta.page != null && meta.perPage != null) {
+      final pagination = await query.paginate(page: meta.page, perPage: meta.perPage);
 
       final related = pagination.data.map((r) {
         final model = def.factory();
@@ -192,7 +194,8 @@ class EagerLoader {
   static Future<void> _loadBelongsTo(
     List<KhademModel> children,
     RelationDefinition def,
-    String relationKey, {
+    String relationKey,
+    RelationMeta meta, {
     List<dynamic> nested = const [],
   }) async {
     final foreignKeys =
@@ -200,10 +203,16 @@ class EagerLoader {
     if (foreignKeys.isEmpty) return;
 
     final placeholders = List.filled(foreignKeys.length, '?').join(', ');
-    final rows = await Khadem.db
+    final query = Khadem.db
         .table<Map<String, dynamic>>(def.relatedTable)
-        .whereRaw('${def.foreignKey} IN ($placeholders)', foreignKeys)
-        .get();
+        .whereRaw('${def.foreignKey} IN ($placeholders)', foreignKeys);
+
+    // Apply query constraints if provided
+    if (meta.query != null) {
+      meta.query!(query);
+    }
+
+    final rows = await query.get();
 
     final related = rows.map((r) {
       final model = def.factory();
@@ -228,7 +237,8 @@ class EagerLoader {
   static Future<void> _loadBelongsToMany(
     List<KhademModel> parents,
     RelationDefinition relation,
-    String relationKey, {
+    String relationKey,
+    RelationMeta meta, {
     List<dynamic> nested = const [],
   }) async {
     final parentIds =
@@ -247,6 +257,7 @@ class EagerLoader {
         .table<Map<String, dynamic>>(relation.relatedTable)
         .whereRaw('id IN (${List.filled(relatedIds.length, '?').join(', ')})',
             relatedIds,)
+        .when(meta.query != null, (q) => meta.query!(q))
         .get();
 
     final relatedModels = relatedRows.map((row) {
@@ -278,7 +289,8 @@ class EagerLoader {
   static Future<void> _loadMorph(
     List<KhademModel> parents,
     RelationDefinition relation,
-    String relationKey, {
+    String relationKey,
+    RelationMeta meta, {
     List<dynamic> nested = const [],
   }) async {
     final ids =
@@ -291,7 +303,8 @@ class EagerLoader {
         .whereRaw(
       '${relation.morphIdField} IN ($placeholders) AND ${relation.morphTypeField} = ?',
       [...ids, type],
-    ).get();
+    ).when(meta.query != null, (q) => meta.query!(q))
+    .get();
 
     final relatedModels = rows.map((r) {
       final model = relation.factory();

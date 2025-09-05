@@ -9,7 +9,7 @@ import '../contracts/token_generator.dart';
 import '../exceptions/auth_exception.dart';
 import '../repositories/database_auth_repository.dart';
 import '../services/hash_password_verifier.dart';
-import '../services/secure_token_generator.dart';
+import '../../../support/services/secure_token_generator.dart';
 import 'base_auth_service.dart';
 
 /// Enhanced JWT-based authentication service
@@ -89,12 +89,24 @@ class EnhancedJWTAuthService extends BaseAuthService {
     return EnhancedJWTAuthService(providerKey: providerKey);
   }
 
-  /// Gets JWT secret from environment with fallback
+  /// Gets JWT secret from environment with enhanced security
   static String _getJwtSecret() {
-    return Khadem.env.getOrDefault(
+    final secret = Khadem.env.getOrDefault(
       'JWT_SECRET',
       'default_jwt_secret_change_in_production_environment',
     );
+
+    // Validate secret strength
+    if (secret.length < 32) {
+      throw AuthException('JWT secret must be at least 32 characters long for security');
+    }
+
+    // Check for weak secrets
+    if (secret == 'default_jwt_secret_change_in_production_environment') {
+      throw AuthException('Please change the default JWT secret in production');
+    }
+
+    return secret;
   }
 
   /// Gets JWT algorithm from environment

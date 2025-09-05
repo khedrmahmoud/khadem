@@ -1,26 +1,6 @@
-import '../contracts/config/config_contract.dart';
-import '../contracts/container/container_interface.dart';
-import '../contracts/env/env_interface.dart';
-import '../contracts/events/event_system_interface.dart';
-import '../contracts/provider/service_provider.dart';
-import '../core/cache/cache_manager.dart';
-import '../core/container/container_provider.dart';
-import '../core/database/database.dart';
-import '../core/database/migration/migrator.dart';
-import '../core/database/migration/seeder.dart';
-import '../core/http/middleware/middleware_pipeline.dart';
-import '../core/lang/lang.dart';
-import '../core/logging/logger.dart';
-import '../core/queue/queue_manager.dart';
-import '../core/scheduler/scheduler.dart';
-import '../core/service_provider/service_provider_manager.dart';
-import '../core/socket/socket_manager.dart';
-import '../core/view/renderer.dart';
-import '../modules/auth/core/auth_service_provider.dart';
-import '../modules/auth/services/auth_manager.dart';
-import '../support/providers/core_service_provider.dart';
-import '../support/providers/database_service_provider.dart';
-import '../support/providers/queue_service_provider.dart';
+import 'package:khadem/khadem_dart.dart';
+import '../core/queue/queue.dart' as LaravelQueue;
+import '../contracts/queue/queue_job.dart' as QueueContract;
 
 /// Central access point for all Khadem framework services and utilities.
 class Khadem {
@@ -42,13 +22,16 @@ class Khadem {
 
   // ========= ⚙️ Core Bootstrapping =========
 
-  /// Registers core service providers (basic, queue, auth).
+  /// Registers core service providers (only essential framework services).
   static Future<void> registerCoreServices() async {
     register([
       CoreServiceProvider(),
-      QueueServiceProvider(),
-      AuthServiceProvider(),
     ]);
+  }
+
+  /// Registers application service providers (user-managed, like Laravel's Kernel).
+  static Future<void> registerApplicationServices(List<ServiceProvider> serviceProviders) async {
+    register(serviceProviders);
   }
 
   /// Lightweight boot (ideal for master isolate).
@@ -72,13 +55,6 @@ class Khadem {
     config.loadFromRegistry(configs);
   }
 
-  /// Register and boot database-related services.
-  static Future<void> registerDatabaseServices() async {
-    final dbProvider = DatabaseServiceProvider();
-    register([dbProvider]);
-    await dbProvider.boot(container);
-  }
-
   // ========= 🧠 Common Services =========
 
   static Logger get logger => container.resolve<Logger>();
@@ -94,8 +70,83 @@ class Khadem {
   static QueueManager get queue => container.resolve<QueueManager>();
   static EventSystemInterface get eventBus =>
       container.resolve<EventSystemInterface>();
-  static AuthManager get auth => container.resolve<AuthManager>();
   static SocketManager get socket => container.resolve<SocketManager>();
+  static StorageManager get storage => container.resolve<StorageManager>();
+
+  // URL and Asset Services
+  static UrlService get urlService => container.resolve<UrlService>();
+  static AssetService get assetService => container.resolve<AssetService>();
+
+  // ========= 📋 Laravel-style Queue Helpers =========
+
+  /// Dispatch a job to the queue (Laravel-style)
+  static Future<void> dispatch(QueueContract.QueueJob job, {Duration? delay, String? onQueue}) async {
+    await LaravelQueue.Queue.dispatch(job, delay: delay, onQueue: onQueue);
+  }
+
+  /// Dispatch multiple jobs at once
+  static Future<void> dispatchBatch(List<QueueContract.QueueJob> jobs, {Duration? delay}) async {
+    await LaravelQueue.Queue.dispatchBatch(jobs, delay: delay);
+  }
+
+  // ========= 🌐 URL & Asset Helpers =========
+
+  /// Generate a URL
+  static String url(String path, {Map<String, String>? query}) {
+    return urlService.url(path, query: query);
+  }
+
+  /// Generate an asset URL
+  static String asset(String path, {Map<String, String>? query}) {
+    return assetService.asset(path, query: query);
+  }
+
+  /// Generate a CSS asset URL
+  static String css(String path, {Map<String, String>? query}) {
+    return assetService.css(path, query: query);
+  }
+
+  /// Generate a JavaScript asset URL
+  static String js(String path, {Map<String, String>? query}) {
+    return assetService.js(path, query: query);
+  }
+
+  /// Generate an image asset URL
+  static String image(String path, {Map<String, String>? query}) {
+    return assetService.image(path, query: query);
+  }
+
+  /// Generate a storage URL
+  static String storageUrl(String path, {Map<String, String>? query}) {
+    return assetService.storage(path, query: query);
+  }
+
+  /// Generate a route URL
+  static String route(String name,
+      {Map<String, String>? parameters, Map<String, String>? query}) {
+    return urlService.route(name, parameters: parameters, query: query);
+  }
+
+  /// Store a file
+  static Future<String> storeFile(
+    String path,
+    List<int> bytes, {
+    String disk = 'public',
+    String? filename,
+  }) {
+    return assetService.storeFile(path, bytes, disk: disk, filename: filename);
+  }
+
+  /// Store a text file
+  static Future<String> storeTextFile(
+    String path,
+    String content, {
+    String disk = 'public',
+    String? filename,
+  }) {
+    return assetService.storeTextFile(path, content,
+        disk: disk, filename: filename);
+  }
 
   // ========= 📅 Scheduler & View System =========
 
@@ -128,7 +179,8 @@ class Khadem {
   /// ```dart
   /// Khadem.setFallbackLocale('en');
   /// ```
-  static void setFallbackLocale(String locale) => Lang.setFallbackLocale(locale);
+  static void setFallbackLocale(String locale) =>
+      Lang.setFallbackLocale(locale);
 
   /// Gets the current fallback locale.
   static String getFallbackLocale() => Lang.getFallbackLocale();
@@ -152,11 +204,13 @@ class Khadem {
   /// String greeting = Khadem.translate('messages.greeting', parameters: {'name': 'Alice'});
   /// String namespaced = Khadem.translate('login', namespace: 'auth');
   /// ```
-  static String translate(String key, {
+  static String translate(
+    String key, {
     Map<String, dynamic>? parameters,
     String? locale,
     String? namespace,
-  }) => Lang.t(key, parameters: parameters, locale: locale, namespace: namespace);
+  }) =>
+      Lang.t(key, parameters: parameters, locale: locale, namespace: namespace);
 
   /// Translates with pluralization based on count.
   ///
@@ -167,11 +221,15 @@ class Khadem {
   /// String apples = Khadem.translateChoice('apples', 3); // "3 apples"
   /// String item = Khadem.translateChoice('item', 1); // "1 item"
   /// ```
-  static String translateChoice(String key, int count, {
+  static String translateChoice(
+    String key,
+    int count, {
     Map<String, dynamic>? parameters,
     String? locale,
     String? namespace,
-  }) => Lang.choice(key, count, parameters: parameters, locale: locale, namespace: namespace);
+  }) =>
+      Lang.choice(key, count,
+          parameters: parameters, locale: locale, namespace: namespace);
 
   /// Translates a field label.
   ///
@@ -181,7 +239,8 @@ class Khadem {
   /// ```dart
   /// String emailLabel = Khadem.translateField('email'); // Looks for 'fields.email'
   /// ```
-  static String translateField(String field, {String? locale, String? namespace}) =>
+  static String translateField(String field,
+          {String? locale, String? namespace}) =>
       Lang.getField(field, locale: locale, namespace: namespace);
 
   /// Checks if a translation key exists.
@@ -203,7 +262,8 @@ class Khadem {
   /// ```dart
   /// String? raw = Khadem.getTranslation('messages.greeting');
   /// ```
-  static String? getTranslation(String key, {String? locale, String? namespace}) =>
+  static String? getTranslation(String key,
+          {String? locale, String? namespace}) =>
       Lang.get(key, locale: locale, namespace: namespace);
 
   /// Loads translations for a specific namespace.
@@ -216,7 +276,8 @@ class Khadem {
   ///   'logout': 'Sign Out'
   /// });
   /// ```
-  static void loadTranslationNamespace(String namespace, String locale, Map<String, String> translations) =>
+  static void loadTranslationNamespace(
+          String namespace, String locale, Map<String, String> translations) =>
       Lang.loadNamespace(namespace, locale, translations);
 
   /// Clears the translation cache.
@@ -250,7 +311,10 @@ class Khadem {
   ///   return ':$key';
   /// });
   /// ```
-  static void addTranslationParameterReplacer(String Function(String key, dynamic value, Map<String, dynamic> parameters) replacer) =>
+  static void addTranslationParameterReplacer(
+          String Function(
+                  String key, dynamic value, Map<String, dynamic> parameters)
+              replacer) =>
       Lang.addParameterReplacer(replacer);
 
   // ========= 🛠️ Utilities =========
@@ -262,10 +326,12 @@ class Khadem {
   static bool get isBooted => providers.isBooted;
 
   /// Checks if the application is running in production mode.
-  static bool get isProduction => env.getOrDefault('APP_ENV', 'production') == 'production';
+  static bool get isProduction =>
+      env.getOrDefault('APP_ENV', 'production') == 'production';
 
   /// Checks if the application is running in development mode.
-  static bool get isDevelopment => env.getOrDefault('APP_ENV', 'production') == 'development';
+  static bool get isDevelopment =>
+      env.getOrDefault('APP_ENV', 'production') == 'development';
 
   /// Shuts down all services (e.g., stops schedulers, closes DB connections).
   static Future<void> shutdown() async {
@@ -274,4 +340,3 @@ class Khadem {
     // Add more cleanup as needed
   }
 }
- 

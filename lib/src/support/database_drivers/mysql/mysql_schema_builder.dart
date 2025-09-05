@@ -55,7 +55,24 @@ class MySQLSchemaBuilder implements SchemaBuilder {
 
     // DEFAULT
     if (column.defaultValue != null && column.generatedExpression == null) {
-      parts.add("DEFAULT '${column.defaultValue}'");
+      // Handle boolean default values for MySQL
+      if (column.type.toUpperCase() == 'BOOLEAN') {
+        final boolVal = column.defaultValue == true ? 1 : 0;
+        parts.add('DEFAULT $boolVal');
+      } else if (column.type.toUpperCase().startsWith('INT') ||
+                 column.type.toUpperCase().contains('BIGINT') ||
+                 column.type.toUpperCase() == 'FLOAT' ||
+                 column.type.toUpperCase() == 'DOUBLE') {
+        parts.add('DEFAULT ${column.defaultValue}');
+      } else if (column.defaultValue is String &&
+                 (column.defaultValue as String).toUpperCase() == 'NULL') {
+        parts.add('DEFAULT NULL');
+      } else if (column.defaultValue is String &&
+                 (column.defaultValue as String).toUpperCase() == 'CURRENT_TIMESTAMP') {
+        parts.add('DEFAULT CURRENT_TIMESTAMP');
+      } else {
+        parts.add("DEFAULT '${column.defaultValue}'");
+      }
     }
 
     // COMMENT

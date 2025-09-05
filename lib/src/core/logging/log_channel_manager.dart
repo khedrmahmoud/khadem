@@ -57,13 +57,7 @@ class LogChannelManager {
     final handlers = _channels[channel];
     if (handlers != null) {
       for (final handler in handlers) {
-        try {
-          handler.log(level, message, context: context, stackTrace: stackTrace);
-        } catch (e, stack) {
-          // Log handler errors to stderr to avoid infinite loops
-          // In a production system, you might want to use a separate error logger
-          print('Error in log handler: $e\n$stack');
-        }
+        handler.log(level, message, context: context, stackTrace: stackTrace);
       }
     }
   }
@@ -72,11 +66,9 @@ class LogChannelManager {
   void closeAll() {
     for (final handlers in _channels.values) {
       for (final handler in handlers) {
-        try {
+     
           handler.close();
-        } catch (e) {
-          print('Error closing log handler: $e');
-        }
+        
       }
     }
     _channels.clear();

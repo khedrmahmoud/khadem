@@ -7,49 +7,63 @@ class MakeMiddlewareCommand extends KhademCommand {
   String get name => 'make:middleware';
 
   @override
-  String get description => 'Create a new HTTP middleware class';
+  String get description => 'Create a new HTTP middleware class with optional folder structure';
 
   MakeMiddlewareCommand({required super.logger}) {
-    argParser.addOption('name', abbr: 'n', help: 'Middleware name');
+    argParser.addOption('name', abbr: 'n', help: 'Middleware name (e.g., Auth or auth/AuthMiddleware)');
   }
 
   @override
   Future<void> handle(List<String> args) async {
     final name = argResults?['name'] as String?;
     if (name == null) {
-      logger.error('Usage: khadem make:middleware --name=<middleware_name>');
+      logger.error('Usage: khadem make:middleware --name=MiddlewareName or --name=folder/MiddlewareName');
       exit(1);
     }
 
-    final className = _toPascalCase(name);
-    final fileName = _toSnakeCase(name);
+    // Parse folder and middleware name
+    final parts = name.split('/');
+    String folder = '';
+    String middlewareName = parts.last;
 
-    final dir = Directory('app/http/middleware');
-    if (!dir.existsSync()) {
-      dir.createSync(recursive: true);
+    if (parts.length > 1) {
+      folder = parts.sublist(0, parts.length - 1).join('/');
     }
 
-    final file = File('${dir.path}/$fileName.dart');
+    // Ensure middleware name ends with 'Middleware'
+    if (!middlewareName.endsWith('Middleware')) {
+      middlewareName = '${middlewareName}Middleware';
+    }
+
+    final className = _toPascalCase(middlewareName);
+    final fileName = '${_toSnakeCase(middlewareName.replaceAll('Middleware', ''))}_middleware.dart';
+    final relativePath = folder.isEmpty
+        ? 'app/http/middleware/$fileName'
+        : 'app/http/middleware/$folder/$fileName';
+
+    final file = File(relativePath);
 
     if (file.existsSync()) {
-      logger.error('❌ Middleware "$fileName.dart" already exists!');
+      logger.error('❌ Middleware "$fileName" already exists!');
       exit(1);
     }
 
-    await file.writeAsString(_template(className));
+    await file.create(recursive: true);
+    await file.writeAsString(_template(className, middlewareName.replaceAll('Middleware', ''), folder));
 
-    logger.info('✅ Middleware "$className" created successfully!');
+    logger.info('✅ Middleware "$className" created at "$relativePath"');
     exit(0);
   }
 
-  String _template(String className) {
+  String _template(String className, String middlewareName, String folder) {
+    final namespace = folder.isEmpty ? '' : '$folder/';
     return '''
 import 'package:khadem/khadem_dart.dart';
 
 class $className implements Middleware {
   @override
   MiddlewareHandler get handler => (req, res, next) async {
-    // 🛡️ Your middleware logic here
+    // 🛡️ ${namespace}$middlewareName middleware logic here
 
     await next(); // Don't forget to call next!
   };

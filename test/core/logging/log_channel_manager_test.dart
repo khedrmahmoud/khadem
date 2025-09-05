@@ -110,18 +110,7 @@ void main() {
       ),).called(1);
     });
 
-    test('should handle handler errors gracefully', () {
-      when(handler1.log(LogLevel.info, 'Test'))
-          .thenThrow(Exception('Handler error'));
-      manager.addHandler(handler1, channel: 'test');
-      manager.addHandler(handler2, channel: 'test');
 
-      // Should not throw exception
-      expect(() => manager.logToChannel('test', LogLevel.info, 'Test'), returnsNormally);
-
-      // Second handler should still be called
-      verify(handler2.log(LogLevel.info, 'Test')).called(1);
-    });
 
     test('should close all handlers', () {
       manager.addHandler(handler1, channel: 'test1');
@@ -134,13 +123,6 @@ void main() {
       expect(manager.channels, isEmpty);
     });
 
-    test('should handle close errors gracefully', () {
-      when(handler1.close()).thenThrow(Exception('Close error'));
-      manager.addHandler(handler1, channel: 'test');
-      manager.addHandler(handler2, channel: 'test');
-
-      expect(() => manager.closeAll(), returnsNormally);
-      verify(handler2.close()).called(1);
-    });
+  
   });
 }

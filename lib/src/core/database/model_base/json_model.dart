@@ -1,3 +1,5 @@
+import 'package:mysql1/mysql1.dart';
+
 import '../../../support/helpers/date_helper.dart';
 import 'khadem_model.dart';
 
@@ -11,7 +13,7 @@ class JsonModel<T> {
 
   void fromJson(Map<String, dynamic> json) {
     _rawData = Map<String, dynamic>.from(json); // Store raw data
-    model.id = json['id'] as int?;
+    model.id = model.id ?? json['id'] as int?;
     for (final key in json.keys) {
       var value = json[key];
       final cast = model.casts[key];
@@ -21,8 +23,14 @@ class JsonModel<T> {
         value = int.tryParse(value);
       } else if (cast == double && value is String) {
         value = double.tryParse(value);
-      } else if (cast == bool && value is String) {
-        value = value.toLowerCase() == 'true';
+      } else if (cast == bool) {
+        if (value is int) {
+          value = value == 1;
+        } else if (value is String) {
+          value = value.toLowerCase() == 'true';
+        }
+      } else if (value is Blob) {
+        value = value.toString();
       }
       model.setField(key, value);
     }
@@ -57,6 +65,7 @@ class JsonModel<T> {
     final data = <String, dynamic>{};
     for (final key in model.fillable) {
       final value = model.getField(key);
+      if (value == null) continue;
       data[key] = value is DateTime ? value.toUtc() : value;
     }
     return data;

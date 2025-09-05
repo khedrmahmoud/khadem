@@ -12,6 +12,7 @@ import '../../core/http/middleware/middleware_pipeline.dart';
 import '../../core/logging/logger.dart';
 import '../../core/socket/socket_manager.dart';
 import '../../core/storage/storage_manager.dart';
+import '../../support/services/url_service.dart';
 
 /// Registers all core services of the Khadem framework,
 /// including configuration, environment, logger, router, cache, and events.
@@ -32,20 +33,56 @@ class CoreServiceProvider extends ServiceProvider {
 
     container.lazySingleton<EnvInterface>((c) => EnvSystem());
 
-    container.lazySingleton<ConfigInterface>((c) => ConfigSystem(
-          configPath: 'config',
-          environment:
-              c.resolve<EnvInterface>().getOrDefault('APP_ENV', 'development'),
-        ),);
+    container.lazySingleton<ConfigInterface>(
+      (c) => ConfigSystem(
+        configPath: 'config',
+        environment:
+            c.resolve<EnvInterface>().getOrDefault('APP_ENV', 'development'),
+      ),
+    );
 
     container.lazySingleton<Logger>((c) => Logger());
 
     container.lazySingleton<MiddlewarePipeline>((c) => MiddlewarePipeline());
 
     container.lazySingleton<StorageManager>((c) => StorageManager());
+
     container.lazySingleton<LangProvider>((c) => FileLangProvider());
 
     container.lazySingleton<SocketManager>((c) => SocketManager());
+
+    // URL and Asset Services
+    container.lazySingleton<UrlService>((c) {
+      final config = c.resolve<ConfigInterface>();
+      final appConfig = config.section('app') ?? {};
+      final baseUrl = appConfig['url'] ?? 'http://localhost:8080';
+      final assetUrl = appConfig['asset_url'];
+      final forceHttps = appConfig['force_https'] ?? false;
+
+      final urlService = UrlService(
+        baseUrl: baseUrl,
+        assetBaseUrl: assetUrl,
+        forceHttps: forceHttps,
+      );
+
+      // Register named routes from config
+      final routes = config.section('routes');
+      if (routes != null) {
+        for (final entry in routes.entries) {
+          final routeName = entry.key;
+          final routePath = entry.value as String;
+          urlService.registerRoute(routeName, routePath);
+        }
+      }
+
+      return urlService;
+    });
+
+    container.lazySingleton<AssetService>((c) {
+      final urlService = c.resolve<UrlService>();
+      final storageManager = c.resolve<StorageManager>();
+      return AssetService(urlService, storageManager);
+    });
   }
 
   /// Boot logic for core services such as loading `.env` and logging startup.
@@ -68,6 +105,7 @@ class CoreServiceProvider extends ServiceProvider {
     container
         .resolve<LangProvider>()
         .setLocale(envSystem.getOrDefault('APP_LOCALE', 'en'));
+    Lang.use(container.resolve<LangProvider>());
 
     final logger = container.resolve<Logger>();
     logger.loadFromConfig(config);

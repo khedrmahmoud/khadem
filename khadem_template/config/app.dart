@@ -66,15 +66,15 @@ class AppConfig {
             'local': {'driver': 'local', 'root': 'storage'},
             'public': {
               'driver': 'local',
-              'root': './storage/public',
+              'root': 'public/assets',
             },
-            's3': {
-              'driver': 's3',
-              'key': 'your-key',
-              'secret': 'your-secret',
-              'region': 'your-region',
-              'bucket': 'your-bucket',
-            },
+            // 's3': {
+            //   'driver': 's3',
+            //   'key': 'your-key',
+            //   'secret': 'your-secret',
+            //   'region': 'your-region',
+            //   'bucket': 'your-bucket',
+            // },
           },
         },
 

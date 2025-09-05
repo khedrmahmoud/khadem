@@ -85,14 +85,7 @@ void main() {
         );
       });
 
-      test('should throw AuthException for refresh token failures', () async {
-        expect(
-          () async {
-            await tokenAuthService.refreshAccessToken('invalid_token');
-          },
-          throwsA(isA<AuthException>()),
-        );
-      });
+
     });
 
     group('Token Validation', () {

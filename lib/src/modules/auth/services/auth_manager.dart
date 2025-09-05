@@ -133,17 +133,7 @@ class AuthManager {
   /// Returns the user data associated with the token
   /// Throws [AuthException] if token is invalid
   Future<Map<String, dynamic>> verify(String token) async {
-    try {
-      return await _driver.verifyToken(token);
-    } catch (e) {
-      if (e is AuthException) {
-        rethrow;
-      }
-      throw AuthException(
-        'Token verification failed: ${e.toString()}',
-        stackTrace: StackTrace.current.toString(),
-      );
-    }
+    return  _driver.verifyToken(token);
   }
 
   /// This method provides secure token refresh functionality with:

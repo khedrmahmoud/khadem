@@ -18,14 +18,17 @@ class SocketServer {
 
   SocketServer(this._port, {SocketManager? manager}) {
     _manager = manager ?? Khadem.socket;
-  } 
+  }
 
   void useMiddleware(SocketMiddleware middleware) {
     _globalMiddleware.add(middleware);
   }
 
-  void on(String event, SocketEventHandler handler,
-      {List<SocketMiddleware> middlewares = const [],}) {
+  void on(
+    String event,
+    SocketEventHandler handler, {
+    List<SocketMiddleware> middlewares = const [],
+  }) {
     _manager.on(event, handler, middlewares: middlewares);
   }
 

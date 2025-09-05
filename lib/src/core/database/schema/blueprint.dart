@@ -1,4 +1,3 @@
-
 import 'column_definition.dart';
 
 /// Used to define the schema of a database table
@@ -61,6 +60,13 @@ class Blueprint {
   /// JSON
   ColumnDefinition json(String name) {
     final col = ColumnDefinition(name, 'JSON');
+    columns.add(col);
+    return col;
+  }
+
+  /// Array (ARRAY)
+  ColumnDefinition array(String name) {
+    final col = ColumnDefinition(name, 'ARRAY');
     columns.add(col);
     return col;
   }

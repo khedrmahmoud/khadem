@@ -71,6 +71,35 @@ class Request {
   /// Shortcut for bodyParser.parseBody()
   Future<Map<String, dynamic>> get body => _bodyParser.parseBody();
 
+  /// Gets a specific input value from the parsed body.
+   dynamic input(String key, [dynamic defaultValue]) =>
+      _bodyParser.input(key, defaultValue);
+  
+  /// check if has field
+  /// Checks if the request body contains the specified field.
+  bool has(String key) => _bodyParser.has(key);
+
+  /// Gets uploaded files from the request.
+  /// Shortcut for bodyParser.files
+  Map<String, dynamic>? get files => _bodyParser.files;
+
+  /// Gets a specific uploaded file by field name.
+  /// Shortcut for bodyParser.file()
+  UploadedFile? file(String fieldName) => _bodyParser.file(fieldName);
+
+  /// Gets all files with a specific field name (for multiple file uploads).
+  /// Shortcut for bodyParser.filesByName()
+  List<UploadedFile> filesByName(String fieldName) =>
+      _bodyParser.filesByName(fieldName);
+
+  /// Checks if a file was uploaded with the given field name.
+  /// Shortcut for bodyParser.hasFile()
+  bool hasFile(String fieldName) => _bodyParser.hasFile(fieldName);
+
+  /// Gets the first file from multiple files with the same name.
+  /// Shortcut for bodyParser.firstFile()
+  UploadedFile? firstFile(String fieldName) => _bodyParser.firstFile(fieldName);
+
   /// Validates the request body input against the given rules.
   /// Shortcut for validator.validateBody()
   Future<Map<String, dynamic>> validate(Map<String, String> rules) =>
@@ -78,7 +107,10 @@ class Request {
 
   /// Validates specific input data against rules.
   /// Shortcut for validator.validateData()
-  Map<String, dynamic> validateData(Map<String, dynamic> data, Map<String, String> rules) =>
+  Map<String, dynamic> validateData(
+    Map<String, dynamic> data,
+    Map<String, String> rules,
+  ) =>
       _validator.validateData(data, rules);
 
   /// Gets a path parameter by key.
@@ -95,7 +127,8 @@ class Request {
 
   /// Sets a custom attribute.
   /// Shortcut for params.setAttribute()
-  void setAttribute(String key, dynamic value) => _params.setAttribute(key, value);
+  void setAttribute(String key, dynamic value) =>
+      _params.setAttribute(key, value);
 
   /// Returns the currently authenticated user (if any).
   /// Shortcut for auth.user

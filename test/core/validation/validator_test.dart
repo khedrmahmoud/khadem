@@ -70,5 +70,46 @@ void main() {
       expect(validator.errors, isNot(contains('name')));
       expect(validator.errors, isNot(contains('age')));
     });
+
+    test('should skip validation for nullable fields when value is null', () {
+      final validator = Validator(
+        {'name': null, 'age': null},
+        {
+          'name': 'nullable|required|string',
+          'age': 'nullable|int|min:18',
+        },
+      );
+
+      expect(validator.passes(), isTrue);
+      expect(validator.errors, isEmpty);
+    });
+
+    test('should validate nullable fields when value is not null', () {
+      final validator = Validator(
+        {'name': 'John', 'age': '15'},
+        {
+          'name': 'nullable|required|string',
+          'age': 'nullable|int|min:18',
+        },
+      );
+
+      expect(validator.passes(), isFalse);
+      expect(validator.errors, contains('age'));
+      expect(validator.errors, isNot(contains('name')));
+    });
+
+    test('should validate non-nullable fields normally', () {
+      final validator = Validator(
+        {'name': null, 'age': '25'},
+        {
+          'name': 'required|string',
+          'age': 'nullable|int|min:18',
+        },
+      );
+
+      expect(validator.passes(), isFalse);
+      expect(validator.errors, contains('name'));
+      expect(validator.errors, isNot(contains('age')));
+    });
   });
 }

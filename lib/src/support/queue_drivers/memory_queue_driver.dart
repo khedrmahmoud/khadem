@@ -19,6 +19,14 @@ class MemoryQueueDriver implements QueueDriver {
       _jobs.remove(job);
     }
   }
+
+  /// Get the number of pending jobs
+  int get pendingJobsCount => _jobs.length;
+
+  /// Clear all pending jobs
+  void clear() {
+    _jobs.clear();
+  }
 }
 
 class _DelayedJob {

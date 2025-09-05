@@ -1,4 +1,5 @@
 import 'package:khadem/src/contracts/views/directive_contract.dart';
+import 'package:khadem/src/core/http/context/request_context.dart';
 
 import '../../http/request/request.dart';
 
@@ -34,13 +35,18 @@ class AuthDirective implements ViewDirective {
   }
 
   bool _isAuthenticated(Map<String, dynamic> context) {
-    // Try to get the request from context first
+    // Try to get the request from RequestContext first
+    if (RequestContext.hasRequest) {
+      return RequestContext.request.isAuthenticated;
+    }
+
+    // Fallback to context-based check
     final request = context['request'] as Request?;
     if (request != null) {
       return request.isAuthenticated;
     }
 
-    // Fallback to checking if user exists in context
+    // Final fallback to checking if user exists in context
     return context.containsKey('user') && context['user'] != null;
   }
 }
@@ -61,19 +67,25 @@ class GuestDirective implements ViewDirective {
   }
 
   bool _isAuthenticated(Map<String, dynamic> context) {
-    // Try to get the request from context first
+    // Try to get the request from RequestContext first
+    if (RequestContext.hasRequest) {
+      return RequestContext.request.isAuthenticated;
+    }
+
+    // Fallback to context-based check
     final request = context['request'] as Request?;
     if (request != null) {
       return request.isAuthenticated;
     }
 
-    // Fallback to checking if user exists in context
+    // Final fallback to checking if user exists in context
     return context.containsKey('user') && context['user'] != null;
   }
 }
 
 class CanDirective implements ViewDirective {
-  static final _canRegex = RegExp(r'@can\s*\(\s*(.+?)\s*\)(.*?)@endcan', dotAll: true);
+  static final _canRegex =
+      RegExp(r'@can\s*\(\s*(.+?)\s*\)(.*?)@endcan', dotAll: true);
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
@@ -89,11 +101,9 @@ class CanDirective implements ViewDirective {
   }
 
   bool _hasPermission(String permission, Map<String, dynamic> context) {
-    // Try to get the request from context first
-    final request = context['request'] as Request?;
-    if (request != null) {
-      // For now, we'll check if the user has the permission in their data
-      // In a real implementation, this might check against a permissions system
+    // Try to get the request from RequestContext first
+    if (RequestContext.hasRequest) {
+      final request = RequestContext.request;
       final user = request.user;
       if (user != null) {
         final permissions = user['permissions'] as List<dynamic>?;
@@ -102,7 +112,18 @@ class CanDirective implements ViewDirective {
       return false;
     }
 
-    // Fallback to checking permissions in context
+    // Fallback to context-based check
+    final request = context['request'] as Request?;
+    if (request != null) {
+      final user = request.user;
+      if (user != null) {
+        final permissions = user['permissions'] as List<dynamic>?;
+        return permissions?.contains(permission) ?? false;
+      }
+      return false;
+    }
+
+    // Final fallback to checking permissions in context
     if (context.containsKey('permissions') && context['permissions'] is List) {
       final permissions = context['permissions'] as List;
       return permissions.contains(permission);
@@ -112,7 +133,8 @@ class CanDirective implements ViewDirective {
 }
 
 class CannotDirective implements ViewDirective {
-  static final _cannotRegex = RegExp(r'@cannot\s*\(\s*(.+?)\s*\)(.*?)@endcannot', dotAll: true);
+  static final _cannotRegex =
+      RegExp(r'@cannot\s*\(\s*(.+?)\s*\)(.*?)@endcannot', dotAll: true);
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
@@ -128,11 +150,9 @@ class CannotDirective implements ViewDirective {
   }
 
   bool _hasPermission(String permission, Map<String, dynamic> context) {
-    // Try to get the request from context first
-    final request = context['request'] as Request?;
-    if (request != null) {
-      // For now, we'll check if the user has the permission in their data
-      // In a real implementation, this might check against a permissions system
+    // Try to get the request from RequestContext first
+    if (RequestContext.hasRequest) {
+      final request = RequestContext.request;
       final user = request.user;
       if (user != null) {
         final permissions = user['permissions'] as List<dynamic>?;
@@ -141,7 +161,18 @@ class CannotDirective implements ViewDirective {
       return false;
     }
 
-    // Fallback to checking permissions in context
+    // Fallback to context-based check
+    final request = context['request'] as Request?;
+    if (request != null) {
+      final user = request.user;
+      if (user != null) {
+        final permissions = user['permissions'] as List<dynamic>?;
+        return permissions?.contains(permission) ?? false;
+      }
+      return false;
+    }
+
+    // Final fallback to checking permissions in context
     if (context.containsKey('permissions') && context['permissions'] is List) {
       final permissions = context['permissions'] as List;
       return permissions.contains(permission);
@@ -151,7 +182,8 @@ class CannotDirective implements ViewDirective {
 }
 
 class RoleDirective implements ViewDirective {
-  static final _roleRegex = RegExp(r'@role\s*\(\s*(.+?)\s*\)(.*?)@endrole', dotAll: true);
+  static final _roleRegex =
+      RegExp(r'@role\s*\(\s*(.+?)\s*\)(.*?)@endrole', dotAll: true);
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
@@ -167,13 +199,18 @@ class RoleDirective implements ViewDirective {
   }
 
   bool _hasRole(String role, Map<String, dynamic> context) {
-    // Try to get the request from context first
+    // Try to get the request from RequestContext first
+    if (RequestContext.hasRequest) {
+      return RequestContext.request.hasRole(role);
+    }
+
+    // Fallback to context-based check
     final request = context['request'] as Request?;
     if (request != null) {
       return request.hasRole(role);
     }
 
-    // Fallback to checking roles in context
+    // Final fallback to checking roles in context
     if (context.containsKey('roles') && context['roles'] is List) {
       final roles = context['roles'] as List;
       return roles.contains(role);
