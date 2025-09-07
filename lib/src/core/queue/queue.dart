@@ -1,7 +1,7 @@
 import '../../contracts/queue/queue_driver.dart';
 import '../../contracts/queue/queue_job.dart';
-import '../../support/queue_drivers/sync_queue_driver.dart';
 import '../../support/queue_drivers/memory_queue_driver.dart';
+import '../../support/queue_drivers/sync_queue_driver.dart';
 
 /// Laravel-style Queue facade for simple job dispatching.
 /// 

@@ -4,20 +4,45 @@ import 'package:path/path.dart' as p;
 
 import '../../support/exceptions/not_found_exception.dart';
 import 'directive_registry.dart';
+import 'expression_evaluator.dart';
+import 'html_escaper.dart';
 
 class ViewRenderer {
   final String viewsDirectory;
-  static final ViewRenderer instance = ViewRenderer();
+  final ExpressionEvaluator _expressionEvaluator;
+  final HtmlEscaper _htmlEscaper;
   final bool _autoEscape;
 
-  ViewRenderer({
-    this.viewsDirectory = 'resources/views',
+  static final ViewRenderer instance = ViewRenderer._internal();
+
+  ViewRenderer._internal({
+    String viewsDirectory = 'resources/views',
     bool autoEscape = true,
-  }) : _autoEscape = autoEscape;
+  })  : viewsDirectory = viewsDirectory,
+        _autoEscape = autoEscape,
+        _expressionEvaluator = ExpressionEvaluator(),
+        _htmlEscaper = HtmlEscaper();
+
+  factory ViewRenderer({
+    String viewsDirectory = 'resources/views',
+    bool autoEscape = true,
+  }) {
+    return ViewRenderer._internal(
+      viewsDirectory: viewsDirectory,
+      autoEscape: autoEscape,
+    );
+  }
 
   Future<String> render(String viewName,
       {Map<String, dynamic> context = const {},
       bool escapeOutput = true,}) async {
+    final template = await _loadTemplate(viewName);
+    final processedTemplate = await _applyDirectives(template, context);
+    return _renderExpressions(processedTemplate, context, escapeOutput);
+  }
+
+  /// Loads a template file from the views directory
+  Future<String> _loadTemplate(String viewName) async {
     final path = p.join(viewsDirectory, '$viewName.khdm.html');
     final file = File(path);
 
@@ -25,51 +50,45 @@ class ViewRenderer {
       throw NotFoundException('View file not found: $path');
     }
 
-    String content = await file.readAsString();
-
-    // Apply all registered directives
-    content = await DirectiveRegistry.applyAll(content, context);
-
-    // Finally replace variables like {{ user }}
-    final variableRegex = RegExp(r'{{\s*(\w+)\s*}}');
-    content = content.replaceAllMapped(variableRegex, (match) {
-      final key = match.group(1)!;
-      final value = context[key]?.toString() ?? '';
-
-      // Auto-escape output to prevent XSS
-      if (escapeOutput && _autoEscape) {
-        return _escapeHtml(value);
-      }
-
-      return value;
-    });
-
-    // Also handle unescaped variables {{{ user }}}
-    final unescapedVariableRegex = RegExp(r'{{{\s*(\w+)\s*}}}');
-    content = content.replaceAllMapped(unescapedVariableRegex, (match) {
-      final key = match.group(1)!;
-      return context[key]?.toString() ?? '';
-    });
-
-    return content;
+    return file.readAsString();
   }
 
-  /// Escapes HTML entities to prevent XSS attacks
-  String _escapeHtml(String input) {
-    if (input.isEmpty) return input;
+  /// Applies all registered directives to the template
+  Future<String> _applyDirectives(String template, Map<String, dynamic> context) async {
+    return DirectiveRegistry.applyAll(template, context);
+  }
 
-    return input
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#x27;')
-        .replaceAll('/', '&#x2F;');
+  /// Renders expressions in the template
+  String _renderExpressions(String template, Map<String, dynamic> context, bool escapeOutput) {
+    // Handle escaped expressions {{ expression }}
+    final escapedRegex = RegExp(r'{{\s*([^}]+?)\s*}}');
+    template = template.replaceAllMapped(escapedRegex, (match) {
+      final expression = match.group(1)!.trim();
+      final value = _expressionEvaluator.evaluate(expression, context);
+      final stringValue = value?.toString() ?? '';
+
+      return escapeOutput && _autoEscape ? _htmlEscaper.escape(stringValue) : stringValue;
+    });
+
+    // Handle unescaped expressions {{{ expression }}}
+    final unescapedRegex = RegExp(r'{{{\s*([^}]+?)\s*}}}');
+    template = template.replaceAllMapped(unescapedRegex, (match) {
+      final expression = match.group(1)!.trim();
+      final value = _expressionEvaluator.evaluate(expression, context);
+      return value?.toString() ?? '';
+    });
+
+    return template;
   }
 
   /// Renders a view without escaping (use with caution!)
   Future<String> renderUnsafe(String viewName,
-      {Map<String, dynamic> context = const {}}) async {
+      {Map<String, dynamic> context = const {},}) async {
     return render(viewName, context: context, escapeOutput: false);
+  }
+
+  /// Public access to expression evaluator for testing
+  dynamic evaluateExpression(String expression, Map<String, dynamic> context) {
+    return _expressionEvaluator.evaluate(expression, context);
   }
 }

@@ -41,7 +41,7 @@ void main() {
     });
 
     test('should format message with custom timestamp', () {
-      final timestamp = DateTime(2023, 1, 1, 12, 0);
+      final timestamp = DateTime(2023, 1, 1, 12);
       final result = formatter.format(LogLevel.debug, 'Debug message', timestamp: timestamp);
 
       expect(result, contains('2023-01-01T12:00:00'));
@@ -100,7 +100,7 @@ void main() {
     });
 
     test('should format message with custom timestamp', () {
-      final timestamp = DateTime(2023, 1, 1, 12, 0);
+      final timestamp = DateTime(2023, 1, 1, 12);
       final result = formatter.format(LogLevel.info, 'Test message', timestamp: timestamp);
 
       expect(result, contains('2023-01-01T12:00:00'));

@@ -11,7 +11,7 @@ class WelcomeEmailJob extends QueueJob {
   @override
   Future<void> handle() async {
     print('📧 Sending welcome email to $name ($email)');
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 100));
     print('✅ Welcome email sent!');
   }
 
@@ -31,11 +31,11 @@ class ProcessPaymentJob extends QueueJob {
     print('💳 Processing payment for order $orderId: $amount $currency');
     
     // Simulate payment processing
-    await Future.delayed(Duration(milliseconds: 300));
+    await Future.delayed(const Duration(milliseconds: 300));
     
     if (amount > 1000) {
       print('   🔍 High-value transaction - additional verification');
-      await Future.delayed(Duration(milliseconds: 200));
+      await Future.delayed(const Duration(milliseconds: 200));
     }
     
     print('✅ Payment processed successfully!');
@@ -48,7 +48,7 @@ class ProcessPaymentJob extends QueueJob {
   int get maxRetries => 5; // Payment jobs should retry more
 
   @override
-  Duration get retryDelay => Duration(minutes: 2); // Longer retry delay
+  Duration get retryDelay => const Duration(minutes: 2); // Longer retry delay
 }
 
 class SendNotificationJob extends QueueJob {
@@ -64,7 +64,7 @@ class SendNotificationJob extends QueueJob {
     print('   Message: $message');
     
     for (final userId in userIds) {
-      await Future.delayed(Duration(milliseconds: 50));
+      await Future.delayed(const Duration(milliseconds: 50));
       print('   ✓ Sent to user $userId');
     }
     
@@ -108,7 +108,7 @@ Future<void> demoDirectQueueUsage() async {
   // Dispatch with delay
   await LaravelQueue.Queue.dispatch(
     SendNotificationJob(['user1', 'user2', 'user3'], 'Welcome to our platform!', 'welcome'),
-    delay: Duration(seconds: 1)
+    delay: const Duration(seconds: 1),
   );
 
   // Batch dispatch
@@ -124,7 +124,7 @@ Future<void> demoDirectQueueUsage() async {
   print('\n⚡ Processing all jobs...');
   for (int i = 0; i < 20; i++) {
     await LaravelQueue.Queue.work();
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 100));
     
     final stats = LaravelQueue.Queue.stats();
     if (stats['pending_jobs'] == 0) break;

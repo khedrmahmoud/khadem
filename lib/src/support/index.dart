@@ -95,7 +95,6 @@ export 'helpers/date_helper.dart';
 // 📦 Hash_helper.dart
 // ========================
 export 'helpers/hash_helper.dart';
-
 // ========================
 // 📦 Json_save.dart
 // ========================
@@ -120,6 +119,7 @@ export 'middlewares/exception_middleware.dart';
 // 📦 Logging_middleware.dart
 // ========================
 export 'middlewares/logging_middleware.dart';
+export 'middlewares/session_middleware.dart';
 // ========================
 // 📦 Set_locale_middleware.dart
 // ========================

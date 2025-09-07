@@ -2,7 +2,6 @@ import 'package:khadem/src/contracts/views/directive_contract.dart';
 
 import 'directives/array_directives.dart';
 import 'directives/asset_directives.dart';
-import 'directives/auth_directives.dart';
 import 'directives/control_flow_directives.dart';
 import 'directives/data_directives.dart';
 import 'directives/for_directive.dart';
@@ -12,10 +11,10 @@ import 'directives/include_directive.dart';
 import 'directives/lang_directive.dart';
 import 'directives/layout_directive.dart';
 import 'directives/loop_directives.dart';
-import 'directives/misc_directives.dart';
 import 'directives/output_directives.dart';
 import 'directives/section_directive.dart';
 import 'directives/string_directives.dart';
+import 'directives/auth_directives.dart';
 import 'directives/utility_directives.dart';
 
 class DirectiveRegistry {
@@ -60,13 +59,6 @@ class DirectiveRegistry {
     InlineJsDirective(),
     UrlRouteDirective(),
 
-    // Authentication directives
-    AuthDirective(),
-    GuestDirective(),
-    CanDirective(),
-    CannotDirective(),
-    RoleDirective(),
-
     // Utility directives
     EnvDirective(),
     ConfigDirective(),
@@ -87,21 +79,16 @@ class DirectiveRegistry {
     IssetDirective(),
     HasDirective(),
 
-    // Form directives
-    CsrfDirective(),
-    MethodDirective(),
-    RouteDirective(),
-    UrlDirective(),
-    ActionDirective(),
-
-    // Miscellaneous directives
-    ErrorDirective(),
-    ErrorsDirective(),
-    ComponentDirective(),
-    SlotDirective(),
-    ClassDirective(),
-    SelectedDirective(),
-    CheckedDirective(),
+  // Form directives
+  CsrfDirective(),
+  MethodDirective(),
+  RouteDirective(),
+  UrlDirective(),
+  ActionDirective(),
+  OldDirective(),
+  // Auth/Guest directives
+  AuthDirective(),
+  GuestDirective(),
   ];
 
   static void register(ViewDirective directive) {
@@ -109,7 +96,9 @@ class DirectiveRegistry {
   }
 
   static Future<String> applyAll(
-      String content, Map<String, dynamic> context,) async {
+    String content,
+    Map<String, dynamic> context,
+  ) async {
     for (final directive in _directives) {
       content = await directive.apply(content, context);
     }

@@ -88,7 +88,7 @@ class RequestBodyParser {
       final boundary = _raw.headers.contentType?.parameters['boundary'];
       if (boundary == null) {
         throw const FormatException(
-            'Missing boundary in multipart content type');
+            'Missing boundary in multipart content type',);
       }
 
       // Read all bytes from the request

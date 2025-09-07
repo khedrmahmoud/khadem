@@ -38,7 +38,7 @@ class SendNotificationJob extends QueueJob {
   @override
   Future<void> handle() async {
     print('🔔 Sending notification to user $userId: $message');
-    await Future.delayed(Duration(milliseconds: 50));
+    await Future.delayed(const Duration(milliseconds: 50));
     print('✅ Notification sent!');
   }
 
@@ -58,13 +58,13 @@ class ProcessOrderJob extends QueueJob {
     print('🛒 Processing order $orderId for \$$amount');
     
     // Simulate processing steps
-    await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 200));
     print('   - Payment processed');
     
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 100));
     print('   - Inventory updated');
     
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 100));
     print('   - Confirmation email queued');
     
     print('✅ Order $orderId processed successfully!');
@@ -74,7 +74,7 @@ class ProcessOrderJob extends QueueJob {
   String get displayName => 'Process Order $orderId';
 
   @override
-  Duration? get timeout => Duration(minutes: 5); // Custom timeout
+  Duration? get timeout => const Duration(minutes: 5); // Custom timeout
 
   @override
   String get queue => 'orders'; // Custom queue
@@ -120,7 +120,7 @@ Future<void> testMemoryDriver() async {
   // Dispatch with delay
   await Queue.dispatch(
     ProcessOrderJob('order-789', 149.99), 
-    delay: Duration(seconds: 2)
+    delay: const Duration(seconds: 2),
   );
   
   // Batch dispatch
@@ -136,7 +136,7 @@ Future<void> testMemoryDriver() async {
   print('\n⚡ Processing queued jobs...');
   for (int i = 0; i < 10; i++) {
     await Queue.work();
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 100));
     
     final stats = Queue.stats();
     if (stats['pending_jobs'] == 0) {

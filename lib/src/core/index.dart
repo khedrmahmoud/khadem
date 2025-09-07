@@ -302,7 +302,6 @@ export 'view/directive_registry.dart';
 // ========================
 export 'view/directives/array_directives.dart';
 export 'view/directives/asset_directives.dart';
-export 'view/directives/auth_directives.dart';
 export 'view/directives/control_flow_directives.dart';
 export 'view/directives/data_directives.dart';
 export 'view/directives/for_directive.dart';
@@ -311,7 +310,6 @@ export 'view/directives/include_directive.dart';
 export 'view/directives/lang_directive.dart';
 export 'view/directives/layout_directive.dart';
 export 'view/directives/loop_directives.dart';
-export 'view/directives/misc_directives.dart';
 export 'view/directives/output_directives.dart';
 export 'view/directives/section_directive.dart';
 export 'view/directives/string_directives.dart';

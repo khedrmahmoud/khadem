@@ -190,7 +190,7 @@ void main() {
       test('should have attemptLogin method', () async {
         final credentials = {
           'email': 'test@example.com',
-          'password': 'password123'
+          'password': 'password123',
         };
 
         expect(

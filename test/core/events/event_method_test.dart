@@ -1,6 +1,7 @@
 import 'package:test/test.dart';
-import '../../../lib/src/core/events/event_method.dart';
+
 import '../../../lib/src/contracts/events/event_system_interface.dart';
+import '../../../lib/src/core/events/event_method.dart';
 
 void main() {
   group('EventMethod', () {

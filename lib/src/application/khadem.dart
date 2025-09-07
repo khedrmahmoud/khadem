@@ -1,6 +1,7 @@
 import 'package:khadem/khadem_dart.dart';
 import '../core/queue/queue.dart' as LaravelQueue;
 import '../contracts/queue/queue_job.dart' as QueueContract;
+import '../core/http/session.dart';
 
 /// Central access point for all Khadem framework services and utilities.
 class Khadem {
@@ -123,7 +124,7 @@ class Khadem {
 
   /// Generate a route URL
   static String route(String name,
-      {Map<String, String>? parameters, Map<String, String>? query}) {
+      {Map<String, String>? parameters, Map<String, String>? query,}) {
     return urlService.route(name, parameters: parameters, query: query);
   }
 
@@ -145,7 +146,7 @@ class Khadem {
     String? filename,
   }) {
     return assetService.storeTextFile(path, content,
-        disk: disk, filename: filename);
+        disk: disk, filename: filename,);
   }
 
   // ========= 📅 Scheduler & View System =========
@@ -156,168 +157,7 @@ class Khadem {
   /// Returns the view renderer for template rendering.
   static ViewRenderer get view => ViewRenderer.instance;
 
-  // ========= 🌐 Localization =========
-
-  /// Sets the global locale for all translations.
-  ///
-  /// This affects all translation calls that don't specify a locale.
-  /// Use this for application-wide locale changes.
-  ///
-  /// ```dart
-  /// Khadem.setGlobalLocale('fr');
-  /// ```
-  static void setGlobalLocale(String locale) => Lang.setGlobalLocale(locale);
-
-  /// Gets the current global locale.
-  static String getGlobalLocale() => Lang.getGlobalLocale();
-
-  /// Sets the fallback locale for missing translations.
-  ///
-  /// When a translation is not found in the current locale,
-  /// this locale will be used as a fallback.
-  ///
-  /// ```dart
-  /// Khadem.setFallbackLocale('en');
-  /// ```
-  static void setFallbackLocale(String locale) =>
-      Lang.setFallbackLocale(locale);
-
-  /// Gets the current fallback locale.
-  static String getFallbackLocale() => Lang.getFallbackLocale();
-
-  /// Sets the locale for the current request.
-  ///
-  /// This is useful for per-request localization in web applications.
-  /// The locale is stored in the request context.
-  ///
-  /// ```dart
-  /// Khadem.setRequestLocale('es');
-  /// ```
-  static void setRequestLocale(String locale) => Lang.setRequestLocale(locale);
-
-  /// Translates a key with optional parameters and namespace.
-  ///
-  /// Supports advanced parameter replacement using :param syntax.
-  /// Falls back to global/request locale if none specified.
-  ///
-  /// ```dart
-  /// String greeting = Khadem.translate('messages.greeting', parameters: {'name': 'Alice'});
-  /// String namespaced = Khadem.translate('login', namespace: 'auth');
-  /// ```
-  static String translate(
-    String key, {
-    Map<String, dynamic>? parameters,
-    String? locale,
-    String? namespace,
-  }) =>
-      Lang.t(key, parameters: parameters, locale: locale, namespace: namespace);
-
-  /// Translates with pluralization based on count.
-  ///
-  /// Handles singular/plural forms based on the count value.
-  /// Expects translation keys with | separator for plural forms.
-  ///
-  /// ```dart
-  /// String apples = Khadem.translateChoice('apples', 3); // "3 apples"
-  /// String item = Khadem.translateChoice('item', 1); // "1 item"
-  /// ```
-  static String translateChoice(
-    String key,
-    int count, {
-    Map<String, dynamic>? parameters,
-    String? locale,
-    String? namespace,
-  }) =>
-      Lang.choice(key, count,
-          parameters: parameters, locale: locale, namespace: namespace);
-
-  /// Translates a field label.
-  ///
-  /// Convenience method for form field labels.
-  /// Automatically prefixes with 'fields.' namespace.
-  ///
-  /// ```dart
-  /// String emailLabel = Khadem.translateField('email'); // Looks for 'fields.email'
-  /// ```
-  static String translateField(String field,
-          {String? locale, String? namespace}) =>
-      Lang.getField(field, locale: locale, namespace: namespace);
-
-  /// Checks if a translation key exists.
-  ///
-  /// Useful for conditional translations or debugging.
-  ///
-  /// ```dart
-  /// if (Khadem.hasTranslation('messages.welcome')) {
-  ///   // Translation exists
-  /// }
-  /// ```
-  static bool hasTranslation(String key, {String? locale, String? namespace}) =>
-      Lang.has(key, locale: locale, namespace: namespace);
-
-  /// Gets the raw translation value without parameter replacement.
-  ///
-  /// Returns the translation string as-is, or null if not found.
-  ///
-  /// ```dart
-  /// String? raw = Khadem.getTranslation('messages.greeting');
-  /// ```
-  static String? getTranslation(String key,
-          {String? locale, String? namespace}) =>
-      Lang.get(key, locale: locale, namespace: namespace);
-
-  /// Loads translations for a specific namespace.
-  ///
-  /// Useful for loading package-specific or module-specific translations.
-  ///
-  /// ```dart
-  /// Khadem.loadTranslationNamespace('package:auth', 'en', {
-  ///   'login': 'Sign In',
-  ///   'logout': 'Sign Out'
-  /// });
-  /// ```
-  static void loadTranslationNamespace(
-          String namespace, String locale, Map<String, String> translations) =>
-      Lang.loadNamespace(namespace, locale, translations);
-
-  /// Clears the translation cache.
-  ///
-  /// Forces reloading of translations on next access.
-  /// Useful during development or after updating translation files.
-  ///
-  /// ```dart
-  /// Khadem.clearTranslationCache();
-  /// ```
-  static void clearTranslationCache() => Lang.clearCache();
-
-  /// Gets all available locales from the translation files.
-  ///
-  /// Returns a list of locale codes found in the lang directory.
-  ///
-  /// ```dart
-  /// List<String> locales = Khadem.getAvailableLocales(); // ['en', 'fr', 'es']
-  /// ```
-  static List<String> getAvailableLocales() => Lang.getAvailableLocales();
-
-  /// Adds a custom parameter replacer function.
-  ///
-  /// Allows extending parameter replacement logic for complex formatting.
-  ///
-  /// ```dart
-  /// Khadem.addTranslationParameterReplacer((key, value, params) {
-  ///   if (key == 'currency' && value is num) {
-  ///     return '\$${value.toStringAsFixed(2)}';
-  ///   }
-  ///   return ':$key';
-  /// });
-  /// ```
-  static void addTranslationParameterReplacer(
-          String Function(
-                  String key, dynamic value, Map<String, dynamic> parameters)
-              replacer) =>
-      Lang.addParameterReplacer(replacer);
-
-  // ========= 🛠️ Utilities =========
+  // ========= 🛠️ Miscellaneous Helpers & Utilities ========
 
   /// Framework version.
   static String get version => '1.0.0';

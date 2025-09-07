@@ -76,7 +76,7 @@ Future<void> demonstrateTokenRefresh() async {
     print('2. Refreshing tokens...');
     
     // In a real scenario, you'd have a separate refresh token
-    final refreshToken = 'stored_refresh_token_from_initial_login';
+    const refreshToken = 'stored_refresh_token_from_initial_login';
     
     final refreshResult = await tokenService.refreshAccessToken(refreshToken);
     

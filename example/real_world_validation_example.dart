@@ -39,10 +39,8 @@ class FileUploadController {
   Future<Map<String, dynamic>> handleProfileImageUpload(Map<String, dynamic> requestData) async {
     // Using helper method for common file validation patterns
     final rules = ValidatorHelpers.fileUploadRules(
-      multiple: false,
       allowedMimes: ['jpg', 'jpeg', 'png', 'gif'],
       maxSizeKB: 2048, // 2MB max
-      required: true,
     );
     
     // Add additional rules
@@ -168,7 +166,7 @@ void main() async {
     'attachment': UploadedFile(
       filename: 'large_avatar.png', 
       size: 3 * 1024 * 1024, // 3MB - exceeds 2MB limit
-      mimeType: 'image/png'
+      mimeType: 'image/png',
     ),
     'alt_text': 'User avatar',
   };

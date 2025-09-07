@@ -1,6 +1,6 @@
 import '../../../application/khadem.dart';
-import '../../../contracts/database/query_builder_interface.dart';
 import '../orm/relation_definition.dart';
+import '../orm/relation_type.dart';
 import 'database_model.dart';
 import 'event_model.dart';
 import 'json_model.dart';
@@ -35,8 +35,7 @@ abstract class KhademModel<T> {
   void setField(String key, dynamic value) => UnimplementedError();
 
   /// Query builder
-  QueryBuilderInterface<T> get query =>
-      Khadem.db.table<T>(tableName, modelFactory: (data) => newFactory(data));
+  dynamic get query => Khadem.db.table(tableName, modelFactory: (data) => newFactory(data));
 
   String get modelName => runtimeType.toString();
   String get tableName => '${runtimeType.toString().toLowerCase()}s';
@@ -60,4 +59,176 @@ abstract class KhademModel<T> {
   Future<T?> findById(dynamic id) => db.findById(id);
   Future<List<T>> findWhere(String column, String operator, dynamic value) =>
       db.findWhere(column, operator, value);
+
+  /// Laravel-like relation loading methods
+  /// Load relations eagerly (equivalent to Laravel's with())
+  Future<T> load(List<String> relations) async {
+    for (final relationName in relations) {
+      await _loadRelation(relationName);
+    }
+    return this as T;
+  }
+
+  /// Load a single relation
+  Future<T> loadRelation(String relationName) async {
+    await _loadRelation(relationName);
+    return this as T;
+  }
+
+  /// Load relations if they haven't been loaded yet
+  Future<T> loadMissing(List<String> relations) async {
+    for (final relationName in relations) {
+      if (!relation.isLoaded(relationName)) {
+        await _loadRelation(relationName);
+      }
+    }
+    return this as T;
+  }
+
+  /// Check if a relation is loaded
+  bool isRelationLoaded(String relationName) {
+    return relation.isLoaded(relationName);
+  }
+
+  /// Get a loaded relation
+  dynamic getRelation(String relationName) {
+    return relation.get(relationName);
+  }
+
+  /// Set a relation value
+  void setRelation(String relationName, dynamic value) {
+    relation.set(relationName, value);
+  }
+
+  /// Append methods - Laravel-like attribute appending
+  /// Append computed attributes to the model
+  T append(List<String> attributes) {
+    for (final attribute in attributes) {
+      _appendAttribute(attribute);
+    }
+    return this as T;
+  }
+
+  /// Append a single attribute
+  T appendAttribute(String attribute) {
+    _appendAttribute(attribute);
+    return this as T;
+  }
+
+  /// Set an appended attribute value
+  void setAppended(String key, dynamic value) {
+    relation.set('appended_$key', value);
+  }
+
+  /// Get an appended attribute value
+  dynamic getAppended(String key) {
+    return relation.get('appended_$key');
+  }
+
+  /// Check if an attribute is appended
+  bool hasAppended(String key) {
+    return relation.get('appended_$key') != null;
+  }
+
+  /// Make a model visible (opposite of hidden)
+  T makeVisible(List<String> attributes) {
+    hidden.removeWhere((attr) => attributes.contains(attr));
+    return this as T;
+  }
+
+  /// Make a model hidden
+  T makeHidden(List<String> attributes) {
+    hidden.addAll(attributes.where((attr) => !hidden.contains(attr)));
+    return this as T;
+  }
+
+  /// Get only specified attributes
+  Map<String, dynamic> only(List<String> attributes) {
+    final result = <String, dynamic>{};
+    final jsonData = toJson();
+
+    for (final attribute in attributes) {
+      if (jsonData.containsKey(attribute)) {
+        result[attribute] = jsonData[attribute];
+      }
+    }
+
+    return result;
+  }
+
+  /// Get all attributes except specified ones
+  Map<String, dynamic> except(List<String> attributes) {
+    final result = Map<String, dynamic>.from(toJson());
+
+    for (final attribute in attributes) {
+      result.remove(attribute);
+    }
+
+    return result;
+  }
+
+  /// Private helper methods
+  Future<void> _loadRelation(String relationName) async {
+    if (!relations.containsKey(relationName)) {
+      throw Exception('Relation "$relationName" not defined on model $modelName');
+    }
+
+    final relationDef = relations[relationName]!;
+    final relatedModels = await _fetchRelatedModels(relationDef);
+
+    relation.set(relationName, relatedModels);
+  }
+
+  Future<dynamic> _fetchRelatedModels(RelationDefinition relationDef) async {
+    final localValue = getField(relationDef.localKey);
+    if (localValue == null) return null;
+
+    switch (relationDef.type) {
+      case RelationType.hasOne:
+      case RelationType.belongsTo:
+        return Khadem.db.table(
+          relationDef.relatedTable,
+          modelFactory: (data) => relationDef.factory().newFactory(data),
+        ).where(relationDef.foreignKey, '=', localValue).first();
+
+      case RelationType.hasMany:
+        return Khadem.db.table(
+          relationDef.relatedTable,
+          modelFactory: (data) => relationDef.factory().newFactory(data),
+        ).where(relationDef.foreignKey, '=', localValue).get();
+
+      case RelationType.belongsToMany:
+        // For many-to-many, we'd need pivot table logic
+        // This is a simplified implementation
+        return Khadem.db.table(
+          relationDef.relatedTable,
+          modelFactory: (data) => relationDef.factory().newFactory(data),
+        ).where(relationDef.foreignKey, '=', localValue).get();
+
+      default:
+        throw UnsupportedError('Relation type ${relationDef.type} not implemented');
+    }
+  }
+
+  void _appendAttribute(String attribute) {
+    if (appends.contains(attribute)) {
+      final value = _getComputedAttribute(attribute);
+      setAppended(attribute, value);
+    }
+  }
+
+  dynamic _getComputedAttribute(String attribute) {
+    // Check if it's in computed properties
+    if (computed.containsKey(attribute)) {
+      final computedValue = computed[attribute];
+      if (computedValue is Function) {
+        return computedValue();
+      }
+      return computedValue;
+    }
+
+    // For now, return null if not found in computed
+    // In a full implementation, you might use reflection or code generation
+    return null;
+  }
 }

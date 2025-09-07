@@ -35,7 +35,7 @@ abstract class QueueJob {
 
   /// Optional: Delay between retry attempts.
   /// Default is 30 seconds.
-  Duration get retryDelay => Duration(seconds: 30);
+  Duration get retryDelay => const Duration(seconds: 30);
 
   /// Optional: Whether this job should be retried on failure.
   /// Default is true.

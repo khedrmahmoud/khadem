@@ -70,7 +70,7 @@ class FileQueueDriver implements QueueDriver {
           print('📁 Job failed permanently: ${jobData['type']}');
         } else {
           // Reschedule for retry
-          final retryDelay = Duration(seconds: 30);
+          const retryDelay = Duration(seconds: 30);
           jobData['scheduledAt'] = DateTime.now().add(retryDelay).toIso8601String();
         }
       }
@@ -149,7 +149,7 @@ class _FileQueueJob extends QueueJob {
     print('   Attempts: ${_data['attempts']}/${_data['maxRetries']}');
     
     // Simulate some work
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 100));
     
     print('✅ File job completed: ${_data['type']}');
   }

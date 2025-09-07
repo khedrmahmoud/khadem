@@ -42,28 +42,28 @@ class TestSetup {
       'guards': {
         'api': {
           'driver': 'token',
-          'provider': 'users'
-        }
+          'provider': 'users',
+        },
       },
       'providers': {
         'users': {
           'table': 'users',
           'primary_key': 'id',
-          'fields': ['email', 'password']
-        }
-      }
+          'fields': ['email', 'password'],
+        },
+      },
     });
 
     // Mock auth config methods
     when(mockAuthConfig.getProvider('users')).thenReturn({
       'table': 'users',
       'primary_key': 'id',
-      'fields': ['email', 'password']
+      'fields': ['email', 'password'],
     });
 
     when(mockAuthConfig.getGuard('api')).thenReturn({
       'driver': 'token',
-      'provider': 'users'
+      'provider': 'users',
     });
 
     when(mockAuthConfig.getDefaultGuard()).thenReturn('api');

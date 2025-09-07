@@ -32,13 +32,13 @@ class RequestValidator {
     // Return only the validated data that are in the rules
     return {
       for (var key in rules.keys)
-        if (input.containsKey(key)) key: input[key]
+        if (input.containsKey(key)) key: input[key],
     };
   }
 
   /// Validates specific input data against rules.
   Map<String, dynamic> validateData(
-      Map<String, dynamic> data, Map<String, String> rules) {
+      Map<String, dynamic> data, Map<String, String> rules,) {
     // If no files are provided in data, try to get them from the body parser
     final validationData = Map<String, dynamic>.from(data);
     if (_bodyParser.files != null && !validationData.containsKey('files')) {
@@ -54,7 +54,7 @@ class RequestValidator {
     // Return only the validated data that are in the rules
     return {
       for (var key in rules.keys)
-        if (validationData.containsKey(key)) key: validationData[key]
+        if (validationData.containsKey(key)) key: validationData[key],
     };
   }
 }

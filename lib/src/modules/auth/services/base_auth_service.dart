@@ -39,7 +39,7 @@ abstract class BaseAuthService implements AuthDriver {
 
   @override
   Future<Map<String, dynamic>> attemptLogin(
-      Map<String, dynamic> credentials) async {
+      Map<String, dynamic> credentials,) async {
     try {
       // Template method pattern - define the algorithm structure
       await validateCredentials(credentials);
@@ -175,7 +175,7 @@ abstract class BaseAuthService implements AuthDriver {
   /// [credentials] The credentials that were attempted
   /// Override for custom failure handling (logging, rate limiting, etc.)
   Future<void> handleLoginFailure(
-      dynamic error, Map<String, dynamic> credentials) async {
+      dynamic error, Map<String, dynamic> credentials,) async {
     // Default implementation - can be overridden for logging, etc.
   }
 
@@ -184,7 +184,7 @@ abstract class BaseAuthService implements AuthDriver {
   /// [error] The error that occurred
   /// [token] The token that failed verification
   Future<void> handleTokenVerificationFailure(
-      dynamic error, String token) async {
+      dynamic error, String token,) async {
     // Default implementation - can be overridden for logging, etc.
   }
 
@@ -246,5 +246,6 @@ abstract class BaseAuthService implements AuthDriver {
   /// [refreshToken] The refresh token to use for generating a new access token
   /// Returns a new access token data
   /// Throws [AuthException] if refresh token is invalid or expired
+  @override
   Future<Map<String, dynamic>> refreshAccessToken(String refreshToken);
 }

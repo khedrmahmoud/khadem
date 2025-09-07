@@ -1,5 +1,9 @@
 import 'dart:io';
 
+import 'package:khadem/khadem_dart.dart' show CookieHelper, Khadem;
+import '../context/request_context.dart';
+import '../session.dart';
+
 import '../context/response_context.dart';
 import 'response_body.dart';
 import 'response_headers.dart';
@@ -51,6 +55,9 @@ class Response {
   /// Access to view rendering functionality
   ResponseRenderer get renderer => _renderer;
 
+  /// Cookie management
+  CookieHelper get cookieHandler => CookieHelper(_raw);
+
   /// Sets the HTTP status code (legacy method for backward compatibility).
   Response status(int code) {
     _status.setStatus(code);
@@ -96,8 +103,12 @@ class Response {
     Map<String, String>? headers,
     List<int> Function(T)? toBytes,
   }) async {
-    await _body.stream(stream,
-        contentType: contentType, headers: headers, toBytes: toBytes,);
+    await _body.stream(
+      stream,
+      contentType: contentType,
+      headers: headers,
+      toBytes: toBytes,
+    );
     _sent = true;
   }
 
@@ -108,8 +119,10 @@ class Response {
   }
 
   /// Renders a view template (convenience method).
-  Future<void> view(String viewName,
-      {Map<String, dynamic> data = const {},}) async {
+  Future<void> view(
+    String viewName, {
+    Map<String, dynamic> data = const {},
+  }) async {
     await _renderer.renderView(viewName, data: data);
     _sent = true;
   }
@@ -121,7 +134,8 @@ class Response {
   }
 
   /// Sends binary data (convenience method).
-  void bytes(List<int> bytes, {String contentType = 'application/octet-stream'}) {
+  void bytes(List<int> bytes,
+      {String contentType = 'application/octet-stream'}) {
     _body.sendBytes(bytes, contentType: contentType);
     _sent = true;
   }
@@ -236,4 +250,34 @@ class Response {
     _headers.setExpires(DateTime.now());
     return this;
   }
+  /// Store a value in the session
+  /// [key] The session attribute key
+  /// [value] The value to store
+  Response sessionPut(String key, dynamic value) {
+    // Store in request session data for middleware to persist
+    try {
+      final req = RequestContext.request;
+      final sessionData = req.attribute<Map<String, dynamic>>('session');
+      if (sessionData != null) {
+        sessionData[key] = value;
+        req.setAttribute('session', sessionData);
+      }
+    } catch (_) {}
+    return this;
+  }
+  /// Flash input data to session for next request
+  /// [inputData] Map of old input values
+  Response flashInput(Map<String, dynamic> inputData) {
+    try {
+      final req = RequestContext.request;
+      final sessionId = req.attribute<String>('session_id');
+      if (sessionId != null) {
+        final manager = Khadem.container.resolve<SessionManager>();
+        manager.flashOldInput(sessionId, inputData);
+      }
+    } catch (_) {}
+    return this;
+  }
+
+
 }

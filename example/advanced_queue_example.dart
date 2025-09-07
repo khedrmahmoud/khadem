@@ -18,7 +18,7 @@ class SendEmailJob extends QueueJob {
     print('   Body: $body');
     
     // Simulate email sending
-    await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 200));
     
     print('✅ Email sent successfully!');
   }
@@ -48,11 +48,11 @@ class ProcessOrderJob extends QueueJob {
     print('🛒 Processing order $orderId for \$${amount.toStringAsFixed(2)}');
     
     // Simulate order processing
-    await Future.delayed(Duration(milliseconds: 300));
+    await Future.delayed(const Duration(milliseconds: 300));
     print('   - Payment processed');
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 100));
     print('   - Inventory updated');
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 100));
     print('   - Confirmation email queued');
     
     print('✅ Order $orderId processed successfully!');
@@ -81,11 +81,11 @@ class BackupDataJob extends QueueJob {
     print('💾 Starting backup of database: $database');
     
     // Simulate backup process
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 500));
     print('   - Creating backup snapshot...');
-    await Future.delayed(Duration(milliseconds: 300));
+    await Future.delayed(const Duration(milliseconds: 300));
     print('   - Compressing data...');
-    await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 200));
     print('   - Uploading to cloud storage...');
     
     print('✅ Backup completed for $database');
@@ -136,11 +136,11 @@ Future<void> testFileDriver() async {
   // Dispatch delayed jobs
   await Queue.dispatch(
     BackupDataJob('user_profiles'), 
-    delay: Duration(seconds: 2)
+    delay: const Duration(seconds: 2),
   );
   await Queue.dispatch(
     SendEmailJob('admin@example.com', 'Daily Report', 'System status: OK'),
-    delay: Duration(seconds: 3)
+    delay: const Duration(seconds: 3),
   );
   
   print('📊 After dispatching: ${fileDriver.getStats()}');
@@ -150,7 +150,7 @@ Future<void> testFileDriver() async {
   // Process jobs multiple times to handle delayed ones
   for (int i = 0; i < 5; i++) {
     await Queue.process();
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
     
     final stats = fileDriver.getStats();
     print('📊 Round ${i + 1} stats: $stats');
@@ -188,7 +188,7 @@ Future<void> testRedisDriver() async {
     // Dispatch delayed jobs
     await Queue.dispatch(
       BackupDataJob('redis_cache'), 
-      delay: Duration(seconds: 1)
+      delay: const Duration(seconds: 1),
     );
     
     print('📊 After dispatching: ${await redisDriver.getStats()}');
@@ -198,7 +198,7 @@ Future<void> testRedisDriver() async {
     // Process jobs multiple times to handle delayed ones
     for (int i = 0; i < 5; i++) {
       await Queue.process();
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
       
       final stats = await redisDriver.getStats();
       print('📊 Round ${i + 1} stats: $stats');

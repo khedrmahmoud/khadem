@@ -14,7 +14,6 @@ void main() {
       final urlService = UrlService(
         baseUrl: 'http://localhost:8080',
         assetBaseUrl: 'http://localhost:8080',
-        forceHttps: false,
       );
 
       // Register routes

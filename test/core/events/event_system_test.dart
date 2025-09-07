@@ -215,7 +215,7 @@ void main() {
           executionOrder.add('second-done');
         });
 
-        await events.emit('sync.test', null); // queue = false
+        await events.emit('sync.test'); // queue = false
 
         // Should execute in order
         expect(executionOrder, equals(['first', 'first-done', 'second', 'second-done']));

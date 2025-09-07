@@ -13,7 +13,7 @@ void main() {
     setUp(() {
       // Reset configuration before each test
       ExceptionReporter.configure(
-        includeUserContext: true,
+        
       );
     });
 

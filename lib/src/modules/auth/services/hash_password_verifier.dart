@@ -66,7 +66,7 @@ class HashPasswordVerifier implements PasswordVerifier {
     int score = 0;
     
     // Length score
-    score += (password.length * 2);
+    score += password.length * 2;
     
     // Character variety scores
     if (password.contains(RegExp(r'[a-z]'))) score += 10;

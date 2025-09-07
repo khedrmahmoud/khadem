@@ -246,7 +246,7 @@ class AuthManager {
     Map<String, dynamic> credentials,
   ) async {
     final driver = _getOrCreateDriver(guardName);
-    return await driver.attemptLogin(credentials);
+    return driver.attemptLogin(credentials);
   }
 
   /// Verifies a token with a specific guard
@@ -259,7 +259,7 @@ class AuthManager {
     String token,
   ) async {
     final driver = _getOrCreateDriver(guardName);
-    return await driver.verifyToken(token);
+    return driver.verifyToken(token);
   }
 
   /// Logs out with a specific guard

@@ -62,7 +62,7 @@ class $className extends ServiceProvider {
 
   String _toPascalCase(String input) {
     if (input.isEmpty) return input;
-    return input.split('_').map((e) => e.isEmpty ? '' : e[0].toUpperCase() + e.substring(1).toLowerCase()).join('');
+    return input.split('_').map((e) => e.isEmpty ? '' : e[0].toUpperCase() + e.substring(1).toLowerCase()).join();
   }
 
   String _toSnakeCase(String input) {

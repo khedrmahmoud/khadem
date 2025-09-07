@@ -11,7 +11,7 @@ class RouteRegistry {
 
   /// Registers a route with the specified parameters.
   void register(String method, String path, RequestHandler handler,
-      List<Middleware> middleware, {String? name}) {
+      List<Middleware> middleware, {String? name,}) {
     final route = Route(method.toUpperCase(), path, handler, middleware, name: name);
     if (route.isDynamic) {
       _routes.add(route);
@@ -22,37 +22,37 @@ class RouteRegistry {
 
   /// Registers a GET route.
   void get(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name}) =>
+          {List<Middleware> middleware = const [], String? name,}) =>
       register('GET', path, handler, middleware, name: name);
 
   /// Registers a POST route.
   void post(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name}) =>
+          {List<Middleware> middleware = const [], String? name,}) =>
       register('POST', path, handler, middleware, name: name);
 
   /// Registers a PUT route.
   void put(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name}) =>
+          {List<Middleware> middleware = const [], String? name,}) =>
       register('PUT', path, handler, middleware, name: name);
 
   /// Registers a PATCH route.
   void patch(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name}) =>
+          {List<Middleware> middleware = const [], String? name,}) =>
       register('PATCH', path, handler, middleware, name: name);
 
   /// Registers a DELETE route.
   void delete(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name}) =>
+          {List<Middleware> middleware = const [], String? name,}) =>
       register('DELETE', path, handler, middleware, name: name);
 
   /// Registers a HEAD route.
   void head(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name}) =>
+          {List<Middleware> middleware = const [], String? name,}) =>
       register('HEAD', path, handler, middleware, name: name);
 
   /// Registers an OPTIONS route.
   void options(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name}) =>
+          {List<Middleware> middleware = const [], String? name,}) =>
       register('OPTIONS', path, handler, middleware, name: name);
 
   /// Registers a route for any method.

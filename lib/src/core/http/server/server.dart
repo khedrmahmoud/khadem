@@ -1,6 +1,6 @@
 import '../../../contracts/http/middleware_contract.dart';
-import '../request/request_handler.dart';
 import '../../routing/router.dart';
+import '../request/request_handler.dart';
 import 'server_lifecycle.dart';
 import 'server_middleware.dart';
 import 'server_router.dart';

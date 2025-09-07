@@ -51,18 +51,23 @@ void main() {
         provider.loadNamespace('', 'en', {'welcome': 'Hello :name'});
         provider.setLocale('en');
 
-        expect(Lang.t('welcome', parameters: {'name': 'Alice'}), equals('Hello Alice'));
+        expect(Lang.t('welcome', parameters: {'name': 'Alice'}),
+            equals('Hello Alice'));
       });
 
       test('should replace multiple parameters', () {
-        provider.loadNamespace('', 'en', {'message': ':greeting :name, welcome to :app'});
+        provider.loadNamespace(
+            '', 'en', {'message': ':greeting :name, welcome to :app'});
         provider.setLocale('en');
 
-        final result = Lang.t('message', parameters: {
-          'greeting': 'Hi',
-          'name': 'Bob',
-          'app': 'MyApp',
-        },);
+        final result = Lang.t(
+          'message',
+          parameters: {
+            'greeting': 'Hi',
+            'name': 'Bob',
+            'app': 'MyApp',
+          },
+        );
 
         expect(result, equals('Hi Bob, welcome to MyApp'));
       });
@@ -78,7 +83,8 @@ void main() {
         provider.loadNamespace('', 'en', {'count': 'You have :number items'});
         provider.setLocale('en');
 
-        expect(Lang.t('count', parameters: {'number': 5}), equals('You have 5 items'));
+        expect(Lang.t('count', parameters: {'number': 5}),
+            equals('You have 5 items'));
       });
     });
 
@@ -107,7 +113,8 @@ void main() {
       });
 
       test('should handle complex pluralization', () {
-        provider.loadNamespace('', 'en', {'file': 'There is one file|There are :count files'});
+        provider.loadNamespace(
+            '', 'en', {'file': 'There is one file|There are :count files'});
         provider.setLocale('en');
 
         expect(Lang.choice('file', 1), equals('There is one file'));
@@ -143,7 +150,8 @@ void main() {
 
     group('Field Translation', () {
       test('should translate field labels', () {
-        provider.loadNamespace('', 'en', {'fields.name': 'Full Name', 'fields.email': 'Email Address'});
+        provider.loadNamespace('', 'en',
+            {'fields.name': 'Full Name', 'fields.email': 'Email Address'});
         provider.setLocale('en');
 
         expect(Lang.getField('name'), equals('Full Name'));
@@ -171,7 +179,7 @@ void main() {
       });
 
       test('should handle request-specific locale', () {
-        final mockRequest = Request(MockHttpRequest('GET', '/test'));
+        final mockRequest = Request(FakeHttpRequest());
         provider.loadNamespace('', 'en', {'greeting': 'Hello'});
         provider.loadNamespace('', 'fr', {'greeting': 'Bonjour'});
 
@@ -257,7 +265,8 @@ void main() {
           return ':$key';
         });
 
-        expect(Lang.t('price', parameters: {'amount': 19.9901}), equals('Price: \$19.99'));
+        expect(Lang.t('price', parameters: {'amount': 19.9901}),
+            equals('Price: \$19.99'));
       });
 
       test('should handle multiple custom replacers', () {
@@ -292,26 +301,27 @@ void main() {
         Lang.clearCache();
       });
 
-      test('should handle concurrent requests with different locales', () async {
+      test('should handle concurrent requests with different locales',
+          () async {
         provider.loadNamespace('', 'en', {'greeting': 'Hello'});
         provider.loadNamespace('', 'fr', {'greeting': 'Bonjour'});
         provider.loadNamespace('', 'es', {'greeting': 'Hola'});
 
-        final request1 = Request(MockHttpRequest('GET', '/test1'));
-        final request2 = Request(MockHttpRequest('GET', '/test2'));
-        final request3 = Request(MockHttpRequest('GET', '/test3'));
+        final request1 = Request(FakeHttpRequest());
+        final request2 = Request(FakeHttpRequest());
+        final request3 = Request(FakeHttpRequest());
 
         // Simulate concurrent requests
         final results = await Future.wait([
-          RequestContext.run(request1, ()async {
+          RequestContext.run(request1, () async {
             Lang.setRequestLocale('en');
             return Lang.t('greeting');
           }),
-          RequestContext.run(request2, () async{
+          RequestContext.run(request2, () async {
             Lang.setRequestLocale('fr');
             return Lang.t('greeting');
           }),
-          RequestContext.run(request3, ()async {
+          RequestContext.run(request3, () async {
             Lang.setRequestLocale('es');
             return Lang.t('greeting');
           }),
@@ -326,8 +336,8 @@ void main() {
         provider.loadNamespace('', 'en', {'message': 'English'});
         provider.loadNamespace('', 'fr', {'message': 'French'});
 
-        final request1 = Request(MockHttpRequest('GET', '/test1'));
-        final request2 = Request(MockHttpRequest('GET', '/test2'));
+        final request1 = Request(FakeHttpRequest());
+        final request2 = Request(FakeHttpRequest());
 
         final result1 = RequestContext.run(request1, () {
           Lang.setRequestLocale('en');
@@ -347,13 +357,14 @@ void main() {
         provider.loadNamespace('', 'en', {'level': 'English'});
         provider.loadNamespace('', 'fr', {'level': 'French'});
 
-        final request = Request(MockHttpRequest('GET', '/test'));
+        final request = Request(FakeHttpRequest());
 
         final result = RequestContext.run(request, () {
           Lang.setRequestLocale('en');
 
           // Simulate nested operation with different locale
-          final nestedResult = RequestContext.run(Request(MockHttpRequest('GET', '/nested')), () {
+          final nestedResult =
+              RequestContext.run(Request(FakeHttpRequest()), () {
             Lang.setRequestLocale('fr');
             return Lang.t('level');
           });
@@ -367,20 +378,21 @@ void main() {
         expect(result['inner'], equals('French'));
       });
 
-      test('should handle rapid locale switching in concurrent requests', () async {
+      test('should handle rapid locale switching in concurrent requests',
+          () async {
         provider.loadNamespace('', 'en', {'text': 'English'});
         provider.loadNamespace('', 'de', {'text': 'German'});
 
         // Test with just 2 requests to ensure isolation
-        final request1 = Request(MockHttpRequest('GET', '/test1'));
-        final request2 = Request(MockHttpRequest('GET', '/test2'));
+        final request1 = Request(FakeHttpRequest());
+        final request2 = Request(FakeHttpRequest());
 
         final results = await Future.wait([
-          RequestContext.run(request1, ()async {
+          RequestContext.run(request1, () async {
             Lang.setRequestLocale('en');
             return Lang.t('text');
           }),
-          RequestContext.run(request2, () async{
+          RequestContext.run(request2, () async {
             Lang.setRequestLocale('de');
             return Lang.t('text');
           }),
@@ -401,8 +413,10 @@ void main() {
         provider.setLocale('en');
 
         // Test translation
-        expect(Lang.t('welcome', parameters: {'name': 'Alice', 'app': 'Khadem'}),
-               equals('Welcome Alice to Khadem'),);
+        expect(
+          Lang.t('welcome', parameters: {'name': 'Alice', 'app': 'Khadem'}),
+          equals('Welcome Alice to Khadem'),
+        );
 
         // Test pluralization
         expect(Lang.choice('items', 1), equals('item'));
@@ -440,7 +454,8 @@ void main() {
         expect(result, equals('Your cart has 3 items'));
 
         // Namespaced translation
-        final total = Lang.t('total', namespace: 'checkout', parameters: {'amount': '29.99'});
+        final total = Lang.t('total',
+            namespace: 'checkout', parameters: {'amount': '29.99'});
         expect(total, equals('Total: 29.99'));
       });
     });

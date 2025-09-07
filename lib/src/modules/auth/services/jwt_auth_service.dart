@@ -1,6 +1,7 @@
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 
 import '../../../application/khadem.dart';
+import '../../../support/services/secure_token_generator.dart';
 import '../config/khadem_auth_config.dart';
 import '../contracts/auth_config.dart';
 import '../contracts/auth_repository.dart';
@@ -9,7 +10,6 @@ import '../contracts/token_generator.dart';
 import '../exceptions/auth_exception.dart';
 import '../repositories/database_auth_repository.dart';
 import '../services/hash_password_verifier.dart';
-import '../../../support/services/secure_token_generator.dart';
 import 'base_auth_service.dart';
 
 /// Enhanced JWT-based authentication service

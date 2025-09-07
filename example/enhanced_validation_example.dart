@@ -107,7 +107,7 @@ void testNestedArrayValidation() {
             mimeType: 'image/jpeg',
             path: '/tmp/alice.jpg',
           ),
-        }
+        },
       },
       {
         'name': 'Bob',
@@ -119,7 +119,7 @@ void testNestedArrayValidation() {
             mimeType: 'image/png',
             path: '/tmp/bob.png',
           ),
-        }
+        },
       },
     ],
   };

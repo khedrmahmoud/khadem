@@ -34,7 +34,7 @@ class MakeControllerCommand extends KhademCommand {
     }
 
     // Clean and format controller name
-    String controllerName = _formatControllerName(rawControllerName);
+    final String controllerName = _formatControllerName(rawControllerName);
 
     final fileName = _toSnakeCase(controllerName.replaceAll('Controller', ''));
     final relativePath = folder.isEmpty
@@ -51,10 +51,10 @@ class MakeControllerCommand extends KhademCommand {
 
   String _formatControllerName(String name) {
     // Remove 'Controller' suffix if present
-    String baseName = name.replaceAll(RegExp(r'Controller$'), '');
+    final String baseName = name.replaceAll(RegExp(r'Controller$'), '');
 
     // Capitalize first letter and add 'Controller' suffix
-    String capitalized = baseName.isNotEmpty
+    final String capitalized = baseName.isNotEmpty
         ? '${baseName[0].toUpperCase()}${baseName.substring(1)}'
         : '';
 
@@ -65,7 +65,7 @@ class MakeControllerCommand extends KhademCommand {
     if (input.isEmpty) return 'controller';
 
     return input.replaceAllMapped(
-        RegExp(r'[A-Z]'), (m) => '_${m.group(0)!.toLowerCase()}'
+        RegExp(r'[A-Z]'), (m) => '_${m.group(0)!.toLowerCase()}',
     ).replaceFirst(RegExp(r'^_'), '');
   }
 

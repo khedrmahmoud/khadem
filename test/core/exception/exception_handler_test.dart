@@ -13,14 +13,14 @@ void main() {
     setUp(() {
       // Reset configuration before each test
       ExceptionHandler.configure(
-        includeStackTracesInResponse: false,
+        
       );
     });
 
     tearDown(() {
       // Reset configuration after each test
       ExceptionHandler.configure(
-        includeStackTracesInResponse: false,
+        
       );
     });
 
@@ -42,7 +42,6 @@ void main() {
         }
 
         ExceptionHandler.configure(
-          includeStackTracesInResponse: false,
           customFormatter: customFormatter,
         );
 

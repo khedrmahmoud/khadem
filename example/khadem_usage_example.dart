@@ -179,22 +179,22 @@ class KhademBootstrapExample {
     router.get('/', (request, response) {
       // Handle home route
       print('Home route accessed');
-    }, name: 'home');
+    }, name: 'home',);
 
     router.get('/user/:id', (request, response) {
       // Handle user profile route
       print('User profile route accessed');
-    }, name: 'user.profile');
+    }, name: 'user.profile',);
 
     router.get('/posts/:id', (request, response) {
       // Handle post show route
       print('Post show route accessed');
-    }, name: 'post.show');
+    }, name: 'post.show',);
 
     router.get('/admin/dashboard', (request, response) {
       // Handle admin dashboard route
       print('Admin dashboard route accessed');
-    }, name: 'admin.dashboard');
+    }, name: 'admin.dashboard',);
   }
 
   static void demonstrateFormDirectives() {
