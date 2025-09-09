@@ -157,9 +157,13 @@ class Server {
   /// Injects a reloading endpoint when the server is reloaded.
   void _injectReload() {
     // Add a POST endpoint for triggering reload
-    _router.post('/reload', (req, res) async {
+    _router.get('/reload', (req, res) async {
       await _lifecycle.reload();
       res.sendJson({'message': 'Server reloaded successfully'});
+    });
+    _router.get('/restart', (req, res) async {
+      await _lifecycle.restart();
+      res.sendJson({'message': 'Server restarted successfully'});
     });
   }
 
