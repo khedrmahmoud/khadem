@@ -119,6 +119,9 @@ class EagerLoader {
     if (meta.query != null) {
       meta.query!(query);
     }
+    if (def.query != null) {
+      def.query!(query);
+    }
 
     if (meta.paginate && meta.page != null && meta.perPage != null) {
       final pagination = await query.paginate(page: meta.page, perPage: meta.perPage);
@@ -211,6 +214,9 @@ class EagerLoader {
     if (meta.query != null) {
       meta.query!(query);
     }
+    if (def.query != null) {
+      def.query!(query);
+    }
 
     final rows = await query.get();
 
@@ -258,6 +264,7 @@ class EagerLoader {
         .whereRaw('id IN (${List.filled(relatedIds.length, '?').join(', ')})',
             relatedIds,)
         .when(meta.query != null, (q) => meta.query!(q))
+        .when(relation.query != null, (q) => relation.query!(q))
         .get();
 
     final relatedModels = relatedRows.map((row) {
@@ -304,6 +311,7 @@ class EagerLoader {
       '${relation.morphIdField} IN ($placeholders) AND ${relation.morphTypeField} = ?',
       [...ids, type],
     ).when(meta.query != null, (q) => meta.query!(q))
+    .when(relation.query != null, (q) => relation.query!(q))
     .get();
 
     final relatedModels = rows.map((r) {

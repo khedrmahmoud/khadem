@@ -15,9 +15,12 @@ class SocketHandler {
   void init() {
     _client.socket.listen((raw) async {
       try {
-          final Map<String, dynamic> message = jsonDecode(raw as String) as Map<String, dynamic>;
-          final String event = message['event'] as String;
+        final Map<String, dynamic> message = jsonDecode(raw as String) as Map<String, dynamic>;
+        final String event = message['event'] as String;
         final dynamic data = message['data'];
+
+        // Execute message middleware first
+        await _globalMiddleware.executeMessage(_client, message);
 
         final eventEntry = _manager.getEvent(event);
 

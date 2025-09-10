@@ -79,7 +79,6 @@ class ServeCommand extends KhademCommand {
       _serverProcess = await Process.start(
         'dart',
         serverArgs,
-        mode: ProcessStartMode.normal,
       );
       
       logger.info('✅ Server process started with PID: ${_serverProcess!.pid}');
@@ -109,7 +108,7 @@ class ServeCommand extends KhademCommand {
       },
       onError: (error) {
         logger.error('❌ Error reading server stdout: $error');
-      }
+      },
     );
 
     _serverProcess!.stderr.transform(utf8.decoder).listen(
@@ -118,7 +117,7 @@ class ServeCommand extends KhademCommand {
       },
       onError: (error) {
         logger.error('❌ Error reading server stderr: $error');
-      }
+      },
     );
 
     // Wait a moment for the server to start
@@ -204,7 +203,7 @@ class ServeCommand extends KhademCommand {
         case 'r':
           _hotReload();
           break;
-        case 'R':
+        case 'f':
           _hotRestart();
           break;
         case 'q':
@@ -267,7 +266,7 @@ class ServeCommand extends KhademCommand {
     _mainIsolate = null;
     
     if (_serverProcess != null) {
-      _serverProcess!.kill(ProcessSignal.sigterm);
+      _serverProcess!.kill();
       await _serverProcess!.exitCode.timeout(const Duration(seconds: 5), onTimeout: () => -1);
     }
     

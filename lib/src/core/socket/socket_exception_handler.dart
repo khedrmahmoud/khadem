@@ -84,6 +84,19 @@ class SocketExceptionHandler {
     }
   }
 
+  /// Handle connection upgrade errors
+  static void handleConnectionError(
+    Request request,
+    Object error,
+    StackTrace? stackTrace,
+    String middlewareName,
+  ) {
+    Khadem.logger.error('❌ Connection middleware "$middlewareName" failed: $error');
+    if (stackTrace != null) {
+      Khadem.logger.debug('Connection stack trace: $stackTrace');
+    }
+  }
+
   /// Handle middleware execution errors
   static void handleMiddlewareError(
     SocketClient client,

@@ -1,3 +1,5 @@
+import 'package:khadem/src/contracts/contracts.dart';
+
 import '../../../application/khadem.dart';
 import '../orm/relation_definition.dart';
 import '../orm/relation_type.dart';
@@ -35,7 +37,7 @@ abstract class KhademModel<T> {
   void setField(String key, dynamic value) => UnimplementedError();
 
   /// Query builder
-  dynamic get query => Khadem.db.table(tableName, modelFactory: (data) => newFactory(data));
+  QueryBuilderInterface<T> get query => Khadem.db.table(tableName, modelFactory: (data) => newFactory(data));
 
   String get modelName => runtimeType.toString();
   String get tableName => '${runtimeType.toString().toLowerCase()}s';
@@ -186,24 +188,36 @@ abstract class KhademModel<T> {
     switch (relationDef.type) {
       case RelationType.hasOne:
       case RelationType.belongsTo:
-        return Khadem.db.table(
+        var query = Khadem.db.table(
           relationDef.relatedTable,
           modelFactory: (data) => relationDef.factory().newFactory(data),
-        ).where(relationDef.foreignKey, '=', localValue).first();
+        ).where(relationDef.foreignKey, '=', localValue);
+        if (relationDef.query != null) {
+          query = relationDef.query!(query);
+        }
+        return query.first();
 
       case RelationType.hasMany:
-        return Khadem.db.table(
+        var query = Khadem.db.table(
           relationDef.relatedTable,
           modelFactory: (data) => relationDef.factory().newFactory(data),
-        ).where(relationDef.foreignKey, '=', localValue).get();
+        ).where(relationDef.foreignKey, '=', localValue);
+        if (relationDef.query != null) {
+          query = relationDef.query!(query);
+        }
+        return query.get();
 
       case RelationType.belongsToMany:
         // For many-to-many, we'd need pivot table logic
         // This is a simplified implementation
-        return Khadem.db.table(
+        var query = Khadem.db.table(
           relationDef.relatedTable,
           modelFactory: (data) => relationDef.factory().newFactory(data),
-        ).where(relationDef.foreignKey, '=', localValue).get();
+        ).where(relationDef.foreignKey, '=', localValue);
+        if (relationDef.query != null) {
+          query = relationDef.query!(query);
+        }
+        return query.get();
 
       default:
         throw UnsupportedError('Relation type ${relationDef.type} not implemented');

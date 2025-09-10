@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+
 import '../../application/khadem.dart';
 import '../../contracts/socket/socket_event_handler.dart';
 import '../../contracts/socket/socket_middleware.dart';
+import '../http/request/request.dart';
 import 'socket_client.dart';
 import 'socket_handler.dart';
 import 'socket_manager.dart';
@@ -16,12 +18,33 @@ class SocketServer {
   late SocketManager _manager;
   final SocketMiddlewarePipeline _globalMiddleware = SocketMiddlewarePipeline();
 
+  // Authorization callbacks
+  FutureOr<bool> Function(Request request)? _authCallback;
+  FutureOr<void> Function(SocketClient client)? _onConnectCallback;
+  FutureOr<void> Function(SocketClient client)? _onDisconnectCallback;
+
   SocketServer(this._port, {SocketManager? manager}) {
     _manager = manager ?? Khadem.socket;
+    _manager.setGlobalMiddleware(_globalMiddleware);
   }
 
   void useMiddleware(SocketMiddleware middleware) {
     _globalMiddleware.add(middleware);
+  }
+
+  /// Set authorization callback that receives the HTTP request during WebSocket upgrade
+  void useAuth(FutureOr<bool> Function(Request request) callback) {
+    _authCallback = callback;
+  }
+
+  /// Set callback for when a client connects
+  void onConnect(FutureOr<void> Function(SocketClient client) callback) {
+    _onConnectCallback = callback;
+  }
+
+  /// Set callback for when a client disconnects
+  void onDisconnect(FutureOr<void> Function(SocketClient client) callback) {
+    _onDisconnectCallback = callback;
   }
 
   void on(
@@ -41,13 +64,81 @@ class SocketServer {
         await HttpServer.bind(InternetAddress.anyIPv4, _port, shared: true);
     Khadem.logger.info('🟢 WebSocket Server started on ws://localhost:$_port');
 
-    _server!.transform(WebSocketTransformer()).listen((ws) {
-      final clientId = _generateClientId();
-      final client = SocketClient(id: clientId, socket: ws, manager: _manager);
-      final handler = SocketHandler(client, _manager, _globalMiddleware);
+    _server!.listen((HttpRequest request) async {
+      final req = Request(request);
+      if (WebSocketTransformer.isUpgradeRequest(request)) {
+        try {
+          // Execute connection middleware
+          await _globalMiddleware.executeConnection(req);
 
-      _manager.addClient(client);
-      handler.init();
+          // Check authorization if callback is set
+          if (_authCallback != null) {
+            final isAuthorized = await _authCallback!(req);
+            if (!isAuthorized) {
+              request.response.statusCode = HttpStatus.unauthorized;
+              await request.response.close();
+              return;
+            }
+          }
+           // Upgrade to WebSocket
+          final ws = await WebSocketTransformer.upgrade(request);
+          final clientId = _generateClientId();
+          final client = SocketClient(
+            id: clientId,
+            socket: ws,
+            manager: _manager,
+            headers: request.headers, 
+            context: req.params.attributes
+          );
+          final handler = SocketHandler(client, _manager, _globalMiddleware);
+
+          _manager.addClient(client);
+
+          // Store authorization headers in client context
+          client.set('headers', request.headers);
+          client.set('authorized', true);
+
+          // Call onConnect callback
+          if (_onConnectCallback != null) {
+            try {
+              await _onConnectCallback!(client);
+            } catch (e, stackTrace) {
+              Khadem.logger.error('Error in onConnect callback: $e');
+              Khadem.logger.debug('Stack trace: $stackTrace');
+            }
+          }
+
+          handler.init();
+
+          // Listen for disconnect
+          ws.done.then((_) async {
+            try {
+              // Execute disconnect middleware
+              await _globalMiddleware.executeDisconnect(client);
+
+              // Call onDisconnect callback
+              if (_onDisconnectCallback != null) {
+                await _onDisconnectCallback!(client);
+              }
+            } catch (e, stackTrace) {
+              Khadem.logger.error('Error in disconnect handling: $e');
+              Khadem.logger.debug('Stack trace: $stackTrace');
+            }
+          });
+        } catch (e, stackTrace) {
+          Khadem.logger.error('Error during WebSocket upgrade: $e');
+          Khadem.logger.debug('Stack trace: $stackTrace');
+          try {
+            request.response.statusCode = HttpStatus.internalServerError;
+            await request.response.close();
+          } catch (responseError) {
+            // Ignore response errors during error handling
+          }
+        }
+      } else {
+        request.response.statusCode = HttpStatus.badRequest;
+        await request.response.close();
+      }
     });
   }
 

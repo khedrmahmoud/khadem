@@ -1,6 +1,7 @@
 import '../../contracts/socket/socket_event_handler.dart';
 import '../../contracts/socket/socket_middleware.dart';
 import 'socket_client.dart';
+import 'socket_middleware_pipeline.dart';
 
 class _EventEntry {
   final SocketEventHandler handler;
@@ -12,13 +13,17 @@ class _EventEntry {
 class SocketManager {
   final Map<String, SocketClient> _clients = {};
   final Map<dynamic, String> _userClientMap = {};
-
   final Map<String, Set<SocketClient>> _rooms = {};
   final Map<String, _EventEntry> _eventHandlers = {};
   final Map<String, List<SocketMiddleware>> _roomMiddlewares = {};
-
-  // Track which clients are interested in which events
   final Map<String, Set<SocketClient>> _eventSubscribers = {};
+
+  // Reference to global middleware pipeline
+  SocketMiddlewarePipeline? _globalMiddleware;
+
+  void setGlobalMiddleware(SocketMiddlewarePipeline middleware) {
+    _globalMiddleware = middleware;
+  }
 
   void addClient(SocketClient client) {
     _clients[client.id] = client;
@@ -67,12 +72,22 @@ class SocketManager {
         .toList();
   }
 
-  void join(String room, SocketClient client) {
+  void join(String room, SocketClient client) async {
+    // Execute room middleware before joining
+    if (_globalMiddleware != null) {
+      await _globalMiddleware!.executeRoom(client, room);
+    }
+
     _rooms.putIfAbsent(room, () => {}).add(client);
     client.rooms.add(room);
   }
 
-  void leave(String room, SocketClient client) {
+  void leave(String room, SocketClient client) async {
+    // Execute room middleware before leaving
+    if (_globalMiddleware != null) {
+      await _globalMiddleware!.executeRoom(client, room);
+    }
+
     _rooms[room]?.remove(client);
     client.rooms.remove(room);
     if (_rooms[room]?.isEmpty ?? false) {
