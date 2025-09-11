@@ -1,11 +1,14 @@
-import '../../contracts/config/config_contract.dart';
-import '../../contracts/queue/queue_driver.dart';
+
+import 'package:khadem/src/contracts/config/config_contract.dart';
+import 'package:khadem/src/contracts/queue/queue_driver.dart';
+
 import '../../support/exceptions/queue_exception.dart';
- import '../../support/queue_drivers/file_queue_driver.dart';
-import '../../support/queue_drivers/memory_queue_driver.dart';
-import '../../support/queue_drivers/redis_queue_driver.dart';
-import '../../support/queue_drivers/sync_queue_driver.dart';
+ 
 import 'queue_driver_registry.dart';
+import 'queue_drivers/file_queue_driver.dart';
+import 'queue_drivers/memory_queue_driver.dart';
+import 'queue_drivers/redis_queue_driver.dart';
+import 'queue_drivers/sync_queue_driver.dart';
 
 /// Simplified queue factory for Laravel-style queues
 /// Focuses on core functionality without serialization complexity.
@@ -47,7 +50,6 @@ class QueueFactory {
   void _registerDefaultDrivers() {
     _registry.register('sync', SyncQueueDriver());
     _registry.register('memory', MemoryQueueDriver());
-    // File and Redis drivers work but execute immediately (no serialization)
     _registry.register('file', FileQueueDriver());
     _registry.register('redis', RedisQueueDriver());
   }

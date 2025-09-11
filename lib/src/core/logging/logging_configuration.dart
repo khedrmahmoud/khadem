@@ -1,9 +1,9 @@
 import '../../contracts/config/config_contract.dart';
 import '../../contracts/logging/log_handler.dart';
 import '../../contracts/logging/log_level.dart';
-import '../../support/logging_writers/console_writer.dart';
-import '../../support/logging_writers/file_writer.dart';
-
+import 'logging_writers/console_writer.dart';
+import 'logging_writers/file_writer.dart';
+ 
 /// Configuration manager for the logging system.
 /// Handles loading and parsing logging configuration from the application config.
 class LoggingConfiguration {

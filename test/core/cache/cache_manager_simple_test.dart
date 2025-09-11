@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:khadem/src/core/cache/cache_manager.dart';
-import 'package:khadem/src/support/cache_drivers/memory_cache_driver.dart';
+import 'package:khadem/src/core/cache/cache_drivers/memory_cache_driver.dart';
 import 'package:khadem/src/support/exceptions/cache_exceptions.dart';
 import 'package:test/test.dart';
 

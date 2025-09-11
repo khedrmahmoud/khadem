@@ -1,5 +1,7 @@
-import '../../contracts/queue/queue_driver.dart';
-import '../../contracts/queue/queue_job.dart';
+
+import 'package:khadem/src/contracts/queue/queue_driver.dart';
+import 'package:khadem/src/contracts/queue/queue_job.dart';
+
 
 class MemoryQueueDriver implements QueueDriver {
   final List<_DelayedJob> _jobs = [];

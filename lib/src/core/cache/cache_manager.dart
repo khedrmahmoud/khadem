@@ -2,11 +2,11 @@ import 'dart:async';
 
 import '../../contracts/cache/cache_driver.dart';
 import '../../contracts/config/config_contract.dart';
-import '../../support/cache_drivers/file_cache_driver.dart';
-import '../../support/cache_drivers/hybrid_cache_driver.dart';
-import '../../support/cache_drivers/memory_cache_driver.dart';
-import '../../support/cache_drivers/redis_cache_driver.dart';
 import '../../support/exceptions/cache_exceptions.dart';
+import 'cache_drivers/file_cache_driver.dart';
+import 'cache_drivers/hybrid_cache_driver.dart';
+import 'cache_drivers/memory_cache_driver.dart';
+import 'cache_drivers/redis_cache_driver.dart';
 
 /// Cache manager that handles multiple cache drivers and automatic cache invalidation.
 ///
@@ -400,11 +400,17 @@ class CacheManager {
 
 /// Statistics for cache operations.
 class CacheStats {
+  /// Number of cache hits
   final int hits;
+  /// Number of cache misses
   final int misses;
+  /// Number of cache puts
   final int puts;
+  /// Number of cache forgets
   final int forgets;
+  /// Number of cache clears
   final int clears;
+  /// Number of errors encountered
   final int errors;
 
   const CacheStats({
@@ -425,6 +431,9 @@ class CacheStats {
         errors: 0,
       );
 
+  /// Calculates the cache hit rate as a percentage.
+  /// Returns a value between 0.0 and 1.0.
+  /// If there are no hits or misses, returns 0.0.
   double get hitRate => hits + misses > 0 ? hits / (hits + misses) : 0.0;
 
   @override

@@ -1,6 +1,5 @@
 import 'package:khadem/khadem_dart.dart';
-import '../core/queue/queue.dart' as LaravelQueue;
-import '../contracts/queue/queue_job.dart' as QueueContract;
+ import '../contracts/queue/queue_job.dart' as QueueContract;
 import '../core/http/session.dart';
 
 /// Central access point for all Khadem framework services and utilities.
@@ -78,17 +77,7 @@ class Khadem {
   static UrlService get urlService => container.resolve<UrlService>();
   static AssetService get assetService => container.resolve<AssetService>();
 
-  // ========= 📋 Laravel-style Queue Helpers =========
-
-  /// Dispatch a job to the queue (Laravel-style)
-  static Future<void> dispatch(QueueContract.QueueJob job, {Duration? delay, String? onQueue}) async {
-    await LaravelQueue.Queue.dispatch(job, delay: delay, onQueue: onQueue);
-  }
-
-  /// Dispatch multiple jobs at once
-  static Future<void> dispatchBatch(List<QueueContract.QueueJob> jobs, {Duration? delay}) async {
-    await LaravelQueue.Queue.dispatchBatch(jobs, delay: delay);
-  }
+ 
 
   // ========= 🌐 URL & Asset Helpers =========
 

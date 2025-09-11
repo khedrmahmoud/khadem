@@ -1,7 +1,10 @@
 import 'dart:convert';
 
-import '../../contracts/logging/log_handler.dart';
-import '../../contracts/logging/log_level.dart';
+import 'package:khadem/src/contracts/logging/log_handler.dart';
+import 'package:khadem/src/contracts/logging/log_level.dart';
+
+
+
 
 /// Console-based log handler.
 class ConsoleLogHandler implements LogHandler {

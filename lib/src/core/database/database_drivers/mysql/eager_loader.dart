@@ -1,5 +1,8 @@
 
 
+import '../../../../../khadem_dart.dart';
+import '../../orm/relation_meta.dart';
+
 class EagerLoader {
   /// Parses a raw list of relation inputs into a list of [RelationMeta].
   static List<RelationMeta> parseRelations(List<dynamic> raw) {

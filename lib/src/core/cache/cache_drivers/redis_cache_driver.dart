@@ -1,7 +1,7 @@
 // redis_cache_driver.dart
 import 'dart:convert';
 import 'package:redis/redis.dart';
-import '../../contracts/cache/cache_driver.dart';
+import '../../../contracts/cache/cache_driver.dart';
 
 class RedisCacheDriver implements CacheDriver {
   final String host;

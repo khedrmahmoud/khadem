@@ -1,3 +1,5 @@
+import 'package:khadem/src/core/logging/logging_writers/console_writer.dart';
+
 import '../../contracts/config/config_contract.dart';
 import '../../contracts/container/container_interface.dart';
 import '../../contracts/env/env_interface.dart';
@@ -9,7 +11,6 @@ import '../../core/database/migration/migrator.dart';
 import '../../core/database/migration/seeder.dart';
 import '../../core/logging/logger.dart';
 import '../../core/queue/queue_manager.dart';
-import '../logging_writers/console_writer.dart';
 
 /// A lightweight service provider for CLI-only context.
 /// Does not start servers or workers, just logging + database + migrator.

@@ -161,10 +161,7 @@ export 'logging/logger.dart';
 // 📦 Logging_configuration.dart
 // ========================
 export 'logging/logging_configuration.dart';
-// ========================
-// 📦 Queue.dart (Laravel-style)
-// ========================
-export 'queue/queue.dart';
+
 // ========================
 // 📦 Queue_driver_registry.dart
 // ========================
