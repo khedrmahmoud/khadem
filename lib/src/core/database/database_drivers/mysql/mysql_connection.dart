@@ -1,9 +1,9 @@
 
 import 'package:mysql1/mysql1.dart';
-import '../../../contracts/database/connection_interface.dart';
-import '../../../contracts/database/database_response.dart';
-import '../../../contracts/database/query_builder_interface.dart';
-import '../../exceptions/database_exception.dart';
+import '../../../../contracts/database/connection_interface.dart';
+import '../../../../contracts/database/database_response.dart';
+import '../../../../contracts/database/query_builder_interface.dart';
+import '../../../../support/exceptions/database_exception.dart';
 import 'mysql_query_builder.dart';
 
 /// Concrete implementation of [ConnectionInterface] for MySQL using `mysql1` package.

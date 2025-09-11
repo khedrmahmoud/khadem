@@ -1,7 +1,7 @@
-import '../../../contracts/database/schema_builder.dart';
+import '../../../../contracts/database/schema_builder.dart';
 
-import '../../../core/database/schema/blueprint.dart';
-import '../../../core/database/schema/column_definition.dart';
+import '../../schema/blueprint.dart';
+import '../../schema/column_definition.dart';
 
 class MySQLSchemaBuilder implements SchemaBuilder {
   final List<String> _queries = [];
