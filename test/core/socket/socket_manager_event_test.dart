@@ -53,6 +53,42 @@ class TestSocketClient implements SocketClient {
 
   @override
   bool isInRoom(String room) => _rooms.contains(room);
+  
+  @override
+  // TODO: implement authToken
+  String? get authToken => throw UnimplementedError();
+  
+  @override
+  String? getHeader(String name) {
+    // TODO: implement getHeader
+    throw UnimplementedError();
+  }
+  
+  @override
+  List<String>? getHeaderValues(String name) {
+    // TODO: implement getHeaderValues
+    throw UnimplementedError();
+  }
+  
+  @override
+  // TODO: implement headers
+  HttpHeaders? get headers => throw UnimplementedError();
+  
+  @override
+  // TODO: implement isAuthenticated
+  bool get isAuthenticated => throw UnimplementedError();
+  
+  @override
+  // TODO: implement isAuthorized
+  bool get isAuthorized => throw UnimplementedError();
+  
+  @override
+  // TODO: implement user
+  Map<String, dynamic>? get user => throw UnimplementedError();
+  
+  @override
+  // TODO: implement userAgent
+  String? get userAgent => throw UnimplementedError();
 }
 
 void main() {

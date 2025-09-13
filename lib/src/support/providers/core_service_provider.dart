@@ -1,18 +1,25 @@
+import 'package:khadem/khadem_dart.dart' show
+    AssetService,
+    ConfigInterface,
+    ConfigSystem,
+    ContainerInterface,
+    EnvInterface,
+    EnvSystem,
+    EventSystem,
+    EventSystemInterface,
+    FileLangProvider,
+    Lang,
+    LangProvider,
+    Logger,
+    MiddlewarePipeline,
+    ServiceProvider,
+    SocketManager,
+    StorageManager,
+    UrlService,
+    Router;
 import 'package:timezone/data/latest.dart' as tz;
 
-import '../../contracts/config/config_contract.dart';
-import '../../contracts/container/container_interface.dart';
-import '../../contracts/env/env_interface.dart';
-import '../../contracts/events/event_system_interface.dart';
-import '../../contracts/lang/lang_provider.dart';
-import '../../contracts/provider/service_provider.dart';
-import '../../core/cache/cache_manager.dart';
-import '../../core/core.dart';
-import '../../core/http/middleware/middleware_pipeline.dart';
-import '../../core/logging/logger.dart';
-import '../../core/socket/socket_manager.dart';
-import '../../core/storage/storage_manager.dart';
-import '../../support/services/url_service.dart';
+
 
 /// Registers all core services of the Khadem framework,
 /// including configuration, environment, logger, router, cache, and events.
@@ -27,7 +34,6 @@ class CoreServiceProvider extends ServiceProvider {
   /// including configuration, environment, logger, router, cache, and events.
   void _registerCoreBindings(ContainerInterface container) {
     container.lazySingleton<Router>((c) => Router());
-    container.lazySingleton<CacheManager>((c) => CacheManager());
 
     container.lazySingleton<EventSystemInterface>((c) => EventSystem());
 
@@ -93,10 +99,6 @@ class CoreServiceProvider extends ServiceProvider {
 
     final config = container.resolve<ConfigInterface>() as ConfigSystem;
     config.setEnvironment(envSystem.getOrDefault('APP_ENV', 'development'));
-
-// Load cache manager
-    final cacheManager = container.resolve<CacheManager>();
-    cacheManager.loadFromConfig(config);
 
 // Load storage manager
     final storageManager = container.resolve<StorageManager>();

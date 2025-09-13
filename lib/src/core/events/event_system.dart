@@ -184,7 +184,7 @@ class EventSystem implements EventSystemInterface {
     }
 
     if (broadcast) {
-      Khadem.socket.broadcast('event', event, payload);
+      Khadem.socket.broadcastEvent(  event, payload);
     }
   }
 

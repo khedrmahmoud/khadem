@@ -1,7 +1,8 @@
 import 'dart:async';
 
  
-import 'package:khadem/src/contracts/contracts.dart';
+ 
+import 'package:khadem/khadem_dart.dart' show NextFunction;
 
 import '../../../routing/router.dart';
 import '../../middleware/middleware_pipeline.dart';

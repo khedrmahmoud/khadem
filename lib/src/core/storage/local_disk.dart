@@ -88,6 +88,7 @@ class LocalDisk implements StorageDisk {
 
   @override
   String url(String path) {
-    return 'file://$basePath/$path';
+    final file = _file(path);
+    return file.resolveSymbolicLinksSync();
   }
 }

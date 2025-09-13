@@ -1,6 +1,7 @@
 import 'package:khadem/src/core/database/model_base/khadem_model.dart';
 
 import '../../core/database/orm/paginated_result.dart';
+import 'dart:async';
 
 /// A generic interface for building SQL-like queries dynamically.
 /// Supports both raw Map responses or strongly-typed KhademModel instances.
@@ -65,6 +66,9 @@ abstract class QueryBuilderInterface<T> {
 
   /// Returns the first row only.
   Future<T?> first();
+
+  /// Returns a stream of results for memory-efficient processing.
+  Stream<T> asStream();
 
   /// Returns a paginated result.
   Future<PaginatedResult<T>> paginate({int? perPage = 10, int? page = 1});

@@ -8,7 +8,9 @@ import 'package:khadem/khadem_dart.dart'
         ServiceProvider,
         SetLocaleMiddleware,
         QueueServiceProvider,
-        AuthServiceProvider;
+        AuthServiceProvider,
+        CoreServiceProvider,
+        CacheServiceProvider;
 import '../app/Providers/event_service_provider.dart';
 import '../app/Providers/scheduler_service_provider.dart';
 import '../app/http/middleware/cors_middleware.dart';
@@ -21,6 +23,8 @@ class Kernel {
 
   /// Core service providers (framework essentials)
   static List<ServiceProvider> get coreProviders => [
+        CoreServiceProvider(),
+        CacheServiceProvider(),
         QueueServiceProvider(),
         AuthServiceProvider(),
         DatabaseServiceProvider(),
@@ -56,9 +60,6 @@ class Kernel {
 
   /// Bootstrap the application with all service providers
   static Future<void> bootstrap() async {
-    // Register core services
-    await Khadem.registerCoreServices();
-
     // Register application services
     Khadem.register(allProviders);
 

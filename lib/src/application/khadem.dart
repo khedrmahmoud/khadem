@@ -1,6 +1,7 @@
 import 'package:khadem/khadem_dart.dart';
- import '../contracts/queue/queue_job.dart' as QueueContract;
-import '../core/http/session.dart';
+import 'package:khadem/src/contracts/cache/cache_interfaces.dart' show ICacheManager;
+import 'package:khadem/src/support/providers/cache_service_provider.dart';
+
 
 /// Central access point for all Khadem framework services and utilities.
 class Khadem {
@@ -21,13 +22,6 @@ class Khadem {
   static ServiceProviderManager get providers => _providerManager;
 
   // ========= ⚙️ Core Bootstrapping =========
-
-  /// Registers core service providers (only essential framework services).
-  static Future<void> registerCoreServices() async {
-    register([
-      CoreServiceProvider(),
-    ]);
-  }
 
   /// Registers application service providers (user-managed, like Laravel's Kernel).
   static Future<void> registerApplicationServices(List<ServiceProvider> serviceProviders) async {
@@ -58,7 +52,7 @@ class Khadem {
   // ========= 🧠 Common Services =========
 
   static Logger get logger => container.resolve<Logger>();
-  static CacheManager get cache => container.resolve<CacheManager>();
+  static ICacheManager get cache => container.resolve<ICacheManager>();
   static EnvInterface get env => container.resolve<EnvInterface>();
   static ConfigInterface get config => container.resolve<ConfigInterface>();
 
@@ -78,65 +72,6 @@ class Khadem {
   static AssetService get assetService => container.resolve<AssetService>();
 
  
-
-  // ========= 🌐 URL & Asset Helpers =========
-
-  /// Generate a URL
-  static String url(String path, {Map<String, String>? query}) {
-    return urlService.url(path, query: query);
-  }
-
-  /// Generate an asset URL
-  static String asset(String path, {Map<String, String>? query}) {
-    return assetService.asset(path, query: query);
-  }
-
-  /// Generate a CSS asset URL
-  static String css(String path, {Map<String, String>? query}) {
-    return assetService.css(path, query: query);
-  }
-
-  /// Generate a JavaScript asset URL
-  static String js(String path, {Map<String, String>? query}) {
-    return assetService.js(path, query: query);
-  }
-
-  /// Generate an image asset URL
-  static String image(String path, {Map<String, String>? query}) {
-    return assetService.image(path, query: query);
-  }
-
-  /// Generate a storage URL
-  static String storageUrl(String path, {Map<String, String>? query}) {
-    return assetService.storage(path, query: query);
-  }
-
-  /// Generate a route URL
-  static String route(String name,
-      {Map<String, String>? parameters, Map<String, String>? query,}) {
-    return urlService.route(name, parameters: parameters, query: query);
-  }
-
-  /// Store a file
-  static Future<String> storeFile(
-    String path,
-    List<int> bytes, {
-    String disk = 'public',
-    String? filename,
-  }) {
-    return assetService.storeFile(path, bytes, disk: disk, filename: filename);
-  }
-
-  /// Store a text file
-  static Future<String> storeTextFile(
-    String path,
-    String content, {
-    String disk = 'public',
-    String? filename,
-  }) {
-    return assetService.storeTextFile(path, content,
-        disk: disk, filename: filename,);
-  }
 
   // ========= 📅 Scheduler & View System =========
 

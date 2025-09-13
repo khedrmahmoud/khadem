@@ -1,14 +1,19 @@
 import 'dart:async';
 
-import '../../contracts/cache/cache_driver.dart';
-import '../../contracts/config/config_contract.dart';
-import '../../support/exceptions/cache_exceptions.dart';
-import 'cache_drivers/file_cache_driver.dart';
-import 'cache_drivers/hybrid_cache_driver.dart';
-import 'cache_drivers/memory_cache_driver.dart';
-import 'cache_drivers/redis_cache_driver.dart';
+import 'package:khadem/src/core/cache/cache_stats.dart';
 
-/// Cache manager that handles multiple cache drivers and automatic cache invalidation.
+import '../../../contracts/cache/cache_config_loader.dart';
+import '../../../contracts/cache/cache_driver.dart';
+import '../../../contracts/cache/cache_driver_registry.dart';
+import '../../../contracts/cache/cache_manager_contract.dart';
+import '../../../contracts/cache/cache_statistics_manager.dart';
+import '../../../contracts/cache/cache_tag_manager.dart';
+import '../../../contracts/cache/cache_validator.dart';
+import '../../../contracts/config/config_contract.dart';
+import '../../../support/exceptions/cache_exceptions.dart';
+
+/// Cache manager that implements a clean facade pattern.
+/// Orchestrates all cache operations through modular managers following SOLID principles.
 ///
 /// The CacheManager provides a unified interface for caching operations across different
 /// storage backends including memory, file system, and Redis. It supports multiple
@@ -17,6 +22,7 @@ import 'cache_drivers/redis_cache_driver.dart';
 ///
 /// ## Features
 ///
+/// - **Modular Architecture**: Uses dependency injection with separate managers for each responsibility
 /// - **Multiple Drivers**: Support for memory, file, hybrid, and Redis cache drivers
 /// - **TTL Management**: Automatic expiration of cached items
 /// - **Cache Tags**: Group related cache items for bulk invalidation
@@ -27,8 +33,23 @@ import 'cache_drivers/redis_cache_driver.dart';
 /// ## Basic Usage
 ///
 /// ```dart
+/// // Create managers
+/// final registry = CacheDriverRegistry();
+/// final statsManager = CacheStatisticsManager();
+/// final tagManager = CacheTagManager();
+/// final configLoader = CacheConfigLoader();
+/// final validator = CacheValidator();
+///
+/// // Create cache manager
+/// final cache = CacheManager(
+///   driverRegistry: registry,
+///   statisticsManager: statsManager,
+///   tagManager: tagManager,
+///   configLoader: configLoader,
+///   validator: validator,
+/// );
+///
 /// // Register a memory cache driver
-/// final cache = CacheManager();
 /// cache.registerDriver('memory', MemoryCacheDriver());
 /// cache.setDefaultDriver('memory');
 ///
@@ -60,28 +81,28 @@ import 'cache_drivers/redis_cache_driver.dart';
 ///       host: localhost
 ///       port: 6379
 /// ```
-class CacheManager {
-  final Map<String, CacheDriver> _drivers = {};
-  final Map<String, Set<String>> _tags = {};
-  final Map<String, DateTime> _tagTimestamps = {};
-  late CacheDriver _defaultDriver;
-  final Map<String, CacheStats> _stats = {};
+class CacheManager implements ICacheManager {
+  final ICacheDriverRegistry _driverRegistry;
+  final ICacheStatisticsManager _statisticsManager;
+  final ICacheTagManager _tagManager;
+  final ICacheConfigLoader _configLoader;
+  final ICacheValidator _validator;
 
-  /// Statistics for cache operations
-  CacheStats get stats {
-    try {
-      return _stats[_defaultDriverName] ?? CacheStats.empty();
-    } catch (e) {
-      return CacheStats.empty();
-    }
-  }
-
-  String get _defaultDriverName {
-    if (_drivers.isEmpty) {
-      throw StateError('No cache drivers registered');
-    }
-    return _drivers.entries.firstWhere((e) => e.value == _defaultDriver).key;
-  }
+  /// Creates a new CacheManager with the required managers.
+  ///
+  /// All managers must be provided through dependency injection to ensure
+  /// proper separation of concerns and testability.
+  CacheManager({
+    required ICacheDriverRegistry driverRegistry,
+    required ICacheStatisticsManager statisticsManager,
+    required ICacheTagManager tagManager,
+    required ICacheConfigLoader configLoader,
+    required ICacheValidator validator,
+  })  : _driverRegistry = driverRegistry,
+        _statisticsManager = statisticsManager,
+        _tagManager = tagManager,
+        _configLoader = configLoader,
+        _validator = validator;
 
   /// Registers a cache driver with the given name.
   ///
@@ -90,19 +111,9 @@ class CacheManager {
   ///
   /// Throws [CacheException] if the driver name is empty or already registered.
   void registerDriver(String name, CacheDriver driver) {
-    if (name.isEmpty) {
-      throw CacheException('Cache driver name cannot be empty');
-    }
-    if (_drivers.containsKey(name)) {
-      throw CacheException('Cache driver "$name" is already registered');
-    }
-
-    _drivers[name] = driver;
-    _stats[name] = CacheStats.empty();
-
-    if (_drivers.length == 1) {
-      _defaultDriver = driver;
-    }
+    _validator.validateDriverName(name);
+    _driverRegistry.registerDriver(name, driver);
+    _statisticsManager.updateStats(name, hit: false, operation: 'register');
   }
 
   /// Loads cache configuration from the application's config.
@@ -125,57 +136,7 @@ class CacheManager {
   /// Throws [CacheException] if the configuration is invalid or if a driver
   /// cannot be initialized.
   void loadFromConfig(ConfigInterface config) {
-    try {
-      final driverConfigs = config.get<Map>('cache.drivers') ?? {};
-      final defaultDriverName = config.get<String>('cache.default') ?? 'memory';
-
-      // Built-in drivers
-      driverConfigs.forEach((name, settings) {
-        final driverType = settings['driver'];
-
-        switch (driverType) {
-          case 'file':
-            final path = settings['path'] as String?;
-            if (path == null || path.isEmpty) {
-              throw CacheException('File cache driver requires a "path" setting');
-            }
-            registerDriver(name as String, FileCacheDriver(config: {'path': path}));
-            break;
-          case 'memory':
-            registerDriver(name as String, MemoryCacheDriver());
-            break;
-          case 'hybrid':
-            final path = settings['path'] as String?;
-            if (path == null || path.isEmpty) {
-              throw CacheException('Hybrid cache driver requires a "path" setting');
-            }
-            registerDriver(
-              name as String,
-              HybridCacheDriver(filePath: path),
-            );
-            break;
-          case 'redis':
-            final host = settings['host'] as String? ?? 'localhost';
-            final port = settings['port'] as int? ?? 6379;
-            registerDriver(
-              name as String,
-              RedisCacheDriver(host: host, port: port),
-            );
-            break;
-          default:
-            throw CacheException('Unknown cache driver: $driverType');
-        }
-      });
-
-      if (_drivers.isEmpty) {
-        // Register default memory driver if no drivers configured
-        registerDriver('memory', MemoryCacheDriver());
-      }
-
-      setDefaultDriver(defaultDriverName);
-    } catch (e) {
-      throw CacheException('Failed to load cache configuration: $e');
-    }
+    _configLoader.loadFromConfig(config, _driverRegistry);
   }
 
   /// Sets the default cache driver.
@@ -185,10 +146,8 @@ class CacheManager {
   ///
   /// Throws [CacheException] if the driver is not registered.
   void setDefaultDriver(String name) {
-    if (!_drivers.containsKey(name)) {
-      throw CacheException('Cache driver "$name" not registered');
-    }
-    _defaultDriver = _drivers[name]!;
+    _validator.validateDriverName(name);
+    _driverRegistry.setDefaultDriver(name);
   }
 
   /// Gets a specific cache driver instance.
@@ -197,14 +156,17 @@ class CacheManager {
   /// Otherwise, returns the default driver.
   ///
   /// Throws [CacheException] if the requested driver is not registered.
+  @override
   CacheDriver driver([String? name]) {
     if (name != null) {
-      if (!_drivers.containsKey(name)) {
+      _validator.validateDriverName(name);
+      final driver = _driverRegistry.getDriver(name);
+      if (driver == null) {
         throw CacheException('Cache driver "$name" not registered');
       }
-      return _drivers[name]!;
+      return driver;
     }
-    return _defaultDriver;
+    return _driverRegistry.getDefaultDriver();
   }
 
   /// Stores a value in the cache using the default driver.
@@ -213,13 +175,26 @@ class CacheManager {
   /// object. The [ttl] specifies how long the item should remain in the cache.
   ///
   /// Throws [CacheException] if the key is empty or if the operation fails.
+  @override
   Future<void> put(String key, dynamic value, Duration ttl) async {
-    _validateKey(key);
+    _validator.validateKey(key);
+    _validator.validateTtl(ttl);
+
     try {
-      await _defaultDriver.put(key, value, ttl);
-      _updateStats(hit: false, operation: 'put');
+      final driver = _driverRegistry.getDefaultDriver();
+      await driver.put(key, value, ttl);
+      _statisticsManager.updateStats(
+        _driverRegistry.getDefaultDriverName(),
+        hit: false,
+        operation: 'put',
+      );
     } catch (e) {
-      _updateStats(hit: false, operation: 'put', error: true);
+      _statisticsManager.updateStats(
+        _driverRegistry.getDefaultDriverName(),
+        hit: false,
+        operation: 'put',
+        error: true,
+      );
       throw CacheException('Failed to store cache item "$key": $e');
     }
   }
@@ -229,14 +204,26 @@ class CacheManager {
   /// Returns the cached value if it exists and hasn't expired, otherwise returns null.
   ///
   /// Throws [CacheException] if the key is empty or if the operation fails.
+  @override
   Future<dynamic> get(String key) async {
-    _validateKey(key);
+    _validator.validateKey(key);
+
     try {
-      final value = await _defaultDriver.get(key);
-      _updateStats(hit: value != null, operation: 'get');
+      final driver = _driverRegistry.getDefaultDriver();
+      final value = await driver.get(key);
+      _statisticsManager.updateStats(
+        _driverRegistry.getDefaultDriverName(),
+        hit: value != null,
+        operation: 'get',
+      );
       return value;
     } catch (e) {
-      _updateStats(hit: false, operation: 'get', error: true);
+      _statisticsManager.updateStats(
+        _driverRegistry.getDefaultDriverName(),
+        hit: false,
+        operation: 'get',
+        error: true,
+      );
       throw CacheException('Failed to retrieve cache item "$key": $e');
     }
   }
@@ -246,13 +233,28 @@ class CacheManager {
   /// If the key doesn't exist, this operation is a no-op.
   ///
   /// Throws [CacheException] if the key is empty or if the operation fails.
+  @override
   Future<void> forget(String key) async {
-    _validateKey(key);
+    _validator.validateKey(key);
+
     try {
-      await _defaultDriver.forget(key);
-      _updateStats(hit: false, operation: 'forget');
+      final driver = _driverRegistry.getDefaultDriver();
+      await driver.forget(key);
+      _statisticsManager.updateStats(
+        _driverRegistry.getDefaultDriverName(),
+        hit: false,
+        operation: 'forget',
+      );
+
+      // Remove tags for this key
+      _tagManager.removeTagsForKey(key);
     } catch (e) {
-      _updateStats(hit: false, operation: 'forget', error: true);
+      _statisticsManager.updateStats(
+        _driverRegistry.getDefaultDriverName(),
+        hit: false,
+        operation: 'forget',
+        error: true,
+      );
       throw CacheException('Failed to remove cache item "$key": $e');
     }
   }
@@ -262,14 +264,26 @@ class CacheManager {
   /// Returns true if the key exists and hasn't expired, false otherwise.
   ///
   /// Throws [CacheException] if the key is empty or if the operation fails.
+  @override
   Future<bool> has(String key) async {
-    _validateKey(key);
+    _validator.validateKey(key);
+
     try {
-      final exists = await _defaultDriver.has(key);
-      _updateStats(hit: exists, operation: 'has');
+      final driver = _driverRegistry.getDefaultDriver();
+      final exists = await driver.has(key);
+      _statisticsManager.updateStats(
+        _driverRegistry.getDefaultDriverName(),
+        hit: exists,
+        operation: 'has',
+      );
       return exists;
     } catch (e) {
-      _updateStats(hit: false, operation: 'has', error: true);
+      _statisticsManager.updateStats(
+        _driverRegistry.getDefaultDriverName(),
+        hit: false,
+        operation: 'has',
+        error: true,
+      );
       throw CacheException('Failed to check cache item "$key": $e');
     }
   }
@@ -279,12 +293,26 @@ class CacheManager {
   /// This operation removes all cached data and cannot be undone.
   ///
   /// Throws [CacheException] if the operation fails.
+  @override
   Future<void> clear() async {
     try {
-      await _defaultDriver.clear();
-      _updateStats(hit: false, operation: 'clear');
+      final driver = _driverRegistry.getDefaultDriver();
+      await driver.clear();
+      _statisticsManager.updateStats(
+        _driverRegistry.getDefaultDriverName(),
+        hit: false,
+        operation: 'clear',
+      );
+
+      // Clear all tags
+      _tagManager.clearAllTags();
     } catch (e) {
-      _updateStats(hit: false, operation: 'clear', error: true);
+      _statisticsManager.updateStats(
+        _driverRegistry.getDefaultDriverName(),
+        hit: false,
+        operation: 'clear',
+        error: true,
+      );
       throw CacheException('Failed to clear cache: $e');
     }
   }
@@ -295,6 +323,7 @@ class CacheManager {
   /// or the cache is cleared.
   ///
   /// Throws [CacheException] if the key is empty or if the operation fails.
+  @override
   Future<void> forever(String key, dynamic value) async {
     await put(key, value, const Duration(days: 365 * 10));
   }
@@ -309,12 +338,15 @@ class CacheManager {
   /// to be cached.
   ///
   /// Throws [CacheException] if the key is empty or if any operation fails.
+  @override
   Future<dynamic> remember(
     String key,
     Duration ttl,
     Future<dynamic> Function() callback,
   ) async {
-    _validateKey(key);
+    _validator.validateKey(key);
+    _validator.validateTtl(ttl);
+
     try {
       if (await has(key)) {
         return await get(key);
@@ -334,12 +366,11 @@ class CacheManager {
   /// all at once using [forgetByTag].
   ///
   /// Throws [CacheException] if the key is empty or if the operation fails.
+  @override
   Future<void> tag(String key, List<String> tags) async {
-    _validateKey(key);
-    for (final tag in tags) {
-      _tags.putIfAbsent(tag, () => {}).add(key);
-    }
-    _tagTimestamps[key] = DateTime.now();
+    _validator.validateKey(key);
+    _validator.validateTags(tags);
+    await _tagManager.tag(key, tags);
   }
 
   /// Removes all cache items associated with the given tag.
@@ -347,96 +378,37 @@ class CacheManager {
   /// This is useful for invalidating groups of related cache items.
   ///
   /// Throws [CacheException] if the operation fails.
+  @override
   Future<void> forgetByTag(String tag) async {
-    final keys = _tags[tag];
-    if (keys != null) {
-      for (final key in keys) {
+    final keys = _tagManager.getKeysForTag(tag);
+
+    // Remove each key from cache
+    for (final key in keys) {
+      try {
         await forget(key);
+      } catch (e) {
+        // Continue with other keys even if one fails
+        // Log error or handle as needed
       }
-      _tags.remove(tag);
     }
+
+    // Remove tag associations
+    await _tagManager.forgetByTag(tag);
   }
 
   /// Gets all registered driver names.
-  List<String> get driverNames => _drivers.keys.toList();
+  @override
+  List<String> get driverNames => _driverRegistry.getDriverNames();
 
   /// Gets the name of the current default driver.
-  String get defaultDriverName {
-    if (_drivers.isEmpty) {
-      throw CacheException('No cache drivers registered');
-    }
-    return _defaultDriverName;
-  }
+  @override
+  String get defaultDriverName => _driverRegistry.getDefaultDriverName();
+
+  /// Gets cache statistics for the default driver.
+  @override
+  CacheStats get stats => _statisticsManager.getStats(_driverRegistry.getDefaultDriverName());
 
   /// Gets cache statistics for all drivers.
-  Map<String, CacheStats> get allStats => Map.unmodifiable(_stats);
-
-  /// Validates that a cache key is not empty.
-  void _validateKey(String key) {
-    if (key.isEmpty) {
-      throw CacheException('Cache key cannot be empty');
-    }
-  }
-
-  /// Updates cache statistics for the current operation.
-  void _updateStats({
-    required bool hit,
-    required String operation,
-    bool error = false,
-  }) {
-    final driverName = _defaultDriverName;
-    final currentStats = _stats[driverName] ?? CacheStats.empty();
-
-    _stats[driverName] = CacheStats(
-      hits: currentStats.hits + (operation == 'get' || operation == 'has' ? (hit ? 1 : 0) : 0),
-      misses: currentStats.misses + (operation == 'get' || operation == 'has' ? (hit ? 0 : 1) : 0),
-      puts: currentStats.puts + (operation == 'put' ? 1 : 0),
-      forgets: currentStats.forgets + (operation == 'forget' ? 1 : 0),
-      clears: currentStats.clears + (operation == 'clear' ? 1 : 0),
-      errors: currentStats.errors + (error ? 1 : 0),
-    );
-  }
-}
-
-/// Statistics for cache operations.
-class CacheStats {
-  /// Number of cache hits
-  final int hits;
-  /// Number of cache misses
-  final int misses;
-  /// Number of cache puts
-  final int puts;
-  /// Number of cache forgets
-  final int forgets;
-  /// Number of cache clears
-  final int clears;
-  /// Number of errors encountered
-  final int errors;
-
-  const CacheStats({
-    required this.hits,
-    required this.misses,
-    required this.puts,
-    required this.forgets,
-    required this.clears,
-    required this.errors,
-  });
-
-  factory CacheStats.empty() => const CacheStats(
-        hits: 0,
-        misses: 0,
-        puts: 0,
-        forgets: 0,
-        clears: 0,
-        errors: 0,
-      );
-
-  /// Calculates the cache hit rate as a percentage.
-  /// Returns a value between 0.0 and 1.0.
-  /// If there are no hits or misses, returns 0.0.
-  double get hitRate => hits + misses > 0 ? hits / (hits + misses) : 0.0;
-
   @override
-  String toString() =>
-      'CacheStats(hits: $hits, misses: $misses, puts: $puts, forgets: $forgets, clears: $clears, errors: $errors, hitRate: ${(hitRate * 100).toStringAsFixed(1)}%)';
+  Map<String, CacheStats> get allStats => _statisticsManager.getAllStats();
 }

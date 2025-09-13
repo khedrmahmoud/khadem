@@ -1,9 +1,10 @@
 import '../../../../contracts/database/connection_interface.dart';
 import '../../../../contracts/database/query_builder_interface.dart';
+import '../../../../support/exceptions/database_exception.dart';
 import '../../model_base/khadem_model.dart';
 import '../../orm/paginated_result.dart';
-import '../../../../support/exceptions/database_exception.dart';
 import 'eager_loader.dart';
+import 'dart:async';
 
 /// A fluent and type-safe MySQL query builder for both Maps and BaseModel subclasses.
 ///
@@ -195,6 +196,46 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         : result is KhademModel
             ? result.rawData['count'] as int
             : 0;
+  }
+
+  /// Returns a stream of results for memory-efficient processing of large datasets.
+  ///
+  /// This method is particularly useful when combined with response.stream()
+  /// for sending large amounts of data without loading everything into memory.
+  ///
+  /// Example:
+  /// ```dart
+  /// server.get('/api/export/users', (req, res) async {
+  ///   res.header('Content-Type', 'application/json');
+  ///   final userStream = User.query().asStream()
+  ///     .map((user) => jsonEncode(user.toJson()) + '\\n');
+  ///   await res.stream(userStream);
+  /// });
+  /// ```
+  @override
+  Stream<T> asStream() {
+    final sql = _buildSelectQuery();
+    final streamController = StreamController<T>();
+
+    // Execute query and stream results
+    _connection.execute(sql, _bindings).then((result) {
+      for (final row in result.data) {
+        if (T == Map || _modelFactory == null) {
+          streamController.add(row as T);
+        } else {
+          final model = _modelFactory?.call(row);
+          if (model != null) {
+            streamController.add(model);
+          }
+        }
+      }
+      streamController.close();
+    }).catchError((error) {
+      streamController.addError(error);
+      streamController.close();
+    });
+
+    return streamController.stream;
   }
 
   /// Returns true if any record matches the query.

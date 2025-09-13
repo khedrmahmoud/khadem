@@ -1,6 +1,6 @@
-import 'package:khadem/src/contracts/contracts.dart';
 
-import '../../../application/khadem.dart';
+import 'package:khadem/khadem_dart.dart' show QueryBuilderInterface, Khadem;
+
 import '../orm/relation_definition.dart';
 import '../orm/relation_type.dart';
 import 'database_model.dart';

@@ -127,12 +127,7 @@ class UrlService {
     return secureUrl;
   }
 
-  /// Generate a URL to the previous page
-  String previous({String fallback = '/'}) {
-    // In a real implementation, this would get the previous URL from the session/request
-    // For now, return the fallback
-    return url(fallback);
-  }
+
 
   /// Check if the given URL is valid
   bool isValidUrl(String url) {

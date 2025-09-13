@@ -1,8 +1,7 @@
-import '../../contracts/config/config_contract.dart';
-import '../../contracts/logging/log_handler.dart';
-import '../../contracts/logging/log_level.dart';
-import '../../contracts/logging/logger_contract.dart';
-import 'log_channel_manager.dart';
+ 
+import 'package:khadem/khadem_dart.dart' show LoggerContract, ConfigInterface, LogHandler, LogLevel;
+
+ import 'log_channel_manager.dart';
 import 'logging_configuration.dart';
 
 /// Advanced logger implementation that provides structured logging capabilities.
