@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:khadem/khadem_dart.dart';
+import 'package:khadem/src/modules/auth/services/web_auth_service.dart';
+import 'package:khadem/src/support/helpers/cookie.dart';
 
 import 'request_auth.dart';
 import 'request_body_parser.dart';
@@ -71,6 +72,9 @@ class Request {
 
   /// Access to parameter functionality
   RequestParams get params => _params;
+
+  /// Client IP address
+  String get ip => _raw.connectionInfo?.remoteAddress.address ?? 'unknown';
 
   /// Parses and returns the request body as a Map.
   /// Shortcut for bodyParser.parseBody()
@@ -260,10 +264,12 @@ class Request {
   void clearSession() => _session.clear();
 
   /// Sets multiple values in the session at once.
-  void setMultipleSessions(Map<String, dynamic> data) => _session.setMultiple(data);
+  void setMultipleSessions(Map<String, dynamic> data) =>
+      _session.setMultiple(data);
 
   /// Gets a typed value from the session, with optional default.
-  T? getSessionTyped<T>(String key, [T? defaultValue]) => _session.getTyped<T>(key, defaultValue);
+  T? getSessionTyped<T>(String key, [T? defaultValue]) =>
+      _session.getTyped<T>(key, defaultValue);
 
   /// Flashes a value to the session (temporary, removed after next access).
   void flashSession(String key, dynamic value) => _session.flash(key, value);

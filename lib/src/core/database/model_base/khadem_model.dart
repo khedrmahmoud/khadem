@@ -22,17 +22,29 @@ abstract class KhademModel<T> {
 
   /// Used in serialization
   List<String> get fillable => [];
+
+  /// Hidden attributes
   List<String> get hidden => _hiddenList;
+
+  /// Appended attributes (computed) 
   List<String> get appends => _appendsList;
+
+  /// Type casting for fields
   Map<String, Type> get casts => {};
+
+  /// Computed properties (getters)
+  /// E.g., 'full_name': () => '$firstName $lastName'
+  /// These are included when listed in `appends`
   Map<String, dynamic> get computed => {};
 
   /// Mutable backing fields for hidden and appends
   late final List<String> _hiddenList = _getInitialHidden();
   late final List<String> _appendsList = _getInitialAppends();
 
-  /// Methods for subclasses to override initial values
+  ///  Initial hidden can be overridden
   List<String> get initialHidden => [];
+
+  /// Initial appends can be overridden
   List<String> get initialAppends => [];
 
   List<String> _getInitialHidden() => List.from(initialHidden);
@@ -184,7 +196,7 @@ abstract class KhademModel<T> {
   Future<void> _loadRelation(String relationName) async {
     if (!relations.containsKey(relationName)) {
       throw Exception(
-          'Relation "$relationName" not defined on model $modelName');
+          'Relation "$relationName" not defined on model $modelName',);
     }
 
     final relationDef = relations[relationName]!;
@@ -239,7 +251,7 @@ abstract class KhademModel<T> {
 
       default:
         throw UnsupportedError(
-            'Relation type ${relationDef.type} not implemented');
+            'Relation type ${relationDef.type} not implemented',);
     }
   }
 

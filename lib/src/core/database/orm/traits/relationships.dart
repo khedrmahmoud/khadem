@@ -1,7 +1,7 @@
+import '../../../../contracts/database/query_builder_interface.dart';
 import '../../model_base/khadem_model.dart';
 import '../relation_definition.dart';
 import '../relation_type.dart';
-import '../../../../contracts/database/query_builder_interface.dart';
 
 /// Utilities to define Eloquent-style relationships.
 mixin HasRelationships {

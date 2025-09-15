@@ -60,12 +60,6 @@ class $className extends KhademModel<$className> with Timestamps, HasRelationshi
   List<String> get fillable => [];
 
   @override
-  List<String> get hidden => [];
-
-  @override
-  List<String> get appends => [];
-
-  @override
   Map<String, Type> get casts => {};
 
   @override

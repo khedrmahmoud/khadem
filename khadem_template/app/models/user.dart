@@ -20,10 +20,13 @@ class User extends KhademModel<User> with Timestamps, HasRelationships {
       ['name', 'email', 'password', 'created_at', 'updated_at'];
 
   @override
-  List<String> get hidden => ['password'];
+  List<String> get initialHidden => ['password'];
 
   @override
-  List<String> get appends => [];
+  List<String> get initialAppends => [];
+
+  @override
+  Map<String, dynamic> get computed => {};
   @override
   Object? getField(String key) {
     return switch (key) {
