@@ -202,10 +202,7 @@ export 'logging/logging_configuration.dart';
 // ========================
 export 'logging/logging_writers/console_writer.dart';
 export 'logging/logging_writers/file_writer.dart';
-// ========================
-// 📦 Job_registry.dart
-// ========================
-export 'queue/job_registry.dart';
+
 // ========================
 // 📦 Queue_driver_registry.dart
 // ========================
@@ -216,16 +213,9 @@ export 'queue/queue_driver_registry.dart';
 export 'queue/queue_drivers/file_queue_driver.dart';
 export 'queue/queue_drivers/memory_queue_driver.dart';
 export 'queue/queue_drivers/redis_queue_driver.dart';
-export 'queue/queue_drivers/simple_queue_drivers.dart';
 export 'queue/queue_drivers/sync_queue_driver.dart';
-// ========================
-// 📦 Queue_factory.dart
-// ========================
-export 'queue/queue_factory.dart';
-// ========================
-// 📦 Queue_job_serializer.dart
-// ========================
-export 'queue/queue_job_serializer.dart';
+
+
 // ========================
 // 📦 Queue_manager.dart
 // ========================

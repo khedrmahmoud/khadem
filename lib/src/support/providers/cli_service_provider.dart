@@ -51,7 +51,7 @@ class CliServiceProvider extends ServiceProvider {
     final queue = container.resolve<QueueManager>();
 
     await database.init();
-    await queue.init();
+    queue.loadFromConfig();
     container.resolve<Logger>().info('✅ CLI services initialized');
   }
 }

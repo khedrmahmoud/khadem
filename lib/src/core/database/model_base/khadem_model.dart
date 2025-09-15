@@ -1,4 +1,3 @@
-
 import 'package:khadem/khadem_dart.dart' show QueryBuilderInterface, Khadem;
 
 import '../orm/relation_definition.dart';
@@ -23,10 +22,21 @@ abstract class KhademModel<T> {
 
   /// Used in serialization
   List<String> get fillable => [];
-  List<String> get hidden => [];
-  List<String> get appends => [];
+  List<String> get hidden => _hiddenList;
+  List<String> get appends => _appendsList;
   Map<String, Type> get casts => {};
   Map<String, dynamic> get computed => {};
+
+  /// Mutable backing fields for hidden and appends
+  late final List<String> _hiddenList = _getInitialHidden();
+  late final List<String> _appendsList = _getInitialAppends();
+
+  /// Methods for subclasses to override initial values
+  List<String> get initialHidden => [];
+  List<String> get initialAppends => [];
+
+  List<String> _getInitialHidden() => List.from(initialHidden);
+  List<String> _getInitialAppends() => List.from(initialAppends);
 
   /// Holds all relations
   Map<String, RelationDefinition> get relations => {};
@@ -37,7 +47,8 @@ abstract class KhademModel<T> {
   void setField(String key, dynamic value) => UnimplementedError();
 
   /// Query builder
-  QueryBuilderInterface<T> get query => Khadem.db.table(tableName, modelFactory: (data) => newFactory(data));
+  QueryBuilderInterface<T> get query =>
+      Khadem.db.table(tableName, modelFactory: (data) => newFactory(data));
 
   String get modelName => runtimeType.toString();
   String get tableName => '${runtimeType.toString().toLowerCase()}s';
@@ -118,18 +129,18 @@ abstract class KhademModel<T> {
   }
 
   /// Set an appended attribute value
-  void setAppended(String key, dynamic value) {
-    relation.set('appended_$key', value);
+  void setAppended(String key) {
+    appends.add(key);
   }
 
   /// Get an appended attribute value
   dynamic getAppended(String key) {
-    return relation.get('appended_$key');
+    return appends.contains(key) ? _getComputedAttribute(key) : null;
   }
 
   /// Check if an attribute is appended
   bool hasAppended(String key) {
-    return relation.get('appended_$key') != null;
+    return appends.contains(key);
   }
 
   /// Make a model visible (opposite of hidden)
@@ -172,7 +183,8 @@ abstract class KhademModel<T> {
   /// Private helper methods
   Future<void> _loadRelation(String relationName) async {
     if (!relations.containsKey(relationName)) {
-      throw Exception('Relation "$relationName" not defined on model $modelName');
+      throw Exception(
+          'Relation "$relationName" not defined on model $modelName');
     }
 
     final relationDef = relations[relationName]!;
@@ -188,20 +200,24 @@ abstract class KhademModel<T> {
     switch (relationDef.type) {
       case RelationType.hasOne:
       case RelationType.belongsTo:
-        var query = Khadem.db.table(
-          relationDef.relatedTable,
-          modelFactory: (data) => relationDef.factory().newFactory(data),
-        ).where(relationDef.foreignKey, '=', localValue);
+        var query = Khadem.db
+            .table(
+              relationDef.relatedTable,
+              modelFactory: (data) => relationDef.factory().newFactory(data),
+            )
+            .where(relationDef.foreignKey, '=', localValue);
         if (relationDef.query != null) {
           query = relationDef.query!(query);
         }
         return query.first();
 
       case RelationType.hasMany:
-        var query = Khadem.db.table(
-          relationDef.relatedTable,
-          modelFactory: (data) => relationDef.factory().newFactory(data),
-        ).where(relationDef.foreignKey, '=', localValue);
+        var query = Khadem.db
+            .table(
+              relationDef.relatedTable,
+              modelFactory: (data) => relationDef.factory().newFactory(data),
+            )
+            .where(relationDef.foreignKey, '=', localValue);
         if (relationDef.query != null) {
           query = relationDef.query!(query);
         }
@@ -210,25 +226,32 @@ abstract class KhademModel<T> {
       case RelationType.belongsToMany:
         // For many-to-many, we'd need pivot table logic
         // This is a simplified implementation
-        var query = Khadem.db.table(
-          relationDef.relatedTable,
-          modelFactory: (data) => relationDef.factory().newFactory(data),
-        ).where(relationDef.foreignKey, '=', localValue);
+        var query = Khadem.db
+            .table(
+              relationDef.relatedTable,
+              modelFactory: (data) => relationDef.factory().newFactory(data),
+            )
+            .where(relationDef.foreignKey, '=', localValue);
         if (relationDef.query != null) {
           query = relationDef.query!(query);
         }
         return query.get();
 
       default:
-        throw UnsupportedError('Relation type ${relationDef.type} not implemented');
+        throw UnsupportedError(
+            'Relation type ${relationDef.type} not implemented');
     }
   }
 
   void _appendAttribute(String attribute) {
-    if (appends.contains(attribute)) {
-      final value = _getComputedAttribute(attribute);
-      setAppended(attribute, value);
+    if (!appends.contains(attribute)) {
+      setAppended(attribute);
     }
+  }
+
+  /// Get a computed attribute value
+  dynamic getComputedAttribute(String attribute) {
+    return _getComputedAttribute(attribute);
   }
 
   dynamic _getComputedAttribute(String attribute) {

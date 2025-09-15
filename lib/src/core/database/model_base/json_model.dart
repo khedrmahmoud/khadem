@@ -55,7 +55,7 @@ class JsonModel<T> {
     }
 
     for (final key in model.appends) {
-      data[key] = model.computed[key];
+      data[key] = model.getComputedAttribute(key);
     }
 
     return data;

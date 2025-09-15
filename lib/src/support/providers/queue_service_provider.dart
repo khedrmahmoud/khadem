@@ -24,7 +24,7 @@ class QueueServiceProvider extends ServiceProvider {
   Future<void> boot(ContainerInterface container) async {
     final queue = container.resolve<QueueManager>();
     final config = container.resolve<ConfigInterface>();
-    await queue.init();
+    queue.loadFromConfig();
     container
         .resolve<Logger>()
         .info('✅ Queue system initialized (${queue.defaultDriverName})');

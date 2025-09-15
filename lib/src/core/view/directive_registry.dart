@@ -2,6 +2,7 @@ import 'package:khadem/src/contracts/views/directive_contract.dart';
 
 import 'directives/array_directives.dart';
 import 'directives/asset_directives.dart';
+import 'directives/auth_directives.dart';
 import 'directives/control_flow_directives.dart';
 import 'directives/data_directives.dart';
 import 'directives/for_directive.dart';
@@ -14,7 +15,6 @@ import 'directives/loop_directives.dart';
 import 'directives/output_directives.dart';
 import 'directives/section_directive.dart';
 import 'directives/string_directives.dart';
-import 'directives/auth_directives.dart';
 import 'directives/utility_directives.dart';
 
 class DirectiveRegistry {

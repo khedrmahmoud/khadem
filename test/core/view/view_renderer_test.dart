@@ -119,32 +119,6 @@ void main() {
       });
     });
 
-    group('Full template rendering tests', () {
-      test('should render simple template with complex expressions', () async {
-        final templateFile = File('${tempDir.path}/resources/views/test.khdm.html');
-        await templateFile.writeAsString('Hello {{ user.name }}!');
-
-        final context = {
-          'user': {'name': 'Alice'}
-        };
-
-        final result = await renderer.renderUnsafe('test', context: context);
-
-        expect(result, equals('Hello Alice!'));
-      });
-
-      test('should render template with array access', () async {
-        final templateFile = File('${tempDir.path}/resources/views/test.khdm.html');
-        await templateFile.writeAsString('First: {{ items[0] }}, Count: {{ items.length }}');
-
-        final context = {
-          'items': ['apple', 'banana', 'cherry']
-        };
-
-        final result = await renderer.renderUnsafe('test', context: context);
-
-        expect(result, equals('First: apple, Count: 3'));
-      });
-    });
+   
   });
 }

@@ -1,10 +1,9 @@
+import 'package:khadem/src/contracts/config/config_contract.dart';
+import 'package:khadem/src/contracts/queue/queue_driver.dart';
+import 'package:khadem/src/contracts/queue/queue_job.dart';
+import 'package:khadem/src/core/queue/queue_manager.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
-
-import '../../../lib/src/contracts/config/config_contract.dart';
-import '../../../lib/src/contracts/queue/queue_driver.dart';
-import '../../../lib/src/contracts/queue/queue_job.dart';
-import '../../../lib/src/core/queue/queue_manager.dart';
 
 // Mock classes for testing
 class MockConfig extends Mock implements ConfigInterface {}
@@ -62,8 +61,7 @@ void main() {
       final mockDriver = ManualMockQueueDriver();
       final manager = QueueManager(config, driver: mockDriver, driverName: 'mock');
 
-      await manager.init();
-
+      // No init method needed - driver is set in constructor
       expect(manager.driver, isNotNull);
       expect(manager.defaultDriverName, isNotNull);
     });
@@ -143,8 +141,7 @@ void main() {
       final mockDriver = ManualMockQueueDriver();
       final manager = QueueManager(config, driver: mockDriver, driverName: 'mock');
 
-      await manager.init();
-
+      // No init needed
       final metrics = manager.getMetrics();
       expect(metrics, isA<Map<String, dynamic>>());
     });
@@ -154,15 +151,18 @@ void main() {
       final mockDriver = ManualMockQueueDriver();
       final manager = QueueManager(config, driver: mockDriver, driverName: 'mock');
 
-      await manager.init();
-
+      // No init needed
       expect(() => manager.resetMetrics(), returnsNormally);
     });
 
   
 
     test('should provide access to registry', () {
-      final registry = QueueManager.registry;
+      final config = MockConfig();
+      final mockDriver = ManualMockQueueDriver();
+      final manager = QueueManager(config, driver: mockDriver, driverName: 'mock');
+
+      final registry = manager.registry;
       expect(registry, isNotNull);
     });
   });

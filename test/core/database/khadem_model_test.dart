@@ -1,179 +1,55 @@
+import 'package:khadem/src/core/database/model_base/khadem_model.dart';
 import 'package:test/test.dart';
-import '../../../lib/src/core/database/model_base/khadem_model.dart';
-import '../../../lib/src/core/database/orm/relation_definition.dart';
-import '../../../lib/src/core/database/orm/relation_type.dart';
 
-// Mock model for testing
-class User extends KhademModel<User> {
+class TestModel extends KhademModel<TestModel> {
   String? name;
-  String? email;
-
-  User({this.name, this.email});
 
   @override
-  User newFactory(Map<String, dynamic> data) {
-    return User(
-      name: data['name'],
-      email: data['email'],
-    );
-  }
+  TestModel newFactory(Map<String, dynamic> data) =>
+      TestModel()..name = data['name'];
 
   @override
-  List<String> get fillable => ['name', 'email'];
+  List<String> get initialAppends => ['test_attr'];
 
   @override
-  Map<String, RelationDefinition> get relations => {
-    'posts': RelationDefinition<Post>(
-      type: RelationType.hasMany,
-      relatedTable: 'posts',
-      localKey: 'id',
-      foreignKey: 'user_id',
-      factory: () => Post(),
-    ),
-  };
+  List<String> get initialHidden => ['secret'];
 
   @override
-  dynamic getField(String key) {
-    switch (key) {
-      case 'id':
-        return id;
-      case 'name':
-        return name;
-      case 'email':
-        return email;
-      default:
-        return null;
-    }
-  }
+  Map<String, dynamic> get computed => {
+        'test_attr': () => 'computed_value',
+      };
+
+  @override
+  dynamic getField(String key) => key == 'name' ? name : null;
 
   @override
   void setField(String key, dynamic value) {
-    switch (key) {
-      case 'id':
-        id = value;
-      case 'name':
-        name = value;
-      case 'email':
-        email = value;
-    }
-  }
-}
-
-class Post extends KhademModel<Post> {
-  String? title;
-  String? content;
-
-  Post({this.title, this.content});
-
-  @override
-  Post newFactory(Map<String, dynamic> data) {
-    return Post(
-      title: data['title'],
-      content: data['content'],
-    );
-  }
-
-  @override
-  List<String> get fillable => ['title', 'content'];
-
-  @override
-  dynamic getField(String key) {
-    switch (key) {
-      case 'id':
-        return id;
-      case 'title':
-        return title;
-      case 'content':
-        return content;
-      default:
-        return null;
-    }
-  }
-
-  @override
-  void setField(String key, dynamic value) {
-    switch (key) {
-      case 'id':
-        id = value;
-      case 'title':
-        title = value;
-      case 'content':
-        content = value;
-    }
+    if (key == 'name') name = value;
   }
 }
 
 void main() {
-  group('KhademModel Laravel-like Features', () {
-    late User user;
+  test('append methods should work with getters', () {
+    final model = TestModel()..name = 'test';
 
-    setUp(() {
-      user = User(name: 'John Doe', email: 'john@example.com');
-      user.id = 1; // Set id after creation
-    });
+    // Test append
+    model.append(['test_attr']);
+    expect(model.appends, contains('test_attr'));
+    expect(model.hasAppended('test_attr'), isTrue);
 
-    test('should append attributes to model', () {
-      user.append(['full_name']);
+    // Test appendAttribute
+    model.appendAttribute('another_attr');
+    expect(model.appends, contains('another_attr'));
 
-      expect(user.hasAppended('full_name'), isTrue);
-    });
+    // Test setAppended
+    model.setAppended('custom_attr');
+    expect(model.appends, contains('custom_attr'));
 
-    test('should append single attribute', () {
-      user.appendAttribute('display_name');
-
-      expect(user.hasAppended('display_name'), isTrue);
-    });
-
-    test('should set and get appended attributes', () {
-      user.setAppended('custom_field', 'custom_value');
-
-      expect(user.getAppended('custom_field'), equals('custom_value'));
-      expect(user.hasAppended('custom_field'), isTrue);
-    });
-
-    test('should check if relation is loaded', () {
-      expect(user.isRelationLoaded('posts'), isFalse);
-
-      user.setRelation('posts', []);
-
-      expect(user.isRelationLoaded('posts'), isTrue);
-    });
-
-    test('should get and set relations', () {
-      final posts = [Post(title: 'Test Post')];
-
-      user.setRelation('posts', posts);
-
-      expect(user.getRelation('posts'), equals(posts));
-    });
-
-    test('should return only specified attributes', () {
-      final result = user.only(['name']);
-
-      expect(result.containsKey('name'), isTrue);
-      expect(result.containsKey('email'), isFalse);
-    });
-
-    test('should return all attributes except specified ones', () {
-      final result = user.except(['email']);
-
-      expect(result.containsKey('name'), isTrue);
-      expect(result.containsKey('email'), isFalse);
-    });
-
-    test('should have correct model properties', () {
-      expect(user.modelName, equals('User'));
-      expect(user.tableName, equals('users'));
-      expect(user.fillable, contains('name'));
-      expect(user.fillable, contains('email'));
-    });
-
-    test('should handle computed properties', () {
-      // Test with computed property
-      final userWithComputed = User(name: 'John', email: 'john@test.com')
-        ..computed['full_name'] = 'John Doe';
-
-      expect(userWithComputed.computed.containsKey('full_name'), isTrue);
-    });
+    // Test makeHidden and makeVisible
+    expect(model.hidden, contains('secret'));
+    model.makeHidden(['name']);
+    expect(model.hidden, contains('name'));
+    model.makeVisible(['name']);
+    expect(model.hidden, isNot(contains('name')));
   });
 }

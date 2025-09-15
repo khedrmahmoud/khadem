@@ -19,12 +19,16 @@ class AppConfig {
 
         /// Cache configuration
         'cache': {
-          'default': 'hybrid',
+          'default': 'memory',
           'drivers': {
             'file': {'driver': 'file', 'path': 'storage/cache'},
             'memory': {'driver': 'memory'},
-            'hybrid': {'driver': 'hybrid', 'path': 'storage/cache'},
-            'redis': {'driver': 'redis', 'host': '127.0.0.1', 'port': 6379},
+            'redis': {
+              'driver': 'redis',
+              'host': env.getOrDefault('REDIS_HOST', '127.0.0.1'),
+              'port': env.getInt('REDIS_PORT', defaultValue: 6379),
+              'password': env.get('REDIS_PASSWORD'),
+            },
           },
         },
 
@@ -36,6 +40,17 @@ class AppConfig {
           // "timeout": 10,
           "run_in_background": true,
           "auto_start": true,
+          'drivers': {
+            'file': {'driver': 'file', 'path': 'storage/queue'},
+            'memory': {'driver': 'memory'},
+            'sync': {'driver': 'sync'},
+            'redis': {
+              'driver': 'redis',
+              'host': env.getOrDefault('REDIS_HOST', '127.0.0.1'),
+              'port': env.getInt('REDIS_PORT', defaultValue: 6379),
+              'password': env.get('REDIS_PASSWORD'),
+            },
+          },
         },
 
         /// Auth configuration

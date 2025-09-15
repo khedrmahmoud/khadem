@@ -24,7 +24,7 @@ void main() {
     });
 
     test('should register and retrieve driver', () {
-      registry.register('test', driver1);
+      registry.registerDriver('test', driver1);
 
       expect(registry.getDriver('test'), equals(driver1));
       expect(registry.hasDriver('test'), isTrue);
@@ -37,8 +37,8 @@ void main() {
     });
 
     test('should register multiple drivers', () {
-      registry.register('driver1', driver1);
-      registry.register('driver2', driver2);
+      registry.registerDriver('driver1', driver1);
+      registry.registerDriver('driver2', driver2);
 
       expect(registry.getDriver('driver1'), equals(driver1));
       expect(registry.getDriver('driver2'), equals(driver2));
@@ -47,7 +47,9 @@ void main() {
     });
 
     test('should unregister driver', () {
-      registry.register('test', driver1);
+      // Register a default driver first
+      registry.registerDriver('default', driver2);
+      registry.registerDriver('test', driver1);
       expect(registry.hasDriver('test'), isTrue);
 
       registry.unregister('test');
@@ -56,8 +58,8 @@ void main() {
     });
 
     test('should clear all drivers', () {
-      registry.register('driver1', driver1);
-      registry.register('driver2', driver2);
+      registry.registerDriver('driver1', driver1);
+      registry.registerDriver('driver2', driver2);
       expect(registry.getDriverNames(), hasLength(2));
 
       registry.clear();

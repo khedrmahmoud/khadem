@@ -29,7 +29,7 @@ class RedisQueueDriver implements QueueDriver {
       final conn = RedisConnection();
       _command = await conn.connect(_host, _port);
       
-      if (_password != null) {
+      if (_password != null && _password!.isNotEmpty) {
         await _command!.send_object(['AUTH', _password]);
       }
     }
