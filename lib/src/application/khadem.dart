@@ -1,6 +1,4 @@
 import 'package:khadem/khadem_dart.dart';
-import 'package:khadem/src/contracts/cache/cache_interfaces.dart' show ICacheManager;
-import 'package:khadem/src/support/providers/cache_service_provider.dart';
 
 
 /// Central access point for all Khadem framework services and utilities.

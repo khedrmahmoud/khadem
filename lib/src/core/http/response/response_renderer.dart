@@ -43,7 +43,7 @@ class ResponseRenderer {
   /// - Request data (session, input, etc)
   /// - Framework data (csrf token, etc)
   Future<Map<String, dynamic>> _buildViewContext(
-      Map<String, dynamic> userData) async {
+      Map<String, dynamic> userData,) async {
     final context = <String, dynamic>{
       ...userData,
     };
@@ -77,11 +77,9 @@ class ResponseRenderer {
       }
 
       // Add old input
-      final oldInput = (await _request!.body);
-      if (oldInput != null) {
-        context['old'] = oldInput;
-      }
-
+      final oldInput = await _request!.body;
+      context['old'] = oldInput;
+    
       // Add auth data
       final user = _request!.attribute('user');
       if (user != null) {

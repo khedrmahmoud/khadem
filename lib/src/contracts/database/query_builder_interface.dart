@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:khadem/src/core/database/model_base/khadem_model.dart';
 
 import '../../core/database/orm/paginated_result.dart';
-import 'dart:async';
 
 /// A generic interface for building SQL-like queries dynamically.
 /// Supports both raw Map responses or strongly-typed KhademModel instances.

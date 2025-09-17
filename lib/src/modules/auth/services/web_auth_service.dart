@@ -66,7 +66,7 @@ class WebAuthService {
     // Check for brute force protection
     if (_isLockedOut(request)) {
       throw AuthException(
-          'Account temporarily locked due to too many failed attempts');
+          'Account temporarily locked due to too many failed attempts',);
     }
 
     try {
@@ -97,7 +97,7 @@ class WebAuthService {
   }
 
   void _saveAuthSession(Request request, Response response,
-      Map<String, dynamic> authResult, bool remember) {
+      Map<String, dynamic> authResult, bool remember,) {
     // Extract user from auth result
     final user = Map<String, dynamic>.from(authResult['user']);
     final userId = user['id'];
@@ -113,7 +113,7 @@ class WebAuthService {
     final csrfToken = base64Url.encode(csrfBytes);
     request.setSession(_csrfKey, csrfToken);
     // Also set in cookie for forms
-    response.cookieHandler.set(_csrfKey, csrfToken, httpOnly: false);
+    response.cookieHandler.set(_csrfKey, csrfToken);
 
     // Handle auth tokens (JWT vs simple token)
     final tokenData = authResult['token'];
@@ -259,7 +259,7 @@ class WebAuthService {
 
   /// Checks if user needs re-authentication (session expiring soon)
   bool needsReauth(Request request,
-      {Duration within = const Duration(minutes: 5)}) {
+      {Duration within = const Duration(minutes: 5),}) {
     return request.session.isExpiringSoon(within);
   }
 
@@ -286,7 +286,7 @@ class WebAuthService {
 
   /// Middleware helper: Redirects unauthenticated users
   Future<void> requireAuth(Request request, Response response,
-      {String redirectTo = '/login'}) async {
+      {String redirectTo = '/login',}) async {
     if (!isAuthenticated(request)) {
       response.redirect(redirectTo);
       return;
@@ -300,7 +300,7 @@ class WebAuthService {
 
   /// Middleware helper: Redirects authenticated users (for login pages)
   void redirectIfAuthenticated(Request request, Response response,
-      {String redirectTo = '/dashboard'}) {
+      {String redirectTo = '/dashboard',}) {
     if (isAuthenticated(request)) {
       response.redirect(redirectTo);
     }

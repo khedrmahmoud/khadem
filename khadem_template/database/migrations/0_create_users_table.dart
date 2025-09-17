@@ -18,5 +18,4 @@ class CreateUsersTable extends MigrationFile {
   }
 }
 
-// This is the entrypoint used by dart_eval
-MigrationFile main() => CreateUsersTable();
+

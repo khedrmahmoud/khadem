@@ -98,7 +98,7 @@ class CookieMiddleware extends Middleware {
 
     // Add cookie helper methods to request (we'll access response through the helper)
     req.setAttribute(
-        'response_cookies', CookieHelper.response(res.raw.response));
+        'response_cookies', CookieHelper.response(res.raw.response),);
 
     // Continue to next middleware/route handler
     await next();

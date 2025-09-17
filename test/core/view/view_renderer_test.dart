@@ -26,7 +26,7 @@ void main() {
 
       test('should handle object property access', () {
         final context = {
-          'user': {'name': 'Alice', 'age': 30}
+          'user': {'name': 'Alice', 'age': 30},
         };
         final result = renderer.evaluateExpression('user.name', context);
         expect(result, equals('Alice'));
@@ -35,8 +35,8 @@ void main() {
       test('should handle nested object properties', () {
         final context = {
           'user': {
-            'profile': {'email': 'alice@example.com'}
-          }
+            'profile': {'email': 'alice@example.com'},
+          },
         };
         final result = renderer.evaluateExpression('user.profile.email', context);
         expect(result, equals('alice@example.com'));
@@ -44,7 +44,7 @@ void main() {
 
       test('should handle array access with brackets', () {
         final context = {
-          'items': ['apple', 'banana', 'cherry']
+          'items': ['apple', 'banana', 'cherry'],
         };
         final result = renderer.evaluateExpression('items[0]', context);
         expect(result, equals('apple'));
@@ -52,7 +52,7 @@ void main() {
 
       test('should handle array access with dot notation', () {
         final context = {
-          'items': ['apple', 'banana']
+          'items': ['apple', 'banana'],
         };
         final result = renderer.evaluateExpression('items.0', context);
         expect(result, equals('apple'));
@@ -60,7 +60,7 @@ void main() {
 
       test('should handle list properties', () {
         final context = {
-          'items': ['a', 'b', 'c']
+          'items': ['a', 'b', 'c'],
         };
         final result = renderer.evaluateExpression('items.length', context);
         expect(result, equals(3));
@@ -71,9 +71,9 @@ void main() {
           'user': {
             'items': [
               {'name': 'Book', 'price': 10},
-              {'name': 'Pen', 'price': 2}
-            ]
-          }
+              {'name': 'Pen', 'price': 2},
+            ],
+          },
         };
         final result = renderer.evaluateExpression('user.items[0].name', context);
         expect(result, equals('Book'));
@@ -91,11 +91,11 @@ void main() {
             'profile': {
               'personal': {
                 'name': 'John',
-                'address': {'city': 'NYC'}
-              }
+                'address': {'city': 'NYC'},
+              },
             },
-            'hobbies': ['reading', 'coding', 'gaming']
-          }
+            'hobbies': ['reading', 'coding', 'gaming'],
+          },
         };
 
         expect(renderer.evaluateExpression('user.profile.personal.name', context), equals('John'));
@@ -112,7 +112,7 @@ void main() {
 
       test('should handle out of bounds array access', () {
         final context = {
-          'items': ['a', 'b']
+          'items': ['a', 'b'],
         };
         final result = renderer.evaluateExpression('items[5]', context);
         expect(result, isNull);

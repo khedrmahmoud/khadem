@@ -88,7 +88,7 @@ class SocketServer {
             socket: ws,
             manager: _manager,
             headers: request.headers, 
-            context: req.params.attributes
+            context: req.params.attributes,
           );
           final handler = SocketHandler(client, _manager, _globalMiddleware);
 

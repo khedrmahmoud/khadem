@@ -135,7 +135,7 @@ class Response {
 
   /// Sends binary data (convenience method).
   void bytes(List<int> bytes,
-      {String contentType = 'application/octet-stream'}) {
+      {String contentType = 'application/octet-stream',}) {
     _body.sendBytes(bytes, contentType: contentType);
     _sent = true;
   }

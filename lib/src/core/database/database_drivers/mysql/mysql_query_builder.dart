@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import '../../../../contracts/database/connection_interface.dart';
 import '../../../../contracts/database/query_builder_interface.dart';
 import '../../../../support/exceptions/database_exception.dart';
 import '../../model_base/khadem_model.dart';
 import '../../orm/paginated_result.dart';
 import 'eager_loader.dart';
-import 'dart:async';
 
 /// A fluent and type-safe MySQL query builder for both Maps and BaseModel subclasses.
 ///

@@ -19,6 +19,7 @@ class CliServiceProvider extends ServiceProvider {
   @override
   void register(ContainerInterface container) {
     // Minimal config and logging
+ 
     container.lazySingleton<EnvInterface>((c) => EnvSystem());
     container.singleton<ConfigInterface>(
       (c) => ConfigSystem(
@@ -46,7 +47,12 @@ class CliServiceProvider extends ServiceProvider {
 
   @override
   Future<void> boot(ContainerInterface container) async {
-    container.resolve<EnvInterface>().loadFromFile('.env');
+       final envSystem = container.resolve<EnvInterface>();
+    envSystem.loadFromFile('.env');
+
+    final config = container.resolve<ConfigInterface>() as ConfigSystem;
+    config.setEnvironment(envSystem.getOrDefault('APP_ENV', 'development'));
+    
     final database = container.resolve<DatabaseManager>();
     final queue = container.resolve<QueueManager>();
 

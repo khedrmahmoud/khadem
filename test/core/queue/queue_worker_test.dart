@@ -223,10 +223,7 @@ void main() {
       final workerWithNulls = QueueWorker(
         mockDriver,
         const QueueWorkerConfig(
-          maxJobs: null,
           delay: Duration.zero,
-          timeout: null,
-          runInBackground: false,
         ),
       );
 
@@ -260,7 +257,6 @@ void main() {
         mockDriver,
         const QueueWorkerConfig(
           maxJobs: 2,
-          delay: Duration(seconds: 1),
         ),
       );
 
@@ -298,7 +294,7 @@ void main() {
       final workers = List.generate(3, (_) => QueueWorker(
         mockDriver,
         const QueueWorkerConfig(maxJobs: 1, timeout: Duration(milliseconds: 50)),
-      ));
+      ),);
 
       // Start all workers concurrently
       await Future.wait(workers.map((w) => w.start()));

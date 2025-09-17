@@ -160,7 +160,6 @@ class CookieManager {
       'flash_message',
       jsonEncode(flashData),
       maxAge: const Duration(seconds: 30), // Short-lived
-      httpOnly: false, // Needs to be accessible by client-side JS
       secure: secure,
       sameSite: 'lax',
     );

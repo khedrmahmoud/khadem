@@ -46,7 +46,7 @@ class ServerLifecycle {
         return;
       } catch (e) {
         Khadem.logger.error(
-            'VM service reload failed, falling back to manual reload: $e');
+            'VM service reload failed, falling back to manual reload: $e',);
       }
     }
 

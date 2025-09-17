@@ -1,25 +1,24 @@
-import 'package:khadem/khadem_dart.dart' show
-    AssetService,
-    ConfigInterface,
-    ConfigSystem,
-    ContainerInterface,
-    EnvInterface,
-    EnvSystem,
-    EventSystem,
-    EventSystemInterface,
-    FileLangProvider,
-    Lang,
-    LangProvider,
-    Logger,
-    MiddlewarePipeline,
-    ServiceProvider,
-    SocketManager,
-    StorageManager,
-    UrlService,
-    Router;
+import 'package:khadem/khadem_dart.dart'
+    show
+        AssetService,
+        ConfigInterface,
+        ConfigSystem,
+        ContainerInterface,
+        EnvInterface,
+        EnvSystem,
+        EventSystem,
+        EventSystemInterface,
+        FileLangProvider,
+        Lang,
+        LangProvider,
+        Logger,
+        MiddlewarePipeline,
+        ServiceProvider,
+        SocketManager,
+        StorageManager,
+        UrlService,
+        Router;
 import 'package:timezone/data/latest.dart' as tz;
-
-
 
 /// Registers all core services of the Khadem framework,
 /// including configuration, environment, logger, router, cache, and events.
@@ -100,7 +99,7 @@ class CoreServiceProvider extends ServiceProvider {
     final config = container.resolve<ConfigInterface>() as ConfigSystem;
     config.setEnvironment(envSystem.getOrDefault('APP_ENV', 'development'));
 
-// Load storage manager
+    // Load storage manager
     final storageManager = container.resolve<StorageManager>();
     storageManager.fromConfig(config.section('storage') ?? {});
 

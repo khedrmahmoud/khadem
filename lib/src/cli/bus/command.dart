@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 
 import '../../core/logging/logger.dart';
-import '../command_bootstrapper.dart';
 
 /// Base class for all CLI commands in Khadem.
 abstract class KhademCommand extends Command<void> {
@@ -19,8 +18,7 @@ abstract class KhademCommand extends Command<void> {
   @override
   Future<void> run() async {
     try {
-      await CommandBootstrapper.register();
-      await CommandBootstrapper.boot();
+      
       await handle(argResults!.arguments);
     } catch (e, stack) {
       logger.error('❌ Command failed: $e');

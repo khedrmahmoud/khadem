@@ -7,7 +7,6 @@ class FileUploadController {
   /// Handle multiple file upload with validation
   Future<Map<String, dynamic>> handleMultipleFileUpload(Map<String, dynamic> requestData) async {
     try {
-      // Define validation rules exactly like Laravel
       final rules = {
         'title': 'required|string|min:3|max:100',
         'description': 'nullable|string|max:500',

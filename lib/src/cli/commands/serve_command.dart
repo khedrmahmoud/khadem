@@ -226,7 +226,7 @@ class ServeCommand extends KhademCommand {
   void _setupStdinListener() {
     if (_stdinSubscription != null) return;
     logger
-        .info('💡 Press "r" for hot reload, "R" for hot restart, "q" to quit.');
+        .info('💡 Press "r" for hot reload, "f" for hot restart, "q" to quit.');
     try {
       stdin.lineMode = false;
       stdin.echoMode = false;

@@ -52,12 +52,12 @@ void main() {
         provider.setLocale('en');
 
         expect(Lang.t('welcome', parameters: {'name': 'Alice'}),
-            equals('Hello Alice'));
+            equals('Hello Alice'),);
       });
 
       test('should replace multiple parameters', () {
         provider.loadNamespace(
-            '', 'en', {'message': ':greeting :name, welcome to :app'});
+            '', 'en', {'message': ':greeting :name, welcome to :app'},);
         provider.setLocale('en');
 
         final result = Lang.t(
@@ -84,7 +84,7 @@ void main() {
         provider.setLocale('en');
 
         expect(Lang.t('count', parameters: {'number': 5}),
-            equals('You have 5 items'));
+            equals('You have 5 items'),);
       });
     });
 
@@ -114,7 +114,7 @@ void main() {
 
       test('should handle complex pluralization', () {
         provider.loadNamespace(
-            '', 'en', {'file': 'There is one file|There are :count files'});
+            '', 'en', {'file': 'There is one file|There are :count files'},);
         provider.setLocale('en');
 
         expect(Lang.choice('file', 1), equals('There is one file'));
@@ -151,7 +151,7 @@ void main() {
     group('Field Translation', () {
       test('should translate field labels', () {
         provider.loadNamespace('', 'en',
-            {'fields.name': 'Full Name', 'fields.email': 'Email Address'});
+            {'fields.name': 'Full Name', 'fields.email': 'Email Address'},);
         provider.setLocale('en');
 
         expect(Lang.getField('name'), equals('Full Name'));
@@ -266,7 +266,7 @@ void main() {
         });
 
         expect(Lang.t('price', parameters: {'amount': 19.9901}),
-            equals('Price: \$19.99'));
+            equals('Price: \$19.99'),);
       });
 
       test('should handle multiple custom replacers', () {
@@ -455,7 +455,7 @@ void main() {
 
         // Namespaced translation
         final total = Lang.t('total',
-            namespace: 'checkout', parameters: {'amount': '29.99'});
+            namespace: 'checkout', parameters: {'amount': '29.99'},);
         expect(total, equals('Total: 29.99'));
       });
     });

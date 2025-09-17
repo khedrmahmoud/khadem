@@ -77,7 +77,7 @@ void main() {
       expect(await cacheManager.has(key), isFalse);
 
       // Store value
-      await cacheManager.put(key, value, Duration(minutes: 5));
+      await cacheManager.put(key, value, const Duration(minutes: 5));
 
       // Now should exist
       expect(await cacheManager.has(key), isTrue);
@@ -88,7 +88,7 @@ void main() {
       const value = 'value_to_remove';
 
       // Store value
-      await cacheManager.put(key, value, Duration(minutes: 5));
+      await cacheManager.put(key, value, const Duration(minutes: 5));
       expect(await cacheManager.has(key), isTrue);
 
       // Remove value
@@ -98,8 +98,8 @@ void main() {
 
     test('should clear all values', () async {
       // Store multiple values
-      await cacheManager.put('key1', 'value1', Duration(minutes: 5));
-      await cacheManager.put('key2', 'value2', Duration(minutes: 5));
+      await cacheManager.put('key1', 'value1', const Duration(minutes: 5));
+      await cacheManager.put('key2', 'value2', const Duration(minutes: 5));
 
       expect(await cacheManager.has('key1'), isTrue);
       expect(await cacheManager.has('key2'), isTrue);
@@ -118,7 +118,7 @@ void main() {
 
       final result = await cacheManager.remember(
         key,
-        Duration(minutes: 5),
+        const Duration(minutes: 5),
         () async {
           callCount++;
           return expectedValue;
@@ -131,7 +131,7 @@ void main() {
       // Second call should use cached value
       final cachedResult = await cacheManager.remember(
         key,
-        Duration(minutes: 5),
+        const Duration(minutes: 5),
         () async {
           callCount++;
           return 'should_not_be_called';
@@ -148,8 +148,8 @@ void main() {
       const tag = 'test_tag';
 
       // Store tagged values
-      await cacheManager.put(key1, 'value1', Duration(minutes: 5));
-      await cacheManager.put(key2, 'value2', Duration(minutes: 5));
+      await cacheManager.put(key1, 'value1', const Duration(minutes: 5));
+      await cacheManager.put(key2, 'value2', const Duration(minutes: 5));
       await cacheManager.tag(key1, [tag]);
       await cacheManager.tag(key2, [tag]);
 
@@ -178,7 +178,7 @@ void main() {
       expect(cacheManager.stats.misses, equals(1));
 
       // Store value
-      await cacheManager.put(key, value, Duration(minutes: 5));
+      await cacheManager.put(key, value, const Duration(minutes: 5));
       expect(cacheManager.stats.sets, equals(1));
 
       // Get existing key (hit)
@@ -193,13 +193,13 @@ void main() {
     test('should validate inputs', () async {
       // Empty key should throw
       expect(
-        () async => await cacheManager.put('', 'value', Duration(minutes: 5)),
+        () async => cacheManager.put('', 'value', const Duration(minutes: 5)),
         throwsA(isA<Exception>()),
       );
 
       // Negative TTL should throw
       expect(
-        () async => await cacheManager.put('key', 'value', Duration(minutes: -1)),
+        () async => cacheManager.put('key', 'value', const Duration(minutes: -1)),
         throwsA(isA<Exception>()),
       );
     });
