@@ -5,19 +5,21 @@ import '../core/kernel.dart';
 void registerRoutes(Server server) {
   // 🛡️Register global middlewares
   server.useMiddlewares(Kernel.middlewares);
-  // 🌐 Set request locale
-  Lang.setRequestLocale(Khadem.env.getOrDefault('APP_LOCALE', 'en'));
 
   // 🏠 Home Routes
   server.group(
-      prefix: '/home',
-      middleware: [
-        // Add any middlewares here
-      ],
-      routes: (router) async {
-        router.get('', HomeController().index);
-        router.get('/welcome', HomeController().welcome);
-        // 🔁 Stream test route
-        router.get('/stream', HomeController().stream);
-      });
+    prefix: '/home',
+    middleware: [
+      // Add any middlewares here
+    ],
+    routes: (router) async {
+      router.get('', HomeController.index);
+      router.get('/welcome', HomeController.welcome);
+      // 🔁 Stream test route
+      router.get('/stream', HomeController.stream);
+    },
+  );
+
+  // Serve static files from 'public' directory
+  server.serveStatic();
 }

@@ -1,5 +1,5 @@
-import '../../contracts/http/middleware_contract.dart';
 import '../../application/khadem.dart';
+import '../../contracts/http/middleware_contract.dart';
 
 class LoggingMiddleware implements Middleware {
   @override
@@ -8,8 +8,8 @@ class LoggingMiddleware implements Middleware {
         Khadem.logger.debug('➡️ Request: ${req.method} ${req.uri}');
         await next();
         final duration = DateTime.now().difference(start);
-        Khadem.logger.debug(
-            '⬅️ Response: ${res.raw.response.statusCode} in ${duration.inMilliseconds}ms');
+        // Khadem.logger.debug(
+        //     '⬅️ Response: ${res.raw.response.statusCode} in ${duration.inMilliseconds}ms',);
       };
 
   @override

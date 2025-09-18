@@ -11,6 +11,7 @@ class EventServiceProvider extends ServiceProvider {
       // add more subscribers here
     ];
     registerSubscribers(subscribers);
+
   }
 
   @override

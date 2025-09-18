@@ -1,4 +1,4 @@
-import '../../infrastructure/scheduler/core/scheduled_task.dart';
+import '../../core/scheduler/core/scheduled_task.dart';
 
 /// Scheduler interface for managing and executing scheduled tasks.
 ///

@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import '../../../application/khadem.dart';
 import '../../../contracts/database/migration_file.dart';
 import '../../../contracts/database/schema_builder.dart';
-import '../../../application/khadem.dart';
 import '../../../support/exceptions/database_exception.dart';
 import '../database.dart';
 
@@ -124,7 +124,7 @@ class Migrator {
       return List<String>.from(results.map((row) => row['name']));
     } catch (e) {
       Khadem.logger.warning(
-          '⚠️ Could not read migration status. Did you run "migrate"?');
+          '⚠️ Could not read migration status. Did you run "migrate"?',);
       return [];
     }
   }

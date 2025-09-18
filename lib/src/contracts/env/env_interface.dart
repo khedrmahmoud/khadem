@@ -51,7 +51,7 @@ abstract interface class EnvInterface {
   /// final origins = env.getList('ALLOWED_ORIGINS');
   /// ```
   List<String> getList(String key,
-      {String separator = ',', List<String> defaultValue = const []});
+      {String separator = ',', List<String> defaultValue = const [],});
 
   /// Sets a runtime environment variable [key] to the given [value].
   ///

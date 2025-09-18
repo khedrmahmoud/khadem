@@ -1,23 +1,5 @@
-import '../contracts/config/config_contract.dart';
-import '../contracts/env/env_interface.dart';
-import '../contracts/container/container_interface.dart';
-import '../core/container/container_provider.dart';
-import '../core/database/database.dart';
-import '../core/database/migration/migrator.dart';
-import '../core/database/migration/seeder.dart';
-import '../contracts/events/event_system_interface.dart';
-import '../core/http/middleware/middleware_pipeline.dart';
-import '../contracts/provider/service_provider.dart';
-import '../modules/auth/services/auth_manager.dart';
-import '../support/providers/core_service_provider.dart';
-import '../support/providers/database_service_provider.dart';
-import '../support/providers/queue_service_provider.dart';
-import '../core/service_provider/service_provider_manager.dart';
+import 'package:khadem/khadem_dart.dart';
 
-import '../infrastructure/cache/cache_manager.dart';
-import '../infrastructure/logging/logger.dart';
-import '../infrastructure/queue/queue_manager.dart';
-import '../modules/auth/core/auth_service_provider.dart';
 
 /// Central access point for all Khadem framework services and utilities.
 class Khadem {
@@ -39,14 +21,9 @@ class Khadem {
 
   // ========= ⚙️ Core Bootstrapping =========
 
-  /// Registers core service providers (basic, queue, auth).
-  static Future<void> registerCoreServices() async {
-    register([
-      CoreServiceProvider(),
-      QueueServiceProvider(),
-      AuthServiceProvider(),
-      // Optionally: LangServiceProvider()
-    ]);
+  /// Registers application service providers (user-managed, like Laravel's Kernel).
+  static Future<void> registerApplicationServices(List<ServiceProvider> serviceProviders) async {
+    register(serviceProviders);
   }
 
   /// Lightweight boot (ideal for master isolate).
@@ -70,17 +47,10 @@ class Khadem {
     config.loadFromRegistry(configs);
   }
 
-  /// Register and boot database-related services.
-  static Future<void> registerDatabaseServices() async {
-    final dbProvider = DatabaseServiceProvider();
-    register([dbProvider]);
-    await dbProvider.boot(container);
-  }
-
   // ========= 🧠 Common Services =========
 
   static Logger get logger => container.resolve<Logger>();
-  static CacheManager get cache => container.resolve<CacheManager>();
+  static ICacheManager get cache => container.resolve<ICacheManager>();
   static EnvInterface get env => container.resolve<EnvInterface>();
   static ConfigInterface get config => container.resolve<ConfigInterface>();
 
@@ -92,5 +62,43 @@ class Khadem {
   static QueueManager get queue => container.resolve<QueueManager>();
   static EventSystemInterface get eventBus =>
       container.resolve<EventSystemInterface>();
-  static AuthManager get auth => container.resolve<AuthManager>();
+  static SocketManager get socket => container.resolve<SocketManager>();
+  static StorageManager get storage => container.resolve<StorageManager>();
+
+  // URL and Asset Services
+  static UrlService get urlService => container.resolve<UrlService>();
+  static AssetService get assetService => container.resolve<AssetService>();
+
+ 
+
+  // ========= 📅 Scheduler & View System =========
+
+  /// Returns the scheduler engine for managing tasks.
+  static SchedulerEngine get scheduler => SchedulerEngine();
+
+  /// Returns the view renderer for template rendering.
+  static ViewRenderer get view => ViewRenderer.instance;
+
+  // ========= 🛠️ Miscellaneous Helpers & Utilities ========
+
+  /// Framework version.
+  static String get version => '1.0.0';
+
+  /// Checks if the framework is fully booted.
+  static bool get isBooted => providers.isBooted;
+
+  /// Checks if the application is running in production mode.
+  static bool get isProduction =>
+      env.getOrDefault('APP_ENV', 'production') == 'production';
+
+  /// Checks if the application is running in development mode.
+  static bool get isDevelopment =>
+      env.getOrDefault('APP_ENV', 'production') == 'development';
+
+  /// Shuts down all services (e.g., stops schedulers, closes DB connections).
+  static Future<void> shutdown() async {
+    scheduler.stopAll();
+    await db.close();
+    // Add more cleanup as needed
+  }
 }

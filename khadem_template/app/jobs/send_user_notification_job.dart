@@ -3,7 +3,7 @@ import 'package:khadem/khadem_dart.dart' show QueueJob;
 class SendUserNotificationJob extends QueueJob {
   final String event;
 
-  SendUserNotificationJob(this.event);
+  SendUserNotificationJob(this.event) {}
 
   @override
   Future<void> handle() async {

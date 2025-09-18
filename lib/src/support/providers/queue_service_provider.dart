@@ -1,9 +1,9 @@
-import '../../infrastructure/logging/logger.dart';
-import '../../infrastructure/queue/queue_manager.dart';
-import '../../core/config/config_system.dart';
 import '../../contracts/config/config_contract.dart';
 import '../../contracts/container/container_interface.dart';
 import '../../contracts/provider/service_provider.dart';
+import '../../core/config/config_system.dart';
+import '../../core/logging/logger.dart';
+import '../../core/queue/queue_manager.dart';
 
 /// Registers the [QueueManager] which is responsible for initializing and
 /// managing the queue system.
@@ -24,7 +24,7 @@ class QueueServiceProvider extends ServiceProvider {
   Future<void> boot(ContainerInterface container) async {
     final queue = container.resolve<QueueManager>();
     final config = container.resolve<ConfigInterface>();
-    await queue.init();
+    queue.loadFromConfig();
     container
         .resolve<Logger>()
         .info('✅ Queue system initialized (${queue.defaultDriverName})');

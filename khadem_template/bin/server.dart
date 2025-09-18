@@ -1,38 +1,48 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:khadem/khadem_dart.dart' show Khadem, ServerCluster, Lang;
+import 'package:khadem/khadem_dart.dart'
+    show Khadem, ContainerInterface, SocketServer, Server;
+
+import '../core/kernel.dart';
+import '../routes/socket.dart';
 import '../routes/web.dart';
-import '../bootstrap/app.dart';
 
 Future<void> main(List<String> args) async {
-  if (Platform.environment.containsKey('KHADIM_JIT_TRAINING')) {
-    // ⛔️ Do not start server during snapshot build
-    return;
-  }
+  if (_isSnapshotBuild()) return;
 
-  final port = _extractPort(args);
-
-  // 🌱 Initialize global container
   final container = Khadem.container;
+  await Kernel.bootstrap();
 
-  // 🚀 Bootstrap base app setup (light mode)
-  await bootstrap(container);
+  final port =
+      _extractPort(args) ?? Khadem.env.getInt("APP_PORT", defaultValue: 9000);
 
-  // 🧠 Start the clustered server
-  await ServerCluster(
-    port: port ?? Khadem.env.getInt("APP_PORT", defaultValue: 9000),
-    globalBootstrap: () async {
-      await lazyBootStrap();
-    },
-    onInit: (server) async {
-      server.serveStatic('public');
-      await Khadem.use(container); // sync with main isolate container
-      Lang.use(container.resolve());
-      Khadem.registerDatabaseServices();
-      registerRoutes(server);
-    },
-  ).start();
+  await Future.wait([
+    _startHttpServer(port, container),
+    _startSocketServer(container, Khadem.socket),
+  ]);
+}
+
+bool _isSnapshotBuild() =>
+    Platform.environment.containsKey('KHADIM_JIT_TRAINING');
+
+Future _startHttpServer(int port, ContainerInterface container) async {
+  final server = Server();
+  registerRoutes(server);
+  server.setInitializer(() async {
+    registerRoutes(server);
+    await server.start(port: port);
+  });
+  await server.reload();
+}
+
+Future<void> _startSocketServer(container, manager) async {
+  final socketPort = Khadem.env.getInt("SOCKET_PORT", defaultValue: 8080);
+  final socketServer = SocketServer(socketPort, manager: manager);
+
+  registerSocketRoutes(socketServer); // 👈 Socket routes
+
+  await socketServer.start();
 }
 
 int? _extractPort(List<String> args) {

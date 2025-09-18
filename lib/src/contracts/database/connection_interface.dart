@@ -19,7 +19,7 @@ abstract class ConnectionInterface {
   /// await connection.execute('SELECT * FROM users WHERE id = ?', [1]);
   /// ```
   Future<DatabaseResponse> execute(String sql,
-      [List<dynamic> bindings = const []]);
+      [List<dynamic> bindings = const [],]);
 
   /// Checks if the connection is currently active and usable.
   bool get isConnected;

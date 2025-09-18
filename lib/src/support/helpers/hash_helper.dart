@@ -1,5 +1,6 @@
-import 'package:crypto/crypto.dart';
 import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 
 class HashHelper {
   /// Hashes the password using SHA-256 (replace with bcrypt if needed)

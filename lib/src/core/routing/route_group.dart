@@ -22,9 +22,9 @@ class RouteGroup {
   /// for this group of routes. The [defineRoutes] parameter is a closure that
   /// defines the routes for this group.
   RouteGroup({
+    required this.defineRoutes,
     this.prefix = '',
     this.middleware = const [],
-    required this.defineRoutes,
   });
 
   /// Registers the routes for this group with the given [router].

@@ -1,5 +1,7 @@
-import '../../../types/relation_type.dart';
+import 'package:khadem/khadem_dart.dart' show QueryBuilderInterface;
+
 import '../model_base/khadem_model.dart';
+import 'relation_type.dart';
 
 class RelationDefinition<T extends KhademModel<T>> {
   final RelationType type;
@@ -12,6 +14,7 @@ class RelationDefinition<T extends KhademModel<T>> {
   final String? relatedPivotKey;
   final String? morphTypeField;
   final String? morphIdField;
+  final Function(QueryBuilderInterface)? query;
 
   RelationDefinition({
     required this.type,
@@ -24,5 +27,6 @@ class RelationDefinition<T extends KhademModel<T>> {
     this.relatedPivotKey,
     this.morphTypeField,
     this.morphIdField,
+    this.query,
   });
 }

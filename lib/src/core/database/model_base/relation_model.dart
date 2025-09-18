@@ -10,6 +10,8 @@ class RelationModel<T> {
 
   dynamic get(String key) => _loaded[key];
 
+  bool isLoaded(String key) => _loaded.containsKey(key);
+
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
     for (final entry in _loaded.entries) {

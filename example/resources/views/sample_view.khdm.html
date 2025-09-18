@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Khadem View Test</title>
+    @css('styles.css')
+    @inlineCss('body { font-family: Arial, sans-serif; }')
+</head>
+<body>
+    <h1>@lang('welcome')</h1>
+
+    @auth
+        <p>Welcome back, {{ user.name }}!</p>
+        @role('admin')
+            <p>You have admin privileges.</p>
+        @endrole
+        @can('edit-posts')
+            <a href="/posts/edit">Edit Posts</a>
+        @endcan
+    @endauth
+
+    @guest
+        <p>Please <a href="/login">log in</a> to access more features.</p>
+    @endguest
+
+    <h2>@strtoupper('product list')</h2>
+
+    @set('items', ['Laptop', 'Phone', 'Tablet'])
+    @foreach(items as item)
+        <p>{{ item }}</p>
+    @endforeach
+
+    <p>Total items: @count(items)</p>
+
+    @unless(empty(items))
+        <p>You have items in your cart.</p>
+    @endunless
+
+    @empty(items)
+        <p>Your cart is empty.</p>
+    @endempty
+
+    <form method="POST" action="/submit">
+        @csrf
+        @method('PUT')
+        <input type="text" name="name" @isset(old.name) value="{{ old.name }}" @endisset>
+        @error('name')
+            <span class="error">{{ errors.name[0] }}</span>
+        @enderror
+
+        <select name="category">
+            <option value="electronics" @selected(old.category == 'electronics')>Electronics</option>
+            <option value="books" @selected(old.category == 'books')>Books</option>
+        </select>
+
+        <button type="submit" @class(['btn': true, 'btn-primary': isPrimary, 'disabled': !enabled])>
+            Submit
+        </button>
+    </form>
+
+    <p>Current date: @now('Y-m-d')</p>
+    <p>App environment: @env('APP_ENV', 'production')</p>
+    <p>App config: @config('app.name', 'Khadem')</p>
+    <p>Math calculation: @math(2 + 3 * 4) = {{ math_result }}</p>
+    <p>Formatted date: @format('2023-12-25', 'Y-m-d')</p>
+
+    @json(user)
+</body>
+</html>

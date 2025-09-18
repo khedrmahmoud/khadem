@@ -2,8 +2,8 @@
 
 import '../../contracts/config/config_contract.dart';
 import '../../contracts/database/database_factory_interface.dart';
-import '../../support/database_drivers/mysql/mysql_driver.dart';
 import '../../support/exceptions/database_exception.dart';
+import 'database_drivers/mysql/mysql_driver.dart';
 
 /// Central registry for all supported database factories.
 ///

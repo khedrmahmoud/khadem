@@ -1,14 +1,14 @@
-import '../../../../types/relation_type.dart';
-import '../relation_definition.dart';
+import '../../../../contracts/database/query_builder_interface.dart';
 import '../../model_base/khadem_model.dart';
+import '../relation_definition.dart';
+import '../relation_type.dart';
 
 /// Utilities to define Eloquent-style relationships.
 mixin HasRelationships {
   RelationDefinition hasOne<T extends KhademModel<T>>({
     required String foreignKey,
-    String localKey = 'id',
-    required String relatedTable,
-    required T Function() factory,
+    required String relatedTable, required T Function() factory, String localKey = 'id',
+    Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<T>(
       type: RelationType.hasOne,
@@ -16,14 +16,14 @@ mixin HasRelationships {
       foreignKey: foreignKey,
       relatedTable: relatedTable,
       factory: factory,
+      query: query,
     );
   }
 
   RelationDefinition hasMany<T extends KhademModel<T>>({
     required String foreignKey,
-    String localKey = 'id',
-    required String relatedTable,
-    required T Function() factory,
+    required String relatedTable, required T Function() factory, String localKey = 'id',
+    Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<T>(
       type: RelationType.hasMany,
@@ -31,14 +31,14 @@ mixin HasRelationships {
       foreignKey: foreignKey,
       relatedTable: relatedTable,
       factory: factory,
+      query: query,
     );
   }
 
   RelationDefinition belongsTo<T extends KhademModel<T>>({
     required String localKey,
-    String foreignKey = 'id',
-    required String relatedTable,
-    required T Function() factory,
+    required String relatedTable, required T Function() factory, String foreignKey = 'id',
+    Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<T>(
       type: RelationType.belongsTo,
@@ -46,6 +46,7 @@ mixin HasRelationships {
       foreignKey: foreignKey,
       relatedTable: relatedTable,
       factory: factory,
+      query: query,
     );
   }
 
@@ -56,6 +57,7 @@ mixin HasRelationships {
     required String relatedTable,
     required String localKey,
     required T Function() factory,
+    Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<T>(
       type: RelationType.belongsToMany,
@@ -66,6 +68,7 @@ mixin HasRelationships {
       pivotTable: pivotTable,
       foreignPivotKey: foreignPivotKey,
       relatedPivotKey: relatedPivotKey,
+      query: query,
     );
   }
 
@@ -74,6 +77,7 @@ mixin HasRelationships {
     required String morphIdField,
     required String relatedTable,
     required T Function() factory,
+    Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<T>(
       type: RelationType.morphOne,
@@ -83,6 +87,7 @@ mixin HasRelationships {
       factory: factory,
       morphTypeField: morphTypeField,
       morphIdField: morphIdField,
+      query: query,
     );
   }
 
@@ -91,6 +96,7 @@ mixin HasRelationships {
     required String morphIdField,
     required String relatedTable,
     required T Function() factory,
+    Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<T>(
       type: RelationType.morphMany,
@@ -100,6 +106,7 @@ mixin HasRelationships {
       factory: factory,
       morphTypeField: morphTypeField,
       morphIdField: morphIdField,
+      query: query,
     );
   }
 
@@ -108,6 +115,7 @@ mixin HasRelationships {
     required String morphIdField,
     required String relatedTable,
     required T Function() factory,
+    Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<T>(
       type: RelationType.morphTo,
@@ -117,6 +125,7 @@ mixin HasRelationships {
       factory: factory,
       morphTypeField: morphTypeField,
       morphIdField: morphIdField,
+      query: query,
     );
   }
 }

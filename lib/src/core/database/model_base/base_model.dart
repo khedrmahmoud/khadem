@@ -1,5 +1,5 @@
-import '../../../contracts/database/query_builder_interface.dart';
 import '../../../application/khadem.dart';
+import '../../../contracts/database/query_builder_interface.dart';
 import '../../../support/helpers/date_helper.dart';
 import '../orm/model_events.dart';
 import '../orm/relation_definition.dart';
@@ -36,7 +36,7 @@ abstract class BaseModel<T> {
   Map<String, dynamic> get computed => {};
 
   T newFactory(Map<String, dynamic> data) => throw UnimplementedError(
-      'newFactory must be implemented in the child model');
+      'newFactory must be implemented in the child model',);
 
   /// Create query builder using current default connection.
   QueryBuilderInterface<T> get query =>
@@ -101,7 +101,7 @@ abstract class BaseModel<T> {
   void fromJson(Map<String, dynamic> json) {
     _rawData = Map<String, dynamic>.from(json); // Store raw data
 
-    id = json['id'];
+    id = json['id'] as int?;
     for (final key in json.keys) {
       var value = json[key];
       // Apply casts
@@ -164,12 +164,12 @@ abstract class BaseModel<T> {
 
   // 🪝 Lifecycle hooks
 
-  Future<void> beforeCreate() async => await fireEvent(ModelEvents.creating);
-  Future<void> afterCreate() async => await fireEvent(ModelEvents.created);
-  Future<void> beforeUpdate() async => await fireEvent(ModelEvents.updating);
-  Future<void> afterUpdate() async => await fireEvent(ModelEvents.updated);
-  Future<void> beforeDelete() async => await fireEvent(ModelEvents.deleting);
-  Future<void> afterDelete() async => await fireEvent(ModelEvents.deleted);
-  Future<void> beforeRestore() async => await fireEvent(ModelEvents.restoring);
-  Future<void> afterRestore() async => await fireEvent(ModelEvents.restored);
+  Future<void> beforeCreate() async => fireEvent(ModelEvents.creating);
+  Future<void> afterCreate() async => fireEvent(ModelEvents.created);
+  Future<void> beforeUpdate() async => fireEvent(ModelEvents.updating);
+  Future<void> afterUpdate() async => fireEvent(ModelEvents.updated);
+  Future<void> beforeDelete() async => fireEvent(ModelEvents.deleting);
+  Future<void> afterDelete() async => fireEvent(ModelEvents.deleted);
+  Future<void> beforeRestore() async => fireEvent(ModelEvents.restoring);
+  Future<void> afterRestore() async => fireEvent(ModelEvents.restored);
 }

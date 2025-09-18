@@ -10,22 +10,26 @@ class AppConfig {
           'driver': env.getOrDefault('DB_CONNECTION', 'mysql'),
           'host': env.getOrDefault('DB_HOST', 'localhost'),
           'port': env.getInt('DB_PORT'),
-          'database': env.get('DB_DATABASE'),
-          'username': env.get('DB_USERNAME'),
+          'database': env.get('DB_NAME'),
+          'username': env.get('DB_USER'),
           // 'password': env.get('DB_PASSWORD'),
           'run_migrations': true,
-          'run_seeders': false
+          'run_seeders': false,
         },
 
         /// Cache configuration
         'cache': {
-          'default': 'hybrid',
+          'default': 'memory',
           'drivers': {
             'file': {'driver': 'file', 'path': 'storage/cache'},
             'memory': {'driver': 'memory'},
-            'hybrid': {'driver': 'hybrid', 'path': 'storage/cache'},
-            'redis': {'driver': 'redis', 'host': '127.0.0.1', 'port': 6379},
-          }
+            'redis': {
+              'driver': 'redis',
+              'host': env.getOrDefault('REDIS_HOST', '127.0.0.1'),
+              'port': env.getInt('REDIS_PORT', defaultValue: 6379),
+              'password': env.get('REDIS_PASSWORD'),
+            },
+          },
         },
 
         /// Queue configuration
@@ -36,6 +40,17 @@ class AppConfig {
           // "timeout": 10,
           "run_in_background": true,
           "auto_start": true,
+          'drivers': {
+            'file': {'driver': 'file', 'path': 'storage/queue'},
+            'memory': {'driver': 'memory'},
+            'sync': {'driver': 'sync'},
+            'redis': {
+              'driver': 'redis',
+              'host': env.getOrDefault('REDIS_HOST', '127.0.0.1'),
+              'port': env.getInt('REDIS_PORT', defaultValue: 6379),
+              'password': env.get('REDIS_PASSWORD'),
+            },
+          },
         },
 
         /// Auth configuration
@@ -66,16 +81,16 @@ class AppConfig {
             'local': {'driver': 'local', 'root': 'storage'},
             'public': {
               'driver': 'local',
-              'root': './storage/public',
+              'root': 'public/assets',
             },
-            's3': {
-              'driver': 's3',
-              'key': 'your-key',
-              'secret': 'your-secret',
-              'region': 'your-region',
-              'bucket': 'your-bucket'
-            },
-          }
+            // 's3': {
+            //   'driver': 's3',
+            //   'key': 'your-key',
+            //   'secret': 'your-secret',
+            //   'region': 'your-region',
+            //   'bucket': 'your-bucket',
+            // },
+          },
         },
 
         /// Scheduler configuration
@@ -94,7 +109,7 @@ class AppConfig {
               "retryOnFail": false,
               'cachePath': 'storage/cache',
             }
-          ]
+          ],
         },
 
         /// CORS configuration
@@ -105,7 +120,7 @@ class AppConfig {
           ],
           "allowed_methods": "GET, POST, PUT, DELETE, OPTIONS",
           "allowed_headers":
-              "Accept, Content-Type, Authorization, X-Requested-With"
-        }
+              "Accept, Content-Type, Authorization, X-Requested-With",
+        },
       };
 }
