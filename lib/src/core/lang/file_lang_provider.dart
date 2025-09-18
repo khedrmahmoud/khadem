@@ -305,7 +305,7 @@ class FileLangProvider implements LangProvider {
         // Load into global namespace by default
         final translations = Map<String, String>.from(data.map(
           (k, v) => MapEntry(k, v.toString()),
-        ),);
+        ));
 
         _translations[locale]![''] = translations;
       }
