@@ -39,7 +39,7 @@ class Route {
     final match = matcher.firstMatch(path);
     if (match == null) return {};
     return {
-      for (final name in paramNames) name: match.namedGroup('_$name') ?? '',
+      for (final name in paramNames) name: match.namedGroup('_$name') ?? ''
     };
   }
 }
