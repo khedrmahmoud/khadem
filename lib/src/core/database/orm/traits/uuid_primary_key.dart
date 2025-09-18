@@ -3,7 +3,7 @@ import 'package:uuid/uuid.dart';
 mixin UuidPrimaryKey {
   String? uuid;
 
-  static const Uuid _uuidGenerator = Uuid();
+  static final Uuid _uuidGenerator = Uuid();
 
   void generateUuid() {
     uuid = _uuidGenerator.v4();
