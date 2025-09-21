@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khadem Framework - Modern Dart Backend Framework</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 900px;
+            padding: 3rem;
+            background: rgba(15, 32, 39, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 2rem;
+            margin-bottom: 8rem;
+            transform: translateY(0);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .logo {
+            font-size: 4.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .logo img {
+            width: 6rem;
+            height: 6rem;
+            object-fit: contain;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 224, 255, 0.4);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 224, 255, 0.1));
+            padding: 0.75rem;
+            border: 2px solid rgba(0, 224, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .logo img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 24px rgba(0, 224, 255, 0.6);
+            border-color: rgba(0, 224, 255, 0.6);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        h1 {
+            font-size: 3.8rem;
+            background: linear-gradient(45deg, #00e0ff, #0070f3, #00ffa1);
+            background-size: 300%;
+            animation: glow 5s linear infinite;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        @keyframes glow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .typing {
+            margin: 1.5rem auto;
+            font-size: 1.4rem;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+            border-right: 3px solid #00e0ff;
+            width: 100%;
+            max-width: 600px;
+            overflow: hidden;
+            animation: typing 8s steps(80, end) forwards, blink .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0;
+                opacity: 0;
+            }
+            to {
+                width: 100%;
+                opacity: 1;
+            }
+        }
+
+        @keyframes blink {
+
+            from,
+            to {
+                border-color: transparent
+            }
+
+            50% {
+                border-color: #00e0ff
+            }
+        }
+
+        .description {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin: 2rem 0;
+            color: #e0e0e0;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 1s ease-out 4s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 2.5rem 0;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            width: 200px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .feature:nth-child(1) {
+            animation: fadeIn 0.5s ease-out 4.2s forwards;
+        }
+
+        .feature:nth-child(2) {
+            animation: fadeIn 0.5s ease-out 4.4s forwards;
+        }
+
+        .feature:nth-child(3) {
+            animation: fadeIn 0.5s ease-out 4.6s forwards;
+        }
+
+        .feature:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-10px);
+        }
+
+        .feature i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #00e0ff;
+        }
+
+        .feature h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #00e0ff, #0070f3);
+            color: #000;
+            font-weight: bold;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 224, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(45deg, #0070f3, #00ffa1);
+            transition: all 0.5s ease;
+            z-index: -1;
+        }
+
+        .button:hover::before {
+            width: 100%;
+        }
+
+        .button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 224, 255, 0.5);
+            color: white;
+        }
+
+        .secondary-button {
+            background: transparent;
+            border: 2px solid #00e0ff;
+            color: #00e0ff;
+        }
+
+        .secondary-button:hover {
+            background: rgba(0, 224, 255, 0.1);
+        }
+
+        footer {
+            position: fixed;
+            bottom: 20px;
+            font-size: 1rem;
+            color: #ccc;
+            z-index: 5;
+            text-align: center;
+            width: 100%;
+            padding: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .social-links a {
+            color: #ccc;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: #00e0ff;
+        }
+
+        .version-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 224, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            h1 {
+                font-size: 2.8rem;
+            }
+
+            .typing {
+                font-size: 1.2rem;
+            }
+
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .feature {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Code snippet styling */
+        .code-container {
+            margin: 2rem auto;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: left;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 1s ease-out 5s forwards;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .code-title {
+            font-family: 'Courier New', monospace;
+            color: #00e0ff;
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red {
+            background-color: #ff5f56;
+        }
+
+        .dot-yellow {
+            background-color: #ffbd2e;
+        }
+
+        .dot-green {
+            background-color: #27c93f;
+        }
+
+        .code-content {
+            font-family: 'Courier New', monospace;
+            color: #e0e0e0;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .code-keyword {
+            color: #ff79c6;
+        }
+
+        .code-string {
+            color: #f1fa8c;
+        }
+
+        .code-comment {
+            color: #6272a4;
+        }
+
+        .code-function {
+            color: #50fa7b;
+        }
+
+        .code-class {
+            color: #8be9fd;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="particles"></canvas>
+
+    <div class="container">
+        <div class="version-badge">v1.0.0 Beta</div>
+        <div class="logo"><img src="/assets/logo.png" alt="Khadem Logo"></div>
+        <h1>Khadem Framework</h1>
+        <div class="typing">A powerful, modern Dart backend framework.</div>
+
+        <p class="description">
+            Khadem is a comprehensive backend framework built with Dart, designed for developers who demand performance, elegance, and full control. It provides a complete toolkit for building robust web applications with features like dependency injection, modular architecture, built-in CLI tools with automatic command discovery, database management, caching, authentication, and production-ready deployment capabilities.
+        </p>
+
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-sync"></i>
+                <h3>Hot Reload</h3>
+                <p>Development server with instant code reloading via VM service</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-terminal"></i>
+                <h3>Powerful CLI</h3>
+                <p>Comprehensive command-line tools with automatic command discovery</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-cogs"></i>
+                <h3>Modular Architecture</h3>
+                <p>Service provider architecture for clean, maintainable code</p>
+            </div>
+        </div>
+
+
+        <div class="buttons">
+            <a class="button" href="https://khadem-framework.github.io/khadem-docs" target="_blank">
+                <i class="fas fa-book"></i> Documentation
+            </a>
+            <a class="button" href="https://khadem-framework.github.io/khadem-docs/docs#quick-start" target="_blank">
+                <i class="fas fa-rocket"></i> Get Started
+            </a>
+            <a class="button secondary-button" href="https://github.com/khedrmahmoud/khadem" target="_blank">
+                <i class="fab fa-github"></i> View Source
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <p>Built with ❤️ for the Dart community by <a href="https://github.com/khedrmahmoud" target="_blank">Khedr Mahmoud</a> — 2025</p>
+        <div class="social-links">
+            <a href="https://github.com/khedrmahmoud/khadem" target="_blank"><i class="fab fa-github"></i></a>
+            <a href="https://pub.dev/packages/khadem" target="_blank"><i class="fas fa-cube"></i></a>
+            <a href="https://khadem-framework.github.io/khadem-docs" target="_blank"><i class="fas fa-code"></i></a>
+            <a href="https://discord.gg/dartlang" target="_blank"><i class="fab fa-discord"></i></a>
+        </div>
+    </footer>
+
+    <script>
+        // Enhanced particle effect with connections
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const particleCount = 120;
+        const connectionDistance = 150;
+        const mouseRadius = 150;
+
+        let mouse = {
+            x: null,
+            y: null,
+            radius: mouseRadius
+        };
+
+        window.addEventListener('mousemove', function (event) {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init(); // Reinitialize particles on resize
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.density = (Math.random() * 30) + 1;
+                this.color = '#00e0ff';
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+            }
+
+            update() {
+                // Mouse interaction
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                let forceDirectionX = dx / distance;
+                let forceDirectionY = dy / distance;
+
+                const maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance;
+
+                if (force < 0) force = 0;
+
+                let directionX = forceDirectionX * force * this.density;
+                let directionY = forceDirectionY * force * this.density;
+
+                if (distance < mouse.radius) {
+                    this.x -= directionX;
+                    this.y -= directionY;
+                } else {
+                    if (this.x !== this.baseX) {
+                        let dx = this.x - this.baseX;
+                        this.x -= dx / 10;
+                    }
+                    if (this.y !== this.baseY) {
+                        let dy = this.y - this.baseY;
+                        this.y -= dy / 10;
+                    }
+                }
+
+                // Natural movement
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Boundary check
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function connect() {
+            let opacityValue = 1;
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    let distance = ((particles[a].x - particles[b].x) * (particles[a].x - particles[b].x))
+                        + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y));
+
+                    if (distance < connectionDistance * connectionDistance) {
+                        opacityValue = 1 - (distance / (connectionDistance * connectionDistance));
+                        ctx.strokeStyle = 'rgba(0, 224, 255, ' + opacityValue + ')';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+
+            connect();
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+
+</html>
