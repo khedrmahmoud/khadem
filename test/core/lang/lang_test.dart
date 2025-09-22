@@ -423,7 +423,6 @@ void main() {
         provider.loadNamespace('', 'en', {
           'welcome': 'Welcome :name to :app',
           'items': 'item|items',
-          
         });
         provider.loadNamespace('fields', 'en', {
           'email': 'Email Address',

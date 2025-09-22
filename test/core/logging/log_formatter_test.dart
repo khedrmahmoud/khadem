@@ -1,7 +1,6 @@
-import 'package:khadem/khadem.dart' show JsonLogFormatter, LogLevel, TextLogFormatter;
+import 'package:khadem/khadem.dart'
+    show JsonLogFormatter, LogLevel, TextLogFormatter;
 import 'package:test/test.dart';
-
- 
 
 void main() {
   group('JsonLogFormatter', () {

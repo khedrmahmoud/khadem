@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:khadem/khadem.dart' show RequestBodyParser, UploadedFile, RequestValidator;
+import 'package:khadem/khadem.dart'
+    show RequestBodyParser, UploadedFile, RequestValidator;
 import 'package:test/test.dart';
-
 
 class FakeRequestBodyParser implements RequestBodyParser {
   final Map<String, dynamic> _data;
@@ -161,7 +161,7 @@ void main() {
 
         final result = validator.validateData(data, rules);
 
-        expect(result,isEmpty);
+        expect(result, isEmpty);
       });
     });
   });

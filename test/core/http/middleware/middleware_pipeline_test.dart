@@ -1,10 +1,14 @@
 import 'dart:async';
 
-import 'package:khadem/khadem.dart' show MiddlewarePipeline, Middleware, MiddlewareNotFoundException, MiddlewarePriority;
+import 'package:khadem/khadem.dart'
+    show
+        MiddlewarePipeline,
+        Middleware,
+        MiddlewareNotFoundException,
+        MiddlewarePriority;
 import 'package:test/test.dart';
 
 import '../../../mocks/http_mocks.dart';
-
 
 void main() {
   group('MiddlewarePipeline', () {
