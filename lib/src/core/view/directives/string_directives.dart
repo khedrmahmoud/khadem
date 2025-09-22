@@ -1,6 +1,5 @@
 import 'package:khadem/src/contracts/views/directive_contract.dart';
 
-
 /// String manipulation directives
 class StrtoupperDirective implements ViewDirective {
   static final _strtoupperRegex = RegExp(r'@strtoupper\s*\(\s*(.+?)\s*\)');
@@ -102,7 +101,8 @@ class StrlenDirective implements ViewDirective {
 }
 
 class SubstrDirective implements ViewDirective {
-  static final _substrRegex = RegExp(r'@substr\s*\(\s*(.+?)\s*,\s*(.+?)\s*(?:,\s*(.+?)\s*)?\)');
+  static final _substrRegex =
+      RegExp(r'@substr\s*\(\s*(.+?)\s*,\s*(.+?)\s*(?:,\s*(.+?)\s*)?\)');
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
@@ -144,7 +144,8 @@ class SubstrDirective implements ViewDirective {
 }
 
 class ReplaceDirective implements ViewDirective {
-  static final _replaceRegex = RegExp(r'@replace\s*\(\s*(.+?)\s*,\s*(.+?)\s*,\s*(.+?)\s*\)');
+  static final _replaceRegex =
+      RegExp(r'@replace\s*\(\s*(.+?)\s*,\s*(.+?)\s*,\s*(.+?)\s*\)');
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {

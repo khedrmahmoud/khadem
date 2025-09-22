@@ -1,23 +1,27 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:io';
 
 import '../bus/command.dart';
 
 class BuildCommand extends KhademCommand {
   BuildCommand({required super.logger}) {
-    argParser.addOption('services',
-        abbr: 'e',
-        help: 'Specify external services to include (mysql,redis,nginx,postgres,mongo,none)',
-        defaultsTo: 'none',
+    argParser.addOption(
+      'services',
+      abbr: 'e',
+      help:
+          'Specify external services to include (mysql,redis,nginx,postgres,mongo,none)',
+      defaultsTo: 'none',
     );
-    argParser.addFlag('delete-temp',
-        abbr: 'd',
-        defaultsTo: true,
-        help: 'Delete temporary files after build',
+    argParser.addFlag(
+      'delete-temp',
+      abbr: 'd',
+      defaultsTo: true,
+      help: 'Delete temporary files after build',
     );
-    argParser.addFlag('verbose',
-        abbr: 'v',
-        help: 'Enable verbose logging',
+    argParser.addFlag(
+      'verbose',
+      abbr: 'v',
+      help: 'Enable verbose logging',
     );
   }
 
@@ -160,7 +164,8 @@ FILESYSTEM_DISK=local
   }
 
   Future<String> _generateDockerCompose(String services) async {
-    final serviceList = services.split(',').map((s) => s.trim().toLowerCase()).toList();
+    final serviceList =
+        services.split(',').map((s) => s.trim().toLowerCase()).toList();
     final buffer = StringBuffer();
     buffer.writeln('services:');
 
@@ -179,7 +184,9 @@ FILESYSTEM_DISK=local
     final dependsOn = <String>[];
 
     // Check for dependencies
-    if (serviceList.contains('mysql') || serviceList.contains('postgres') || serviceList.contains('mongo')) {
+    if (serviceList.contains('mysql') ||
+        serviceList.contains('postgres') ||
+        serviceList.contains('mongo')) {
       dependsOn.add('database');
     }
     if (serviceList.contains('redis')) {
@@ -207,15 +214,21 @@ FILESYSTEM_DISK=local
       buffer.writeln('      - .env');
       buffer.writeln('    environment:');
       buffer.writeln('      # Database service configuration');
-      buffer.writeln('      - MYSQL_ROOT_PASSWORD=${r'$'}{DB_PASSWORD:-root_password}');
+      buffer.writeln(
+        '      - MYSQL_ROOT_PASSWORD=${r'$'}{DB_PASSWORD:-root_password}',
+      );
       buffer.writeln('      - MYSQL_DATABASE=${r'$'}{DB_NAME:-khadem_db}');
       buffer.writeln('      - MYSQL_USER=${r'$'}{DB_USER:-khadem_user}');
-      buffer.writeln('      - MYSQL_PASSWORD=${r'$'}{DB_PASSWORD:-your_password}');
+      buffer.writeln(
+        '      - MYSQL_PASSWORD=${r'$'}{DB_PASSWORD:-your_password}',
+      );
       buffer.writeln('    ports:');
       buffer.writeln('      - "${r'$'}{DB_PORT:-3306}:3306"');
       buffer.writeln('    volumes:');
       buffer.writeln('      - mysql_data:/var/lib/mysql');
-      buffer.writeln('    command: --default-authentication-plugin=mysql_native_password');
+      buffer.writeln(
+        '    command: --default-authentication-plugin=mysql_native_password',
+      );
       buffer.writeln('    networks:');
       buffer.writeln('      - khadem-network');
       buffer.writeln('    restart: unless-stopped');
@@ -231,7 +244,9 @@ FILESYSTEM_DISK=local
       buffer.writeln('      # Database service configuration');
       buffer.writeln('      - POSTGRES_DB=${r'$'}{DB_NAME:-khadem_db}');
       buffer.writeln('      - POSTGRES_USER=${r'$'}{DB_USER:-khadem_user}');
-      buffer.writeln('      - POSTGRES_PASSWORD=${r'$'}{DB_PASSWORD:-your_password}');
+      buffer.writeln(
+        '      - POSTGRES_PASSWORD=${r'$'}{DB_PASSWORD:-your_password}',
+      );
       buffer.writeln('    ports:');
       buffer.writeln('      - "${r'$'}{DB_PORT:-5432}:5432"');
       buffer.writeln('    volumes:');
@@ -249,7 +264,8 @@ FILESYSTEM_DISK=local
       buffer.writeln('      - .env');
       buffer.writeln('    environment:');
       buffer.writeln('      # Database service configuration');
-      buffer.writeln('      - MONGO_INITDB_DATABASE=${r'$'}{DB_NAME:-khadem_db}');
+      buffer
+          .writeln('      - MONGO_INITDB_DATABASE=${r'$'}{DB_NAME:-khadem_db}');
       buffer.writeln('    ports:');
       buffer.writeln('      - "${r'$'}{DB_PORT:-27017}:27017"');
       buffer.writeln('    volumes:');
@@ -270,7 +286,9 @@ FILESYSTEM_DISK=local
       buffer.writeln('      - "${r'$'}{REDIS_PORT:-6379}:6379"');
       buffer.writeln('    volumes:');
       buffer.writeln('      - redis_data:/data');
-      buffer.writeln('    command: redis-server --requirepass ${r'$'}{REDIS_PASSWORD:-}');
+      buffer.writeln(
+        '    command: redis-server --requirepass ${r'$'}{REDIS_PASSWORD:-}',
+      );
       buffer.writeln('    networks:');
       buffer.writeln('      - khadem-network');
       buffer.writeln('    restart: unless-stopped');
@@ -326,15 +344,18 @@ FILESYSTEM_DISK=local
     if (services != 'none') {
       logger.info(' Docker setup complete! Run: docker-compose up -d');
       logger.info(' Services included: $services');
-      logger.info(' Make sure to copy .env.example to .env and configure your environment variables');
+      logger.info(
+        ' Make sure to copy .env.example to .env and configure your environment variables',
+      );
     } else {
-      logger.info(' Docker setup complete! Run: docker build -t myapp . && docker run -p 9000:9000 myapp');
+      logger.info(
+        ' Docker setup complete! Run: docker build -t myapp . && docker run -p 9000:9000 myapp',
+      );
     }
   }
 
   @override
-  String get description =>
-      'Generate Docker setup for production deployment';
+  String get description => 'Generate Docker setup for production deployment';
 
   @override
   String get name => 'build';

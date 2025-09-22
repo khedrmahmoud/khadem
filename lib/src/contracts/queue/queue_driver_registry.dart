@@ -32,5 +32,5 @@ abstract class IQueueDriverRegistry {
   void removeDriver(String name);
 
   /// Unregisters a driver from the registry.
-   void unregister(String name);
+  void unregister(String name);
 }

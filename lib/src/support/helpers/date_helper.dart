@@ -101,8 +101,11 @@ class DateHelper {
   }
 
   /// Format localized (requires Intl locale setup).
-  static String localized(DateTime date, String locale,
-      {String pattern = 'yMMMMd',}) {
+  static String localized(
+    DateTime date,
+    String locale, {
+    String pattern = 'yMMMMd',
+  }) {
     return DateFormat(pattern, locale).format(date);
   }
 }

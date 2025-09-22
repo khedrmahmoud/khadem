@@ -4,14 +4,12 @@ import 'dart:io';
 import 'package:khadem/src/contracts/queue/queue_driver.dart';
 import 'package:khadem/src/contracts/queue/queue_job.dart';
 
-  
-
 /// File queue driver that persists jobs to disk
 class FileQueueDriver implements QueueDriver {
   final String _queuePath;
   final List<Map<String, dynamic>> _memoryQueue = [];
 
-  FileQueueDriver({String? queuePath}) 
+  FileQueueDriver({String? queuePath})
       : _queuePath = queuePath ?? 'storage/queue/jobs.json';
 
   @override
@@ -20,7 +18,8 @@ class FileQueueDriver implements QueueDriver {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
       'type': job.runtimeType.toString(),
       'payload': job.toJson(),
-      'scheduledAt': DateTime.now().add(delay ?? Duration.zero).toIso8601String(),
+      'scheduledAt':
+          DateTime.now().add(delay ?? Duration.zero).toIso8601String(),
       'createdAt': DateTime.now().toIso8601String(),
       'attempts': 0,
       'maxRetries': job.maxRetries,
@@ -28,10 +27,10 @@ class FileQueueDriver implements QueueDriver {
 
     // Add to memory queue
     _memoryQueue.add(jobData);
-    
+
     // Persist to file
     await _persistToFile();
-    
+
     print('📁 Job queued: ${job.displayName}');
   }
 
@@ -58,14 +57,13 @@ class FileQueueDriver implements QueueDriver {
         // Create a generic job that runs the stored payload
         final genericJob = _FileQueueJob.fromData(jobData);
         await genericJob.handle();
-        
+
         // Remove completed job
         _memoryQueue.remove(jobData);
         print('📁 Job completed: ${jobData['type']}');
-        
       } catch (e) {
         print('📁 Job failed: ${jobData['type']} - $e');
-        
+
         // Handle retries
         jobData['attempts'] = (jobData['attempts'] as int) + 1;
         if (jobData['attempts'] >= jobData['maxRetries']) {
@@ -74,7 +72,8 @@ class FileQueueDriver implements QueueDriver {
         } else {
           // Reschedule for retry
           const retryDelay = Duration(seconds: 30);
-          jobData['scheduledAt'] = DateTime.now().add(retryDelay).toIso8601String();
+          jobData['scheduledAt'] =
+              DateTime.now().add(retryDelay).toIso8601String();
         }
       }
     }
@@ -150,10 +149,10 @@ class _FileQueueJob extends QueueJob {
     print('📁 Processing file job: ${_data['type']}');
     print('   Payload: $_payload');
     print('   Attempts: ${_data['attempts']}/${_data['maxRetries']}');
-    
+
     // Simulate some work
     await Future.delayed(const Duration(milliseconds: 100));
-    
+
     print('✅ File job completed: ${_data['type']}');
   }
 

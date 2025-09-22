@@ -48,7 +48,10 @@ void main() {
       });
 
       test('should register singleton binding', () {
-        container.bind<TestService>((c) => TestService('singleton'), singleton: true);
+        container.bind<TestService>(
+          (c) => TestService('singleton'),
+          singleton: true,
+        );
 
         final instance1 = container.resolve<TestService>();
         final instance2 = container.resolve<TestService>();
@@ -59,8 +62,10 @@ void main() {
       });
 
       test('should throw ServiceNotFoundException for unregistered type', () {
-        expect(() => container.resolve<TestService>(),
-            throwsA(isA<ServiceNotFoundException>()),);
+        expect(
+          () => container.resolve<TestService>(),
+          throwsA(isA<ServiceNotFoundException>()),
+        );
       });
     });
 
@@ -113,7 +118,10 @@ void main() {
     group('bindWhen()', () {
       test('should register contextual binding', () {
         container.bind<TestService>((c) => TestService('default'));
-        container.bindWhen<TestService>('context1', (c) => TestService('contextual'));
+        container.bindWhen<TestService>(
+          'context1',
+          (c) => TestService('contextual'),
+        );
 
         final defaultInstance = container.resolve<TestService>();
         final contextualInstance = container.resolve<TestService>('context1');
@@ -124,7 +132,10 @@ void main() {
 
       test('should fallback to default binding when context not found', () {
         container.bind<TestService>((c) => TestService('default'));
-        container.bindWhen<TestService>('context1', (c) => TestService('contextual'));
+        container.bindWhen<TestService>(
+          'context1',
+          (c) => TestService('contextual'),
+        );
 
         final instance = container.resolve<TestService>('unknown-context');
         expect(instance.name, equals('default'));
@@ -134,7 +145,9 @@ void main() {
     group('resolve()', () {
       test('should resolve dependencies', () {
         container.bind<TestService>((c) => TestService('service'));
-        container.bind<DependentService>((c) => DependentService(c.resolve<TestService>()));
+        container.bind<DependentService>(
+          (c) => DependentService(c.resolve<TestService>()),
+        );
 
         final dependent = container.resolve<DependentService>();
         expect(dependent.service.name, equals('service'));
@@ -144,13 +157,17 @@ void main() {
         container.bind<CircularA>((c) => CircularA(c.resolve<CircularB>()));
         container.bind<CircularB>((c) => CircularB(c.resolve<CircularA>()));
 
-        expect(() => container.resolve<CircularA>(),
-            throwsA(isA<CircularDependencyException>()),);
+        expect(
+          () => container.resolve<CircularA>(),
+          throwsA(isA<CircularDependencyException>()),
+        );
       });
 
       test('should handle complex dependency chains', () {
         container.singleton<TestService>((c) => TestService('root'));
-        container.bind<DependentService>((c) => DependentService(c.resolve<TestService>()));
+        container.bind<DependentService>(
+          (c) => DependentService(c.resolve<TestService>()),
+        );
 
         final root = container.resolve<TestService>();
         final dependent = container.resolve<DependentService>();
@@ -177,7 +194,10 @@ void main() {
       });
 
       test('should check contextual bindings', () {
-        container.bindWhen<TestService>('context', (c) => TestService('contextual'));
+        container.bindWhen<TestService>(
+          'context',
+          (c) => TestService('contextual'),
+        );
         expect(container.has<TestService>('context'), isTrue);
         expect(container.has<TestService>('unknown'), isFalse);
       });
@@ -201,7 +221,10 @@ void main() {
       });
 
       test('should remove contextual binding', () {
-        container.bindWhen<TestService>('context', (c) => TestService('contextual'));
+        container.bindWhen<TestService>(
+          'context',
+          (c) => TestService('contextual'),
+        );
         expect(container.has<TestService>('context'), isTrue);
 
         container.unbind<TestService>('context');
@@ -218,13 +241,14 @@ void main() {
       });
     });
 
-    
-
     group('flush()', () {
       test('should clear all bindings and instances', () {
         container.bind<TestService>((c) => TestService('binding'));
         container.instance<String>('instance');
-        container.bindWhen<TestService>('context', (c) => TestService('contextual'));
+        container.bindWhen<TestService>(
+          'context',
+          (c) => TestService('contextual'),
+        );
 
         expect(container.has<TestService>(), isTrue);
         expect(container.has<String>(), isTrue);
@@ -242,7 +266,9 @@ void main() {
       test('should handle complex service graph', () {
         // Register services
         container.singleton<TestService>((c) => TestService('main'));
-        container.bind<DependentService>((c) => DependentService(c.resolve<TestService>()));
+        container.bind<DependentService>(
+          (c) => DependentService(c.resolve<TestService>()),
+        );
 
         // Resolve and verify
         final mainService = container.resolve<TestService>();

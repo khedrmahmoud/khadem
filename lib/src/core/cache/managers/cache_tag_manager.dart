@@ -100,7 +100,8 @@ class CacheTagManager implements ICacheTagManager {
 
   /// Checks if a key has any tags.
   bool hasTags(String key) {
-    return _keyToTags.containsKey(key) && (_keyToTags[key]?.isNotEmpty ?? false);
+    return _keyToTags.containsKey(key) &&
+        (_keyToTags[key]?.isNotEmpty ?? false);
   }
 
   /// Gets all keys that have tags.

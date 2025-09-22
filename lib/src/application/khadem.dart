@@ -1,6 +1,5 @@
 import 'package:khadem/khadem.dart';
 
-
 /// Central access point for all Khadem framework services and utilities.
 class Khadem {
   Khadem._();
@@ -22,7 +21,9 @@ class Khadem {
   // ========= ⚙️ Core Bootstrapping =========
 
   /// Registers application service providers.
-  static Future<void> registerApplicationServices(List<ServiceProvider> serviceProviders) async {
+  static Future<void> registerApplicationServices(
+    List<ServiceProvider> serviceProviders,
+  ) async {
     register(serviceProviders);
   }
 
@@ -68,8 +69,6 @@ class Khadem {
   // URL and Asset Services
   static UrlService get urlService => container.resolve<UrlService>();
   static AssetService get assetService => container.resolve<AssetService>();
-
- 
 
   // ========= 📅 Scheduler & View System =========
 

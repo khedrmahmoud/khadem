@@ -30,12 +30,14 @@ void main() {
       });
 
       test('should default once to false', () {
-        final reg = EventRegistration((payload) async {}, EventPriority.normal, false);
+        final reg =
+            EventRegistration((payload) async {}, EventPriority.normal, false);
         expect(reg.once, isFalse);
       });
 
       test('should default removed to false', () {
-        final reg = EventRegistration((payload) async {}, EventPriority.normal, false);
+        final reg =
+            EventRegistration((payload) async {}, EventPriority.normal, false);
         expect(reg.removed, isFalse);
       });
     });
@@ -98,8 +100,10 @@ void main() {
         ];
 
         for (var i = 0; i < priorities.length - 1; i++) {
-          final lower = EventRegistration((payload) async {}, priorities[i], false);
-          final higher = EventRegistration((payload) async {}, priorities[i + 1], false);
+          final lower =
+              EventRegistration((payload) async {}, priorities[i], false);
+          final higher =
+              EventRegistration((payload) async {}, priorities[i + 1], false);
 
           expect(lower.compareTo(higher), greaterThan(0));
           expect(higher.compareTo(lower), lessThan(0));
@@ -167,9 +171,21 @@ void main() {
       });
 
       test('should maintain stable sort for same priorities', () {
-        final reg1 = EventRegistration((payload) async => print('first'), EventPriority.normal, false);
-        final reg2 = EventRegistration((payload) async => print('second'), EventPriority.normal, false);
-        final reg3 = EventRegistration((payload) async => print('third'), EventPriority.normal, false);
+        final reg1 = EventRegistration(
+          (payload) async => print('first'),
+          EventPriority.normal,
+          false,
+        );
+        final reg2 = EventRegistration(
+          (payload) async => print('second'),
+          EventPriority.normal,
+          false,
+        );
+        final reg3 = EventRegistration(
+          (payload) async => print('third'),
+          EventPriority.normal,
+          false,
+        );
 
         final registrations = [reg1, reg2, reg3];
         registrations.sort((a, b) => a.compareTo(b));

@@ -28,7 +28,6 @@ class StorageManager {
       final root = options['root'] ?? './storage';
       return LocalDisk(basePath: root as String);
     });
-    
   }
 
   /// Registers a custom storage driver.

@@ -1,9 +1,9 @@
 import 'package:khadem/src/contracts/views/directive_contract.dart';
 
-
 /// Control flow directives
 class UnlessDirective implements ViewDirective {
-  static final _regex = RegExp(r'@unless\s*\((.*?)\)(.*?)@endunless', dotAll: true);
+  static final _regex =
+      RegExp(r'@unless\s*\((.*?)\)(.*?)@endunless', dotAll: true);
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
@@ -64,9 +64,12 @@ class ElseDirective implements ViewDirective {
 }
 
 class SwitchDirective implements ViewDirective {
-  static final _switchRegex = RegExp(r'@switch\s*\((.*?)\)(.*?)@endswitch', dotAll: true);
-  static final _caseRegex = RegExp(r'@case\s*\((.*?)\)(.*?)@endcase', dotAll: true);
-  static final _defaultRegex = RegExp(r'@default(.*?)@enddefault', dotAll: true);
+  static final _switchRegex =
+      RegExp(r'@switch\s*\((.*?)\)(.*?)@endswitch', dotAll: true);
+  static final _caseRegex =
+      RegExp(r'@case\s*\((.*?)\)(.*?)@endcase', dotAll: true);
+  static final _defaultRegex =
+      RegExp(r'@default(.*?)@enddefault', dotAll: true);
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {

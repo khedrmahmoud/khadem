@@ -20,7 +20,7 @@ class MethodDirective implements ViewDirective {
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
     return content.replaceAllMapped(
-  RegExp(r"@method\('([A-Za-z]+)'\)"),
+      RegExp(r"@method\('([A-Za-z]+)'\)"),
       (match) {
         final method = match.group(1)?.toUpperCase() ?? '';
         return '<input type="hidden" name="_method" value="$method">';
@@ -36,7 +36,7 @@ class OldDirective implements ViewDirective {
   Future<String> apply(String content, Map<String, dynamic> context) async {
     final old = context['old'] as Map<String, dynamic>? ?? {};
     return content.replaceAllMapped(
-  RegExp(r"@old\('([\w-]+)'\)"),
+      RegExp(r"@old\('([\w-]+)'\)"),
       (match) {
         final key = match.group(1) ?? '';
         final value = old[key] ?? '';
@@ -51,7 +51,7 @@ class RouteDirective implements ViewDirective {
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
     return content.replaceAllMapped(
-  RegExp(r"@route\('([^']+)'\)"),
+      RegExp(r"@route\('([^']+)'\)"),
       (match) {
         final routeName = match.group(1) ?? '';
         return routeName; // Replace with real route URL if available
@@ -65,7 +65,7 @@ class UrlDirective implements ViewDirective {
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
     return content.replaceAllMapped(
-  RegExp(r"@url\('([^']+)'\)"),
+      RegExp(r"@url\('([^']+)'\)"),
       (match) {
         final url = match.group(1) ?? '';
         return url;
@@ -79,7 +79,7 @@ class ActionDirective implements ViewDirective {
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
     return content.replaceAllMapped(
-  RegExp(r"@action\('([^']+)'\)"),
+      RegExp(r"@action\('([^']+)'\)"),
       (match) {
         final action = match.group(1) ?? '';
         return action;

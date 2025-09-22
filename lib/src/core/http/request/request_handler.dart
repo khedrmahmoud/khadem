@@ -18,4 +18,7 @@ import 'request.dart';
 /// The handler function should use the request object to figure out what
 /// to do, and then use the response object to send the result back to the
 /// client.
-typedef RequestHandler = FutureOr<void> Function(Request request, Response response);
+typedef RequestHandler = FutureOr<void> Function(
+  Request request,
+  Response response,
+);

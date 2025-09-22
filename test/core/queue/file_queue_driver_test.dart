@@ -216,7 +216,10 @@ void main() {
       expect(stats['file_path'], equals(queuePath));
 
       await driver.push(testJob);
-      await driver.push(TestQueueJob('delayed'), delay: const Duration(seconds: 1));
+      await driver.push(
+        TestQueueJob('delayed'),
+        delay: const Duration(seconds: 1),
+      );
 
       final statsWithJobs = driver.getStats();
       expect(statsWithJobs['total_jobs'], equals(2));
@@ -226,7 +229,8 @@ void main() {
 
     test('should handle file I/O errors gracefully', () async {
       // Create driver with invalid path
-      final invalidDriver = FileQueueDriver(queuePath: '/invalid/path/queue.json');
+      final invalidDriver =
+          FileQueueDriver(queuePath: '/invalid/path/queue.json');
 
       // Should not throw on push
       await expectLater(invalidDriver.push(testJob), completes);

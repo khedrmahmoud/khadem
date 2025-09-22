@@ -88,7 +88,10 @@ void main() {
 
     test('should handle delayed jobs when Redis is unavailable', () async {
       // This test expects ServiceNotFoundException when Khadem is not initialized
-      expect(() => driver.push(testJob, delay: const Duration(seconds: 5)), throwsException);
+      expect(
+        () => driver.push(testJob, delay: const Duration(seconds: 5)),
+        throwsException,
+      );
     });
 
     test('should handle clear when Redis is unavailable', () async {
@@ -141,7 +144,10 @@ void main() {
       final delayedJob = TestQueueJob('delayed');
 
       expect(() => driver.push(immediateJob), throwsException);
-      expect(() => driver.push(delayedJob, delay: const Duration(seconds: 1)), throwsException);
+      expect(
+        () => driver.push(delayedJob, delay: const Duration(seconds: 1)),
+        throwsException,
+      );
     });
 
     test('should handle job failures gracefully', () async {
@@ -174,7 +180,10 @@ void main() {
     test('should handle concurrent operations', () async {
       // All push operations should throw due to uninitialized Khadem
       for (int i = 0; i < 5; i++) {
-        expect(() => driver.push(TestQueueJob('concurrent_$i')), throwsException);
+        expect(
+          () => driver.push(TestQueueJob('concurrent_$i')),
+          throwsException,
+        );
       }
     });
 
@@ -187,7 +196,8 @@ void main() {
 
     test('should handle special characters in queue names', () {
       const specialQueueName = 'test-queue_with.special:chars';
-      final driverWithSpecialName = RedisQueueDriver(queueName: specialQueueName);
+      final driverWithSpecialName =
+          RedisQueueDriver(queueName: specialQueueName);
 
       expect(driverWithSpecialName, isNotNull);
     });
@@ -197,16 +207,28 @@ void main() {
     // These tests would run only if Redis is available
     // For now, they're skipped since Redis might not be running in CI
 
-    test('should work with real Redis connection', () async {
-      // This test is skipped unless Redis is available
-    }, skip: 'Requires Redis server to be running',);
+    test(
+      'should work with real Redis connection',
+      () async {
+        // This test is skipped unless Redis is available
+      },
+      skip: 'Requires Redis server to be running',
+    );
 
-    test('should persist jobs across driver restarts', () async {
-      // This test is skipped unless Redis is available
-    }, skip: 'Requires Redis server to be running',);
+    test(
+      'should persist jobs across driver restarts',
+      () async {
+        // This test is skipped unless Redis is available
+      },
+      skip: 'Requires Redis server to be running',
+    );
 
-    test('should handle Redis connection drops', () async {
-      // This test is skipped unless Redis is available
-    }, skip: 'Requires Redis server to be running',);
+    test(
+      'should handle Redis connection drops',
+      () async {
+        // This test is skipped unless Redis is available
+      },
+      skip: 'Requires Redis server to be running',
+    );
   });
 }

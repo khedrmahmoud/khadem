@@ -19,12 +19,14 @@ void main() {
       expect(result, isNull);
     });
 
-    test('should return null when value is a string containing valid integer', () {
+    test('should return null when value is a string containing valid integer',
+        () {
       final result = rule.validate('field', '42', null, data: {});
       expect(result, isNull);
     });
 
-    test('should return null when value is a string containing valid decimal', () {
+    test('should return null when value is a string containing valid decimal',
+        () {
       final result = rule.validate('field', '42.5', null, data: {});
       expect(result, isNull);
     });

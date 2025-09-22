@@ -49,10 +49,10 @@ class AuthServiceProvider extends ServiceProvider {
   Future<void> register(ContainerInterface container) async {
     // Register core contracts
     await _registerCoreContracts(container);
-    
+
     // Register authentication drivers
     await _registerAuthDrivers(container);
-    
+
     // Register the main auth manager
     await _registerAuthManager(container);
   }
@@ -125,7 +125,7 @@ class AuthServiceProvider extends ServiceProvider {
   Future<void> _bootAuthServices(ContainerInterface container) async {
     // Register custom driver factories with the auth manager
     _registerCustomDriverFactories();
-    
+
     // Set up any cleanup schedules
     await _setupCleanupSchedules(container);
   }
@@ -153,7 +153,7 @@ class AuthServiceProvider extends ServiceProvider {
   Future<void> _setupCleanupSchedules(ContainerInterface container) async {
     // This would typically set up periodic cleanup of expired tokens
     // For now, this is a placeholder for future implementation
-    
+
     // Example implementation:
     // final authManager = container.make<EnhancedAuthManager>();
     // Timer.periodic(Duration(hours: 1), (timer) {

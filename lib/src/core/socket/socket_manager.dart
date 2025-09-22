@@ -54,8 +54,11 @@ class SocketManager {
     }
   }
 
-  void on(String event, SocketEventHandler handler,
-      {List<SocketMiddleware> middlewares = const [],}) {
+  void on(
+    String event,
+    SocketEventHandler handler, {
+    List<SocketMiddleware> middlewares = const [],
+  }) {
     _eventHandlers[event] = _EventEntry(handler, List.from(middlewares));
   }
 
@@ -168,6 +171,6 @@ class SocketManager {
   /// Check if an event has any subscribers
   bool hasEventSubscribers(String event) {
     return _eventSubscribers.containsKey(event) &&
-           (_eventSubscribers[event]?.isNotEmpty ?? false);
+        (_eventSubscribers[event]?.isNotEmpty ?? false);
   }
 }

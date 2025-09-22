@@ -7,7 +7,9 @@ import '../relation_type.dart';
 mixin HasRelationships {
   RelationDefinition hasOne<T extends KhademModel<T>>({
     required String foreignKey,
-    required String relatedTable, required T Function() factory, String localKey = 'id',
+    required String relatedTable,
+    required T Function() factory,
+    String localKey = 'id',
     Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<T>(
@@ -22,7 +24,9 @@ mixin HasRelationships {
 
   RelationDefinition hasMany<T extends KhademModel<T>>({
     required String foreignKey,
-    required String relatedTable, required T Function() factory, String localKey = 'id',
+    required String relatedTable,
+    required T Function() factory,
+    String localKey = 'id',
     Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<T>(
@@ -37,7 +41,9 @@ mixin HasRelationships {
 
   RelationDefinition belongsTo<T extends KhademModel<T>>({
     required String localKey,
-    required String relatedTable, required T Function() factory, String foreignKey = 'id',
+    required String relatedTable,
+    required T Function() factory,
+    String foreignKey = 'id',
     Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<T>(

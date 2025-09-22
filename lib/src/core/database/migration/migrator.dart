@@ -124,7 +124,8 @@ class Migrator {
       return List<String>.from(results.map((row) => row['name']));
     } catch (e) {
       Khadem.logger.warning(
-          '⚠️ Could not read migration status. Did you run "migrate"?',);
+        '⚠️ Could not read migration status. Did you run "migrate"?',
+      );
       return [];
     }
   }

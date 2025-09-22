@@ -9,8 +9,10 @@ void main() {
 
     setUp(() async {
       tempDir = await Directory.systemTemp.createTemp('view_test_');
-      await Directory('${tempDir.path}/resources/views').create(recursive: true);
-      renderer = ViewRenderer(viewsDirectory: '${tempDir.path}/resources/views');
+      await Directory('${tempDir.path}/resources/views')
+          .create(recursive: true);
+      renderer =
+          ViewRenderer(viewsDirectory: '${tempDir.path}/resources/views');
     });
 
     tearDown(() async {
@@ -38,7 +40,8 @@ void main() {
             'profile': {'email': 'alice@example.com'},
           },
         };
-        final result = renderer.evaluateExpression('user.profile.email', context);
+        final result =
+            renderer.evaluateExpression('user.profile.email', context);
         expect(result, equals('alice@example.com'));
       });
 
@@ -75,7 +78,8 @@ void main() {
             ],
           },
         };
-        final result = renderer.evaluateExpression('user.items[0].name', context);
+        final result =
+            renderer.evaluateExpression('user.items[0].name', context);
         expect(result, equals('Book'));
       });
 
@@ -98,15 +102,31 @@ void main() {
           },
         };
 
-        expect(renderer.evaluateExpression('user.profile.personal.name', context), equals('John'));
-        expect(renderer.evaluateExpression('user.profile.personal.address.city', context), equals('NYC'));
-        expect(renderer.evaluateExpression('user.hobbies[0]', context), equals('reading'));
-        expect(renderer.evaluateExpression('user.hobbies.length', context), equals(3));
+        expect(
+          renderer.evaluateExpression('user.profile.personal.name', context),
+          equals('John'),
+        );
+        expect(
+          renderer.evaluateExpression(
+            'user.profile.personal.address.city',
+            context,
+          ),
+          equals('NYC'),
+        );
+        expect(
+          renderer.evaluateExpression('user.hobbies[0]', context),
+          equals('reading'),
+        );
+        expect(
+          renderer.evaluateExpression('user.hobbies.length', context),
+          equals(3),
+        );
       });
 
       test('should handle invalid expressions gracefully', () {
         final context = {'name': 'test'};
-        final result = renderer.evaluateExpression('invalid..expression', context);
+        final result =
+            renderer.evaluateExpression('invalid..expression', context);
         expect(result, isNull);
       });
 
@@ -118,7 +138,5 @@ void main() {
         expect(result, isNull);
       });
     });
-
-   
   });
 }

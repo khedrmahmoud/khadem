@@ -43,7 +43,10 @@ class AuthMiddleware extends Middleware {
   ///
   /// Throws [AuthException] if authentication fails
   static Future<void> _handleAuth(
-      Request req, Response res, NextFunction next,) async {
+    Request req,
+    Response res,
+    NextFunction next,
+  ) async {
     try {
       // Extract and validate authorization header
       final authHeader = _extractAuthHeader(req);

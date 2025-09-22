@@ -1,12 +1,10 @@
-
+import 'package:khadem/src/contracts/http/middleware_contract.dart';
+import 'package:khadem/src/core/http/request/request.dart';
+import 'package:khadem/src/core/http/response/index.dart';
+import 'package:khadem/src/core/routing/index.dart';
 import 'package:test/test.dart';
 
-import '../../../lib/src/contracts/http/middleware_contract.dart';
-import '../../../lib/src/core/http/request/request.dart';
-import '../../../lib/src/core/http/response/index.dart';
-import '../../../lib/src/core/routing/index.dart';
 import '../../mocks/http_mocks.dart';
-
 
 void main() {
   group('RouteRegistry', () {
@@ -72,7 +70,8 @@ void main() {
       });
 
       test('should register route with middleware', () {
-        final middleware = Middleware((req, res, next) async => await next(), name: 'auth');
+        final middleware =
+            Middleware((req, res, next) async => await next(), name: 'auth');
         registry.get('/test', (req, res) async {}, middleware: [middleware]);
 
         expect(registry.routes.length, equals(1));
@@ -82,7 +81,10 @@ void main() {
 
       test('should register ANY method routes', () {
         registry.any('/test', (req, res) async {});
-        expect(registry.routes.length, equals(6)); // GET, POST, PUT, PATCH, DELETE, HEAD
+        expect(
+          registry.routes.length,
+          equals(6),
+        ); // GET, POST, PUT, PATCH, DELETE, HEAD
 
         final methods = registry.routes.map((r) => r.method).toSet();
         expect(methods, contains('GET'));
@@ -98,7 +100,10 @@ void main() {
         registry.get('/users/:id', (req, res) async {});
 
         expect(registry.routes.length, equals(2));
-        expect(registry.routes[0].path, equals('/users/profile')); // Static first
+        expect(
+          registry.routes[0].path,
+          equals('/users/profile'),
+        ); // Static first
         expect(registry.routes[1].path, equals('/users/:id')); // Dynamic second
       });
     });
@@ -242,7 +247,8 @@ void main() {
       });
 
       test('should group routes with middleware', () {
-        final middleware = Middleware((req, res, next) async => await next(), name: 'auth');
+        final middleware =
+            Middleware((req, res, next) async => await next(), name: 'auth');
 
         groupManager.group(
           prefix: '/api',
@@ -258,8 +264,12 @@ void main() {
       });
 
       test('should combine group middleware with route middleware', () {
-        final groupMiddleware = Middleware((req, res, next) async => await next(), name: 'auth');
-        final routeMiddleware = Middleware((req, res, next) async => await next(), name: 'rate-limit');
+        final groupMiddleware =
+            Middleware((req, res, next) async => await next(), name: 'auth');
+        final routeMiddleware = Middleware(
+          (req, res, next) async => await next(),
+          name: 'rate-limit',
+        );
 
         groupManager.group(
           prefix: '/api',
@@ -310,10 +320,10 @@ void main() {
 
     group('Handler Wrapping', () {
       test('should wrap handler with exception handling', () {
-        final originalHandler = (Request req, Response res) async {
-        };
+        final originalHandler = (Request req, Response res) async {};
 
-        final wrappedHandler = handler.wrapWithExceptionHandler(originalHandler);
+        final wrappedHandler =
+            handler.wrapWithExceptionHandler(originalHandler);
 
         // Note: We can't easily test the exception handling without mocking
         // the ExceptionHandler, but we can verify the wrapper is created
@@ -338,7 +348,11 @@ void main() {
           executed = true;
         };
 
-        await handler.executeHandler(testHandler, FakeRequest(), FakeResponse());
+        await handler.executeHandler(
+          testHandler,
+          FakeRequest(),
+          FakeResponse(),
+        );
         expect(executed, isTrue);
       });
     });
@@ -360,7 +374,8 @@ void main() {
       });
 
       test('should register routes with middleware', () {
-        final middleware = Middleware((req, res, next) async => await next(), name: 'test');
+        final middleware =
+            Middleware((req, res, next) async => await next(), name: 'test');
         router.get('/test', (req, res) async {}, middleware: [middleware]);
 
         expect(router.routes.length, equals(1));
@@ -399,7 +414,8 @@ void main() {
       });
 
       test('should group routes with middleware', () {
-        final middleware = Middleware((req, res, next) async => await next(), name: 'auth');
+        final middleware =
+            Middleware((req, res, next) async => await next(), name: 'auth');
 
         router.group(
           prefix: '/api',

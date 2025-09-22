@@ -65,7 +65,8 @@ class WebAuthService {
     // Check for brute force protection
     if (_isLockedOut(request)) {
       throw AuthException(
-          'Account temporarily locked due to too many failed attempts',);
+        'Account temporarily locked due to too many failed attempts',
+      );
     }
 
     try {
@@ -95,8 +96,12 @@ class WebAuthService {
     }
   }
 
-  void _saveAuthSession(Request request, Response response,
-      Map<String, dynamic> authResult, bool remember,) {
+  void _saveAuthSession(
+    Request request,
+    Response response,
+    Map<String, dynamic> authResult,
+    bool remember,
+  ) {
     // Extract user from auth result
     final user = Map<String, dynamic>.from(authResult['user']);
     final userId = user['id'];
@@ -257,8 +262,10 @@ class WebAuthService {
   }
 
   /// Checks if user needs re-authentication (session expiring soon)
-  bool needsReauth(Request request,
-      {Duration within = const Duration(minutes: 5),}) {
+  bool needsReauth(
+    Request request, {
+    Duration within = const Duration(minutes: 5),
+  }) {
     return request.session.isExpiringSoon(within);
   }
 
@@ -283,8 +290,11 @@ class WebAuthService {
   }
 
   /// Middleware helper: Redirects unauthenticated users
-  Future<void> requireAuth(Request request, Response response,
-      {String redirectTo = '/login',}) async {
+  Future<void> requireAuth(
+    Request request,
+    Response response, {
+    String redirectTo = '/login',
+  }) async {
     if (!isAuthenticated(request)) {
       response.redirect(redirectTo);
       return;
@@ -297,8 +307,11 @@ class WebAuthService {
   }
 
   /// Middleware helper: Redirects authenticated users (for login pages)
-  void redirectIfAuthenticated(Request request, Response response,
-      {String redirectTo = '/dashboard',}) {
+  void redirectIfAuthenticated(
+    Request request,
+    Response response, {
+    String redirectTo = '/dashboard',
+  }) {
     if (isAuthenticated(request)) {
       response.redirect(redirectTo);
     }

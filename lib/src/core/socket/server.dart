@@ -80,14 +80,14 @@ class SocketServer {
               return;
             }
           }
-           // Upgrade to WebSocket
+          // Upgrade to WebSocket
           final ws = await WebSocketTransformer.upgrade(request);
           final clientId = _generateClientId();
           final client = SocketClient(
             id: clientId,
             socket: ws,
             manager: _manager,
-            headers: request.headers, 
+            headers: request.headers,
             context: req.params.attributes,
           );
           final handler = SocketHandler(client, _manager, _globalMiddleware);

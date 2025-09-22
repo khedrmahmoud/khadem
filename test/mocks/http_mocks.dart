@@ -1,7 +1,9 @@
 import 'dart:io';
 
-import 'package:khadem/khadem.dart' show Response, CookieHelper, ResponseBody, Request, ResponseHeaders, ResponseStatus, RouteMatchResult;
-import 'package:khadem/src/core/index.dart' show ResponseRenderer;
+import 'package:khadem/src/core/http/request/request.dart';
+import 'package:khadem/src/core/http/response/index.dart';
+import 'package:khadem/src/core/routing/index.dart' show RouteMatchResult;
+import 'package:khadem/src/support/helpers/cookie.dart';
 
 /// Mock HttpRequest for testing
 class FakeHttpRequest implements HttpRequest {
@@ -153,19 +155,30 @@ class FakeResponse implements Response {
   Future<void> redirect(String url, {int status = 302}) async {}
 
   @override
-  Future<void> stream<T>(Stream<T> stream, {String contentType = 'application/octet-stream', Map<String, String>? headers, List<int> Function(T)? toBytes}) async {}
+  Future<void> stream<T>(
+    Stream<T> stream, {
+    String contentType = 'application/octet-stream',
+    Map<String, String>? headers,
+    List<int> Function(T)? toBytes,
+  }) async {}
 
   @override
   Future<void> file(File file) async {}
 
   @override
-  Future<void> view(String viewName, {Map<String, dynamic> data = const {}}) async {}
+  Future<void> view(
+    String viewName, {
+    Map<String, dynamic> data = const {},
+  }) async {}
 
   @override
   void html(String html) {}
 
   @override
-  void bytes(List<int> bytes, {String contentType = 'application/octet-stream'}) {}
+  void bytes(
+    List<int> bytes, {
+    String contentType = 'application/octet-stream',
+  }) {}
 
   @override
   void jsonPretty(dynamic data, {int indent = 2}) {}
@@ -208,7 +221,8 @@ class FakeResponse implements Response {
     String? exposeHeaders,
     bool allowCredentials = false,
     int? maxAge,
-  }) => this;
+  }) =>
+      this;
 
   @override
   Response security({
@@ -217,7 +231,8 @@ class FakeResponse implements Response {
     bool enableXFrameOptions = true,
     bool enableXContentTypeOptions = true,
     String? cspPolicy,
-  }) => this;
+  }) =>
+      this;
 
   @override
   Response cache(String value) => this;
@@ -227,19 +242,19 @@ class FakeResponse implements Response {
 
   @override
   CookieHelper get cookieHandler => CookieHelper(FakeHttpRequest() as dynamic);
-  
+
   @override
   Response flashInput(Map<String, dynamic> inputData) {
     // TODO: implement flashInput
     throw UnimplementedError();
   }
-  
+
   @override
   Response sessionPut(String key, value) {
     // TODO: implement sessionPut
     throw UnimplementedError();
   }
-  
+
   @override
   // TODO: implement statusCode
   int get statusCode => throw UnimplementedError();

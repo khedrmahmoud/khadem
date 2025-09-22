@@ -13,7 +13,8 @@ void main() {
 
     setUp(() {
       storageManager = StorageManager();
-      localDisk = LocalDisk(basePath: Directory.systemTemp.path + '/test_storage');
+      localDisk =
+          LocalDisk(basePath: Directory.systemTemp.path + '/test_storage');
     });
 
     test('should initialize with default local driver', () {
@@ -30,8 +31,10 @@ void main() {
     });
 
     test('should throw when registering disk with empty name', () {
-      expect(() => storageManager.registerDisk('', localDisk),
-             throwsA(isA<StorageException>()),);
+      expect(
+        () => storageManager.registerDisk('', localDisk),
+        throwsA(isA<StorageException>()),
+      );
     });
 
     test('should get disk by name', () {
@@ -49,8 +52,10 @@ void main() {
     });
 
     test('should throw when getting non-existent disk', () {
-      expect(() => storageManager.disk('nonexistent'),
-             throwsA(isA<NotFoundException>()),);
+      expect(
+        () => storageManager.disk('nonexistent'),
+        throwsA(isA<NotFoundException>()),
+      );
     });
 
     test('should remove disk successfully', () {
@@ -62,8 +67,10 @@ void main() {
     });
 
     test('should throw when removing non-existent disk', () {
-      expect(() => storageManager.removeDisk('nonexistent'),
-             throwsA(isA<NotFoundException>()),);
+      expect(
+        () => storageManager.removeDisk('nonexistent'),
+        throwsA(isA<NotFoundException>()),
+      );
     });
 
     test('should set default disk successfully', () {
@@ -74,19 +81,29 @@ void main() {
     });
 
     test('should throw when setting non-existent disk as default', () {
-      expect(() => storageManager.setDefaultDisk('nonexistent'),
-             throwsA(isA<NotFoundException>()),);
+      expect(
+        () => storageManager.setDefaultDisk('nonexistent'),
+        throwsA(isA<NotFoundException>()),
+      );
     });
 
     test('should register driver successfully', () {
-      storageManager.registerDriver('custom', (options) => LocalDisk(basePath: './custom'));
+      storageManager.registerDriver(
+        'custom',
+        (options) => LocalDisk(basePath: './custom'),
+      );
 
       expect(storageManager.driverCount, equals(2)); // local + custom
     });
 
     test('should throw when registering driver with empty name', () {
-      expect(() => storageManager.registerDriver('', (options) => LocalDisk(basePath: './test')),
-             throwsA(isA<StorageException>()),);
+      expect(
+        () => storageManager.registerDriver(
+          '',
+          (options) => LocalDisk(basePath: './test'),
+        ),
+        throwsA(isA<StorageException>()),
+      );
     });
 
     test('should load configuration successfully', () {
@@ -116,8 +133,10 @@ void main() {
         },
       };
 
-      expect(() => storageManager.fromConfig(config),
-             throwsA(isA<StorageException>()),);
+      expect(
+        () => storageManager.fromConfig(config),
+        throwsA(isA<StorageException>()),
+      );
     });
 
     test('should throw when loading config with unsupported driver', () {
@@ -130,8 +149,10 @@ void main() {
         },
       };
 
-      expect(() => storageManager.fromConfig(config),
-             throwsA(isA<NotFoundException>()),);
+      expect(
+        () => storageManager.fromConfig(config),
+        throwsA(isA<NotFoundException>()),
+      );
     });
 
     test('should flush all disks', () {
@@ -174,7 +195,10 @@ void main() {
       };
 
       storageManager.fromConfig(config);
-      expect(storageManager.defaultDisk, equals('local')); // should keep original default
+      expect(
+        storageManager.defaultDisk,
+        equals('local'),
+      ); // should keep original default
     });
   });
 }

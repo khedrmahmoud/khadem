@@ -1,9 +1,8 @@
- 
 import 'package:khadem/khadem.dart' show ConfigInterface, LogLevel, LogHandler;
 
 import 'logging_writers/console_writer.dart';
 import 'logging_writers/file_writer.dart';
- 
+
 /// Configuration manager for the logging system.
 /// Handles loading and parsing logging configuration from the application config.
 class LoggingConfiguration {
@@ -25,7 +24,8 @@ class LoggingConfiguration {
   /// Gets the configured log handlers.
   List<LogHandler> get handlers {
     final handlers = <LogHandler>[];
-    final handlersConfig = _config.get<Map<String, dynamic>>('logging.handlers', {})!;
+    final handlersConfig =
+        _config.get<Map<String, dynamic>>('logging.handlers', {})!;
 
     // Configure file handler
     final fileConfig = handlersConfig['file'] as Map<String, dynamic>?;

@@ -139,8 +139,12 @@ abstract class EventSystemInterface {
   /// ```dart
   /// await events.emit('user.updated', {'userId': 123, 'changes': {...}});
   /// ```
-  Future<void> emit(String event,
-      [dynamic payload, bool queue = false, bool broadcast = false,]);
+  Future<void> emit(
+    String event, [
+    dynamic payload,
+    bool queue = false,
+    bool broadcast = false,
+  ]);
 
   /// Emits all events within a named group.
   ///
@@ -158,8 +162,12 @@ abstract class EventSystemInterface {
   /// ```dart
   /// await events.emitGroup('user.lifecycle', userData);
   /// ```
-  Future<void> emitGroup(String groupName,
-      [dynamic payload, bool queue = false, bool broadcast = false,]);
+  Future<void> emitGroup(
+    String groupName, [
+    dynamic payload,
+    bool queue = false,
+    bool broadcast = false,
+  ]);
 
   /// Removes a specific listener from an event.
   ///

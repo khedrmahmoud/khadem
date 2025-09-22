@@ -11,7 +11,10 @@ class MockContainer implements ContainerInterface {
   final Map<Type, dynamic> _bindings = {};
 
   @override
-  void bind<T>(dynamic Function(ContainerInterface) factory, {bool singleton = false}) {
+  void bind<T>(
+    dynamic Function(ContainerInterface) factory, {
+    bool singleton = false,
+  }) {
     _bindings[T] = factory;
   }
 
@@ -31,8 +34,11 @@ class MockContainer implements ContainerInterface {
   }
 
   @override
-  void bindWhen<T>(String context, dynamic Function(ContainerInterface) factory,
-      {bool singleton = false,}) {
+  void bindWhen<T>(
+    String context,
+    dynamic Function(ContainerInterface) factory, {
+    bool singleton = false,
+  }) {
     // Not implemented for this test
   }
 
@@ -179,7 +185,8 @@ void main() {
         registry.register(testProvider);
         registry.register(deferredProvider);
 
-        final testProviders = registry.getProvidersByType<TestServiceProvider>();
+        final testProviders =
+            registry.getProvidersByType<TestServiceProvider>();
         expect(testProviders.length, equals(1));
         expect(testProviders.first, equals(testProvider));
       });
@@ -245,7 +252,10 @@ void main() {
         await bootloader.bootProvider(provider);
 
         expect(provider.booted, isTrue);
-        expect(bootloader.isBooted, isFalse); // Single boot doesn't set overall booted state
+        expect(
+          bootloader.isBooted,
+          isFalse,
+        ); // Single boot doesn't set overall booted state
       });
 
       test('should boot multiple providers', () async {
@@ -402,7 +412,10 @@ void main() {
 
         expect(regularProvider.booted, isTrue);
         expect(deferredProvider.booted, isFalse);
-        expect(manager.isBooted, isFalse); // Partial boot doesn't set overall booted state
+        expect(
+          manager.isBooted,
+          isFalse,
+        ); // Partial boot doesn't set overall booted state
       });
 
       test('should boot only deferred providers', () async {
@@ -416,7 +429,10 @@ void main() {
 
         expect(regularProvider.booted, isFalse);
         expect(deferredProvider.booted, isTrue);
-        expect(manager.isBooted, isFalse); // Partial boot doesn't set overall booted state
+        expect(
+          manager.isBooted,
+          isFalse,
+        ); // Partial boot doesn't set overall booted state
       });
 
       test('should validate providers', () {
@@ -512,7 +528,10 @@ void main() {
 
       test('should provide immutable provider list', () {
         final providers = manager.allProviders;
-        expect(() => providers.add(TestServiceProvider()), throwsUnsupportedError);
+        expect(
+          () => providers.add(TestServiceProvider()),
+          throwsUnsupportedError,
+        );
       });
     });
   });

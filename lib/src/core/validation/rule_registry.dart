@@ -69,6 +69,7 @@ class ValidationRuleRepository {
   static void register(String name, Rule Function() factory) {
     _rules[name] = factory;
   }
+
   static void registerAll(Map<String, Rule Function()> rules) {
     _rules.addAll(rules);
   }

@@ -1,6 +1,5 @@
 import 'package:khadem/src/contracts/views/directive_contract.dart';
 
-
 /// Data manipulation directives
 class SetDirective implements ViewDirective {
   static final _setRegex = RegExp(r'@set\s*\(\s*(\w+)\s*,\s*(.+?)\s*\)');
@@ -65,7 +64,8 @@ class UnsetDirective implements ViewDirective {
 }
 
 class PushDirective implements ViewDirective {
-  static final _pushRegex = RegExp(r'@push\s*\(\s*(\w+)\s*\)(.*?)@endPush', dotAll: true);
+  static final _pushRegex =
+      RegExp(r'@push\s*\(\s*(\w+)\s*\)(.*?)@endPush', dotAll: true);
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {

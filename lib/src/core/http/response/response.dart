@@ -137,8 +137,10 @@ class Response {
   }
 
   /// Sends binary data (convenience method).
-  void bytes(List<int> bytes,
-      {String contentType = 'application/octet-stream',}) {
+  void bytes(
+    List<int> bytes, {
+    String contentType = 'application/octet-stream',
+  }) {
     _body.sendBytes(bytes, contentType: contentType);
     _sent = true;
   }
@@ -253,6 +255,7 @@ class Response {
     _headers.setExpires(DateTime.now());
     return this;
   }
+
   /// Store a value in the session
   /// [key] The session attribute key
   /// [value] The value to store
@@ -268,6 +271,7 @@ class Response {
     } catch (_) {}
     return this;
   }
+
   /// Flash input data to session for next request
   /// [inputData] Map of old input values
   Response flashInput(Map<String, dynamic> inputData) {
@@ -281,6 +285,4 @@ class Response {
     } catch (_) {}
     return this;
   }
-
-
 }

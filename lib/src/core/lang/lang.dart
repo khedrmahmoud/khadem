@@ -115,7 +115,7 @@ class Lang {
   ///
   /// This method changes the locale for all future calls to [t] and [getField].
   static void setRequestLocale(String locale) {
-     RequestContext.set('locale', locale);
+    RequestContext.set('locale', locale);
   }
 
   static String? _getLocale({String? overrideLocale}) {
@@ -227,7 +227,10 @@ class Lang {
   /// - [locale]: The locale.
   /// - [translations]: The translations map.
   static void loadNamespace(
-      String namespace, String locale, Map<String, String> translations,) {
+    String namespace,
+    String locale,
+    Map<String, String> translations,
+  ) {
     _provider.loadNamespace(namespace, locale, translations);
   }
 
@@ -241,9 +244,12 @@ class Lang {
 
   /// Adds a custom parameter replacer.
   static void addParameterReplacer(
-      String Function(
-              String key, dynamic value, Map<String, dynamic> parameters,)
-          replacer,) {
+    String Function(
+      String key,
+      dynamic value,
+      Map<String, dynamic> parameters,
+    ) replacer,
+  ) {
     _provider.addParameterReplacer(replacer);
   }
 }

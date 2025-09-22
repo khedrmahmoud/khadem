@@ -10,7 +10,8 @@ class MakeMigrationCommand extends KhademCommand {
   String get name => 'make:migration';
 
   @override
-  String get description => 'Create a new migration file and update the registry.';
+  String get description =>
+      'Create a new migration file and update the registry.';
 
   @override
   Future<void> handle(List<String> args) async {
@@ -70,7 +71,10 @@ class $className extends MigrationFile {
     final files = dir
         .listSync()
         .whereType<File>()
-        .where((f) => f.path.endsWith('.dart') && !f.path.endsWith('migrations.dart'))
+        .where(
+          (f) =>
+              f.path.endsWith('.dart') && !f.path.endsWith('migrations.dart'),
+        )
         .toList()
       ..sort((a, b) => a.path.compareTo(b.path));
 
@@ -81,7 +85,9 @@ class $className extends MigrationFile {
 
     for (final file in files) {
       final fileName = file.uri.pathSegments.last;
-      final className = _toClassName(fileName.replaceAll('.dart', '').split('_').skip(1).join('_'));
+      final className = _toClassName(
+        fileName.replaceAll('.dart', '').split('_').skip(1).join('_'),
+      );
       classNames.add(className);
       buffer.writeln("import '$fileName';");
     }

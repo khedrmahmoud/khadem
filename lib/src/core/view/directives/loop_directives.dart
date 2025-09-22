@@ -1,6 +1,5 @@
 import 'package:khadem/src/contracts/views/directive_contract.dart';
 
-
 /// Enhanced loop directives
 class ForeachDirective implements ViewDirective {
   static final _foreachRegex = RegExp(

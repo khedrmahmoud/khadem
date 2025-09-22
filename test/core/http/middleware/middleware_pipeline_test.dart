@@ -1,11 +1,8 @@
 import 'dart:async';
 
+import 'package:khadem/khadem.dart' show MiddlewarePipeline, Middleware, MiddlewareNotFoundException, MiddlewarePriority;
 import 'package:test/test.dart';
 
-import '../../../../lib/src/contracts/http/middleware_contract.dart';
-import '../../../../lib/src/core/http/middleware/middleware_pipeline.dart';
-
-import '../../../../lib/src/support/exceptions/middleware_not_found_exception.dart';
 import '../../../mocks/http_mocks.dart';
 
 
@@ -34,9 +31,12 @@ void main() {
 
     group('Adding Middleware', () {
       test('should add middleware handler', () {
-        pipeline.add((req, res, next) async {
-          await next();
-        }, name: 'test',);
+        pipeline.add(
+          (req, res, next) async {
+            await next();
+          },
+          name: 'test',
+        );
 
         expect(pipeline.middleware.length, equals(1));
         expect(pipeline.hasMiddleware('test'), isTrue);
@@ -44,9 +44,12 @@ void main() {
       });
 
       test('should add middleware object', () {
-        final middleware = Middleware((req, res, next) async {
-          await next();
-        }, name: 'test',);
+        final middleware = Middleware(
+          (req, res, next) async {
+            await next();
+          },
+          name: 'test',
+        );
 
         pipeline.addMiddleware(middleware);
 
@@ -86,11 +89,20 @@ void main() {
 
     group('Middleware Ordering', () {
       test('should sort middleware by priority', () {
-        pipeline.add((req, res, next) async => await next(), name: 'business',);
-        pipeline.add((req, res, next) async => await next(),
-            priority: MiddlewarePriority.global, name: 'global',);
-        pipeline.add((req, res, next) async => await next(),
-            priority: MiddlewarePriority.auth, name: 'auth',);
+        pipeline.add(
+          (req, res, next) async => await next(),
+          name: 'business',
+        );
+        pipeline.add(
+          (req, res, next) async => await next(),
+          priority: MiddlewarePriority.global,
+          name: 'global',
+        );
+        pipeline.add(
+          (req, res, next) async => await next(),
+          priority: MiddlewarePriority.auth,
+          name: 'auth',
+        );
 
         final middleware = pipeline.middleware;
         expect(middleware[0].name, equals('global'));
@@ -102,7 +114,11 @@ void main() {
     group('Named Middleware Operations', () {
       test('should add middleware before named middleware', () {
         pipeline.add((req, res, next) async => await next(), name: 'target');
-        pipeline.addBefore('target', (req, res, next) async => await next(), name: 'before');
+        pipeline.addBefore(
+          'target',
+          (req, res, next) async => await next(),
+          name: 'before',
+        );
 
         final middleware = pipeline.middleware;
         expect(middleware[0].name, equals('before'));
@@ -111,7 +127,11 @@ void main() {
 
       test('should add middleware after named middleware', () {
         pipeline.add((req, res, next) async => await next(), name: 'target');
-        pipeline.addAfter('target', (req, res, next) async => await next(), name: 'after');
+        pipeline.addAfter(
+          'target',
+          (req, res, next) async => await next(),
+          name: 'after',
+        );
 
         final middleware = pipeline.middleware;
         expect(middleware[0].name, equals('target'));
@@ -119,13 +139,23 @@ void main() {
       });
 
       test('should throw when adding before non-existent middleware', () {
-        expect(() => pipeline.addBefore('nonexistent', (req, res, next) async => await next()),
-            throwsA(isA<MiddlewareNotFoundException>()),);
+        expect(
+          () => pipeline.addBefore(
+            'nonexistent',
+            (req, res, next) async => await next(),
+          ),
+          throwsA(isA<MiddlewareNotFoundException>()),
+        );
       });
 
       test('should throw when adding after non-existent middleware', () {
-        expect(() => pipeline.addAfter('nonexistent', (req, res, next) async => await next()),
-            throwsA(isA<MiddlewareNotFoundException>()),);
+        expect(
+          () => pipeline.addAfter(
+            'nonexistent',
+            (req, res, next) async => await next(),
+          ),
+          throwsA(isA<MiddlewareNotFoundException>()),
+        );
       });
 
       test('should remove middleware by name', () {
@@ -147,34 +177,49 @@ void main() {
       test('should process request through middleware chain', () async {
         final order = <String>[];
 
-        pipeline.add((req, res, next) async {
-          order.add('first');
-          await next();
-          order.add('first-after');
-        }, name: 'first',);
+        pipeline.add(
+          (req, res, next) async {
+            order.add('first');
+            await next();
+            order.add('first-after');
+          },
+          name: 'first',
+        );
 
-        pipeline.add((req, res, next) async {
-          order.add('second');
-          await next();
-          order.add('second-after');
-        }, name: 'second',);
+        pipeline.add(
+          (req, res, next) async {
+            order.add('second');
+            await next();
+            order.add('second-after');
+          },
+          name: 'second',
+        );
 
         await pipeline.process(request, response);
 
-        expect(order, equals(['first', 'second', 'second-after', 'first-after']));
+        expect(
+          order,
+          equals(['first', 'second', 'second-after', 'first-after']),
+        );
       });
 
       test('should handle middleware that does not call next', () async {
         var called = false;
 
-        pipeline.add((req, res, next) async {
-          called = true;
-          // Does not call next
-        }, name: 'blocking',);
+        pipeline.add(
+          (req, res, next) async {
+            called = true;
+            // Does not call next
+          },
+          name: 'blocking',
+        );
 
-        pipeline.add((req, res, next) async {
-          fail('Should not be reached');
-        }, name: 'never-called',);
+        pipeline.add(
+          (req, res, next) async {
+            fail('Should not be reached');
+          },
+          name: 'never-called',
+        );
 
         await pipeline.process(request, response);
 
@@ -204,15 +249,21 @@ void main() {
           throw Exception('Test error');
         });
 
-        pipeline.add((req, res, next) async {
-          errorHandled = true;
-          await next();
-        }, priority: MiddlewarePriority.terminating,);
+        pipeline.add(
+          (req, res, next) async {
+            errorHandled = true;
+            await next();
+          },
+          priority: MiddlewarePriority.terminating,
+        );
 
         await pipeline.process(request, response);
 
         expect(errorHandled, isTrue);
-        expect(request.attribute<String>('error'), equals('Exception: Test error'));
+        expect(
+          request.attribute<String>('error'),
+          equals('Exception: Test error'),
+        );
         expect(request.attribute<String>('stackTrace'), isNotNull);
       });
 
@@ -224,15 +275,23 @@ void main() {
           throw Exception('Test error');
         });
 
-        pipeline.add((req, res, next) async {
-          handler1Called = true;
-          await next();
-        }, priority: MiddlewarePriority.terminating, name: 'handler1',);
+        pipeline.add(
+          (req, res, next) async {
+            handler1Called = true;
+            await next();
+          },
+          priority: MiddlewarePriority.terminating,
+          name: 'handler1',
+        );
 
-        pipeline.add((req, res, next) async {
-          handler2Called = true;
-          await next();
-        }, priority: MiddlewarePriority.terminating, name: 'handler2',);
+        pipeline.add(
+          (req, res, next) async {
+            handler2Called = true;
+            await next();
+          },
+          priority: MiddlewarePriority.terminating,
+          name: 'handler2',
+        );
 
         await pipeline.process(request, response);
 
@@ -245,8 +304,10 @@ void main() {
           throw MiddlewareNotFoundException('Test middleware not found');
         });
 
-        expect(() async => pipeline.process(request, response),
-            throwsA(isA<MiddlewareNotFoundException>()),);
+        expect(
+          () async => pipeline.process(request, response),
+          throwsA(isA<MiddlewareNotFoundException>()),
+        );
       });
     });
 
@@ -259,7 +320,8 @@ void main() {
       });
 
       test('should get middleware by name', () {
-        final middleware = Middleware((req, res, next) async => await next(), name: 'test');
+        final middleware =
+            Middleware((req, res, next) async => await next(), name: 'test');
         pipeline.addMiddleware(middleware);
 
         final retrieved = pipeline.getByName('test');

@@ -36,10 +36,13 @@ void main() {
 
       test('should call factory function once for singleton bindings', () {
         var callCount = 0;
-        container.bind<TestService>((c) {
-          callCount++;
-          return TestService('singleton-$callCount');
-        }, singleton: true,);
+        container.bind<TestService>(
+          (c) {
+            callCount++;
+            return TestService('singleton-$callCount');
+          },
+          singleton: true,
+        );
 
         final instance1 = container.resolve<TestService>();
         final instance2 = container.resolve<TestService>();
@@ -155,7 +158,10 @@ void main() {
         container.bind<TestService>((c) => nullableService!);
 
         // This would throw, but we're testing the binding mechanism
-        expect(() => container.resolve<TestService>(), throwsA(isA<TypeError>()));
+        expect(
+          () => container.resolve<TestService>(),
+          throwsA(isA<TypeError>()),
+        );
       });
 
       test('should handle complex factory functions', () {

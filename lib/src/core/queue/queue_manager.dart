@@ -26,9 +26,9 @@ class QueueManager {
     String? driverName,
     IQueueDriverRegistry? registry,
     QueueConfigLoader? configLoader,
-  }) : _monitor = monitor ?? BasicQueueMonitor(),
-       _registry = registry ?? QueueDriverRegistry(),
-       _configLoader = configLoader ?? QueueConfigLoader() {
+  })  : _monitor = monitor ?? BasicQueueMonitor(),
+        _registry = registry ?? QueueDriverRegistry(),
+        _configLoader = configLoader ?? QueueConfigLoader() {
     if (driver != null) {
       _defaultDriver = driver;
       _defaultDriverName = driverName ?? 'mock';
@@ -49,8 +49,6 @@ class QueueManager {
 
   /// Gets the config loader.
   QueueConfigLoader get configLoader => _configLoader;
-
- 
 
   /// Loads queue configuration from the application's config.
   ///

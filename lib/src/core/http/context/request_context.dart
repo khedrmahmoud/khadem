@@ -80,7 +80,8 @@ class RequestContext {
   static String? get userAgent => request.headers.header('user-agent');
 
   /// Get the Accept-Language header
-  static String? get acceptLanguage => request.headers.header('accept-language');
+  static String? get acceptLanguage =>
+      request.headers.header('accept-language');
 
   /// Get the Content-Type header
   static String? get contentType => request.headers.header('content-type');
@@ -106,16 +107,21 @@ class RequestContext {
     final stopwatch = Stopwatch()..start();
 
     try {
-      return runZoned(() {
-        final result = body();
-        _customData.remove(request); // Clean up after request finishes
-        return result;
-      }, zoneValues: {zoneKey: request},);
+      return runZoned(
+        () {
+          final result = body();
+          _customData.remove(request); // Clean up after request finishes
+          return result;
+        },
+        zoneValues: {zoneKey: request},
+      );
     } finally {
       stopwatch.stop();
       // Optional: Log slow requests
       if (stopwatch.elapsedMilliseconds > 1000) {
-        Khadem.logger.warning('[RequestContext] Slow request: ${request.method} ${request.path} took ${stopwatch.elapsedMilliseconds}ms');
+        Khadem.logger.warning(
+          '[RequestContext] Slow request: ${request.method} ${request.path} took ${stopwatch.elapsedMilliseconds}ms',
+        );
       }
     }
   }

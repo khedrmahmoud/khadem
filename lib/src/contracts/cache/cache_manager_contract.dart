@@ -24,7 +24,11 @@ abstract class ICacheManager {
   Future<void> forever(String key, dynamic value);
 
   /// Retrieves a value or stores the default value if it doesn't exist.
-  Future<dynamic> remember(String key, Duration ttl, Future<dynamic> Function() callback);
+  Future<dynamic> remember(
+    String key,
+    Duration ttl,
+    Future<dynamic> Function() callback,
+  );
 
   /// Tags a cache item with one or more tags.
   Future<void> tag(String key, List<String> tags);

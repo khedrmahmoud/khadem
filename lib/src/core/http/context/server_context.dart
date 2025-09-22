@@ -72,15 +72,20 @@ class ServerContext {
 
   /// Execute a function within this server context
   R run<R>(R Function() body) {
-    return runZoned(() {
-      final result = body();
-      // Log processing time if it took more than 100ms
-      final duration = processingTime;
-      if (duration.inMilliseconds > 100) {
-        // Could integrate with logger here
-        print('[ServerContext] Request processed in ${duration.inMilliseconds}ms');
-      }
-      return result;
-    }, zoneValues: {zoneKey: this},);
+    return runZoned(
+      () {
+        final result = body();
+        // Log processing time if it took more than 100ms
+        final duration = processingTime;
+        if (duration.inMilliseconds > 100) {
+          // Could integrate with logger here
+          print(
+            '[ServerContext] Request processed in ${duration.inMilliseconds}ms',
+          );
+        }
+        return result;
+      },
+      zoneValues: {zoneKey: this},
+    );
   }
 }

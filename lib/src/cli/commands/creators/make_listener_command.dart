@@ -4,20 +4,27 @@ import '../../bus/command.dart';
 
 class MakeListenerCommand extends KhademCommand {
   MakeListenerCommand({required super.logger}) {
-    argParser.addOption('name', abbr: 'n', help: 'Listener name (e.g., Post or auth/UserEventsHandler)');
+    argParser.addOption(
+      'name',
+      abbr: 'n',
+      help: 'Listener name (e.g., Post or auth/UserEventsHandler)',
+    );
   }
 
   @override
   String get name => 'make:listener';
 
   @override
-  String get description => 'Create a new event listener / handler class with optional folder structure';
+  String get description =>
+      'Create a new event listener / handler class with optional folder structure';
 
   @override
   Future<void> handle(List<String> args) async {
     final name = argResults?['name'] as String?;
     if (name == null || name.isEmpty) {
-      logger.error('❌ Usage: khadem make:listener --name=ListenerName or --name=folder/ListenerName');
+      logger.error(
+        '❌ Usage: khadem make:listener --name=ListenerName or --name=folder/ListenerName',
+      );
       exit(1);
     }
 
@@ -36,7 +43,8 @@ class MakeListenerCommand extends KhademCommand {
     }
 
     final className = _capitalize(listenerName);
-    final fileName = '${_snakeCase(listenerName.replaceAll('EventsHandler', ''))}_events_handler.dart';
+    final fileName =
+        '${_snakeCase(listenerName.replaceAll('EventsHandler', ''))}_events_handler.dart';
     final relativePath = folder.isEmpty
         ? 'app/listeners/$fileName'
         : 'app/listeners/$folder/$fileName';
@@ -44,7 +52,13 @@ class MakeListenerCommand extends KhademCommand {
     final file = File(relativePath);
     await file.create(recursive: true);
 
-    await file.writeAsString(_listenerStub(className, listenerName.replaceAll('EventsHandler', ''), folder));
+    await file.writeAsString(
+      _listenerStub(
+        className,
+        listenerName.replaceAll('EventsHandler', ''),
+        folder,
+      ),
+    );
 
     logger.info('✅ Listener "$className" created at "$relativePath"');
     exit(0);

@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:khadem/khadem.dart' show RequestContext;
-
 import '../../view/renderer.dart';
+import '../context/request_context.dart';
 import '../request/request.dart';
 import 'response_body.dart';
 import 'response_headers.dart';
@@ -43,7 +42,8 @@ class ResponseRenderer {
   /// - Request data (session, input, etc)
   /// - Framework data (csrf token, etc)
   Future<Map<String, dynamic>> _buildViewContext(
-      Map<String, dynamic> userData,) async {
+    Map<String, dynamic> userData,
+  ) async {
     final context = <String, dynamic>{
       ...userData,
     };
@@ -79,7 +79,7 @@ class ResponseRenderer {
       // Add old input
       final oldInput = await _request!.body;
       context['old'] = oldInput;
-    
+
       // Add auth data
       final user = _request!.attribute('user');
       if (user != null) {

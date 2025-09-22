@@ -9,7 +9,4 @@ class SendUserNotificationJob extends QueueJob {
   Future<void> handle() async {
     print('🔔 Notification sent for user: $event');
   }
-
-
-
 }

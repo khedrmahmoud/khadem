@@ -36,7 +36,8 @@ class MySQLSchemaBuilder implements SchemaBuilder {
       parts.add('`${column.name}` ENUM($enumValues)');
     } else if (column.generatedExpression != null) {
       parts.add(
-          '`${column.name}` AS (${column.generatedExpression}) ${column.isStoredGenerated ? 'STORED' : 'VIRTUAL'}',);
+        '`${column.name}` AS (${column.generatedExpression}) ${column.isStoredGenerated ? 'STORED' : 'VIRTUAL'}',
+      );
     } else {
       parts.add('`${column.name}` ${_getTypeWithLength(column)}');
     }
@@ -60,15 +61,16 @@ class MySQLSchemaBuilder implements SchemaBuilder {
         final boolVal = column.defaultValue == true ? 1 : 0;
         parts.add('DEFAULT $boolVal');
       } else if (column.type.toUpperCase().startsWith('INT') ||
-                 column.type.toUpperCase().contains('BIGINT') ||
-                 column.type.toUpperCase() == 'FLOAT' ||
-                 column.type.toUpperCase() == 'DOUBLE') {
+          column.type.toUpperCase().contains('BIGINT') ||
+          column.type.toUpperCase() == 'FLOAT' ||
+          column.type.toUpperCase() == 'DOUBLE') {
         parts.add('DEFAULT ${column.defaultValue}');
       } else if (column.defaultValue is String &&
-                 (column.defaultValue as String).toUpperCase() == 'NULL') {
+          (column.defaultValue as String).toUpperCase() == 'NULL') {
         parts.add('DEFAULT NULL');
       } else if (column.defaultValue is String &&
-                 (column.defaultValue as String).toUpperCase() == 'CURRENT_TIMESTAMP') {
+          (column.defaultValue as String).toUpperCase() ==
+              'CURRENT_TIMESTAMP') {
         parts.add('DEFAULT CURRENT_TIMESTAMP');
       } else {
         parts.add("DEFAULT '${column.defaultValue}'");
@@ -97,7 +99,9 @@ class MySQLSchemaBuilder implements SchemaBuilder {
 
   /// Handles indexes and foreign keys separately
   List<String> _generateConstraints(
-      List<ColumnDefinition> columns, String tableName,) {
+    List<ColumnDefinition> columns,
+    String tableName,
+  ) {
     final constraints = <String>[];
 
     for (final column in columns) {
@@ -117,7 +121,8 @@ class MySQLSchemaBuilder implements SchemaBuilder {
             : '';
 
         constraints.add(
-            'CONSTRAINT `$fkName` FOREIGN KEY (`${column.name}`) REFERENCES `${column.foreignTable}`(`${column.foreignKey}`)$onDelete$onUpdate',);
+          'CONSTRAINT `$fkName` FOREIGN KEY (`${column.name}`) REFERENCES `${column.foreignTable}`(`${column.foreignKey}`)$onDelete$onUpdate',
+        );
       }
     }
 
@@ -147,7 +152,9 @@ class MySQLSchemaBuilder implements SchemaBuilder {
 
   @override
   void createIfNotExists(
-      String tableName, void Function(Blueprint table) callback,) {
+    String tableName,
+    void Function(Blueprint table) callback,
+  ) {
     final blueprint = Blueprint(tableName);
     callback(blueprint);
 

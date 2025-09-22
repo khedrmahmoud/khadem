@@ -160,7 +160,8 @@ class ProhibitedIfRule extends Rule {
     final otherField = parts[0];
     final expectedValue = parts[1];
 
-    if (data.containsKey(otherField) && data[otherField].toString() == expectedValue) {
+    if (data.containsKey(otherField) &&
+        data[otherField].toString() == expectedValue) {
       return 'prohibited_if_validation';
     }
 
@@ -188,7 +189,8 @@ class RequiredIfRule extends Rule {
     final otherField = parts[0];
     final expectedValue = parts[1];
 
-    if (data.containsKey(otherField) && data[otherField].toString() == expectedValue) {
+    if (data.containsKey(otherField) &&
+        data[otherField].toString() == expectedValue) {
       if (value == null || (value is String && value.isEmpty)) {
         return 'required_if_validation';
       }

@@ -1,6 +1,6 @@
 library;
 
-export  'src/application/khadem.dart';
+export 'src/application/khadem.dart';
 export 'src/cli/index.dart';
 export 'src/contracts/index.dart';
 export 'src/core/index.dart';

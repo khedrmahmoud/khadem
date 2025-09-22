@@ -36,7 +36,8 @@ void main() {
         expect(config.get<String>('app.name'), equals('TestApp'));
       });
 
-      test('should throw ConfigException for non-existent config directory', () {
+      test('should throw ConfigException for non-existent config directory',
+          () {
         expect(
           () => ConfigSystem(
             configPath: '${tempDir.path}/non_existent',
@@ -142,7 +143,10 @@ void main() {
 
         expect(config.get<String>('app.name'), equals('Khadem')); // From base
         expect(config.get<bool>('app.debug'), equals(true)); // Overridden
-        expect(config.get<int>('app.database.port'), equals(3307)); // Overridden
+        expect(
+          config.get<int>('app.database.port'),
+          equals(3307),
+        ); // Overridden
       });
 
       test('should handle environment change', () {
@@ -209,10 +213,19 @@ void main() {
           useCache: false,
         );
 
-        expect(config.get<String>('app.database.connection.host'), equals('localhost'));
+        expect(
+          config.get<String>('app.database.connection.host'),
+          equals('localhost'),
+        );
         expect(config.get<int>('app.database.connection.port'), equals(3306));
-        expect(config.get<String>('app.database.connection.credentials.username'), equals('root'));
-        expect(config.get<String>('app.database.connection.credentials.password'), equals('secret'));
+        expect(
+          config.get<String>('app.database.connection.credentials.username'),
+          equals('root'),
+        );
+        expect(
+          config.get<String>('app.database.connection.credentials.password'),
+          equals('secret'),
+        );
       });
 
       test('should return default value for non-existent nested key', () {
@@ -226,7 +239,10 @@ void main() {
           useCache: false,
         );
 
-        expect(config.get<String>('app.database.host', 'localhost'), equals('localhost'));
+        expect(
+          config.get<String>('app.database.host', 'localhost'),
+          equals('localhost'),
+        );
         expect(config.get<int>('app.database.port', 3306), equals(3306));
       });
 
@@ -246,7 +262,10 @@ void main() {
           useCache: false,
         );
 
-        expect(config.get<String>('app.scalar.fake_key', 'default'), equals('default'));
+        expect(
+          config.get<String>('app.scalar.fake_key', 'default'),
+          equals('default'),
+        );
         expect(config.get<String>('app.nested.key'), equals('value'));
       });
     });
@@ -278,7 +297,10 @@ void main() {
         expect(config.get<double>('app.double_val'), equals(3.14));
         expect(config.get<bool>('app.bool_val'), equals(true));
         expect(config.get<List>('app.list_val'), equals(['a', 'b', 'c']));
-        expect(config.get<Map<String, dynamic>>('app.object_val'), equals({'nested': 'value'}));
+        expect(
+          config.get<Map<String, dynamic>>('app.object_val'),
+          equals({'nested': 'value'}),
+        );
       });
 
       test('should return default values for type mismatches', () {
@@ -297,7 +319,10 @@ void main() {
           useCache: false,
         );
 
-        expect(config.get<String>('app.string_val', 'default'), equals('default'));
+        expect(
+          config.get<String>('app.string_val', 'default'),
+          equals('default'),
+        );
         expect(config.get<int>('app.int_val', 42), equals(42));
       });
 
@@ -313,7 +338,10 @@ void main() {
         );
 
         expect(config.get<String>('app.null_val'), isNull);
-        expect(config.get<String>('app.null_val', 'default'), equals('default'));
+        expect(
+          config.get<String>('app.null_val', 'default'),
+          equals('default'),
+        );
       });
     });
 
@@ -337,7 +365,10 @@ void main() {
         );
 
         config.set('app.nested.deep.key', 'nested_value');
-        expect(config.get<String>('app.nested.deep.key'), equals('nested_value'));
+        expect(
+          config.get<String>('app.nested.deep.key'),
+          equals('nested_value'),
+        );
       });
 
       test('should override file-based config with runtime values', () {
@@ -520,8 +551,7 @@ void main() {
         expect(config.get<String>('app.name'), equals('Original'));
 
         // Modify the file
-        File('$configPath/app.json')
-          ..writeAsStringSync('{"name": "Modified"}');
+        File('$configPath/app.json')..writeAsStringSync('{"name": "Modified"}');
 
         config.reload();
         expect(config.get<String>('app.name'), equals('Modified'));
@@ -633,7 +663,9 @@ void main() {
       test('should handle deep nested access gracefully', () {
         File('$configPath/app.json')
           ..createSync()
-          ..writeAsStringSync('{"level1": {"level2": {"level3": "deep_value"}}}');
+          ..writeAsStringSync(
+            '{"level1": {"level2": {"level3": "deep_value"}}}',
+          );
 
         final config = ConfigSystem(
           configPath: configPath,
@@ -641,8 +673,14 @@ void main() {
           useCache: false,
         );
 
-        expect(config.get<String>('app.level1.level2.level3'), equals('deep_value'));
-        expect(config.get<String>('app.level1.nonexistent.level3', 'default'), equals('default'));
+        expect(
+          config.get<String>('app.level1.level2.level3'),
+          equals('deep_value'),
+        );
+        expect(
+          config.get<String>('app.level1.nonexistent.level3', 'default'),
+          equals('default'),
+        );
       });
     });
 
@@ -688,9 +726,18 @@ void main() {
         expect(config.get<String>('app.name'), equals('Khadem'));
         expect(config.get<bool>('app.debug'), equals(false));
         expect(config.get<int>('app.services.api.port'), equals(3000));
-        expect(config.get<bool>('app.services.websocket.enabled'), equals(true));
-        expect(config.get<List>('app.features'), equals(['auth', 'cache', 'queue']));
-        expect(config.get<int>('app.limits.rate_limit.requests_per_minute'), equals(60));
+        expect(
+          config.get<bool>('app.services.websocket.enabled'),
+          equals(true),
+        );
+        expect(
+          config.get<List>('app.features'),
+          equals(['auth', 'cache', 'queue']),
+        );
+        expect(
+          config.get<int>('app.limits.rate_limit.requests_per_minute'),
+          equals(60),
+        );
       });
 
       test('should handle multiple environment overrides', () {
@@ -742,11 +789,23 @@ void main() {
 
         // Test merged values
         expect(config.get<bool>('app.debug'), equals(true)); // Overridden
-        expect(config.get<String>('app.database.host'), equals('localhost')); // From base
-        expect(config.get<int>('app.database.port'), equals(3307)); // Overridden
-        expect(config.get<String>('cache.driver'), equals('redis')); // Overridden
+        expect(
+          config.get<String>('app.database.host'),
+          equals('localhost'),
+        ); // From base
+        expect(
+          config.get<int>('app.database.port'),
+          equals(3307),
+        ); // Overridden
+        expect(
+          config.get<String>('cache.driver'),
+          equals('redis'),
+        ); // Overridden
         expect(config.get<int>('cache.ttl'), equals(300)); // Overridden
-        expect(config.get<String>('cache.prefix'), equals('app_cache')); // From base
+        expect(
+          config.get<String>('cache.prefix'),
+          equals('app_cache'),
+        ); // From base
       });
     });
   });

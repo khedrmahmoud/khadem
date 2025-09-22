@@ -147,8 +147,10 @@ class ConfigSystem implements ConfigInterface {
   ///
   /// [isEnvironmentSpecific] indicates whether these are environment overrides
   /// that should be merged with existing base configurations.
-  void _loadConfigsFromDirectory(Directory directory,
-      {bool isEnvironmentSpecific = false,}) {
+  void _loadConfigsFromDirectory(
+    Directory directory, {
+    bool isEnvironmentSpecific = false,
+  }) {
     for (final entity in directory.listSync()) {
       if (entity is File &&
           (entity.path.endsWith('.json') || entity.path.endsWith('.yaml'))) {
@@ -191,8 +193,10 @@ class ConfigSystem implements ConfigInterface {
   void _mergeConfigs(Map<String, dynamic> base, Map<String, dynamic> override) {
     for (final key in override.keys) {
       if (base[key] is Map && override[key] is Map) {
-        _mergeConfigs(base[key] as Map<String, dynamic>,
-            override[key] as Map<String, dynamic>,);
+        _mergeConfigs(
+          base[key] as Map<String, dynamic>,
+          override[key] as Map<String, dynamic>,
+        );
       } else {
         base[key] = override[key];
       }
@@ -391,8 +395,10 @@ class ConfigSystem implements ConfigInterface {
       if (envFile.existsSync()) {
         final envContent = envFile.readAsStringSync();
         final envConfig = jsonDecode(envContent);
-        _mergeConfigs(_config[configName] as Map<String, dynamic>,
-            envConfig as Map<String, dynamic>,);
+        _mergeConfigs(
+          _config[configName] as Map<String, dynamic>,
+          envConfig as Map<String, dynamic>,
+        );
       }
 
       _cacheTimestamps[configName] = DateTime.now();

@@ -37,16 +37,16 @@ class DatabaseAuthRepository implements AuthRepository {
     String table,
     String primaryKey,
   ) async {
-    final result = await Khadem.db
-        .table(table)
-        .where(primaryKey, '=', id)
-        .first();
+    final result =
+        await Khadem.db.table(table).where(primaryKey, '=', id).first();
 
     return result as Map<String, dynamic>?;
   }
 
   @override
-  Future<Map<String, dynamic>> storeToken(Map<String, dynamic> tokenData) async {
+  Future<Map<String, dynamic>> storeToken(
+    Map<String, dynamic> tokenData,
+  ) async {
     await Khadem.db.table('personal_access_tokens').insert(tokenData);
     return tokenData;
   }

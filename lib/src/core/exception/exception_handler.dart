@@ -81,7 +81,8 @@ class ExceptionHandler {
     AppException error,
     StackTrace? stackTrace,
   ) {
-    final responseData = _customFormatter?.call(error) ?? _formatAppExceptionResponse(error, stackTrace);
+    final responseData = _customFormatter?.call(error) ??
+        _formatAppExceptionResponse(error, stackTrace);
 
     res.status(error.statusCode).sendJson(responseData);
   }
@@ -157,7 +158,9 @@ class ExceptionHandler {
       response['details'] = error.details;
     }
 
-    if (_showDetailedErrors && _includeStackTracesInResponse && stackTrace != null) {
+    if (_showDetailedErrors &&
+        _includeStackTracesInResponse &&
+        stackTrace != null) {
       response['stack_trace'] = stackTrace.toString();
     }
 
@@ -185,7 +188,9 @@ class ExceptionHandler {
       response['exception_message'] = error.toString();
     }
 
-    if (_showDetailedErrors && _includeStackTracesInResponse && stackTrace != null) {
+    if (_showDetailedErrors &&
+        _includeStackTracesInResponse &&
+        stackTrace != null) {
       response['stack_trace'] = stackTrace.toString();
     }
 
@@ -199,9 +204,10 @@ class ExceptionHandler {
     StackTrace? stackTrace,
   ) {
     final xml = _buildXmlErrorResponse(error, stackTrace);
-    res.status(error.statusCode)
-       .header('Content-Type', 'application/xml')
-       .send(xml);
+    res
+        .status(error.statusCode)
+        .header('Content-Type', 'application/xml')
+        .send(xml);
   }
 
   /// Send XML response for generic exception
@@ -211,9 +217,7 @@ class ExceptionHandler {
     StackTrace? stackTrace,
   ) {
     final xml = _buildXmlErrorResponse(error, stackTrace);
-    res.status(500)
-       .header('Content-Type', 'application/xml')
-       .send(xml);
+    res.status(500).header('Content-Type', 'application/xml').send(xml);
   }
 
   /// Send HTML response for AppException
@@ -223,9 +227,7 @@ class ExceptionHandler {
     StackTrace? stackTrace,
   ) {
     final html = _buildHtmlErrorResponse(error, stackTrace);
-    res.status(error.statusCode)
-       .header('Content-Type', 'text/html')
-       .send(html);
+    res.status(error.statusCode).header('Content-Type', 'text/html').send(html);
   }
 
   /// Send HTML response for generic exception
@@ -235,9 +237,7 @@ class ExceptionHandler {
     StackTrace? stackTrace,
   ) {
     final html = _buildHtmlErrorResponse(error, stackTrace);
-    res.status(500)
-       .header('Content-Type', 'text/html')
-       .send(html);
+    res.status(500).header('Content-Type', 'text/html').send(html);
   }
 
   /// Build XML error response
@@ -266,7 +266,9 @@ class ExceptionHandler {
       buffer.write('</details>');
     }
 
-    if (_showDetailedErrors && _includeStackTracesInResponse && stackTrace != null) {
+    if (_showDetailedErrors &&
+        _includeStackTracesInResponse &&
+        stackTrace != null) {
       buffer.write('<stack_trace>');
       buffer.write(_escapeXml(stackTrace.toString()));
       buffer.write('</stack_trace>');
@@ -291,7 +293,9 @@ class ExceptionHandler {
     buffer.write('<style>');
     buffer.write('body{font-family:Arial,sans-serif;margin:40px;}');
     buffer.write('.error{color:#d32f2f;}');
-    buffer.write('.details{background:#f5f5f5;padding:10px;margin:10px 0;border-left:4px solid #d32f2f;}');
+    buffer.write(
+      '.details{background:#f5f5f5;padding:10px;margin:10px 0;border-left:4px solid #d32f2f;}',
+    );
     buffer.write('</style>');
     buffer.write('</head><body>');
     buffer.write('<h1 class="error">Error $statusCode</h1>');
@@ -309,14 +313,18 @@ class ExceptionHandler {
       buffer.write('</div>');
     }
 
-    if (_showDetailedErrors && _includeStackTracesInResponse && stackTrace != null) {
+    if (_showDetailedErrors &&
+        _includeStackTracesInResponse &&
+        stackTrace != null) {
       buffer.write('<div class="details">');
       buffer.write('<strong>Stack Trace:</strong><br>');
       buffer.write('<pre>${_escapeHtml(stackTrace.toString())}</pre>');
       buffer.write('</div>');
     }
 
-    buffer.write('<p><small>Timestamp: ${DateTime.now().toIso8601String()}</small></p>');
+    buffer.write(
+      '<p><small>Timestamp: ${DateTime.now().toIso8601String()}</small></p>',
+    );
     buffer.write('</body></html>');
 
     return buffer.toString();

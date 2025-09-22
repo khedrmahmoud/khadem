@@ -71,13 +71,23 @@ class ImageRule extends Rule {
 
     // Check single file
     if (value is UploadedFile) {
-      return _validateImageFile(field, value, allowedMimeTypes, allowedExtensions);
+      return _validateImageFile(
+        field,
+        value,
+        allowedMimeTypes,
+        allowedExtensions,
+      );
     }
 
     // Check multiple files
     if (value is List<UploadedFile>) {
       for (final file in value) {
-        final error = _validateImageFile(field, file, allowedMimeTypes, allowedExtensions);
+        final error = _validateImageFile(
+          field,
+          file,
+          allowedMimeTypes,
+          allowedExtensions,
+        );
         if (error != null) return error;
       }
     }
@@ -92,7 +102,8 @@ class ImageRule extends Rule {
     List<String> allowedExtensions,
   ) {
     // Check MIME type if available
-    if (file.contentType != null && !allowedMimeTypes.contains(file.contentType)) {
+    if (file.contentType != null &&
+        !allowedMimeTypes.contains(file.contentType)) {
       return 'image_validation';
     }
 
@@ -123,7 +134,8 @@ class MimesRule extends Rule {
       return 'file_validation';
     }
 
-    final allowedTypes = arg.split(',').map((e) => e.trim().toLowerCase()).toList();
+    final allowedTypes =
+        arg.split(',').map((e) => e.trim().toLowerCase()).toList();
 
     // Check single file
     if (value is UploadedFile) {
@@ -141,7 +153,11 @@ class MimesRule extends Rule {
     return null;
   }
 
-  String? _validateMimeType(String field, UploadedFile file, List<String> allowedTypes) {
+  String? _validateMimeType(
+    String field,
+    UploadedFile file,
+    List<String> allowedTypes,
+  ) {
     // Check MIME type if available
     if (file.contentType != null) {
       final mimeType = file.contentType!.toLowerCase();
@@ -163,7 +179,8 @@ class MimesRule extends Rule {
       'gif': 'image/gif',
       'pdf': 'application/pdf',
       'doc': 'application/msword',
-      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'docx':
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'txt': 'text/plain',
       'csv': 'text/csv',
       'json': 'application/json',

@@ -66,9 +66,7 @@ class LogChannelManager {
   void closeAll() {
     for (final handlers in _channels.values) {
       for (final handler in handlers) {
-     
-          handler.close();
-        
+        handler.close();
       }
     }
     _channels.clear();

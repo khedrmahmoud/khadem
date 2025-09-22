@@ -4,20 +4,27 @@ import '../../bus/command.dart';
 
 class MakeJobCommand extends KhademCommand {
   MakeJobCommand({required super.logger}) {
-    argParser.addOption('name', abbr: 'n', help: 'Job class name (e.g., SendEmail or auth/SendEmailJob)');
+    argParser.addOption(
+      'name',
+      abbr: 'n',
+      help: 'Job class name (e.g., SendEmail or auth/SendEmailJob)',
+    );
   }
 
   @override
   String get name => 'make:job';
 
   @override
-  String get description => 'Create a new queue job class with optional folder structure';
+  String get description =>
+      'Create a new queue job class with optional folder structure';
 
   @override
   Future<void> handle(List<String> args) async {
     final name = argResults?['name'] as String?;
     if (name == null || name.isEmpty) {
-      logger.error('❌ Usage: khadem make:job --name=JobName or --name=folder/JobName');
+      logger.error(
+        '❌ Usage: khadem make:job --name=JobName or --name=folder/JobName',
+      );
       exit(1);
     }
 
@@ -37,13 +44,14 @@ class MakeJobCommand extends KhademCommand {
 
     final className = _capitalize(jobName);
     final fileName = '${_snakeCase(jobName.replaceAll('Job', ''))}_job.dart';
-    final relativePath = folder.isEmpty
-        ? 'app/jobs/$fileName'
-        : 'app/jobs/$folder/$fileName';
+    final relativePath =
+        folder.isEmpty ? 'app/jobs/$fileName' : 'app/jobs/$folder/$fileName';
 
     final file = File(relativePath);
     await file.create(recursive: true);
-    await file.writeAsString(_jobStub(className, jobName.replaceAll('Job', ''), folder));
+    await file.writeAsString(
+      _jobStub(className, jobName.replaceAll('Job', ''), folder),
+    );
 
     logger.info('✅ Job "$className" created at "$relativePath"');
     exit(0);

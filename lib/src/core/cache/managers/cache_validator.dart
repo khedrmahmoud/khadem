@@ -80,7 +80,9 @@ class CacheValidator implements ICacheValidator {
     // For simple validation, we can check string length or basic object size
     // More sophisticated size checking could be implemented if needed
     if (value is String && value.length > maxSize) {
-      throw CacheException('Cache value is too large (maximum $maxSize characters for strings)');
+      throw CacheException(
+        'Cache value is too large (maximum $maxSize characters for strings)',
+      );
     }
   }
 

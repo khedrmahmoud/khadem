@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:khadem/src/contracts/views/directive_contract.dart';
 
-
 /// Output and debugging directives
 class JsonDirective implements ViewDirective {
   static final _jsonRegex = RegExp(r'@json\s*\(\s*(.+?)\s*\)');
@@ -82,7 +81,8 @@ class DdDirective implements ViewDirective {
 }
 
 class CommentDirective implements ViewDirective {
-  static final _commentRegex = RegExp(r'@comment(.*?)@endComment', dotAll: true);
+  static final _commentRegex =
+      RegExp(r'@comment(.*?)@endComment', dotAll: true);
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {

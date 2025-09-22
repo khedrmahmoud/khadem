@@ -333,8 +333,11 @@ class EnvSystem implements EnvInterface {
   /// final paths = env.getList('PATHS', separator: ';');
   /// ```
   @override
-  List<String> getList(String key,
-      {String separator = ',', List<String> defaultValue = const [],}) {
+  List<String> getList(
+    String key, {
+    String separator = ',',
+    List<String> defaultValue = const [],
+  }) {
     final value = _env[key];
     if (value == null || value.isEmpty) return defaultValue;
     return value.split(separator).map((e) => e.trim()).toList();

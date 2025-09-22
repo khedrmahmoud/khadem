@@ -98,7 +98,9 @@ class EnhancedJWTAuthService extends BaseAuthService {
 
     // Validate secret strength
     if (secret.length < 32) {
-      throw AuthException('JWT secret must be at least 32 characters long for security');
+      throw AuthException(
+        'JWT secret must be at least 32 characters long for security',
+      );
     }
 
     // Check for weak secrets

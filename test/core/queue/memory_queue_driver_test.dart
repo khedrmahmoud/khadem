@@ -142,7 +142,10 @@ void main() {
 
     test('should clear all pending jobs', () async {
       await driver.push(testJob, delay: const Duration(seconds: 1));
-      await driver.push(TestQueueJob('job2'), delay: const Duration(seconds: 1));
+      await driver.push(
+        TestQueueJob('job2'),
+        delay: const Duration(seconds: 1),
+      );
 
       expect(driver.pendingJobsCount, equals(2));
 

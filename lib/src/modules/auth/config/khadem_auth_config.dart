@@ -14,11 +14,13 @@ class KhademAuthConfig implements AuthConfig {
   /// Gets the full auth configuration with caching
   Map<String, dynamic> _getAuthConfig() {
     _authConfig ??= Khadem.config.section('auth') ?? {};
-    
+
     if (_authConfig!.isEmpty) {
-      throw AuthException('Authentication configuration not found. Please check your config/auth file.');
+      throw AuthException(
+        'Authentication configuration not found. Please check your config/auth file.',
+      );
     }
-    
+
     return _authConfig!;
   }
 
@@ -26,11 +28,13 @@ class KhademAuthConfig implements AuthConfig {
   Map<String, dynamic> getProvider(String providerKey) {
     final config = _getAuthConfig();
     final providers = config['providers'] as Map<String, dynamic>?;
-    
+
     if (providers == null || !providers.containsKey(providerKey)) {
-      throw AuthException('Authentication provider "$providerKey" not found in configuration.');
+      throw AuthException(
+        'Authentication provider "$providerKey" not found in configuration.',
+      );
     }
-    
+
     return providers[providerKey] as Map<String, dynamic>;
   }
 
@@ -38,11 +42,13 @@ class KhademAuthConfig implements AuthConfig {
   Map<String, dynamic> getGuard(String guardName) {
     final config = _getAuthConfig();
     final guards = config['guards'] as Map<String, dynamic>?;
-    
+
     if (guards == null || !guards.containsKey(guardName)) {
-      throw AuthException('Authentication guard "$guardName" not found in configuration.');
+      throw AuthException(
+        'Authentication guard "$guardName" not found in configuration.',
+      );
     }
-    
+
     return guards[guardName] as Map<String, dynamic>;
   }
 
@@ -50,11 +56,13 @@ class KhademAuthConfig implements AuthConfig {
   String getDefaultGuard() {
     final config = _getAuthConfig();
     final defaultGuard = config['default'] as String?;
-    
+
     if (defaultGuard == null) {
-      throw AuthException('No default guard specified in authentication configuration.');
+      throw AuthException(
+        'No default guard specified in authentication configuration.',
+      );
     }
-    
+
     return defaultGuard;
   }
 

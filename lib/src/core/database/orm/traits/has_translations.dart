@@ -16,7 +16,9 @@ mixin HasTranslations {
   void loadTranslations(Map<String, dynamic> raw) {
     translations = {
       for (final locale in raw.keys)
-        locale: Map<String, String>.from((raw[locale] ?? {}) as Map<dynamic, dynamic>),
+        locale: Map<String, String>.from(
+          (raw[locale] ?? {}) as Map<dynamic, dynamic>,
+        ),
     };
   }
 

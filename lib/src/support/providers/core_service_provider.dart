@@ -103,8 +103,6 @@ class CoreServiceProvider extends ServiceProvider {
     final storageManager = container.resolve<StorageManager>();
     storageManager.fromConfig(config.section('storage') ?? {});
 
-    
-        
     Lang.use(container.resolve<LangProvider>());
     Lang.setGlobalLocale(envSystem.getOrDefault('APP_LOCALE', 'en'));
 

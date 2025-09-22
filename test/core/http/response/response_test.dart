@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:khadem/src/core/http/response/response.dart';
+import 'package:khadem/src/core/http/response/response_body.dart';
+import 'package:khadem/src/core/http/response/response_headers.dart';
+import 'package:khadem/src/core/http/response/response_renderer.dart';
+import 'package:khadem/src/core/http/response/response_status.dart';
 import 'package:test/test.dart';
-
-import '../../../../lib/src/core/http/response/response.dart';
-import '../../../../lib/src/core/http/response/response_body.dart';
-import '../../../../lib/src/core/http/response/response_headers.dart';
-import '../../../../lib/src/core/http/response/response_renderer.dart';
-import '../../../../lib/src/core/http/response/response_status.dart';
+ 
 
 class FakeHttpRequest implements HttpRequest {
   @override
@@ -265,7 +265,9 @@ void main() {
       });
 
       test('should send pretty JSON', () {
-        final data = {'users': ['Alice', 'Bob']};
+        final data = {
+          'users': ['Alice', 'Bob'],
+        };
         response.jsonPretty(data);
         expect(response.sent, isTrue);
       });

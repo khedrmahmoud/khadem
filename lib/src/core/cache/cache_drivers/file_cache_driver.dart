@@ -297,7 +297,9 @@ class FileCacheDriver implements CacheDriver {
     // Set file permissions if supported (Unix systems)
     try {
       await Process.run(
-          'chmod', ['${_filePermissions.toRadixString(8)}', filePath],);
+        'chmod',
+        ['${_filePermissions.toRadixString(8)}', filePath],
+      );
     } catch (e) {
       // Silently fail if chmod is not available (e.g., on Windows)
     }

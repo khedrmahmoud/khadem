@@ -1,6 +1,4 @@
-
 import 'package:khadem/khadem.dart';
-
 
 /// Handles exceptions in socket operations and sends appropriate error responses.
 class SocketExceptionHandler {
@@ -30,7 +28,8 @@ class SocketExceptionHandler {
         });
       } catch (e) {
         // Last resort - just log the error
-        Khadem.logger.error('❌ Could not send error response to client ${client.id}');
+        Khadem.logger
+            .error('❌ Could not send error response to client ${client.id}');
       }
     }
   }
@@ -59,7 +58,8 @@ class SocketExceptionHandler {
     // In development, include more details
     final isDevelopment = Khadem.isDevelopment;
     if (isDevelopment) {
-      response['message'] = error is AppException ? error.message : error.toString();
+      response['message'] =
+          error is AppException ? error.message : error.toString();
       response['type'] = error.runtimeType.toString();
       if (stackTrace != null) {
         response['stack_trace'] = stackTrace.toString();
@@ -78,7 +78,8 @@ class SocketExceptionHandler {
     Object error, [
     StackTrace? stackTrace,
   ]) {
-    Khadem.logger.warning('⚠️ Client ${client.id} disconnected with error: $error');
+    Khadem.logger
+        .warning('⚠️ Client ${client.id} disconnected with error: $error');
     if (stackTrace != null) {
       Khadem.logger.debug('Disconnect stack trace: $stackTrace');
     }
@@ -91,7 +92,8 @@ class SocketExceptionHandler {
     StackTrace? stackTrace,
     String middlewareName,
   ) {
-    Khadem.logger.error('❌ Connection middleware "$middlewareName" failed: $error');
+    Khadem.logger
+        .error('❌ Connection middleware "$middlewareName" failed: $error');
     if (stackTrace != null) {
       Khadem.logger.debug('Connection stack trace: $stackTrace');
     }
@@ -104,7 +106,9 @@ class SocketExceptionHandler {
     StackTrace? stackTrace,
     String middlewareName,
   ) {
-    Khadem.logger.error('❌ Middleware "$middlewareName" failed for client ${client.id}: $error');
+    Khadem.logger.error(
+      '❌ Middleware "$middlewareName" failed for client ${client.id}: $error',
+    );
     if (stackTrace != null) {
       Khadem.logger.debug('Middleware stack trace: $stackTrace');
     }

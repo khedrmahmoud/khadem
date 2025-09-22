@@ -74,12 +74,15 @@ class SocketMiddleware {
     SocketMiddlewareType type = SocketMiddlewareType.general,
     String? name,
   })  : _handler = handler is SocketMiddlewareHandler ? handler : null,
-        _connectionHandler = handler is SocketConnectionHandler ? handler : null,
-        _disconnectHandler = handler is SocketDisconnectHandler ? handler : null,
+        _connectionHandler =
+            handler is SocketConnectionHandler ? handler : null,
+        _disconnectHandler =
+            handler is SocketDisconnectHandler ? handler : null,
         _roomHandler = handler is SocketRoomHandler ? handler : null,
         _priority = priority,
         _type = type,
-        _name = name ?? 'socket-middleware-${DateTime.now().millisecondsSinceEpoch}';
+        _name = name ??
+            'socket-middleware-${DateTime.now().millisecondsSinceEpoch}';
 
   /// Create a connection middleware
   SocketMiddleware.connection(
@@ -138,5 +141,6 @@ class SocketMiddleware {
   String get name => _name;
 
   /// Check if this middleware handles the given type
-  bool canHandle(SocketMiddlewareType type) => _type == type || _type == SocketMiddlewareType.general;
+  bool canHandle(SocketMiddlewareType type) =>
+      _type == type || _type == SocketMiddlewareType.general;
 }

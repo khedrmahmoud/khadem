@@ -36,7 +36,8 @@ abstract class BaseModel<T> {
   Map<String, dynamic> get computed => {};
 
   T newFactory(Map<String, dynamic> data) => throw UnimplementedError(
-      'newFactory must be implemented in the child model',);
+        'newFactory must be implemented in the child model',
+      );
 
   /// Create query builder using current default connection.
   QueryBuilderInterface<T> get query =>

@@ -284,7 +284,6 @@ class FileLangProvider implements LangProvider {
 
   /// Gets a translation from the internal map.
   String? _getTranslation(String key, String locale, String namespace) {
-  
     return _translations[locale]?[namespace]?[key];
   }
 

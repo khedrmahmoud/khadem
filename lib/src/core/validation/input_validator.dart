@@ -13,12 +13,12 @@ class InputValidator {
 
   bool passes() {
     errors.clear();
-    
+
     // Process all rules, including nested ones
     for (final entry in rules.entries) {
       final fieldPattern = entry.key;
       final ruleString = entry.value;
-      
+
       if (fieldPattern.contains('*')) {
         // Handle nested/wildcard validation (e.g., attachments.*)
         _validateNestedField(fieldPattern, ruleString);
@@ -55,7 +55,8 @@ class InputValidator {
       if (rule != null) {
         final messageKey = rule.validate(field, value, ruleArg, data: data);
         if (messageKey != null) {
-          errors[field] = _formatErrorMessage(messageKey, field, ruleArg, value);
+          errors[field] =
+              _formatErrorMessage(messageKey, field, ruleArg, value);
           break; // Stop at first error for this field
         }
       }
@@ -65,7 +66,7 @@ class InputValidator {
   void _validateNestedField(String fieldPattern, String ruleString) {
     // Convert pattern like "attachments.*" to actual field paths
     final fieldPaths = _expandFieldPattern(fieldPattern);
-    
+
     for (final fieldPath in fieldPaths) {
       _validateField(fieldPath, ruleString);
     }
@@ -73,12 +74,12 @@ class InputValidator {
 
   List<String> _expandFieldPattern(String pattern) {
     final paths = <String>[];
-    
+
     if (pattern.endsWith('.*')) {
       // Handle array validation like "attachments.*"
       final baseField = pattern.substring(0, pattern.length - 2);
       final baseValue = _getFieldValue(baseField);
-      
+
       if (baseValue is List) {
         for (int i = 0; i < baseValue.length; i++) {
           paths.add('$baseField.$i');
@@ -92,7 +93,7 @@ class InputValidator {
       // Handle more complex patterns (can be extended)
       paths.addAll(_expandComplexPattern(pattern));
     }
-    
+
     return paths;
   }
 
@@ -100,18 +101,18 @@ class InputValidator {
     // This can be extended to handle more complex patterns like:
     // "users.*.profile.email", "data.*.files.*", etc.
     final paths = <String>[];
-    
+
     // For now, just return the pattern as is
     // This can be enhanced based on specific requirements
     paths.add(pattern);
-    
+
     return paths;
   }
 
   dynamic _getFieldValue(String fieldPath) {
     final parts = fieldPath.split('.');
     dynamic current = data;
-    
+
     for (final part in parts) {
       if (current is Map) {
         current = current[part];
@@ -126,18 +127,27 @@ class InputValidator {
         return null;
       }
     }
-    
+
     return current;
   }
 
   bool _isNullableAndNull(List<String> ruleParts, dynamic value) {
-    final hasNullable = ruleParts.any((part) => part.split(':')[0] == 'nullable');
+    final hasNullable =
+        ruleParts.any((part) => part.split(':')[0] == 'nullable');
     return hasNullable && value == null;
   }
 
-  String _formatErrorMessage(String messageKey, String field, String? arg, dynamic value) {
-    final parameters = <String, dynamic>{'field': Lang.getField(field), 'arg': arg};
-    
+  String _formatErrorMessage(
+    String messageKey,
+    String field,
+    String? arg,
+    dynamic value,
+  ) {
+    final parameters = <String, dynamic>{
+      'field': Lang.getField(field),
+      'arg': arg,
+    };
+
     // Add file-specific parameters for better error messages
     if (_isFileValidationContext(messageKey, value)) {
       _addFileValidationParameters(parameters, messageKey, value, arg);
@@ -147,9 +157,9 @@ class InputValidator {
   }
 
   bool _isFileValidationContext(String messageKey, dynamic value) {
-    return messageKey.contains('file') || 
-           messageKey.contains('image') || 
-           messageKey.contains('max') && value is UploadedFile;
+    return messageKey.contains('file') ||
+        messageKey.contains('image') ||
+        messageKey.contains('max') && value is UploadedFile;
   }
 
   void _addFileValidationParameters(
@@ -184,13 +194,13 @@ extension ValidatorHelpers on InputValidator {
     bool multiple = false,
   }) {
     final rules = <String>[];
-    
+
     if (nullable) rules.add('nullable');
     if (required && !nullable) rules.add('required');
-    
+
     if (multiple) {
       rules.add('array');
-      
+
       final itemRules = <String>['file'];
       if (allowedMimes.isNotEmpty) {
         itemRules.add('mimes:${allowedMimes.join(',')}');
@@ -198,7 +208,7 @@ extension ValidatorHelpers on InputValidator {
       if (maxSizeKB != null) {
         itemRules.add('max:$maxSizeKB');
       }
-      
+
       return {
         'attachments': rules.join('|'),
         'attachments.*': itemRules.join('|'),
@@ -211,7 +221,7 @@ extension ValidatorHelpers on InputValidator {
       if (maxSizeKB != null) {
         rules.add('max:$maxSizeKB');
       }
-      
+
       return {'attachment': rules.join('|')};
     }
   }
@@ -226,14 +236,14 @@ extension ValidatorHelpers on InputValidator {
     int? maxItems,
   }) {
     final rules = <String>[];
-    
+
     if (nullable) rules.add('nullable');
     if (required && !nullable) rules.add('required');
-    
+
     rules.add('array');
     if (minItems != null) rules.add('min_items:$minItems');
     if (maxItems != null) rules.add('max_items:$maxItems');
-    
+
     return {
       fieldName: rules.join('|'),
       '$fieldName.*': itemRules,

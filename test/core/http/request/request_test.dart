@@ -2,9 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:khadem/src/core/index.dart';
 import 'package:test/test.dart';
-
-import '../../../../lib/src/core/http/request/index.dart';
 
 class FakeHttpRequest extends Stream<Uint8List> implements HttpRequest {
   @override
@@ -17,12 +16,20 @@ class FakeHttpRequest extends Stream<Uint8List> implements HttpRequest {
   HttpHeaders headers = FakeHttpHeaders();
 
   @override
-  StreamSubscription<Uint8List> listen(void Function(Uint8List event)? onData,
-      {Function? onError, void Function()? onDone, bool? cancelOnError,}) {
+  StreamSubscription<Uint8List> listen(
+    void Function(Uint8List event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
     // Return a subscription with some dummy JSON data
     final data = Uint8List.fromList('{"name": "test", "value": 123}'.codeUnits);
-    return Stream<Uint8List>.fromIterable([data]).listen(onData,
-        onError: onError, onDone: onDone, cancelOnError: cancelOnError,);
+    return Stream<Uint8List>.fromIterable([data]).listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
   }
 
   @override
@@ -175,14 +182,21 @@ void main() {
 
       test('should handle custom attributes', () {
         request.setAttribute('session', {'id': 'abc123'});
-        expect(request.attribute<Map<String, dynamic>>('session'), equals({'id': 'abc123'}));
+        expect(
+          request.attribute<Map<String, dynamic>>('session'),
+          equals({'id': 'abc123'}),
+        );
         expect(request.params.hasAttribute('session'), isTrue);
       });
     });
 
     group('Authentication', () {
       test('should handle user authentication', () {
-        final userData = {'id': 1, 'name': 'John', 'roles': ['admin', 'user']};
+        final userData = {
+          'id': 1,
+          'name': 'John',
+          'roles': ['admin', 'user'],
+        };
         request.setUser(userData);
 
         expect(request.user, equals(userData));
@@ -199,7 +213,11 @@ void main() {
       });
 
       test('should handle role checking', () {
-        final userData = {'id': 1, 'name': 'John', 'roles': ['admin', 'user']};
+        final userData = {
+          'id': 1,
+          'name': 'John',
+          'roles': ['admin', 'user'],
+        };
         request.setUser(userData);
 
         expect(request.hasRole('admin'), isTrue);

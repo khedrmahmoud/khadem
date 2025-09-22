@@ -1,5 +1,5 @@
- 
-import 'package:khadem/khadem.dart' show LoggerContract, ConfigInterface, LogHandler, LogLevel;
+import 'package:khadem/khadem.dart'
+    show LoggerContract, ConfigInterface, LogHandler, LogLevel;
 
 import 'log_channel_manager.dart';
 import 'logging_configuration.dart';
@@ -93,12 +93,19 @@ class Logger implements LoggerContract {
   /// [stackTrace] - Optional stack trace
   /// [channel] - Optional channel name (uses default if not specified)
   @override
-  void debug(String message,
-      {Map<String, dynamic>? context,
-      StackTrace? stackTrace,
-      String? channel,}) {
-    _log(LogLevel.debug, message,
-        context: context, stackTrace: stackTrace, channel: channel,);
+  void debug(
+    String message, {
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+    String? channel,
+  }) {
+    _log(
+      LogLevel.debug,
+      message,
+      context: context,
+      stackTrace: stackTrace,
+      channel: channel,
+    );
   }
 
   /// Logs an info message.
@@ -108,12 +115,19 @@ class Logger implements LoggerContract {
   /// [stackTrace] - Optional stack trace
   /// [channel] - Optional channel name (uses default if not specified)
   @override
-  void info(String message,
-      {Map<String, dynamic>? context,
-      StackTrace? stackTrace,
-      String? channel,}) {
-    _log(LogLevel.info, message,
-        context: context, stackTrace: stackTrace, channel: channel,);
+  void info(
+    String message, {
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+    String? channel,
+  }) {
+    _log(
+      LogLevel.info,
+      message,
+      context: context,
+      stackTrace: stackTrace,
+      channel: channel,
+    );
   }
 
   /// Logs a warning message.
@@ -123,12 +137,19 @@ class Logger implements LoggerContract {
   /// [stackTrace] - Optional stack trace
   /// [channel] - Optional channel name (uses default if not specified)
   @override
-  void warning(String message,
-      {Map<String, dynamic>? context,
-      StackTrace? stackTrace,
-      String? channel,}) {
-    _log(LogLevel.warning, message,
-        context: context, stackTrace: stackTrace, channel: channel,);
+  void warning(
+    String message, {
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+    String? channel,
+  }) {
+    _log(
+      LogLevel.warning,
+      message,
+      context: context,
+      stackTrace: stackTrace,
+      channel: channel,
+    );
   }
 
   /// Logs an error message.
@@ -138,12 +159,19 @@ class Logger implements LoggerContract {
   /// [stackTrace] - Optional stack trace
   /// [channel] - Optional channel name (uses default if not specified)
   @override
-  void error(String message,
-      {Map<String, dynamic>? context,
-      StackTrace? stackTrace,
-      String? channel,}) {
-    _log(LogLevel.error, message,
-        context: context, stackTrace: stackTrace, channel: channel,);
+  void error(
+    String message, {
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+    String? channel,
+  }) {
+    _log(
+      LogLevel.error,
+      message,
+      context: context,
+      stackTrace: stackTrace,
+      channel: channel,
+    );
   }
 
   /// Logs a critical message.
@@ -153,12 +181,19 @@ class Logger implements LoggerContract {
   /// [stackTrace] - Optional stack trace
   /// [channel] - Optional channel name (uses default if not specified)
   @override
-  void critical(String message,
-      {Map<String, dynamic>? context,
-      StackTrace? stackTrace,
-      String? channel,}) {
-    _log(LogLevel.critical, message,
-        context: context, stackTrace: stackTrace, channel: channel,);
+  void critical(
+    String message, {
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+    String? channel,
+  }) {
+    _log(
+      LogLevel.critical,
+      message,
+      context: context,
+      stackTrace: stackTrace,
+      channel: channel,
+    );
   }
 
   /// Logs a message with a specific level.
@@ -198,8 +233,13 @@ class Logger implements LoggerContract {
     StackTrace? stackTrace,
     String? channel,
   }) {
-    log(level, message,
-        context: context, stackTrace: stackTrace, channel: channel,);
+    log(
+      level,
+      message,
+      context: context,
+      stackTrace: stackTrace,
+      channel: channel,
+    );
   }
 
   /// Closes all log handlers and releases resources.

@@ -3,13 +3,11 @@ import 'dart:io';
 
 import 'package:khadem/khadem.dart';
 
-
 class ServerLifecycle {
   final ServerRouter _router;
   final ServerMiddleware _middleware;
   final ServerStatic _static;
   void Function()? _initializer;
-
 
   ServerLifecycle(this._router, this._middleware, this._static);
 
@@ -27,9 +25,7 @@ class ServerLifecycle {
     }
   }
 
-
   Future<void> start({int port = 8080}) async {
-
     final handler = HttpRequestProcessor(
       router: _router.router,
       globalMiddleware: _middleware.pipeline,

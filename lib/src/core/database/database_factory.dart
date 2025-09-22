@@ -1,5 +1,3 @@
-
-
 import '../../contracts/config/config_contract.dart';
 import '../../contracts/database/database_factory_interface.dart';
 import '../../support/exceptions/database_exception.dart';

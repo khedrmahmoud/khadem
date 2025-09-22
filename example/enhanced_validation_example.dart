@@ -3,39 +3,39 @@ import '../lib/src/core/validation/input_validator.dart';
 void main() {
   print('🎯 Enhanced Validation System Examples');
   print('═════════════════════════════════════════');
-  
+
   testBasicValidation();
   print('\n' + '═' * 50 + '\n');
-  
+
   testFileUploadValidation();
   print('\n' + '═' * 50 + '\n');
-  
+
   testNestedArrayValidation();
   print('\n' + '═' * 50 + '\n');
-  
+
   testHelperMethods();
 }
 
 void testBasicValidation() {
   print('📋 Basic Validation Test');
   print('─────────────────────────');
-  
+
   final data = {
     'name': 'John Doe',
     'email': 'john@example.com',
     'age': 25,
     'website': null,
   };
-  
+
   final rules = {
     'name': 'required|string|min:2',
     'email': 'required|email',
     'age': 'required|int|min:18',
     'website': 'nullable|url',
   };
-  
+
   final validator = InputValidator(data, rules);
-  
+
   if (validator.passes()) {
     print('✅ Basic validation passed');
   } else {
@@ -49,7 +49,7 @@ void testBasicValidation() {
 void testFileUploadValidation() {
   print('📎 File Upload Validation Test');
   print('───────────────────────────────');
-  
+
   // Simulate file upload data
   final data = {
     'attachments': [
@@ -73,14 +73,14 @@ void testFileUploadValidation() {
       ),
     ],
   };
-  
+
   final rules = {
     'attachments': 'nullable|array',
     'attachments.*': 'file|max:5120', // Max 5MB per file
   };
-  
+
   final validator = InputValidator(data, rules);
-  
+
   if (validator.passes()) {
     print('✅ File upload validation passed');
   } else {
@@ -94,7 +94,7 @@ void testFileUploadValidation() {
 void testNestedArrayValidation() {
   print('🔗 Nested Array Validation Test');
   print('─────────────────────────────────');
-  
+
   final data = {
     'users': [
       {
@@ -123,16 +123,16 @@ void testNestedArrayValidation() {
       },
     ],
   };
-  
+
   final rules = {
     'users': 'required|array|min_items:1',
     'users.*.name': 'required|string|min:2',
     'users.*.email': 'required|email',
     // Note: Nested file validation like users.*.profile.avatar would need more complex implementation
   };
-  
+
   final validator = InputValidator(data, rules);
-  
+
   if (validator.passes()) {
     print('✅ Nested array validation passed');
   } else {
@@ -146,7 +146,7 @@ void testNestedArrayValidation() {
 void testHelperMethods() {
   print('🛠️  Helper Methods Test');
   print('─────────────────────');
-  
+
   // Test file upload helper
   print('📎 File upload rules:');
   final fileRules = ValidatorHelpers.fileUploadRules(
@@ -155,11 +155,11 @@ void testHelperMethods() {
     maxSizeKB: 5120, // 5MB
     nullable: true,
   );
-  
+
   fileRules.forEach((field, rule) {
     print('   $field: $rule');
   });
-  
+
   print('\n📋 Array validation rules:');
   final arrayRules = ValidatorHelpers.arrayRules(
     'tags',
@@ -167,7 +167,7 @@ void testHelperMethods() {
     minItems: 1,
     maxItems: 10,
   );
-  
+
   arrayRules.forEach((field, rule) {
     print('   $field: $rule');
   });
@@ -179,14 +179,14 @@ class UploadedFile {
   final int size;
   final String mimeType;
   final String path;
-  
+
   UploadedFile({
     required this.filename,
     required this.size,
     required this.mimeType,
     required this.path,
   });
-  
+
   @override
   String toString() => 'UploadedFile($filename, ${(size / 1024).round()}KB)';
 }

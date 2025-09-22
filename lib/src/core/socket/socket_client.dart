@@ -9,7 +9,7 @@ class SocketClient {
   final Set<String> rooms = {};
   final HttpHeaders? headers;
 
-  final Map<String, dynamic> _context  ;
+  final Map<String, dynamic> _context;
 
   SocketClient({
     required this.id,
@@ -41,7 +41,6 @@ class SocketClient {
     rooms.add(room);
     manager.join(room, this);
   }
-  
 
   void leaveRoom(String room) {
     rooms.remove(room);
@@ -62,15 +61,13 @@ class SocketClient {
   /// Get authorization token from headers
   String? get authToken {
     if (headers == null) return null;
-    return headers!['authorization']?.first ??
-           headers!['Authorization']?.first;
+    return headers!['authorization']?.first ?? headers!['Authorization']?.first;
   }
 
   /// Get user agent from headers
   String? get userAgent {
     if (headers == null) return null;
-    return headers!['user-agent']?.first ??
-           headers!['User-Agent']?.first;
+    return headers!['user-agent']?.first ?? headers!['User-Agent']?.first;
   }
 
   /// Get any header value

@@ -38,7 +38,9 @@ class CacheConfigLoader implements ICacheConfigLoader {
 
   @override
   CacheDriver createDriverFromConfig(
-      String driverType, Map<String, dynamic> settings,) {
+    String driverType,
+    Map<String, dynamic> settings,
+  ) {
     switch (driverType.toLowerCase()) {
       case 'memory':
         return MemoryCacheDriver();

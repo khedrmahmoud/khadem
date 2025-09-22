@@ -67,9 +67,11 @@ class ExceptionReporter {
 
     // Log based on severity
     if (error.statusCode >= 500) {
-      Khadem.logger.critical(logMessage, context: context, stackTrace: stackTrace);
+      Khadem.logger
+          .critical(logMessage, context: context, stackTrace: stackTrace);
     } else if (error.statusCode >= 400) {
-      Khadem.logger.warning(logMessage, context: context, stackTrace: stackTrace);
+      Khadem.logger
+          .warning(logMessage, context: context, stackTrace: stackTrace);
     } else {
       Khadem.logger.error(logMessage, context: context, stackTrace: stackTrace);
     }
@@ -115,22 +117,28 @@ class ExceptionReporter {
 
     switch (level.toLowerCase()) {
       case 'critical':
-        Khadem.logger.critical(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger
+            .critical(logMessage, context: context, stackTrace: stackTrace);
         break;
       case 'error':
-        Khadem.logger.error(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger
+            .error(logMessage, context: context, stackTrace: stackTrace);
         break;
       case 'warning':
-        Khadem.logger.warning(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger
+            .warning(logMessage, context: context, stackTrace: stackTrace);
         break;
       case 'info':
-        Khadem.logger.info(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger
+            .info(logMessage, context: context, stackTrace: stackTrace);
         break;
       case 'debug':
-        Khadem.logger.debug(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger
+            .debug(logMessage, context: context, stackTrace: stackTrace);
         break;
       default:
-        Khadem.logger.error(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger
+            .error(logMessage, context: context, stackTrace: stackTrace);
     }
 
     // Send to external service if configured
@@ -202,7 +210,10 @@ class ExceptionReporter {
   }
 
   /// Format exception message for logging
-  static String _formatExceptionMessage(Object error, Map<String, dynamic> context) {
+  static String _formatExceptionMessage(
+    Object error,
+    Map<String, dynamic> context,
+  ) {
     final buffer = StringBuffer();
 
     buffer.write('Exception: ${error.runtimeType}');
@@ -215,7 +226,9 @@ class ExceptionReporter {
 
     // Add context summary
     final request = context['request'];
-    if (request != null && request['method'] != null && request['url'] != null) {
+    if (request != null &&
+        request['method'] != null &&
+        request['url'] != null) {
       buffer.write(' [${request['method']} ${request['url']}]');
     }
 

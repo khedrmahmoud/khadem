@@ -33,9 +33,11 @@ class ViewRenderer {
     );
   }
 
-  Future<String> render(String viewName,
-      {Map<String, dynamic> context = const {},
-      bool escapeOutput = true,}) async {
+  Future<String> render(
+    String viewName, {
+    Map<String, dynamic> context = const {},
+    bool escapeOutput = true,
+  }) async {
     final template = await _loadTemplate(viewName);
     final processedTemplate = await _applyDirectives(template, context);
     return _renderExpressions(processedTemplate, context, escapeOutput);
@@ -54,12 +56,19 @@ class ViewRenderer {
   }
 
   /// Applies all registered directives to the template
-  Future<String> _applyDirectives(String template, Map<String, dynamic> context) async {
+  Future<String> _applyDirectives(
+    String template,
+    Map<String, dynamic> context,
+  ) async {
     return DirectiveRegistry.applyAll(template, context);
   }
 
   /// Renders expressions in the template
-  String _renderExpressions(String template, Map<String, dynamic> context, bool escapeOutput) {
+  String _renderExpressions(
+    String template,
+    Map<String, dynamic> context,
+    bool escapeOutput,
+  ) {
     // Handle escaped expressions {{ expression }}
     final escapedRegex = RegExp(r'{{\s*([^}]+?)\s*}}');
     template = template.replaceAllMapped(escapedRegex, (match) {
@@ -67,7 +76,9 @@ class ViewRenderer {
       final value = _expressionEvaluator.evaluate(expression, context);
       final stringValue = value?.toString() ?? '';
 
-      return escapeOutput && _autoEscape ? _htmlEscaper.escape(stringValue) : stringValue;
+      return escapeOutput && _autoEscape
+          ? _htmlEscaper.escape(stringValue)
+          : stringValue;
     });
 
     // Handle unescaped expressions {{{ expression }}}
@@ -82,8 +93,10 @@ class ViewRenderer {
   }
 
   /// Renders a view without escaping (use with caution!)
-  Future<String> renderUnsafe(String viewName,
-      {Map<String, dynamic> context = const {},}) async {
+  Future<String> renderUnsafe(
+    String viewName, {
+    Map<String, dynamic> context = const {},
+  }) async {
     return render(viewName, context: context, escapeOutput: false);
   }
 

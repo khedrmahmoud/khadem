@@ -10,7 +10,8 @@ class QueueWorkerConfig {
   final void Function(dynamic error, StackTrace stack)? onError;
   final void Function(QueueJob job)? onJobStart;
   final void Function(QueueJob job, dynamic result)? onJobComplete;
-  final void Function(QueueJob job, dynamic error, StackTrace stack)? onJobError;
+  final void Function(QueueJob job, dynamic error, StackTrace stack)?
+      onJobError;
 
   const QueueWorkerConfig({
     this.maxJobs,

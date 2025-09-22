@@ -119,7 +119,10 @@ class ResponseHeaders {
     String? cspPolicy,
   }) {
     if (enableHsts) {
-      setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+      setHeader(
+        'Strict-Transport-Security',
+        'max-age=31536000; includeSubDomains',
+      );
     }
     if (enableCsp && cspPolicy != null) {
       setHeader('Content-Security-Policy', cspPolicy);

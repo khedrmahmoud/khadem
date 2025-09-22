@@ -48,7 +48,8 @@ void main() {
 
       test('should persist bindings across different accesses', () {
         // Register via first access
-        ContainerProvider.instance.bind<TestService>((c) => TestService('persistent'));
+        ContainerProvider.instance
+            .bind<TestService>((c) => TestService('persistent'));
 
         // Access via second reference
         final container2 = ContainerProvider.instance;
@@ -92,11 +93,14 @@ void main() {
 
         // Register dependencies
         provider.singleton<MockLogger>((c) => MockLogger());
-        provider.bind<MockDatabase>((c) => MockDatabase(c.resolve<MockLogger>()));
-        provider.bind<MockUserService>((c) => MockUserService(
-          c.resolve<MockDatabase>(),
-          c.resolve<MockLogger>(),
-        ),);
+        provider
+            .bind<MockDatabase>((c) => MockDatabase(c.resolve<MockLogger>()));
+        provider.bind<MockUserService>(
+          (c) => MockUserService(
+            c.resolve<MockDatabase>(),
+            c.resolve<MockLogger>(),
+          ),
+        );
 
         // Resolve service
         final userService = provider.resolve<MockUserService>();

@@ -66,7 +66,7 @@ class CommandRegistry {
   Future<void> autoDiscoverCommands(String projectPath) async {
     try {
       await _loadPackageName();
- 
+
       final commandsDir = Directory(path.join(projectPath, 'app', 'commands'));
       if (!await commandsDir.exists()) {
         return;
@@ -77,8 +77,7 @@ class CommandRegistry {
         // Try mirror-based loading
         await _tryLoadCommandWithMirrors(file);
       }
-
-     } catch (e) {
+    } catch (e) {
       logger.warning('Failed to auto-discover commands: $e');
     }
   }
@@ -127,7 +126,9 @@ class CommandRegistry {
         final commandInstance = _instantiateCommand(classMirror);
         if (commandInstance != null) {
           _customCommands.add(commandInstance);
-          logger.info('✅ Auto-registered custom command: ${commandInstance.name}');
+          logger.info(
+            '✅ Auto-registered custom command: ${commandInstance.name}',
+          );
         }
       }
 
@@ -186,7 +187,7 @@ class CommandRegistry {
     try {
       // Convert file path to file URI
       final fileUri = Uri.file(filePath);
- 
+
       final library = await currentMirrorSystem().isolate.loadUri(fileUri);
       return library;
     } catch (e) {
@@ -290,7 +291,10 @@ class CommandRegistry {
       // Strategy 1: Try with named parameter {logger: logger}
       try {
         instance = classMirror.newInstance(
-            const Symbol(''), [], {const Symbol('logger'): logger},);
+          const Symbol(''),
+          [],
+          {const Symbol('logger'): logger},
+        );
       } catch (e) {
         // Strategy 2: Try with positional parameter [logger]
         try {

@@ -9,7 +9,8 @@ void main() {
 
   setUp(() async {
     // Create a temporary directory for testing
-    tempDir = Directory('storage/cache/file_cache_test_')..createSync(recursive: true);
+    tempDir = Directory('storage/cache/file_cache_test_')
+      ..createSync(recursive: true);
     cache = FileCacheDriver(cacheDir: tempDir.path);
   });
 
@@ -76,14 +77,29 @@ void main() {
 
       // On Windows, file deletion may not work immediately due to file handle locking
       // Check file existence directly instead of using has() method
-      final filePath = cache.cacheDirectory + '/' + key.replaceAll('/', '_').replaceAll('\\', '_').replaceAll(':', '_').replaceAll('*', '_').replaceAll('?', '_').replaceAll('"', '_').replaceAll('<', '_').replaceAll('>', '_').replaceAll('|', '_').replaceAll(' ', '_') + '.cache.json';
+      final filePath = cache.cacheDirectory +
+          '/' +
+          key
+              .replaceAll('/', '_')
+              .replaceAll('\\', '_')
+              .replaceAll(':', '_')
+              .replaceAll('*', '_')
+              .replaceAll('?', '_')
+              .replaceAll('"', '_')
+              .replaceAll('<', '_')
+              .replaceAll('>', '_')
+              .replaceAll('|', '_')
+              .replaceAll(' ', '_') +
+          '.cache.json';
       final file = File(filePath);
       final fileExists = await file.exists();
 
       // If file still exists, that's okay on Windows - the forget operation may have failed due to file handle locking
       // The important thing is that the cache functionality works
       if (fileExists) {
-        print('File still exists after forget (expected on Windows due to file handle locking)');
+        print(
+          'File still exists after forget (expected on Windows due to file handle locking)',
+        );
       } else {
         expect(await cache.has(key), isFalse);
       }
@@ -106,11 +122,18 @@ void main() {
       // On Windows, file deletion may not work immediately due to file handle locking
       // Check a few files directly
       final dir = Directory(cache.cacheDirectory);
-      final files = await dir.list().where((entity) => entity is File && entity.path.endsWith('.cache.json')).toList();
+      final files = await dir
+          .list()
+          .where(
+            (entity) => entity is File && entity.path.endsWith('.cache.json'),
+          )
+          .toList();
 
       // If files still exist, that's okay on Windows - the clear operation may have failed due to file handle locking
       if (files.isNotEmpty) {
-        print('Some cache files still exist after clear (expected on Windows due to file handle locking)');
+        print(
+          'Some cache files still exist after clear (expected on Windows due to file handle locking)',
+        );
       } else {
         // Verify they're gone
         expect(await cache.has('key1'), isFalse);
@@ -155,7 +178,10 @@ void main() {
     });
 
     test('should handle empty key', () async {
-      expect(() => cache.put('', 'value', const Duration(minutes: 5)), throwsArgumentError);
+      expect(
+        () => cache.put('', 'value', const Duration(minutes: 5)),
+        throwsArgumentError,
+      );
       expect(() => cache.get(''), throwsArgumentError);
       expect(() => cache.forget(''), throwsArgumentError);
     });

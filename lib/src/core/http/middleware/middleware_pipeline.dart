@@ -38,9 +38,11 @@ class MiddlewarePipeline {
   final Map<String, Middleware> _namedMiddleware = {};
 
   /// Adds a middleware handler function to the pipeline.
-  void add(MiddlewareHandler handler,
-      {MiddlewarePriority priority = MiddlewarePriority.business,
-      String? name,}) {
+  void add(
+    MiddlewareHandler handler, {
+    MiddlewarePriority priority = MiddlewarePriority.business,
+    String? name,
+  }) {
     final middleware = Middleware(handler, priority: priority, name: name);
     addMiddleware(middleware);
   }
@@ -55,8 +57,10 @@ class MiddlewarePipeline {
   }
 
   /// Adds multiple middleware handlers to the pipeline.
-  void addAll(List<MiddlewareHandler> handlers,
-      {MiddlewarePriority priority = MiddlewarePriority.business,}) {
+  void addAll(
+    List<MiddlewareHandler> handlers, {
+    MiddlewarePriority priority = MiddlewarePriority.business,
+  }) {
     for (final handler in handlers) {
       add(handler, priority: priority);
     }
@@ -73,7 +77,8 @@ class MiddlewarePipeline {
   void addBefore(String targetName, MiddlewareHandler handler, {String? name}) {
     if (!_namedMiddleware.containsKey(targetName)) {
       throw MiddlewareNotFoundException(
-          'Named middleware not found: $targetName',);
+        'Named middleware not found: $targetName',
+      );
     }
 
     final target = _namedMiddleware[targetName]!;
@@ -91,7 +96,8 @@ class MiddlewarePipeline {
   void addAfter(String targetName, MiddlewareHandler handler, {String? name}) {
     if (!_namedMiddleware.containsKey(targetName)) {
       throw MiddlewareNotFoundException(
-          'Named middleware not found: $targetName',);
+        'Named middleware not found: $targetName',
+      );
     }
 
     final target = _namedMiddleware[targetName]!;
@@ -133,8 +139,12 @@ class MiddlewarePipeline {
   }
 
   /// Handles errors in the middleware pipeline.
-  Future<void> _handleError(dynamic error, StackTrace stackTrace,
-      Request request, Response response,) async {
+  Future<void> _handleError(
+    dynamic error,
+    StackTrace stackTrace,
+    Request request,
+    Response response,
+  ) async {
     final errorHandlers = _middleware
         .where((m) => m.priority == MiddlewarePriority.terminating)
         .toList();
@@ -206,17 +216,23 @@ class MiddlewarePipeline {
   List<String> get middlewareNames => _namedMiddleware.keys.toList();
 
   /// Executes middleware conditionally based on a predicate.
-  void addConditional(MiddlewareHandler handler,
-      {required bool Function(Request request) condition,
-      MiddlewarePriority priority = MiddlewarePriority.business,
-      String? name,}) {
-    add((req, res, next) async {
-      if (condition(req)) {
-        await handler(req, res, next);
-      } else {
-        await next();
-      }
-    }, priority: priority, name: name,);
+  void addConditional(
+    MiddlewareHandler handler, {
+    required bool Function(Request request) condition,
+    MiddlewarePriority priority = MiddlewarePriority.business,
+    String? name,
+  }) {
+    add(
+      (req, res, next) async {
+        if (condition(req)) {
+          await handler(req, res, next);
+        } else {
+          await next();
+        }
+      },
+      priority: priority,
+      name: name,
+    );
   }
 
   /// Checks if a named middleware exists.

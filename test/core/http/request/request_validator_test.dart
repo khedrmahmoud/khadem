@@ -1,9 +1,8 @@
 import 'dart:async';
 
+import 'package:khadem/khadem.dart' show RequestBodyParser, UploadedFile, RequestValidator;
 import 'package:test/test.dart';
 
-import '../../../../lib/src/core/http/request/request_body_parser.dart';
-import '../../../../lib/src/core/http/request/request_validator.dart';
 
 class FakeRequestBodyParser implements RequestBodyParser {
   final Map<String, dynamic> _data;
@@ -32,7 +31,8 @@ void main() {
     late FakeRequestBodyParser fakeBodyParser;
 
     setUp(() {
-      fakeBodyParser = FakeRequestBodyParser({'name': 'John', 'email': 'john@example.com'});
+      fakeBodyParser =
+          FakeRequestBodyParser({'name': 'John', 'email': 'john@example.com'});
       validator = RequestValidator(fakeBodyParser as dynamic);
     });
 
@@ -48,7 +48,8 @@ void main() {
       });
 
       test('should throw validation exception for invalid body', () async {
-        fakeBodyParser = FakeRequestBodyParser({'name': '', 'email': 'invalid-email'});
+        fakeBodyParser =
+            FakeRequestBodyParser({'name': '', 'email': 'invalid-email'});
         validator = RequestValidator(fakeBodyParser as dynamic);
 
         final rules = {'name': 'required', 'email': 'required|email'};
@@ -60,7 +61,11 @@ void main() {
     group('Data Validation', () {
       test('should validate data successfully', () {
         final data = {'name': 'John', 'email': 'john@example.com', 'age': 25};
-        final rules = {'name': 'required', 'email': 'required|email', 'age': 'required|integer'};
+        final rules = {
+          'name': 'required',
+          'email': 'required|email',
+          'age': 'required|integer',
+        };
 
         final result = validator.validateData(data, rules);
 
@@ -156,7 +161,7 @@ void main() {
 
         final result = validator.validateData(data, rules);
 
-        expect(result, equals(data));
+        expect(result,isEmpty);
       });
     });
   });

@@ -95,22 +95,24 @@ void main() {
         stackTrace: StackTrace.current,
       );
 
-      verify(handler1.log(
-        LogLevel.info,
-        'Test message',
-        context: {'key': 'value'},
-        stackTrace: anyNamed('stackTrace'),
-      ),).called(1);
+      verify(
+        handler1.log(
+          LogLevel.info,
+          'Test message',
+          context: {'key': 'value'},
+          stackTrace: anyNamed('stackTrace'),
+        ),
+      ).called(1);
 
-      verify(handler2.log(
-        LogLevel.info,
-        'Test message',
-        context: {'key': 'value'},
-        stackTrace: anyNamed('stackTrace'),
-      ),).called(1);
+      verify(
+        handler2.log(
+          LogLevel.info,
+          'Test message',
+          context: {'key': 'value'},
+          stackTrace: anyNamed('stackTrace'),
+        ),
+      ).called(1);
     });
-
-
 
     test('should close all handlers', () {
       manager.addHandler(handler1, channel: 'test1');
@@ -122,7 +124,5 @@ void main() {
       verify(handler2.close()).called(1);
       expect(manager.channels, isEmpty);
     });
-
-  
   });
 }

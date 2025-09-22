@@ -11,5 +11,8 @@ abstract class IQueueConfigLoader {
 
   /// Creates a queue driver instance from configuration.
   /// Throws [QueueException] if driver type is unknown or configuration is invalid.
-  QueueDriver createDriverFromConfig(String driverType, Map<String, dynamic> settings);
+  QueueDriver createDriverFromConfig(
+    String driverType,
+    Map<String, dynamic> settings,
+  );
 }

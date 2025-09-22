@@ -141,14 +141,19 @@ class EventSystem implements EventSystemInterface {
       for (final registration in listenersCopy) {
         if (registration.removed) continue;
 
-        futures.add(Future(() async {
-          try {
-            await registration.listener(payload);
-          } catch (e, stackTrace) {
-            Khadem.logger.error('Event listener error for event "$event": $e', stackTrace: stackTrace);
-          }
-        }),);
- 
+        futures.add(
+          Future(() async {
+            try {
+              await registration.listener(payload);
+            } catch (e, stackTrace) {
+              Khadem.logger.error(
+                'Event listener error for event "$event": $e',
+                stackTrace: stackTrace,
+              );
+            }
+          }),
+        );
+
         if (registration.once) {
           registration.removed = true;
           toRemove.add(registration);
@@ -184,7 +189,7 @@ class EventSystem implements EventSystemInterface {
     }
 
     if (broadcast) {
-      Khadem.socket.broadcastEvent(  event, payload);
+      Khadem.socket.broadcastEvent(event, payload);
     }
   }
 
@@ -199,8 +204,12 @@ class EventSystem implements EventSystemInterface {
   /// [broadcast] - Whether to broadcast events via socket
   /// Returns a Future that completes when all group events have been emitted
   @override
-  Future<void> emitGroup(String groupName,
-      [dynamic payload, bool queue = false, bool broadcast = false,]) async {
+  Future<void> emitGroup(
+    String groupName, [
+    dynamic payload,
+    bool queue = false,
+    bool broadcast = false,
+  ]) async {
     final events = _eventGroups[groupName];
     if (events == null) return;
 
@@ -258,7 +267,8 @@ class EventSystem implements EventSystemInterface {
 
     for (final event in events) {
       _listeners[event]?.removeWhere(
-          (reg) => _subscriberEvents[subscriber]?.contains(event) ?? false,);
+        (reg) => _subscriberEvents[subscriber]?.contains(event) ?? false,
+      );
       if (_listeners[event]?.isEmpty ?? false) {
         _listeners.remove(event);
       }

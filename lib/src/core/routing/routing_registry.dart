@@ -10,9 +10,15 @@ class RouteRegistry {
   List<Route> get routes => _routes;
 
   /// Registers a route with the specified parameters.
-  void register(String method, String path, RequestHandler handler,
-      List<Middleware> middleware, {String? name,}) {
-    final route = Route(method.toUpperCase(), path, handler, middleware, name: name);
+  void register(
+    String method,
+    String path,
+    RequestHandler handler,
+    List<Middleware> middleware, {
+    String? name,
+  }) {
+    final route =
+        Route(method.toUpperCase(), path, handler, middleware, name: name);
     if (route.isDynamic) {
       _routes.add(route);
     } else {
@@ -21,43 +27,74 @@ class RouteRegistry {
   }
 
   /// Registers a GET route.
-  void get(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name,}) =>
+  void get(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+    String? name,
+  }) =>
       register('GET', path, handler, middleware, name: name);
 
   /// Registers a POST route.
-  void post(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name,}) =>
+  void post(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+    String? name,
+  }) =>
       register('POST', path, handler, middleware, name: name);
 
   /// Registers a PUT route.
-  void put(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name,}) =>
+  void put(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+    String? name,
+  }) =>
       register('PUT', path, handler, middleware, name: name);
 
   /// Registers a PATCH route.
-  void patch(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name,}) =>
+  void patch(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+    String? name,
+  }) =>
       register('PATCH', path, handler, middleware, name: name);
 
   /// Registers a DELETE route.
-  void delete(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name,}) =>
+  void delete(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+    String? name,
+  }) =>
       register('DELETE', path, handler, middleware, name: name);
 
   /// Registers a HEAD route.
-  void head(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name,}) =>
+  void head(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+    String? name,
+  }) =>
       register('HEAD', path, handler, middleware, name: name);
 
   /// Registers an OPTIONS route.
-  void options(String path, RequestHandler handler,
-          {List<Middleware> middleware = const [], String? name,}) =>
+  void options(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+    String? name,
+  }) =>
       register('OPTIONS', path, handler, middleware, name: name);
 
   /// Registers a route for any method.
-  void any(String path, RequestHandler handler,
-      {List<Middleware> middleware = const [],}) {
+  void any(
+    String path,
+    RequestHandler handler, {
+    List<Middleware> middleware = const [],
+  }) {
     for (final method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD']) {
       register(method, path, handler, middleware);
     }

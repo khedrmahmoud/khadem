@@ -33,7 +33,7 @@ enum LogLevel {
     }
   }
 
- /// Gets the integer value of the log level for comparison.
+  /// Gets the integer value of the log level for comparison.
   int get value {
     switch (this) {
       case LogLevel.debug:
@@ -54,7 +54,6 @@ enum LogLevel {
   bool isAtLeast(LogLevel other) {
     return value >= other.value;
   }
-
 
   /// Gets the string representation of the log level.
   String get name {

@@ -55,7 +55,8 @@ class ServerCluster {
 
   static Future<void> _startInstance(Map<String, dynamic> args) async {
     final int port = args['port'] as int;
-    final void Function(Server server)? onInit = args['onInit'] as void Function(Server server)?;
+    final void Function(Server server)? onInit =
+        args['onInit'] as void Function(Server server)?;
     // final SendPort sendPort = args['sendPort'];
     final server = Server();
 

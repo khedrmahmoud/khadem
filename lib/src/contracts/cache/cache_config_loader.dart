@@ -11,5 +11,8 @@ abstract class ICacheConfigLoader {
 
   /// Creates a cache driver instance from configuration.
   /// Throws [CacheException] if driver type is unknown or configuration is invalid.
-  CacheDriver createDriverFromConfig(String driverType, Map<String, dynamic> settings);
+  CacheDriver createDriverFromConfig(
+    String driverType,
+    Map<String, dynamic> settings,
+  );
 }

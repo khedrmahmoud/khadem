@@ -7,17 +7,24 @@ class MakeMiddlewareCommand extends KhademCommand {
   String get name => 'make:middleware';
 
   @override
-  String get description => 'Create a new HTTP middleware class with optional folder structure';
+  String get description =>
+      'Create a new HTTP middleware class with optional folder structure';
 
   MakeMiddlewareCommand({required super.logger}) {
-    argParser.addOption('name', abbr: 'n', help: 'Middleware name (e.g., Auth or auth/AuthMiddleware)');
+    argParser.addOption(
+      'name',
+      abbr: 'n',
+      help: 'Middleware name (e.g., Auth or auth/AuthMiddleware)',
+    );
   }
 
   @override
   Future<void> handle(List<String> args) async {
     final name = argResults?['name'] as String?;
     if (name == null) {
-      logger.error('Usage: khadem make:middleware --name=MiddlewareName or --name=folder/MiddlewareName');
+      logger.error(
+        'Usage: khadem make:middleware --name=MiddlewareName or --name=folder/MiddlewareName',
+      );
       exit(1);
     }
 
@@ -36,7 +43,8 @@ class MakeMiddlewareCommand extends KhademCommand {
     }
 
     final className = _toPascalCase(middlewareName);
-    final fileName = '${_toSnakeCase(middlewareName.replaceAll('Middleware', ''))}_middleware.dart';
+    final fileName =
+        '${_toSnakeCase(middlewareName.replaceAll('Middleware', ''))}_middleware.dart';
     final relativePath = folder.isEmpty
         ? 'app/http/middleware/$fileName'
         : 'app/http/middleware/$folder/$fileName';
@@ -49,7 +57,13 @@ class MakeMiddlewareCommand extends KhademCommand {
     }
 
     await file.create(recursive: true);
-    await file.writeAsString(_template(className, middlewareName.replaceAll('Middleware', ''), folder));
+    await file.writeAsString(
+      _template(
+        className,
+        middlewareName.replaceAll('Middleware', ''),
+        folder,
+      ),
+    );
 
     logger.info('✅ Middleware "$className" created at "$relativePath"');
     exit(0);

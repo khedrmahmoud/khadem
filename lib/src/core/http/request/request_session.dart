@@ -74,7 +74,8 @@ class RequestSession {
   /// Flashes a value to the session (temporary, removed after next access).
   void flash(String key, dynamic value) {
     touch();
-    final Map<String, dynamic> flashData = _session['flash'] ?? <String, dynamic>{};
+    final Map<String, dynamic> flashData =
+        _session['flash'] ?? <String, dynamic>{};
     flashData[key] = value;
     _session['flash'] = flashData;
   }
@@ -100,7 +101,8 @@ class RequestSession {
 
     // Restore data but update creation time for security
     sessionData.forEach((key, value) {
-      if (key != 'created_at') { // Don't restore old creation time
+      if (key != 'created_at') {
+        // Don't restore old creation time
         _session[key] = value;
       }
     });
@@ -298,8 +300,14 @@ class RequestSession {
   Map<String, dynamic> getAllData() {
     final data = <String, dynamic>{};
     for (final key in _session.keys) {
-      if (!key.toString().startsWith('_') && 
-          !['created_at', 'last_access', 'timeout_seconds', 'invalidated', 'invalidated_at'].contains(key)) {
+      if (!key.toString().startsWith('_') &&
+          ![
+            'created_at',
+            'last_access',
+            'timeout_seconds',
+            'invalidated',
+            'invalidated_at',
+          ].contains(key)) {
         data[key] = _session[key];
       }
     }

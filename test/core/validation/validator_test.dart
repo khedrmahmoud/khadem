@@ -1,11 +1,11 @@
-import 'package:khadem/src/core/validation/validator.dart';
+import 'package:khadem/src/core/validation/input_validator.dart';
 import 'package:khadem/src/support/exceptions/validation_exception.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Validator', () {
+  group('InputValidator', () {
     test('should pass validation when all rules are satisfied', () {
-      final validator = Validator(
+      final validator = InputValidator(
         {'name': 'John', 'age': '25'},
         {'name': 'required', 'age': 'required|int'},
       );
@@ -15,7 +15,7 @@ void main() {
     });
 
     test('should fail validation when required field is missing', () {
-      final validator = Validator(
+      final validator = InputValidator(
         {'name': ''},
         {'name': 'required'},
       );
@@ -25,7 +25,7 @@ void main() {
     });
 
     test('should fail validation when multiple rules are not satisfied', () {
-      final validator = Validator(
+      final validator = InputValidator(
         {'age': 'not-a-number'},
         {'age': 'required|int'},
       );
@@ -34,8 +34,10 @@ void main() {
       expect(validator.errors, contains('age'));
     });
 
-    test('should throw ValidationException when validate() is called and validation fails', () {
-      final validator = Validator(
+    test(
+        'should throw ValidationException when validate() is called and validation fails',
+        () {
+      final validator = InputValidator(
         {'name': ''},
         {'name': 'required'},
       );
@@ -46,8 +48,10 @@ void main() {
       );
     });
 
-    test('should not throw ValidationException when validate() is called and validation passes', () {
-      final validator = Validator(
+    test(
+        'should not throw ValidationException when validate() is called and validation passes',
+        () {
+      final validator = InputValidator(
         {'name': 'John'},
         {'name': 'required'},
       );
@@ -56,7 +60,7 @@ void main() {
     });
 
     test('should handle multiple fields with multiple rules', () {
-      final validator = Validator(
+      final validator = InputValidator(
         {'name': 'John', 'age': '25', 'email': ''},
         {
           'name': 'required',
@@ -72,7 +76,7 @@ void main() {
     });
 
     test('should skip validation for nullable fields when value is null', () {
-      final validator = Validator(
+      final validator = InputValidator(
         {'name': null, 'age': null},
         {
           'name': 'nullable|required|string',
@@ -85,7 +89,7 @@ void main() {
     });
 
     test('should validate nullable fields when value is not null', () {
-      final validator = Validator(
+      final validator = InputValidator(
         {'name': 'John', 'age': '15'},
         {
           'name': 'nullable|required|string',
@@ -99,7 +103,7 @@ void main() {
     });
 
     test('should validate non-nullable fields normally', () {
-      final validator = Validator(
+      final validator = InputValidator(
         {'name': null, 'age': '25'},
         {
           'name': 'required|string',

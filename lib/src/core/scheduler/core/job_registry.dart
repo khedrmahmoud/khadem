@@ -17,17 +17,21 @@ class SchedulerJobRegistry {
   /// This method should be called during application bootstrap
   /// to register the default jobs that come with the framework.
   static void registerAll() {
-    register(JobDefinition(
-      name: 'ping',
-      factory: (config) => PingJob(),
-    ),);
-
-    register(JobDefinition(
-      name: 'ttl_cleaner',
-      factory: (config) => TTLFileCleanerJob(
-        cachePath: (config['cachePath'] ?? 'storage/cache') as String,
+    register(
+      JobDefinition(
+        name: 'ping',
+        factory: (config) => PingJob(),
       ),
-    ),);
+    );
+
+    register(
+      JobDefinition(
+        name: 'ttl_cleaner',
+        factory: (config) => TTLFileCleanerJob(
+          cachePath: (config['cachePath'] ?? 'storage/cache') as String,
+        ),
+      ),
+    );
   }
 
   /// Register a new job definition

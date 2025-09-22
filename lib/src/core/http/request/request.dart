@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:khadem/src/modules/auth/services/web_auth_service.dart';
+import 'package:khadem/khadem.dart' show WebAuthService;
 import 'package:khadem/src/support/helpers/cookie.dart';
 
 import 'request_auth.dart';

@@ -1,4 +1,3 @@
-
 import '../../contracts/config/config_contract.dart';
 import '../../contracts/database/connection_interface.dart';
 import '../../contracts/database/query_builder_interface.dart';
@@ -31,8 +30,10 @@ class DatabaseManager {
   }
 
   /// Gets a query builder for the given table.
-  QueryBuilderInterface<T> table<T>(String tableName,
-      {T Function(Map<String, dynamic>)? modelFactory,}) {
+  QueryBuilderInterface<T> table<T>(
+    String tableName, {
+    T Function(Map<String, dynamic>)? modelFactory,
+  }) {
     return _connection.queryBuilder<T>(tableName, modelFactory: modelFactory);
   }
 

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:mirrors';
 
-
 import '../../application/khadem.dart';
 import '../../contracts/queue/queue_job.dart';
 import '../../core/queue/queue_manager.dart';
@@ -27,7 +26,7 @@ class QueueWorkCommand extends KhademCommand {
   @override
   Future<void> handle(List<String> args) async {
     await CommandBootstrapper.register();
-      await CommandBootstrapper.boot();
+    await CommandBootstrapper.boot();
     final queue = Khadem.container.resolve<QueueManager>();
 
     // Parse optional args
@@ -101,7 +100,6 @@ class QueueWorkCommand extends KhademCommand {
       logger.info('📂 Falling back to manual job discovery...');
       final manualJobs = await _discoverJobsManually();
       logger.info('✅ Discovered ${manualJobs.length} jobs manually');
-
     } catch (e, stackTrace) {
       logger.error('❌ Failed to auto-register jobs: $e');
       logger.error('Stack trace: $stackTrace');
@@ -163,7 +161,6 @@ class QueueWorkCommand extends KhademCommand {
       }
 
       return jobClasses.length;
-
     } catch (e) {
       logger.error('❌ Failed to load jobs registry: $e');
       return 0;
@@ -180,7 +177,9 @@ class QueueWorkCommand extends KhademCommand {
 
     final jobFiles = <String>[];
     await for (final entity in jobsDir.list()) {
-      if (entity is File && entity.path.endsWith('.dart') && !entity.path.endsWith('jobs.dart')) {
+      if (entity is File &&
+          entity.path.endsWith('.dart') &&
+          !entity.path.endsWith('jobs.dart')) {
         final className = await _extractJobClassFromFile(entity);
         if (className != null) {
           jobFiles.add(className);
@@ -225,7 +224,8 @@ class QueueWorkCommand extends KhademCommand {
       }
 
       // Get the class mirror
-      final classMirror = jobLibrary.declarations[Symbol(className)] as ClassMirror;
+      final classMirror =
+          jobLibrary.declarations[Symbol(className)] as ClassMirror;
 
       // Verify it extends QueueJob
       const queueJobSymbol = Symbol('QueueJob');
@@ -252,7 +252,6 @@ class QueueWorkCommand extends KhademCommand {
 
       // Log successful registration
       logger.info('🔗 Job $className registered successfully with mirrors');
-
     } catch (e) {
       logger.error('❌ Mirror registration failed for $className: $e');
       rethrow;

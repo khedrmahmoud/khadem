@@ -26,7 +26,7 @@ abstract class KhademModel<T> {
   /// Hidden attributes
   List<String> get hidden => _hiddenList;
 
-  /// Appended attributes (computed) 
+  /// Appended attributes (computed)
   List<String> get appends => _appendsList;
 
   /// Type casting for fields
@@ -124,7 +124,6 @@ abstract class KhademModel<T> {
     relation.set(relationName, value);
   }
 
-
   /// Append computed attributes to the model
   T append(List<String> attributes) {
     for (final attribute in attributes) {
@@ -195,7 +194,8 @@ abstract class KhademModel<T> {
   Future<void> _loadRelation(String relationName) async {
     if (!relations.containsKey(relationName)) {
       throw Exception(
-          'Relation "$relationName" not defined on model $modelName',);
+        'Relation "$relationName" not defined on model $modelName',
+      );
     }
 
     final relationDef = relations[relationName]!;
@@ -250,7 +250,8 @@ abstract class KhademModel<T> {
 
       default:
         throw UnsupportedError(
-            'Relation type ${relationDef.type} not implemented',);
+          'Relation type ${relationDef.type} not implemented',
+        );
     }
   }
 

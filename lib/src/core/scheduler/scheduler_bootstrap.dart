@@ -16,9 +16,10 @@ final scheduler = SchedulerEngine();
 ///
 /// [tasks] Additional tasks to add beyond configuration
 /// [configJobs] Custom job definitions to register
-void startSchedulers(
-    {List<ScheduledTask> tasks = const [],
-    List<JobDefinition> configJobs = const [],}) {
+void startSchedulers({
+  List<ScheduledTask> tasks = const [],
+  List<JobDefinition> configJobs = const [],
+}) {
   final logger = Khadem.logger;
   logger.info('🚀 Initializing scheduler system...');
 
@@ -45,7 +46,8 @@ void startSchedulers(
 
     for (var configItem in configTasks) {
       try {
-        final task = ScheduledTask.fromConfig(configItem as Map<String, dynamic>);
+        final task =
+            ScheduledTask.fromConfig(configItem as Map<String, dynamic>);
         scheduler.add(task);
         logger.debug('✅ Config task "${task.name}" loaded and started');
       } catch (e) {
@@ -55,9 +57,10 @@ void startSchedulers(
     }
 
     logger.info('✅ Scheduler system initialized successfully');
-    logger.info('📊 Registered jobs: ${SchedulerJobRegistry.registeredNames.join(", ")}');
+    logger.info(
+      '📊 Registered jobs: ${SchedulerJobRegistry.registeredNames.join(", ")}',
+    );
     logger.info('📋 Active tasks: ${scheduler.activeTasks().join(", ")}');
-
   } catch (e, stackTrace) {
     logger.error('❌ Failed to initialize scheduler system: $e');
     logger.error('Stack trace: $stackTrace');

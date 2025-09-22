@@ -12,7 +12,7 @@ import 'user_seeder.dart';
 
 List<Seeder> seedersList = <Seeder>[
   // User-related seeders
-    UserSeeder(),
+  UserSeeder(),
 ];
 
 // Note: This file is automatically updated when you run:

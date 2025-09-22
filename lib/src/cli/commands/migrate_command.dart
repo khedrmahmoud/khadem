@@ -4,7 +4,7 @@ import 'dart:mirrors';
 import 'package:khadem/khadem.dart';
 import 'package:path/path.dart' as path;
 
-import '../command_bootstrapper.dart';// Dynamic imports for migration classes
+import '../command_bootstrapper.dart'; // Dynamic imports for migration classes
 // These would be generated in a production system
 // For now, we'll use conditional imports based on the project structure
 
@@ -16,44 +16,59 @@ class MigrateCommand extends KhademCommand {
   String get name => 'migrate';
 
   @override
-  String get description => 'Run database migrations with comprehensive error handling';
+  String get description =>
+      'Run database migrations with comprehensive error handling';
 
   MigrateCommand({required super.logger}) {
     argParser
-      ..addFlag('reset',
-          abbr: 'r',
-          help: 'Reset all migrations (rollback and re-run)',
-          negatable: false,)
-      ..addFlag('fresh',
-          abbr: 'f',
-          help: 'Drop all tables and rerun all migrations',
-          negatable: false,)
-      ..addFlag('status',
-          abbr: 's',
-          help: 'Show migration status',
-          negatable: false,)
-      ..addFlag('force',
-          abbr: 'x',
-          help: 'Force run migrations in production',
-          negatable: false,)
-      ..addOption('step',
-          abbr: 't',
-          help: 'Run migrations in steps (specify number)',
-          valueHelp: 'count',)
-      ..addOption('path',
-          abbr: 'p',
-          help: 'Path to migrations directory',
-          defaultsTo: 'database/migrations',)
-      ..addFlag('verbose',
-          abbr: 'v',
-          help: 'Show detailed migration information',
-          negatable: false,);
+      ..addFlag(
+        'reset',
+        abbr: 'r',
+        help: 'Reset all migrations (rollback and re-run)',
+        negatable: false,
+      )
+      ..addFlag(
+        'fresh',
+        abbr: 'f',
+        help: 'Drop all tables and rerun all migrations',
+        negatable: false,
+      )
+      ..addFlag(
+        'status',
+        abbr: 's',
+        help: 'Show migration status',
+        negatable: false,
+      )
+      ..addFlag(
+        'force',
+        abbr: 'x',
+        help: 'Force run migrations in production',
+        negatable: false,
+      )
+      ..addOption(
+        'step',
+        abbr: 't',
+        help: 'Run migrations in steps (specify number)',
+        valueHelp: 'count',
+      )
+      ..addOption(
+        'path',
+        abbr: 'p',
+        help: 'Path to migrations directory',
+        defaultsTo: 'database/migrations',
+      )
+      ..addFlag(
+        'verbose',
+        abbr: 'v',
+        help: 'Show detailed migration information',
+        negatable: false,
+      );
   }
 
   @override
   Future<void> handle(List<String> args) async {
     try {
-   await CommandBootstrapper.register();
+      await CommandBootstrapper.register();
       await CommandBootstrapper.boot();
       // Check if we're in production without force flag
       final isProduction = Khadem.isProduction;
@@ -88,7 +103,6 @@ class MigrateCommand extends KhademCommand {
 
       logger.info('✅ Migration command completed successfully.');
       exit(0);
-
     } catch (e, stackTrace) {
       logger.error('❌ Migration failed: $e');
       if (argResults?['verbose'] == true) {
@@ -100,7 +114,8 @@ class MigrateCommand extends KhademCommand {
   }
 
   Future<List<MigrationFile>> _discoverMigrations() async {
-    final migrationsPath = argResults?['path'] as String? ?? 'database/migrations';
+    final migrationsPath =
+        argResults?['path'] as String? ?? 'database/migrations';
     final migrationsDir = Directory(migrationsPath);
 
     if (!await migrationsDir.exists()) {
@@ -116,7 +131,11 @@ class MigrateCommand extends KhademCommand {
     // Filter Dart files (exclude migrations.dart)
     final migrationFiles = files
         .whereType<File>()
-        .where((file) => file.path.endsWith('.dart') && !file.path.endsWith('migrations.dart'))
+        .where(
+          (file) =>
+              file.path.endsWith('.dart') &&
+              !file.path.endsWith('migrations.dart'),
+        )
         .toList();
 
     if (migrationFiles.isEmpty) {
@@ -151,7 +170,6 @@ class MigrateCommand extends KhademCommand {
     return migrations;
   }
 
-   
   Future<MigrationFile?> _loadMigrationFromFile(File file) async {
     try {
       final fileName = path.basenameWithoutExtension(file.path);
@@ -178,7 +196,6 @@ class MigrateCommand extends KhademCommand {
         logger.error('❌ Failed to instantiate migration: $className');
         return null;
       }
-
     } catch (e, stackTrace) {
       logger.error('❌ Failed to load migration from file: ${file.path}');
       logger.error('   Error: $e');
@@ -188,7 +205,6 @@ class MigrateCommand extends KhademCommand {
       return null;
     }
   }
-
 
   Future<void> _showMigrationStatus(Migrator migrator) async {
     logger.info('📊 Migration Status:');
@@ -269,9 +285,14 @@ class MigrateCommand extends KhademCommand {
 
       // Remove .dart extension and convert to PascalCase
       final baseName = nameWithoutTimestamp.replaceAll('_', ' ');
-      final words = baseName.split(' ').map((word) =>
-        word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : '',
-      ).where((word) => word.isNotEmpty);
+      final words = baseName
+          .split(' ')
+          .map(
+            (word) => word.isNotEmpty
+                ? word[0].toUpperCase() + word.substring(1).toLowerCase()
+                : '',
+          )
+          .where((word) => word.isNotEmpty);
 
       return words.join();
     } catch (e) {
@@ -280,7 +301,10 @@ class MigrateCommand extends KhademCommand {
     }
   }
 
-  Future<MigrationFile?> _instantiateMigrationWithMirrors(File file, String className) async {
+  Future<MigrationFile?> _instantiateMigrationWithMirrors(
+    File file,
+    String className,
+  ) async {
     try {
       // First, try to find the class in the current mirror system
       final mirrorSystem = currentMirrorSystem();
@@ -288,7 +312,8 @@ class MigrateCommand extends KhademCommand {
 
       for (final library in mirrorSystem.libraries.values) {
         try {
-          migrationClassMirror = library.declarations[Symbol(className)] as ClassMirror?;
+          migrationClassMirror =
+              library.declarations[Symbol(className)] as ClassMirror?;
           if (migrationClassMirror != null) {
             break;
           }
@@ -306,7 +331,8 @@ class MigrateCommand extends KhademCommand {
         }
 
         // Create an instance using the default constructor
-        final instanceMirror = migrationClassMirror.newInstance(const Symbol(''), []);
+        final instanceMirror =
+            migrationClassMirror.newInstance(const Symbol(''), []);
         final migration = instanceMirror.reflectee as MigrationFile;
 
         if (argResults?['verbose'] == true) {
@@ -317,11 +343,12 @@ class MigrateCommand extends KhademCommand {
       }
 
       // If not found in mirror system, try dynamic loading approach
-      logger.warning('⚠️ Migration class "$className" not found in mirror system');
+      logger.warning(
+        '⚠️ Migration class "$className" not found in mirror system',
+      );
       logger.warning('   Attempting dynamic loading from file...');
 
       return await _loadMigrationFromFileContent(file, className);
-
     } catch (e, stackTrace) {
       logger.error('❌ Failed to instantiate migration with mirror: $className');
       logger.error('   Error: $e');
@@ -332,7 +359,10 @@ class MigrateCommand extends KhademCommand {
     }
   }
 
-  Future<MigrationFile?> _loadMigrationFromFileContent(File file, String className) async {
+  Future<MigrationFile?> _loadMigrationFromFileContent(
+    File file,
+    String className,
+  ) async {
     try {
       // Read the migration file content
       final content = await file.readAsString();
@@ -354,7 +384,8 @@ class MigrateCommand extends KhademCommand {
 
       // Create a basic migration wrapper
       // This is a temporary solution - in production you'd use proper instantiation
-      final migration = _createMigrationWrapper(className, migrationName, content);
+      final migration =
+          _createMigrationWrapper(className, migrationName, content);
 
       if (migration != null) {
         logger.info('✅ Created migration wrapper for: $className');
@@ -362,7 +393,6 @@ class MigrateCommand extends KhademCommand {
       }
 
       return null;
-
     } catch (e) {
       logger.error('❌ Failed to load migration from file content: $e');
       return null;
@@ -379,14 +409,24 @@ class MigrateCommand extends KhademCommand {
     return fileName;
   }
 
-  MigrationFile? _createMigrationWrapper(String className, String migrationName, String content) {
+  MigrationFile? _createMigrationWrapper(
+    String className,
+    String migrationName,
+    String content,
+  ) {
     // This is a simplified approach for demonstration
     // In a real implementation, you'd parse the up() and down() methods
 
     try {
       // Extract up method content
-      final upMatch = RegExp(r'Future<void>\s+up\s*\([^)]*\)\s*async\s*\{([^}]*)\}', multiLine: true).firstMatch(content);
-      final downMatch = RegExp(r'Future<void>\s+down\s*\([^)]*\)\s*async\s*\{([^}]*)\}', multiLine: true).firstMatch(content);
+      final upMatch = RegExp(
+        r'Future<void>\s+up\s*\([^)]*\)\s*async\s*\{([^}]*)\}',
+        multiLine: true,
+      ).firstMatch(content);
+      final downMatch = RegExp(
+        r'Future<void>\s+down\s*\([^)]*\)\s*async\s*\{([^}]*)\}',
+        multiLine: true,
+      ).firstMatch(content);
 
       if (upMatch == null) {
         logger.error('❌ Could not find up() method in migration: $className');
@@ -394,8 +434,11 @@ class MigrateCommand extends KhademCommand {
       }
 
       // Create a simple migration implementation
-      return _SimpleMigration(className, upMatch.group(1) ?? '', downMatch?.group(1) ?? '');
-
+      return _SimpleMigration(
+        className,
+        upMatch.group(1) ?? '',
+        downMatch?.group(1) ?? '',
+      );
     } catch (e) {
       logger.error('❌ Failed to create migration wrapper: $e');
       return null;

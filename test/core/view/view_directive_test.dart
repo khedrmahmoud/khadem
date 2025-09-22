@@ -18,9 +18,14 @@ void main() {
         'greeting': 'Hello :name!',
         'welcome': 'Welcome to :app',
         'items': 'item|items',
-        'fields.name': 'Full Name',
-        'fields.email': 'Email Address',
         'messages.count': 'You have :count messages',
+      });
+      provider.loadNamespace('fields', 'en', {
+        'name': 'Full Name',
+        'email': 'Email Address',
+      });
+      provider.loadNamespace('messages', 'en', {
+        'count': 'You have :count messages',
       });
       provider.setLocale('en');
     });
@@ -138,7 +143,8 @@ void main() {
     });
 
     test('should handle complex parameter maps', () async {
-      const template = '@lang("welcome", parameters: {"app": "TestApp", "version": 2})';
+      const template =
+          '@lang("welcome", parameters: {"app": "TestApp", "version": 2})';
       const context = <String, dynamic>{};
 
       final result = await directive.apply(template, context);

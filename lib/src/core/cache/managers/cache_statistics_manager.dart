@@ -8,7 +8,8 @@ class CacheStatisticsManager implements ICacheStatisticsManager {
   final Map<String, CacheStats> _stats = {};
 
   @override
-  void updateStats(String driverName, {
+  void updateStats(
+    String driverName, {
     required bool hit,
     required String operation,
     bool error = false,

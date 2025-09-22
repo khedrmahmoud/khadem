@@ -20,7 +20,8 @@ void main() {
     });
 
     group('Error Handling', () {
-      test('should throw AuthException for invalid credentials format', () async {
+      test('should throw AuthException for invalid credentials format',
+          () async {
         // This test would require mocking the Khadem static methods
         // For now, we'll test the exception types that should be thrown
         expect(
@@ -32,7 +33,8 @@ void main() {
         );
       });
 
-      test('should throw AuthException for token verification failures', () async {
+      test('should throw AuthException for token verification failures',
+          () async {
         expect(
           () async {
             await tokenAuthService.verifyToken('invalid_token');

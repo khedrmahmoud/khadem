@@ -69,8 +69,11 @@ abstract interface class ContainerInterface {
   /// - [singleton]: If true, the factory is treated as a singleton within the context.
   ///
   /// Throws an exception if a binding for [T] under the same [context] already exists.
-  void bindWhen<T>(String context, dynamic Function(ContainerInterface) factory,
-      {bool singleton = false,});
+  void bindWhen<T>(
+    String context,
+    dynamic Function(ContainerInterface) factory, {
+    bool singleton = false,
+  });
 
   /// Resolves and returns an instance of type [T].
   ///

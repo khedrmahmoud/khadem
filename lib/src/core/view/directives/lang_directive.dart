@@ -46,7 +46,11 @@ class LangDirective implements ViewDirective {
     return result;
   }
 
-  String _processLangDirective(String key, String? options, Map<String, dynamic> context) {
+  String _processLangDirective(
+    String key,
+    String? options,
+    Map<String, dynamic> context,
+  ) {
     final params = _parseOptions(options, context);
 
     return Lang.t(
@@ -57,7 +61,12 @@ class LangDirective implements ViewDirective {
     );
   }
 
-  String _processChoiceDirective(String key, String countExpr, String? options, Map<String, dynamic> context) {
+  String _processChoiceDirective(
+    String key,
+    String countExpr,
+    String? options,
+    Map<String, dynamic> context,
+  ) {
     final count = _resolveValue(countExpr, context);
     final params = _parseOptions(options, context);
 
@@ -80,7 +89,11 @@ class LangDirective implements ViewDirective {
     );
   }
 
-  String _processFieldDirective(String key, String? options, Map<String, dynamic> context) {
+  String _processFieldDirective(
+    String key,
+    String? options,
+    Map<String, dynamic> context,
+  ) {
     final params = _parseOptions(options, context);
 
     return Lang.getField(
@@ -90,7 +103,10 @@ class LangDirective implements ViewDirective {
     );
   }
 
-  Map<String, dynamic> _parseOptions(String? options, Map<String, dynamic> context) {
+  Map<String, dynamic> _parseOptions(
+    String? options,
+    Map<String, dynamic> context,
+  ) {
     if (options == null || options.trim().isEmpty) {
       return {};
     }
@@ -124,7 +140,8 @@ class LangDirective implements ViewDirective {
         if (part.startsWith('locale:')) {
           result['locale'] = _resolveValue(part.substring(7).trim(), context);
         } else if (part.startsWith('namespace:')) {
-          result['namespace'] = _resolveValue(part.substring(10).trim(), context);
+          result['namespace'] =
+              _resolveValue(part.substring(10).trim(), context);
         } else if (part.startsWith('parameters:')) {
           final paramStr = part.substring(11).trim();
           result['parameters'] = _parseParameterMap(paramStr, context);
@@ -135,7 +152,10 @@ class LangDirective implements ViewDirective {
     return result;
   }
 
-  Map<String, dynamic> _parseParameterMap(String paramStr, Map<String, dynamic> context) {
+  Map<String, dynamic> _parseParameterMap(
+    String paramStr,
+    Map<String, dynamic> context,
+  ) {
     final map = <String, dynamic>{};
     final trimmed = paramStr.trim();
 
@@ -147,7 +167,8 @@ class LangDirective implements ViewDirective {
     if (content.trim().isEmpty) return map;
 
     // Simple parsing for key-value pairs
-    final pairs = content.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty);
+    final pairs =
+        content.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty);
 
     for (final pair in pairs) {
       final colonIndex = pair.indexOf(':');
@@ -166,7 +187,10 @@ class LangDirective implements ViewDirective {
     return map;
   }
 
-  dynamic _resolveContextVariable(String variable, Map<String, dynamic> context) {
+  dynamic _resolveContextVariable(
+    String variable,
+    Map<String, dynamic> context,
+  ) {
     final path = variable.substring(1); // Remove $
     final parts = path.split('.');
 

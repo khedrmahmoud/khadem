@@ -29,11 +29,13 @@ class RouteMatcher {
 
     for (final route in _routes) {
       if (route.matches(method, path)) {
-        matches.add(RouteMatchResult(
-          handler: route.handler,
-          params: route.extractParams(path),
-          middleware: route.middleware,
-        ),);
+        matches.add(
+          RouteMatchResult(
+            handler: route.handler,
+            params: route.extractParams(path),
+            middleware: route.middleware,
+          ),
+        );
       }
     }
 

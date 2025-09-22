@@ -59,7 +59,8 @@ class NewCommand extends KhademCommand {
 
     if (khademIndex == -1) {
       throw Exception(
-          '❌ Unable to locate "khadem" directory in the script path.',);
+        '❌ Unable to locate "khadem" directory in the script path.',
+      );
     }
 
     final khademPath =
@@ -68,7 +69,10 @@ class NewCommand extends KhademCommand {
   }
 
   Future<void> _copyAndReplace(
-      Directory source, Directory target, String projectName,) async {
+    Directory source,
+    Directory target,
+    String projectName,
+  ) async {
     if (!target.existsSync()) {
       target.createSync(recursive: true);
     }
@@ -80,7 +84,7 @@ class NewCommand extends KhademCommand {
       if (entity is File) {
         // Check if file is binary (don't try to read as text)
         final isBinary = await _isBinaryFile(entity);
-        
+
         if (isBinary) {
           // Copy binary files directly
           await entity.copy(newPath);
@@ -89,7 +93,7 @@ class NewCommand extends KhademCommand {
           String content = await entity.readAsString();
 
           // 🔁 Replace placeholders
-          content = content.replaceAll('{{app_name}}', projectName);
+          content = content.replaceAll('khadem_app', projectName);
           content = content.replaceAll('khadem_template', projectName);
 
           await File(newPath).writeAsString(content);
@@ -134,8 +138,19 @@ class NewCommand extends KhademCommand {
   Future<bool> _isBinaryFile(File file) async {
     // Check file extension for known binary files
     final extension = p.extension(file.path).toLowerCase();
-    final binaryExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg', '.woff', '.woff2', '.ttf', '.eot'];
-    
+    final binaryExtensions = [
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.gif',
+      '.ico',
+      '.svg',
+      '.woff',
+      '.woff2',
+      '.ttf',
+      '.eot',
+    ];
+
     if (binaryExtensions.contains(extension)) {
       return true;
     }

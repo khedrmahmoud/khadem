@@ -79,16 +79,16 @@ class DirectiveRegistry {
     IssetDirective(),
     HasDirective(),
 
-  // Form directives
-  CsrfDirective(),
-  MethodDirective(),
-  RouteDirective(),
-  UrlDirective(),
-  ActionDirective(),
-  OldDirective(),
-  // Auth/Guest directives
-  AuthDirective(),
-  GuestDirective(),
+    // Form directives
+    CsrfDirective(),
+    MethodDirective(),
+    RouteDirective(),
+    UrlDirective(),
+    ActionDirective(),
+    OldDirective(),
+    // Auth/Guest directives
+    AuthDirective(),
+    GuestDirective(),
   ];
 
   static void register(ViewDirective directive) {

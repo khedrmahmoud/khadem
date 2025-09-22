@@ -22,7 +22,11 @@ class RouteHandler {
   }
 
   /// Executes a handler with proper error handling.
-  Future<void> executeHandler(RequestHandler handler, Request req, Response res) async {
+  Future<void> executeHandler(
+    RequestHandler handler,
+    Request req,
+    Response res,
+  ) async {
     final wrappedHandler = wrapWithExceptionHandler(handler);
     await wrappedHandler(req, res);
   }

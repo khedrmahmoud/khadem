@@ -64,10 +64,12 @@ class ServiceProviderManager {
   }
 
   /// Gets deferred providers.
-  List<ServiceProvider> get deferredProviders => _registry.getDeferredProviders();
+  List<ServiceProvider> get deferredProviders =>
+      _registry.getDeferredProviders();
 
   /// Gets non-deferred providers.
-  List<ServiceProvider> get nonDeferredProviders => _registry.getNonDeferredProviders();
+  List<ServiceProvider> get nonDeferredProviders =>
+      _registry.getNonDeferredProviders();
 
   /// Gets the count of registered providers.
   int get providerCount => _registry.count;

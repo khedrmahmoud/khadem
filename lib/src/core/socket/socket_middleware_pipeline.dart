@@ -35,7 +35,12 @@ class SocketMiddlewarePipeline {
             await next();
           }
         } catch (e, stackTrace) {
-          SocketExceptionHandler.handleConnectionError(request, e, stackTrace, middleware.name);
+          SocketExceptionHandler.handleConnectionError(
+            request,
+            e,
+            stackTrace,
+            middleware.name,
+          );
           // Re-throw the exception to prevent connection establishment
           rethrow;
         }

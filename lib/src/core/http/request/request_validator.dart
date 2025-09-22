@@ -38,7 +38,9 @@ class RequestValidator {
 
   /// Validates specific input data against rules.
   Map<String, dynamic> validateData(
-      Map<String, dynamic> data, Map<String, String> rules,) {
+    Map<String, dynamic> data,
+    Map<String, String> rules,
+  ) {
     // If no files are provided in data, try to get them from the body parser
     final validationData = Map<String, dynamic>.from(data);
     if (_bodyParser.files != null && !validationData.containsKey('files')) {

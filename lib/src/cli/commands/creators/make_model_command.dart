@@ -10,8 +10,11 @@ class MakeModelCommand extends KhademCommand {
   String get description => 'Create a new model class';
 
   MakeModelCommand({required super.logger}) {
-    argParser.addOption('name',
-        abbr: 'n', help: 'Model name with optional path (e.g. Auth/User)',);
+    argParser.addOption(
+      'name',
+      abbr: 'n',
+      help: 'Model name with optional path (e.g. Auth/User)',
+    );
   }
 
   @override
@@ -30,7 +33,8 @@ class MakeModelCommand extends KhademCommand {
 
     final className = _toPascalCase(name);
     final fileName = _toSnakeCase(name);
-    final filePath = 'app/models/${folder.isEmpty ? '' : '$folder/'}$fileName.dart';
+    final filePath =
+        'app/models/${folder.isEmpty ? '' : '$folder/'}$fileName.dart';
 
     final file = File(filePath);
     if (await file.exists()) {
@@ -102,11 +106,20 @@ class $className extends KhademModel<$className> with Timestamps, HasRelationshi
 
   String _toPascalCase(String input) {
     if (input.isEmpty) return input;
-    return input.split('_').map((e) => e.isEmpty ? '' : e[0].toUpperCase() + e.substring(1).toLowerCase()).join();
+    return input
+        .split('_')
+        .map(
+          (e) => e.isEmpty
+              ? ''
+              : e[0].toUpperCase() + e.substring(1).toLowerCase(),
+        )
+        .join();
   }
 
   String _toSnakeCase(String input) {
     if (input.isEmpty) return input;
-    return input.replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]}_${m[2]}').toLowerCase();
+    return input
+        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]}_${m[2]}')
+        .toLowerCase();
   }
 }

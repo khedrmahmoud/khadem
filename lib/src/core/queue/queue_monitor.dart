@@ -1,8 +1,6 @@
 import '../../contracts/queue/queue_job.dart';
 import '../../contracts/queue/queue_monitor.dart';
 
-
-
 /// Basic implementation of queue monitoring.
 class BasicQueueMonitor implements QueueMonitor {
   final QueueMetrics _metrics = QueueMetrics();
@@ -81,7 +79,9 @@ class QueueMetrics {
 
   Duration get averageProcessingTime {
     if (totalCompleted == 0) return Duration.zero;
-    return Duration(microseconds: totalProcessingTime.inMicroseconds ~/ totalCompleted);
+    return Duration(
+      microseconds: totalProcessingTime.inMicroseconds ~/ totalCompleted,
+    );
   }
 
   void reset() {

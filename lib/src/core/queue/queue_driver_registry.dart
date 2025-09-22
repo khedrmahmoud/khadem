@@ -60,7 +60,8 @@ class QueueDriverRegistry implements IQueueDriverRegistry {
 
   @override
   QueueDriver getDefaultDriver() {
-    if (_defaultDriverName == null || !_drivers.containsKey(_defaultDriverName)) {
+    if (_defaultDriverName == null ||
+        !_drivers.containsKey(_defaultDriverName)) {
       throw QueueException('No default driver set or default driver not found');
     }
     return _drivers[_defaultDriverName]!;

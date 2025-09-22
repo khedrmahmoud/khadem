@@ -18,7 +18,6 @@ abstract class KhademCommand extends Command<void> {
   @override
   Future<void> run() async {
     try {
-      
       await handle(argResults!.arguments);
     } catch (e, stack) {
       logger.error('❌ Command failed: $e');

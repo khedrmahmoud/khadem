@@ -19,7 +19,8 @@ void main() {
       expect(result, isNull);
     });
 
-    test('should return error message when pattern does not match the value', () {
+    test('should return error message when pattern does not match the value',
+        () {
       final result = rule.validate('field', 'abc', r'^\d+$', data: {});
       expect(result, equals('regex_validation'));
     });

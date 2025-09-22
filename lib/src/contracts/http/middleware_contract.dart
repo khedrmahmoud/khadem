@@ -4,7 +4,10 @@ import '../../core/http/response/response.dart';
 
 /// Signature of a middleware function.
 typedef MiddlewareHandler = FutureOr<void> Function(
-    Request request, Response response, NextFunction next,);
+  Request request,
+  Response response,
+  NextFunction next,
+);
 
 /// Signature for "next" callback in middleware chain.
 typedef NextFunction = FutureOr<void> Function();
@@ -25,9 +28,11 @@ class Middleware {
   final MiddlewarePriority _priority;
   final String _name;
 
-  Middleware(this._handler,
-      {MiddlewarePriority priority = MiddlewarePriority.business, String? name,})
-      : _priority = priority,
+  Middleware(
+    this._handler, {
+    MiddlewarePriority priority = MiddlewarePriority.business,
+    String? name,
+  })  : _priority = priority,
         _name = name ?? 'anonymous-${DateTime.now().millisecondsSinceEpoch}';
 
   MiddlewareHandler get handler => _handler;

@@ -55,31 +55,49 @@ void main() {
     });
 
     group('on() - Priority execution', () {
-      test('should execute listeners in priority order (high to low)', () async {
+      test('should execute listeners in priority order (high to low)',
+          () async {
         final executionOrder = <String>[];
 
-        events.on('priority.test', (payload) async {
-          executionOrder.add('low');
-        }, priority: EventPriority.low,);
+        events.on(
+          'priority.test',
+          (payload) async {
+            executionOrder.add('low');
+          },
+          priority: EventPriority.low,
+        );
 
-        events.on('priority.test', (payload) async {
-          executionOrder.add('normal');
-        },);
+        events.on(
+          'priority.test',
+          (payload) async {
+            executionOrder.add('normal');
+          },
+        );
 
-        events.on('priority.test', (payload) async {
-          executionOrder.add('high');
-        }, priority: EventPriority.high,);
+        events.on(
+          'priority.test',
+          (payload) async {
+            executionOrder.add('high');
+          },
+          priority: EventPriority.high,
+        );
 
-        events.on('priority.test', (payload) async {
-          executionOrder.add('critical');
-        }, priority: EventPriority.critical,);
+        events.on(
+          'priority.test',
+          (payload) async {
+            executionOrder.add('critical');
+          },
+          priority: EventPriority.critical,
+        );
 
         await events.emit('priority.test');
 
         expect(executionOrder, equals(['critical', 'high', 'normal', 'low']));
       });
 
-      test('should maintain priority order with multiple listeners at same level', () async {
+      test(
+          'should maintain priority order with multiple listeners at same level',
+          () async {
         final executionOrder = <int>[];
 
         events.on('same.priority', (payload) async => executionOrder.add(1));
@@ -117,11 +135,20 @@ void main() {
       test('should support priority with once listeners', () async {
         final executionOrder = <String>[];
 
-        events.once('once.priority', (payload) async => executionOrder.add('once-high'), priority: EventPriority.high);
-        events.on('once.priority', (payload) async => executionOrder.add('normal'));
+        events.once(
+          'once.priority',
+          (payload) async => executionOrder.add('once-high'),
+          priority: EventPriority.high,
+        );
+        events.on(
+          'once.priority',
+          (payload) async => executionOrder.add('normal'),
+        );
 
         await events.emit('once.priority');
-        await events.emit('once.priority'); // Second emit should only trigger normal listener
+        await events.emit(
+          'once.priority',
+        ); // Second emit should only trigger normal listener
 
         expect(executionOrder, equals(['once-high', 'normal', 'normal']));
       });
@@ -137,8 +164,14 @@ void main() {
       test('should pass payload to all listeners', () async {
         final receivedPayloads = <dynamic>[];
 
-        events.on('payload.test', (payload) async => receivedPayloads.add(payload));
-        events.on('payload.test', (payload) async => receivedPayloads.add(payload));
+        events.on(
+          'payload.test',
+          (payload) async => receivedPayloads.add(payload),
+        );
+        events.on(
+          'payload.test',
+          (payload) async => receivedPayloads.add(payload),
+        );
 
         final testPayload = {'key': 'value', 'number': 42};
         await events.emit('payload.test', testPayload);
@@ -181,17 +214,24 @@ void main() {
       test('should execute listeners asynchronously when queued', () async {
         final executionOrder = <String>[];
 
-        events.on('queue.test', (payload) async {
-          executionOrder.add('sync-start');
-          await Future.delayed(const Duration(milliseconds: 5));
-          executionOrder.add('sync-end');
-        },);
+        events.on(
+          'queue.test',
+          (payload) async {
+            executionOrder.add('sync-start');
+            await Future.delayed(const Duration(milliseconds: 5));
+            executionOrder.add('sync-end');
+          },
+        );
 
-        events.on('queue.test', (payload) async {
-          executionOrder.add('queued-start');
-          await Future.delayed(const Duration(milliseconds: 1));
-          executionOrder.add('queued-end');
-        }, priority: EventPriority.low,);
+        events.on(
+          'queue.test',
+          (payload) async {
+            executionOrder.add('queued-start');
+            await Future.delayed(const Duration(milliseconds: 1));
+            executionOrder.add('queued-end');
+          },
+          priority: EventPriority.low,
+        );
 
         await events.emit('queue.test', null, true); // queue = true
 
@@ -218,7 +258,10 @@ void main() {
         await events.emit('sync.test'); // queue = false
 
         // Should execute in order
-        expect(executionOrder, equals(['first', 'first-done', 'second', 'second-done']));
+        expect(
+          executionOrder,
+          equals(['first', 'first-done', 'second', 'second-done']),
+        );
       });
     });
 
@@ -289,17 +332,32 @@ void main() {
       test('should track listeners by subscriber', () {
         final subscriber = TestSubscriber('test');
 
-        events.on('subscriber.test', (payload) async {}, subscriber: subscriber);
+        events.on(
+          'subscriber.test',
+          (payload) async {},
+          subscriber: subscriber,
+        );
 
-        expect(events.subscriberEvents[subscriber], contains('subscriber.test'));
+        expect(
+          events.subscriberEvents[subscriber],
+          contains('subscriber.test'),
+        );
       });
 
       test('should remove all listeners for a subscriber', () async {
         final subscriber = TestSubscriber('test');
         var callCount = 0;
 
-        events.on('sub1', (payload) async => callCount++, subscriber: subscriber);
-        events.on('sub2', (payload) async => callCount++, subscriber: subscriber);
+        events.on(
+          'sub1',
+          (payload) async => callCount++,
+          subscriber: subscriber,
+        );
+        events.on(
+          'sub2',
+          (payload) async => callCount++,
+          subscriber: subscriber,
+        );
 
         await events.emit('sub1');
         await events.emit('sub2');
@@ -406,7 +464,11 @@ void main() {
       test('should remove all listeners and groups', () {
         events.on('clear.test', (payload) async {});
         events.addToGroup('clear.group', 'clear.test');
-        events.on('subscriber.test', (payload) async {}, subscriber: TestSubscriber('test'));
+        events.on(
+          'subscriber.test',
+          (payload) async {},
+          subscriber: TestSubscriber('test'),
+        );
 
         expect(events.hasListeners('clear.test'), isTrue);
         expect(events.eventGroups.isNotEmpty, isTrue);
@@ -421,17 +483,32 @@ void main() {
     });
 
     group('Integration tests', () {
-      test('should handle complex event flow with priorities and groups', () async {
+      test('should handle complex event flow with priorities and groups',
+          () async {
         final executionLog = <String>[];
 
         // Set up listeners with different priorities
-        events.on('complex.test', (payload) async => executionLog.add('normal-1'));
-        events.on('complex.test', (payload) async => executionLog.add('high-1'), priority: EventPriority.high);
-        events.once('complex.test', (payload) async => executionLog.add('once-critical'), priority: EventPriority.critical);
+        events.on(
+          'complex.test',
+          (payload) async => executionLog.add('normal-1'),
+        );
+        events.on(
+          'complex.test',
+          (payload) async => executionLog.add('high-1'),
+          priority: EventPriority.high,
+        );
+        events.once(
+          'complex.test',
+          (payload) async => executionLog.add('once-critical'),
+          priority: EventPriority.critical,
+        );
 
         // Add to group
         events.addToGroup('complex.group', 'complex.test');
-        events.addToGroup('complex.group', 'complex.test'); // Duplicate should be handled
+        events.addToGroup(
+          'complex.group',
+          'complex.test',
+        ); // Duplicate should be handled
 
         // Emit through group
         await events.emitGroup('complex.group');
@@ -450,9 +527,21 @@ void main() {
         var callCount = 0;
 
         // Component registers multiple events
-        events.on('component.init', (payload) async => callCount++, subscriber: component);
-        events.on('component.update', (payload) async => callCount++, subscriber: component);
-        events.on('component.destroy', (payload) async => callCount++, subscriber: component);
+        events.on(
+          'component.init',
+          (payload) async => callCount++,
+          subscriber: component,
+        );
+        events.on(
+          'component.update',
+          (payload) async => callCount++,
+          subscriber: component,
+        );
+        events.on(
+          'component.destroy',
+          (payload) async => callCount++,
+          subscriber: component,
+        );
 
         // Events fire
         await events.emit('component.init');

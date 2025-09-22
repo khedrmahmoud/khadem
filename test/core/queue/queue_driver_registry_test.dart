@@ -65,7 +65,5 @@ void main() {
       registry.clear();
       expect(registry.getDriverNames(), isEmpty);
     });
-
-  
   });
 }

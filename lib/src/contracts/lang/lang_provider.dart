@@ -120,7 +120,8 @@ abstract class LangProvider {
   /// - [locale]: Override locale; uses current if null.
   /// - [namespace]: Namespace to search in (e.g., 'package:auth').
   /// - Returns: The translated string with parameters replaced.
-  String t(String key, {
+  String t(
+    String key, {
     Map<String, dynamic>? parameters,
     String? locale,
     String? namespace,
@@ -139,7 +140,9 @@ abstract class LangProvider {
   /// - [locale]: Override locale.
   /// - [namespace]: Namespace to search in.
   /// - Returns: The translated string with pluralization and parameters.
-  String choice(String key, int count, {
+  String choice(
+    String key,
+    int count, {
     Map<String, dynamic>? parameters,
     String? locale,
     String? namespace,
@@ -178,7 +181,11 @@ abstract class LangProvider {
   /// - [namespace]: The namespace identifier.
   /// - [locale]: Locale to load for.
   /// - [translations]: Map of key-value translations.
-  void loadNamespace(String namespace, String locale, Map<String, String> translations);
+  void loadNamespace(
+    String namespace,
+    String locale,
+    Map<String, String> translations,
+  );
 
   /// Clears any cached translations.
   ///
@@ -195,5 +202,11 @@ abstract class LangProvider {
   /// Allows extending parameter replacement logic.
   ///
   /// - [replacer]: Function that takes key, value, and parameters, returns replaced string.
-  void addParameterReplacer(String Function(String key, dynamic value, Map<String, dynamic> parameters) replacer);
+  void addParameterReplacer(
+    String Function(
+      String key,
+      dynamic value,
+      Map<String, dynamic> parameters,
+    ) replacer,
+  );
 }

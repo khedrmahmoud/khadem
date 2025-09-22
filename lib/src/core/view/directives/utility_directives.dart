@@ -2,7 +2,6 @@ import 'package:khadem/src/contracts/views/directive_contract.dart';
 
 import '../../../application/khadem.dart';
 
-
 /// Environment and configuration directives
 class EnvDirective implements ViewDirective {
   static final _envRegex = RegExp(r'@env\s*\(\s*(.+?)\s*(?:,\s*(.+?)\s*)?\)');
@@ -25,13 +24,15 @@ class EnvDirective implements ViewDirective {
 
         // If not found and default value provided, return it
         if (defaultValue != null) {
-          final cleanDefault = defaultValue.replaceAll('"', '').replaceAll("'", '');
+          final cleanDefault =
+              defaultValue.replaceAll('"', '').replaceAll("'", '');
           return cleanDefault;
         }
       } catch (_) {
         // If there's an error, return default value
         if (defaultValue != null) {
-          final cleanDefault = defaultValue.replaceAll('"', '').replaceAll("'", '');
+          final cleanDefault =
+              defaultValue.replaceAll('"', '').replaceAll("'", '');
           return cleanDefault;
         }
       }
@@ -42,7 +43,8 @@ class EnvDirective implements ViewDirective {
 }
 
 class ConfigDirective implements ViewDirective {
-  static final _configRegex = RegExp(r'@config\s*\(\s*(.+?)\s*(?:,\s*(.+?)\s*)?\)');
+  static final _configRegex =
+      RegExp(r'@config\s*\(\s*(.+?)\s*(?:,\s*(.+?)\s*)?\)');
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
@@ -62,13 +64,15 @@ class ConfigDirective implements ViewDirective {
 
         // If not found and default value provided, return it
         if (defaultValue != null) {
-          final cleanDefault = defaultValue.replaceAll('"', '').replaceAll("'", '');
+          final cleanDefault =
+              defaultValue.replaceAll('"', '').replaceAll("'", '');
           return cleanDefault;
         }
       } catch (_) {
         // If there's an error, return default value
         if (defaultValue != null) {
-          final cleanDefault = defaultValue.replaceAll('"', '').replaceAll("'", '');
+          final cleanDefault =
+              defaultValue.replaceAll('"', '').replaceAll("'", '');
           return cleanDefault;
         }
       }
@@ -100,7 +104,7 @@ class NowDirective implements ViewDirective {
             return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
           case 'Y-m-d H:i:s':
             return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} '
-                   '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+                '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
           case 'H:i:s':
             return '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
           case 'Y':
@@ -140,7 +144,7 @@ class FormatDirective implements ViewDirective {
               return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
             case 'Y-m-d H:i:s':
               return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} '
-                     '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}';
+                  '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}';
             case 'H:i:s':
               return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}';
             case 'Y':
@@ -246,7 +250,11 @@ class MathDirective implements ViewDirective {
 
       final subExpr = cleanExpr.substring(openParen + 1, closeParen);
       final subResult = _parseExpression(subExpr);
-      cleanExpr = cleanExpr.replaceRange(openParen, closeParen + 1, subResult.toString());
+      cleanExpr = cleanExpr.replaceRange(
+        openParen,
+        closeParen + 1,
+        subResult.toString(),
+      );
     }
 
     // Handle multiplication and division first (higher precedence)
@@ -266,7 +274,8 @@ class MathDirective implements ViewDirective {
         return 0; // Division by zero
       }
 
-      cleanExpr = cleanExpr.replaceRange(match.start, match.end, result.toString());
+      cleanExpr =
+          cleanExpr.replaceRange(match.start, match.end, result.toString());
       match = mulDivRegex.firstMatch(cleanExpr);
     }
 
@@ -285,7 +294,8 @@ class MathDirective implements ViewDirective {
         result = left - right;
       }
 
-      cleanExpr = cleanExpr.replaceRange(match.start, match.end, result.toString());
+      cleanExpr =
+          cleanExpr.replaceRange(match.start, match.end, result.toString());
       match = addSubRegex.firstMatch(cleanExpr);
     }
 

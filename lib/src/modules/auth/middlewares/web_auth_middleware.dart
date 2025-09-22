@@ -113,7 +113,8 @@ class WebAuthMiddleware {
 
         // Check admin role
         if (!request.hasRole('admin')) {
-          request.session.flash('message', 'Access denied. Admin privileges required.');
+          request.session
+              .flash('message', 'Access denied. Admin privileges required.');
           request.session.flash('message_type', 'error');
           response.redirect('/dashboard');
           return;
@@ -156,7 +157,8 @@ class WebAuthMiddleware {
         }
 
         if (!hasAccess) {
-          request.session.flash('message', 'Access denied. Insufficient privileges.');
+          request.session
+              .flash('message', 'Access denied. Insufficient privileges.');
           request.session.flash('message_type', 'error');
           response.redirect('/dashboard');
           return;
@@ -201,13 +203,15 @@ class WebAuthMiddleware {
 
         bool hasAccess;
         if (requireAll) {
-          hasAccess = permissions.every((perm) => userPermissions.contains(perm));
+          hasAccess =
+              permissions.every((perm) => userPermissions.contains(perm));
         } else {
           hasAccess = permissions.any((perm) => userPermissions.contains(perm));
         }
 
         if (!hasAccess) {
-          request.session.flash('message', 'Access denied. Insufficient permissions.');
+          request.session
+              .flash('message', 'Access denied. Insufficient permissions.');
           request.session.flash('message_type', 'error');
           response.redirect('/dashboard');
           return;

@@ -115,10 +115,16 @@ void main() {
         env.set('LIST_SPACES', ' a , b , c ');
 
         expect(env.getList('LIST_COMMA'), equals(['a', 'b', 'c']));
-        expect(env.getList('LIST_SEMICOLON', separator: ';'), equals(['x', 'y', 'z']));
+        expect(
+          env.getList('LIST_SEMICOLON', separator: ';'),
+          equals(['x', 'y', 'z']),
+        );
         expect(env.getList('LIST_EMPTY'), equals([]));
         expect(env.getList('LIST_SPACES'), equals(['a', 'b', 'c']));
-        expect(env.getList('NON_EXISTENT', defaultValue: ['default']), equals(['default']));
+        expect(
+          env.getList('NON_EXISTENT', defaultValue: ['default']),
+          equals(['default']),
+        );
       });
     });
 
@@ -147,7 +153,10 @@ export REDIS_URL=redis://localhost:6379
         expect(env.get('APP_VERSION'), equals('1.0.0'));
         expect(env.getBool('DEBUG'), isTrue);
         expect(env.getInt('PORT'), equals(3000));
-        expect(env.get('DATABASE_URL'), equals('postgresql://user:pass@localhost:5432/db'));
+        expect(
+          env.get('DATABASE_URL'),
+          equals('postgresql://user:pass@localhost:5432/db'),
+        );
         expect(env.get('API_KEY'), equals('secret-key'));
         expect(env.get('REDIS_URL'), equals('redis://localhost:6379'));
         expect(env.loadedFiles, contains(envFile.path));
@@ -378,10 +387,16 @@ ALLOWED_EXTENSIONS=jpg,png,pdf,doc
         expect(env.getInt('DB_PORT'), equals(3306));
         expect(env.getInt('SESSION_LIFETIME'), equals(120));
         expect(env.get('MAIL_FROM_ADDRESS'), equals('hello@example.com'));
-        expect(env.get('MAIL_FROM_NAME'), equals('Khadem')); // Variable substitution
+        expect(
+          env.get('MAIL_FROM_NAME'),
+          equals('Khadem'),
+        ); // Variable substitution
         expect(env.getInt('API_RATE_LIMIT'), equals(1000));
         expect(env.getInt('MAX_FILE_SIZE'), equals(10240));
-        expect(env.getList('ALLOWED_EXTENSIONS'), equals(['jpg', 'png', 'pdf', 'doc']));
+        expect(
+          env.getList('ALLOWED_EXTENSIONS'),
+          equals(['jpg', 'png', 'pdf', 'doc']),
+        );
       });
 
       test('should handle multiple .env files', () {
@@ -404,7 +419,10 @@ LOCAL_VAR=local_value
         env.loadFromFile(localEnv.path);
 
         expect(env.get('APP_NAME'), equals('Khadem')); // From base
-        expect(env.get('APP_ENV'), equals('development')); // Overridden by local
+        expect(
+          env.get('APP_ENV'),
+          equals('development'),
+        ); // Overridden by local
         expect(env.getBool('DEBUG'), isTrue); // Overridden by local
         expect(env.get('LOCAL_VAR'), equals('local_value')); // From local
         expect(env.loadedFiles, containsAll([baseEnv.path, localEnv.path]));

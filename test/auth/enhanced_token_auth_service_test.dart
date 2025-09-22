@@ -108,7 +108,8 @@ void main() {
       test('should accept valid token format', () async {
         // This will succeed because token validation only checks format
         // and doesn't require database access for basic format validation
-        await tokenAuthService.validateToken('valid_token_with_sufficient_length_123456789');
+        await tokenAuthService
+            .validateToken('valid_token_with_sufficient_length_123456789');
         // If we get here, the test passes
       });
     });
@@ -121,7 +122,12 @@ void main() {
           () async {
             await tokenAuthService.generateApiToken(user);
           },
-          throwsA(anyOf(isA<AuthException>(), isA<Exception>())), // Will fail due to container, but tests method existence
+          throwsA(
+            anyOf(
+              isA<AuthException>(),
+              isA<Exception>(),
+            ),
+          ), // Will fail due to container, but tests method existence
         );
       });
 
@@ -130,9 +136,17 @@ void main() {
 
         expect(
           () async {
-            await tokenAuthService.generateApiToken(user, name: 'Custom API Token');
+            await tokenAuthService.generateApiToken(
+              user,
+              name: 'Custom API Token',
+            );
           },
-          throwsA(anyOf(isA<AuthException>(), isA<Exception>())), // Will fail due to container, but tests method existence
+          throwsA(
+            anyOf(
+              isA<AuthException>(),
+              isA<Exception>(),
+            ),
+          ), // Will fail due to container, but tests method existence
         );
       });
 
@@ -144,7 +158,12 @@ void main() {
           () async {
             await tokenAuthService.generateApiToken(user, expiresAt: expiresAt);
           },
-          throwsA(anyOf(isA<AuthException>(), isA<Exception>())), // Will fail due to container, but tests method existence
+          throwsA(
+            anyOf(
+              isA<AuthException>(),
+              isA<Exception>(),
+            ),
+          ), // Will fail due to container, but tests method existence
         );
       });
     });
@@ -155,7 +174,12 @@ void main() {
           () async {
             await tokenAuthService.revokeAllUserTokens(1);
           },
-          throwsA(anyOf(isA<AuthException>(), isA<Exception>())), // Will fail due to container, but tests method existence
+          throwsA(
+            anyOf(
+              isA<AuthException>(),
+              isA<Exception>(),
+            ),
+          ), // Will fail due to container, but tests method existence
         );
       });
 
@@ -171,7 +195,12 @@ void main() {
             final result = await tokenAuthService.revokeToken('some_token');
             expect(result, isA<bool>());
           },
-          throwsA(anyOf(isA<AuthException>(), isA<Exception>())), // Will fail due to container, but tests method existence
+          throwsA(
+            anyOf(
+              isA<AuthException>(),
+              isA<Exception>(),
+            ),
+          ), // Will fail due to container, but tests method existence
         );
       });
 
@@ -181,7 +210,12 @@ void main() {
             final count = await tokenAuthService.cleanupExpiredTokens();
             expect(count, isA<int>());
           },
-          throwsA(anyOf(isA<AuthException>(), isA<Exception>())), // Will fail due to container, but tests method existence
+          throwsA(
+            anyOf(
+              isA<AuthException>(),
+              isA<Exception>(),
+            ),
+          ), // Will fail due to container, but tests method existence
         );
       });
     });
@@ -197,7 +231,12 @@ void main() {
           () async {
             await tokenAuthService.attemptLogin(credentials);
           },
-          throwsA(anyOf(isA<AuthException>(), isA<Exception>())), // Will fail due to container, but tests method existence
+          throwsA(
+            anyOf(
+              isA<AuthException>(),
+              isA<Exception>(),
+            ),
+          ), // Will fail due to container, but tests method existence
         );
       });
 
@@ -206,7 +245,12 @@ void main() {
           () async {
             await tokenAuthService.verifyToken('some_valid_token');
           },
-          throwsA(anyOf(isA<AuthException>(), isA<Exception>())), // Will fail due to container, but tests method existence
+          throwsA(
+            anyOf(
+              isA<AuthException>(),
+              isA<Exception>(),
+            ),
+          ), // Will fail due to container, but tests method existence
         );
       });
 
@@ -215,7 +259,12 @@ void main() {
           () async {
             await tokenAuthService.logout('some_token');
           },
-          throwsA(anyOf(isA<AuthException>(), isA<Exception>())), // Will fail due to container, but tests method existence
+          throwsA(
+            anyOf(
+              isA<AuthException>(),
+              isA<Exception>(),
+            ),
+          ), // Will fail due to container, but tests method existence
         );
       });
     });
@@ -224,23 +273,35 @@ void main() {
       test('should have refreshAccessToken method', () async {
         expect(
           () async {
-            final result = await tokenAuthService.refreshAccessToken('refresh_token');
+            final result =
+                await tokenAuthService.refreshAccessToken('refresh_token');
             expect(result, isA<Map<String, dynamic>>());
             expect(result.containsKey('access_token'), isTrue);
             expect(result.containsKey('refresh_token'), isTrue);
           },
-          throwsA(anyOf(isA<AuthException>(), isA<Exception>())), // Will fail due to container, but tests method existence
+          throwsA(
+            anyOf(
+              isA<AuthException>(),
+              isA<Exception>(),
+            ),
+          ), // Will fail due to container, but tests method existence
         );
       });
 
       test('should have proper refresh token response structure', () async {
         expect(
           () async {
-            final result = await tokenAuthService.refreshAccessToken('refresh_token');
+            final result =
+                await tokenAuthService.refreshAccessToken('refresh_token');
             expect(result.containsKey('token_type'), isTrue);
             expect(result['token_type'], equals('Bearer'));
           },
-          throwsA(anyOf(isA<AuthException>(), isA<Exception>())), // Will fail due to container, but tests method existence
+          throwsA(
+            anyOf(
+              isA<AuthException>(),
+              isA<Exception>(),
+            ),
+          ), // Will fail due to container, but tests method existence
         );
       });
     });

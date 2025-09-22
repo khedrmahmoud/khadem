@@ -5,7 +5,6 @@ import 'package:khadem/src/contracts/queue/queue_driver.dart';
 import 'package:khadem/src/contracts/queue/queue_job.dart';
 import 'package:redis/redis.dart';
 
-
 /// Redis queue driver that uses Redis lists for job queuing
 class RedisQueueDriver implements QueueDriver {
   final String _queueName;
@@ -19,16 +18,16 @@ class RedisQueueDriver implements QueueDriver {
     String host = 'localhost',
     int port = 6379,
     String? password,
-  }) : _queueName = 'queue:$queueName',
-       _host = host,
-       _port = port,
-       _password = password;
+  })  : _queueName = 'queue:$queueName',
+        _host = host,
+        _port = port,
+        _password = password;
 
   Future<Command> _getConnection() async {
     if (_command == null) {
       final conn = RedisConnection();
       _command = await conn.connect(_host, _port);
-      
+
       if (_password != null && _password!.isNotEmpty) {
         await _command!.send_object(['AUTH', _password]);
       }
@@ -42,7 +41,8 @@ class RedisQueueDriver implements QueueDriver {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
       'type': job.runtimeType.toString(),
       'payload': job.toJson(),
-      'scheduledAt': DateTime.now().add(delay ?? Duration.zero).toIso8601String(),
+      'scheduledAt':
+          DateTime.now().add(delay ?? Duration.zero).toIso8601String(),
       'createdAt': DateTime.now().toIso8601String(),
       'attempts': 0,
       'maxRetries': job.maxRetries,
@@ -50,25 +50,25 @@ class RedisQueueDriver implements QueueDriver {
 
     try {
       final command = await _getConnection();
-      
+
       if (delay != null && delay > Duration.zero) {
         // Use Redis sorted sets for delayed jobs
         final score = DateTime.now().add(delay).millisecondsSinceEpoch;
         await command.send_object([
-          'ZADD', 
-          '${_queueName}:delayed', 
+          'ZADD',
+          '${_queueName}:delayed',
           score.toString(),
           jsonEncode(jobData),
         ]);
       } else {
         // Push to immediate queue
         await command.send_object([
-          'LPUSH', 
-          _queueName, 
+          'LPUSH',
+          _queueName,
           jsonEncode(jobData),
         ]);
       }
-      
+
       Khadem.logger.info('Job queued in Redis: ${job.displayName}');
     } catch (e) {
       Khadem.logger.error('Failed to queue job in Redis: $e');
@@ -80,13 +80,12 @@ class RedisQueueDriver implements QueueDriver {
   Future<void> process() async {
     try {
       final command = await _getConnection();
-      
+
       // First, check for delayed jobs that are ready
       await _processDelayedJobs(command);
-      
+
       // Then process immediate jobs
       await _processImmediateJobs(command);
-      
     } catch (e) {
       Khadem.logger.error('Redis queue processing error: $e');
     }
@@ -94,14 +93,14 @@ class RedisQueueDriver implements QueueDriver {
 
   Future<void> _processDelayedJobs(Command command) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    
+
     // Get jobs that are ready (score <= now)
     final result = await command.send_object([
       'ZRANGEBYSCORE',
       '${_queueName}:delayed',
       '-inf',
       now.toString(),
-      'LIMIT', '0', '10',  // Process up to 10 jobs at once
+      'LIMIT', '0', '10', // Process up to 10 jobs at once
     ]);
 
     if (result is List && result.isNotEmpty) {
@@ -113,13 +112,12 @@ class RedisQueueDriver implements QueueDriver {
             '${_queueName}:delayed',
             jobJson,
           ]);
-          
+
           await command.send_object([
             'LPUSH',
             _queueName,
             jobJson,
           ]);
-          
         } catch (e) {
           Khadem.logger.error('Failed to move delayed job: $e');
         }
@@ -132,21 +130,22 @@ class RedisQueueDriver implements QueueDriver {
     final result = await command.send_object([
       'BRPOP',
       _queueName,
-      '1',  // 1 second timeout
+      '1', // 1 second timeout
     ]);
 
     if (result is List && result.length >= 2) {
       final jobJson = result[1];
-      
+
       try {
         final jobData = jsonDecode(jobJson) as Map<String, dynamic>;
         final scheduledAt = DateTime.parse(jobData['scheduledAt']);
-        
+
         // Check if job is ready to run
-        if (scheduledAt.isBefore(DateTime.now()) || scheduledAt.isAtSameMomentAs(DateTime.now())) {
+        if (scheduledAt.isBefore(DateTime.now()) ||
+            scheduledAt.isAtSameMomentAs(DateTime.now())) {
           final job = _RedisQueueJob.fromData(jobData);
           await job.handle();
-          
+
           Khadem.logger.info('Redis job completed: ${jobData['type']}');
         } else {
           // Job not ready yet, put it back with delay
@@ -158,7 +157,6 @@ class RedisQueueDriver implements QueueDriver {
             jobJson,
           ]);
         }
-        
       } catch (e) {
         Khadem.logger.error('Redis job failed: $e');
         await _handleFailedJob(command, jobJson, e);
@@ -166,11 +164,15 @@ class RedisQueueDriver implements QueueDriver {
     }
   }
 
-  Future<void> _handleFailedJob(Command command, String jobJson, dynamic error) async {
+  Future<void> _handleFailedJob(
+    Command command,
+    String jobJson,
+    dynamic error,
+  ) async {
     try {
       final jobData = jsonDecode(jobJson) as Map<String, dynamic>;
       jobData['attempts'] = (jobData['attempts'] as int) + 1;
-      
+
       if (jobData['attempts'] >= jobData['maxRetries']) {
         // Job failed permanently, move to failed queue
         await command.send_object([
@@ -182,22 +184,24 @@ class RedisQueueDriver implements QueueDriver {
             'error': error.toString(),
           }),
         ]);
-        
+
         Khadem.logger.error('Job failed permanently: ${jobData['type']}');
       } else {
         // Retry job with delay
         const retryDelay = Duration(seconds: 30);
         final retryTime = DateTime.now().add(retryDelay);
         jobData['scheduledAt'] = retryTime.toIso8601String();
-        
+
         await command.send_object([
           'ZADD',
           '${_queueName}:delayed',
           retryTime.millisecondsSinceEpoch.toString(),
           jsonEncode(jobData),
         ]);
-        
-        Khadem.logger.info('Job scheduled for retry: ${jobData['type']} (attempt ${jobData['attempts']}/${jobData['maxRetries']})');
+
+        Khadem.logger.info(
+          'Job scheduled for retry: ${jobData['type']} (attempt ${jobData['attempts']}/${jobData['maxRetries']})',
+        );
       }
     } catch (e) {
       Khadem.logger.error('Failed to handle failed job: $e');
@@ -220,11 +224,13 @@ class RedisQueueDriver implements QueueDriver {
   Future<Map<String, dynamic>> getStats() async {
     try {
       final command = await _getConnection();
-      
+
       final immediateCount = await command.send_object(['LLEN', _queueName]);
-      final delayedCount = await command.send_object(['ZCARD', '${_queueName}:delayed']);
-      final failedCount = await command.send_object(['LLEN', '${_queueName}:failed']);
-      
+      final delayedCount =
+          await command.send_object(['ZCARD', '${_queueName}:delayed']);
+      final failedCount =
+          await command.send_object(['LLEN', '${_queueName}:failed']);
+
       return {
         'driver': 'redis',
         'immediate_jobs': immediateCount ?? 0,
@@ -271,10 +277,10 @@ class _RedisQueueJob extends QueueJob {
     print('🔴 Processing Redis job: ${_data['type']}');
     print('   Payload: $_payload');
     print('   Attempts: ${_data['attempts']}/${_data['maxRetries']}');
-    
+
     // Simulate some work
     await Future.delayed(const Duration(milliseconds: 100));
-    
+
     print('✅ Redis job completed: ${_data['type']}');
   }
 

@@ -1,6 +1,5 @@
 import 'package:khadem/src/contracts/views/directive_contract.dart';
 
-
 /// Array and data checking directives
 class CountDirective implements ViewDirective {
   static final _countRegex = RegExp(r'@count\s*\(\s*(.+?)\s*\)');
@@ -31,7 +30,8 @@ class CountDirective implements ViewDirective {
 }
 
 class EmptyDirective implements ViewDirective {
-  static final _emptyRegex = RegExp(r'@empty\s*\(\s*(.+?)\s*\)(.*?)@endempty', dotAll: true);
+  static final _emptyRegex =
+      RegExp(r'@empty\s*\(\s*(.+?)\s*\)(.*?)@endempty', dotAll: true);
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
@@ -67,7 +67,8 @@ class EmptyDirective implements ViewDirective {
 }
 
 class IssetDirective implements ViewDirective {
-  static final _issetRegex = RegExp(r'@isset\s*\(\s*(.+?)\s*\)(.*?)@endisset', dotAll: true);
+  static final _issetRegex =
+      RegExp(r'@isset\s*\(\s*(.+?)\s*\)(.*?)@endisset', dotAll: true);
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
@@ -95,7 +96,8 @@ class IssetDirective implements ViewDirective {
 }
 
 class HasDirective implements ViewDirective {
-  static final _hasRegex = RegExp(r'@has\s*\(\s*(.+?)\s*,\s*(.+?)\s*\)(.*?)@endhas', dotAll: true);
+  static final _hasRegex =
+      RegExp(r'@has\s*\(\s*(.+?)\s*,\s*(.+?)\s*\)(.*?)@endhas', dotAll: true);
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {

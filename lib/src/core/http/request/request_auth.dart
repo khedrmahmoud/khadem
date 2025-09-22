@@ -5,7 +5,8 @@ class RequestAuth {
   RequestAuth(this._attributes);
 
   /// Returns the currently authenticated user (if any).
-  Map<String, dynamic>? get user => _attributes['user'] as Map<String, dynamic>?;
+  Map<String, dynamic>? get user =>
+      _attributes['user'] as Map<String, dynamic>?;
 
   /// Returns the ID of the authenticated user (if available).
   dynamic get userId => user?['id'];

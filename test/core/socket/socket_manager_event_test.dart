@@ -53,39 +53,39 @@ class TestSocketClient implements SocketClient {
 
   @override
   bool isInRoom(String room) => _rooms.contains(room);
-  
+
   @override
   // TODO: implement authToken
   String? get authToken => throw UnimplementedError();
-  
+
   @override
   String? getHeader(String name) {
     // TODO: implement getHeader
     throw UnimplementedError();
   }
-  
+
   @override
   List<String>? getHeaderValues(String name) {
     // TODO: implement getHeaderValues
     throw UnimplementedError();
   }
-  
+
   @override
   // TODO: implement headers
   HttpHeaders? get headers => throw UnimplementedError();
-  
+
   @override
   // TODO: implement isAuthenticated
   bool get isAuthenticated => throw UnimplementedError();
-  
+
   @override
   // TODO: implement isAuthorized
   bool get isAuthorized => throw UnimplementedError();
-  
+
   @override
   // TODO: implement user
   Map<String, dynamic>? get user => throw UnimplementedError();
-  
+
   @override
   // TODO: implement userAgent
   String? get userAgent => throw UnimplementedError();
@@ -109,17 +109,26 @@ void main() {
       socketManager.addClient(client1);
       socketManager.subscribeToEvent('user:login', client1);
 
-      expect(socketManager.isClientSubscribedToEvent('user:login', client1), isTrue);
+      expect(
+        socketManager.isClientSubscribedToEvent('user:login', client1),
+        isTrue,
+      );
       expect(socketManager.getEventSubscriberCount('user:login'), equals(1));
     });
 
     test('unsubscribeFromEvent removes client from event subscribers', () {
       socketManager.addClient(client1);
       socketManager.subscribeToEvent('user:login', client1);
-      expect(socketManager.isClientSubscribedToEvent('user:login', client1), isTrue);
+      expect(
+        socketManager.isClientSubscribedToEvent('user:login', client1),
+        isTrue,
+      );
 
       socketManager.unsubscribeFromEvent('user:login', client1);
-      expect(socketManager.isClientSubscribedToEvent('user:login', client1), isFalse);
+      expect(
+        socketManager.isClientSubscribedToEvent('user:login', client1),
+        isFalse,
+      );
       expect(socketManager.getEventSubscriberCount('user:login'), equals(0));
     });
 
@@ -133,9 +142,18 @@ void main() {
       socketManager.subscribeToEvent('notification', client3);
 
       expect(socketManager.getEventSubscriberCount('notification'), equals(3));
-      expect(socketManager.isClientSubscribedToEvent('notification', client1), isTrue);
-      expect(socketManager.isClientSubscribedToEvent('notification', client2), isTrue);
-      expect(socketManager.isClientSubscribedToEvent('notification', client3), isTrue);
+      expect(
+        socketManager.isClientSubscribedToEvent('notification', client1),
+        isTrue,
+      );
+      expect(
+        socketManager.isClientSubscribedToEvent('notification', client2),
+        isTrue,
+      );
+      expect(
+        socketManager.isClientSubscribedToEvent('notification', client3),
+        isTrue,
+      );
     });
 
     test('clients can subscribe to multiple events', () {
@@ -208,11 +226,19 @@ void main() {
 
       expect(socketManager.getEventSubscriberCount('cleanup:event'), equals(1));
       expect(socketManager.getEventSubscriberCount('other:event'), equals(0));
-      expect(socketManager.isClientSubscribedToEvent('cleanup:event', client1), isFalse);
-      expect(socketManager.isClientSubscribedToEvent('other:event', client1), isFalse);
+      expect(
+        socketManager.isClientSubscribedToEvent('cleanup:event', client1),
+        isFalse,
+      );
+      expect(
+        socketManager.isClientSubscribedToEvent('other:event', client1),
+        isFalse,
+      );
     });
 
-    test('broadcastToEventSubscribers does nothing for event with no subscribers', () {
+    test(
+        'broadcastToEventSubscribers does nothing for event with no subscribers',
+        () {
       socketManager.addClient(client1);
       socketManager.subscribeToEvent('subscribed:event', client1);
 
@@ -220,7 +246,8 @@ void main() {
       socketManager.broadcastToEventSubscribers('unsubscribed:event', 'data');
     });
 
-    test('event subscribers are cleaned up when last subscriber is removed', () {
+    test('event subscribers are cleaned up when last subscriber is removed',
+        () {
       socketManager.addClient(client1);
       socketManager.addClient(client2);
 

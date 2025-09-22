@@ -1,5 +1,4 @@
-
-import 'package:khadem/khadem.dart'show LogLevel;
+import 'package:khadem/khadem.dart' show LogLevel;
 
 /// Interface for log message formatters.
 /// Responsible for formatting log entries into strings.

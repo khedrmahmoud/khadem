@@ -13,7 +13,7 @@ class SecureTokenGenerator implements TokenGenerator {
   static final Random _random = Random.secure();
 
   /// Characters used for token generation
-  static const String _tokenChars = 
+  static const String _tokenChars =
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
   @override
@@ -30,13 +30,13 @@ class SecureTokenGenerator implements TokenGenerator {
   @override
   bool isValidTokenFormat(String token) {
     if (token.isEmpty) return false;
-    
+
     // Check for basic token format (alphanumeric + - and _)
     final basicPattern = RegExp(r'^[A-Za-z0-9\-_]+$');
-    
+
     // Check for prefixed token format (prefix|token)
     final prefixedPattern = RegExp(r'^[A-Za-z0-9\-_]+\|[A-Za-z0-9\-_]+$');
-    
+
     return basicPattern.hasMatch(token) || prefixedPattern.hasMatch(token);
   }
 
@@ -78,13 +78,13 @@ class SecureTokenGenerator implements TokenGenerator {
   /// Returns a UUID-like token string
   String generateUuidToken() {
     final bytes = List<int>.generate(16, (_) => _random.nextInt(256));
-    
+
     // Set version (4) and variant bits according to RFC 4122
     bytes[6] = (bytes[6] & 0x0f) | 0x40; // Version 4
     bytes[8] = (bytes[8] & 0x3f) | 0x80; // Variant bits
-    
+
     final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-    
+
     return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}';
   }
 }

@@ -6,7 +6,7 @@ void registerRoutes(Server server) {
   // 🛡️Register global middlewares
   server.useMiddlewares(Kernel.middlewares);
 
-  server.get('', HomeController.welcome);
+  server.get('/', HomeController.welcome);
 
   server.get('/home', HomeController.index);
 

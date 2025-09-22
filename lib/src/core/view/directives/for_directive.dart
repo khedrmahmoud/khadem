@@ -1,6 +1,5 @@
 import 'package:khadem/src/contracts/views/directive_contract.dart';
 
-
 class ForDirective implements ViewDirective {
   static final _forRegex = RegExp(
     r'@for\s*\(\s*(\w+)\s+in\s+(\w+)\s*\)(.*?)@endFor',

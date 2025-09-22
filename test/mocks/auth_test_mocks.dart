@@ -32,7 +32,8 @@ class TestSetup {
     when(mockContainer.resolve<DatabaseManager>()).thenReturn(mockDb);
 
     // Mock environment values
-    when(mockEnv.get('JWT_SECRET')).thenReturn('test_jwt_secret_key_for_testing');
+    when(mockEnv.get('JWT_SECRET'))
+        .thenReturn('test_jwt_secret_key_for_testing');
     when(mockEnv.get('JWT_ALGORITHM')).thenReturn('HS256');
     when(mockEnv.get('DB_CONNECTION')).thenReturn('test');
 

@@ -2,6 +2,7 @@ import '../../support/exceptions/validation_exception.dart';
 import '../http/request/request_body_parser.dart';
 import '../lang/lang.dart';
 import 'rule_registry.dart';
+
 @Deprecated('Use InputValidator instead')
 class Validator {
   final Map<String, dynamic> data;
@@ -18,7 +19,8 @@ class Validator {
       final ruleParts = ruleString.split('|');
 
       // Check if field is nullable and null - if so, skip all validation
-      final hasNullableRule = ruleParts.any((part) => part.split(':')[0] == 'nullable');
+      final hasNullableRule =
+          ruleParts.any((part) => part.split(':')[0] == 'nullable');
       if (hasNullableRule && value == null) {
         continue; // Skip validation for this nullable field
       }
@@ -33,12 +35,12 @@ class Validator {
           final messageKey = rule.validate(field, value, arg, data: data);
           if (messageKey != null) {
             final parameters = <String, dynamic>{'field': field, 'arg': arg};
-            
+
             // Handle file validation specific parameters
             if (_isFileValidationRule(name) && value != null) {
               _addFileValidationParameters(parameters, name, value, arg);
             }
-            
+
             errors[field] = Lang.t(messageKey, parameters: parameters);
             break;
           }

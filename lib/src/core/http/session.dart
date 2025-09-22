@@ -18,8 +18,8 @@ class SessionManager {
   SessionManager({
     String sessionDir = _sessionDir,
     Duration lifetime = _defaultLifetime,
-  }) : _sessionDirectory = Directory(sessionDir),
-       _lifetime = lifetime {
+  })  : _sessionDirectory = Directory(sessionDir),
+        _lifetime = lifetime {
     // Ensure session directory exists
     if (!_sessionDirectory.existsSync()) {
       _sessionDirectory.createSync(recursive: true);
@@ -35,7 +35,9 @@ class SessionManager {
   }
 
   /// Creates a new session with optional initial data
-  Future<String> createSession([Map<String, dynamic> initialData = const {}]) async {
+  Future<String> createSession([
+    Map<String, dynamic> initialData = const {},
+  ]) async {
     final sessionId = generateSessionId();
     final sessionData = {
       '_created': DateTime.now().toIso8601String(),
@@ -68,7 +70,10 @@ class SessionManager {
   }
 
   /// Updates session data
-  Future<void> updateSession(String sessionId, Map<String, dynamic> data) async {
+  Future<void> updateSession(
+    String sessionId,
+    Map<String, dynamic> data,
+  ) async {
     if (sessionId.isEmpty) return;
 
     final existingData = await getSession(sessionId);
@@ -138,7 +143,9 @@ class SessionManager {
   }
 
   /// Sets session cookie in response
-  void setSessionCookie(HttpResponse response, String sessionId, {
+  void setSessionCookie(
+    HttpResponse response,
+    String sessionId, {
     Duration? maxAge,
     bool secure = false,
     bool httpOnly = true,
@@ -175,7 +182,10 @@ class SessionManager {
   }
 
   /// Flash old input data to session for form repopulation
-  Future<void> flashOldInput(String sessionId, Map<String, dynamic> inputData) async {
+  Future<void> flashOldInput(
+    String sessionId,
+    Map<String, dynamic> inputData,
+  ) async {
     final sessionData = await getSession(sessionId);
     if (sessionData == null) return;
 
@@ -212,7 +222,10 @@ class SessionManager {
   }
 
   /// Stores session data to file
-  Future<void> _storeSessionData(String sessionId, Map<String, dynamic> data) async {
+  Future<void> _storeSessionData(
+    String sessionId,
+    Map<String, dynamic> data,
+  ) async {
     final file = File('${_sessionDirectory.path}/$sessionId.json');
     final jsonData = jsonEncode(data);
     await file.writeAsString(jsonData);

@@ -18,24 +18,30 @@ class DbSeedCommand extends KhademCommand {
 
   DbSeedCommand({required super.logger}) {
     argParser
-      ..addFlag('force',
-          abbr: 'f',
-          help: 'Force run seeders in production',
-          negatable: false,)
-      ..addOption('class',
-          abbr: 'c',
-          help: 'Run a specific seeder class',
-          valueHelp: 'className',)
-      ..addFlag('verbose',
-          abbr: 'v',
-          help: 'Show detailed seeder information',
-          negatable: false,);
+      ..addFlag(
+        'force',
+        abbr: 'f',
+        help: 'Force run seeders in production',
+        negatable: false,
+      )
+      ..addOption(
+        'class',
+        abbr: 'c',
+        help: 'Run a specific seeder class',
+        valueHelp: 'className',
+      )
+      ..addFlag(
+        'verbose',
+        abbr: 'v',
+        help: 'Show detailed seeder information',
+        negatable: false,
+      );
   }
 
   @override
   Future<void> handle(List<String> args) async {
     try {
-    await CommandBootstrapper.register();
+      await CommandBootstrapper.register();
       await CommandBootstrapper.boot();
       // Check if we're in production without force flag
       final isProduction = Khadem.isProduction;
@@ -63,7 +69,6 @@ class DbSeedCommand extends KhademCommand {
 
       logger.info('✅ Database seeding completed successfully.');
       exit(0);
-
     } catch (e, stackTrace) {
       logger.error('❌ Seeding failed: $e');
       if (argResults?['verbose'] == true) {
@@ -91,7 +96,6 @@ class DbSeedCommand extends KhademCommand {
       final manualSeeders = await _discoverSeedersManually();
       seederManager.registerAll(manualSeeders);
       logger.info('✅ Discovered ${manualSeeders.length} seeders manually');
-
     } catch (e, stackTrace) {
       logger.error('❌ Failed to auto-discover seeders: $e');
       if (argResults?['verbose'] == true) {
@@ -165,7 +169,6 @@ class DbSeedCommand extends KhademCommand {
       }
 
       return seeders;
-
     } catch (e) {
       logger.error('❌ Failed to load seeders registry: $e');
       return [];
@@ -181,13 +184,17 @@ class DbSeedCommand extends KhademCommand {
 
     final seeders = <Seeder>[];
     await for (final entity in seedersDir.list()) {
-      if (entity is File && entity.path.endsWith('.dart') && !entity.path.endsWith('seeders.dart')) {
+      if (entity is File &&
+          entity.path.endsWith('.dart') &&
+          !entity.path.endsWith('seeders.dart')) {
         try {
           final seeder = await _loadSeederFromFile(entity);
           if (seeder != null) {
             seeders.add(seeder);
             if (argResults?['verbose'] == true) {
-              logger.info('📄 Loaded seeder: ${path.basenameWithoutExtension(entity.path)}');
+              logger.info(
+                '📄 Loaded seeder: ${path.basenameWithoutExtension(entity.path)}',
+              );
             }
           }
         } catch (e) {
@@ -238,7 +245,8 @@ class DbSeedCommand extends KhademCommand {
 
       for (final library in mirrorSystem.libraries.values) {
         try {
-          seederClassMirror = library.declarations[Symbol(className)] as ClassMirror?;
+          seederClassMirror =
+              library.declarations[Symbol(className)] as ClassMirror?;
           if (seederClassMirror != null) {
             break;
           }
@@ -248,8 +256,11 @@ class DbSeedCommand extends KhademCommand {
       }
 
       if (seederClassMirror == null) {
-        logger.warning('⚠️ Seeder class "$className" not found in mirror system');
-        logger.warning('   This may be normal if the class hasn\'t been imported');
+        logger
+            .warning('⚠️ Seeder class "$className" not found in mirror system');
+        logger.warning(
+          '   This may be normal if the class hasn\'t been imported',
+        );
         return null;
       }
 
@@ -261,11 +272,11 @@ class DbSeedCommand extends KhademCommand {
       }
 
       // Create an instance using the default constructor
-      final instanceMirror = seederClassMirror.newInstance(const Symbol(''), []);
+      final instanceMirror =
+          seederClassMirror.newInstance(const Symbol(''), []);
       final seeder = instanceMirror.reflectee as Seeder;
 
       return seeder;
-
     } catch (e) {
       logger.error('❌ Failed to instantiate seeder with mirror: $className');
       logger.error('   Error: $e');
@@ -278,7 +289,10 @@ class DbSeedCommand extends KhademCommand {
     await seederManager.runAll();
   }
 
-  Future<void> _runSpecificSeeder(SeederManager seederManager, String className) async {
+  Future<void> _runSpecificSeeder(
+    SeederManager seederManager,
+    String className,
+  ) async {
     logger.info('🎯 Running specific seeder: $className');
     await seederManager.run(className);
   }

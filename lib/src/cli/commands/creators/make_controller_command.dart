@@ -4,9 +4,11 @@ import '../../bus/command.dart';
 
 class MakeControllerCommand extends KhademCommand {
   MakeControllerCommand({required super.logger}) {
-    argParser.addOption('name',
-        abbr: 'n',
-        help: 'Controller name (e.g., PostsController or auth/AuthController)',);
+    argParser.addOption(
+      'name',
+      abbr: 'n',
+      help: 'Controller name (e.g., PostsController or auth/AuthController)',
+    );
   }
 
   @override
@@ -20,7 +22,8 @@ class MakeControllerCommand extends KhademCommand {
     final name = argResults?['name'] as String?;
     if (name == null) {
       logger.error(
-          'Usage: khadem make:controller --name=ControllerName or --name=folder/ControllerName',);
+        'Usage: khadem make:controller --name=ControllerName or --name=folder/ControllerName',
+      );
       exit(1);
     }
 
@@ -64,9 +67,12 @@ class MakeControllerCommand extends KhademCommand {
   String _toSnakeCase(String input) {
     if (input.isEmpty) return 'controller';
 
-    return input.replaceAllMapped(
-        RegExp(r'[A-Z]'), (m) => '_${m.group(0)!.toLowerCase()}',
-    ).replaceFirst(RegExp(r'^_'), '');
+    return input
+        .replaceAllMapped(
+          RegExp(r'[A-Z]'),
+          (m) => '_${m.group(0)!.toLowerCase()}',
+        )
+        .replaceFirst(RegExp(r'^_'), '');
   }
 
   String _controllerStub(String className, String fileName, String folder) {

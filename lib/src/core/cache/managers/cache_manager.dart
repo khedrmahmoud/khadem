@@ -406,7 +406,8 @@ class CacheManager implements ICacheManager {
 
   /// Gets cache statistics for the default driver.
   @override
-  CacheStats get stats => _statisticsManager.getStats(_driverRegistry.getDefaultDriverName());
+  CacheStats get stats =>
+      _statisticsManager.getStats(_driverRegistry.getDefaultDriverName());
 
   /// Gets cache statistics for all drivers.
   @override

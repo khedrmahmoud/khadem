@@ -31,13 +31,15 @@ class ServiceProviderBootloader {
 
   /// Boots only non-deferred providers.
   Future<void> bootNonDeferred(List<ServiceProvider> providers) async {
-    final nonDeferred = providers.where((provider) => !provider.isDeferred).toList();
+    final nonDeferred =
+        providers.where((provider) => !provider.isDeferred).toList();
     await bootProviders(nonDeferred);
   }
 
   /// Boots only deferred providers.
   Future<void> bootDeferred(List<ServiceProvider> providers) async {
-    final deferred = providers.where((provider) => provider.isDeferred).toList();
+    final deferred =
+        providers.where((provider) => provider.isDeferred).toList();
     await bootProviders(deferred);
   }
 

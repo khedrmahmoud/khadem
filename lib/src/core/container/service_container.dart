@@ -70,8 +70,10 @@ class ServiceContainer implements ContainerInterface {
   /// [factory] - Factory function that creates the instance
   /// [singleton] - Whether to cache and reuse the instance
   @override
-  void bind<T>(dynamic Function(ContainerInterface) factory,
-      {bool singleton = false,}) {
+  void bind<T>(
+    dynamic Function(ContainerInterface) factory, {
+    bool singleton = false,
+  }) {
     _bindings[T] = _Binding(factory, singleton: singleton);
   }
 
@@ -85,8 +87,11 @@ class ServiceContainer implements ContainerInterface {
   /// [factory] - Factory function that creates the instance
   /// [singleton] - Whether to cache and reuse the instance
   @override
-  void bindWhen<T>(String context, dynamic Function(ContainerInterface) factory,
-      {bool singleton = false,}) {
+  void bindWhen<T>(
+    String context,
+    dynamic Function(ContainerInterface) factory, {
+    bool singleton = false,
+  }) {
     _contextualBindings[context] ??= {};
     _contextualBindings[context]![T] = _Binding(factory, singleton: singleton);
   }
@@ -142,7 +147,8 @@ class ServiceContainer implements ContainerInterface {
   T resolve<T>([String? context]) {
     if (_resolving.contains(T)) {
       throw CircularDependencyException(
-          'Circular dependency detected while resolving $T',);
+        'Circular dependency detected while resolving $T',
+      );
     }
 
     if (_instances.containsKey(T)) {

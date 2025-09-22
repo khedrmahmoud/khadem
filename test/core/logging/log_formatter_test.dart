@@ -1,7 +1,7 @@
+import 'package:khadem/khadem.dart' show JsonLogFormatter, LogLevel, TextLogFormatter;
 import 'package:test/test.dart';
 
-import '../../../lib/src/contracts/logging/log_level.dart';
-import '../../../lib/src/core/logging/log_formatter.dart';
+ 
 
 void main() {
   group('JsonLogFormatter', () {
@@ -21,7 +21,8 @@ void main() {
 
     test('should format message with context', () {
       final context = {'user': 'john', 'action': 'login'};
-      final result = formatter.format(LogLevel.warning, 'User action', context: context);
+      final result =
+          formatter.format(LogLevel.warning, 'User action', context: context);
 
       expect(result, contains('User action'));
       expect(result, contains('WARNING'));
@@ -33,7 +34,11 @@ void main() {
 
     test('should format message with stack trace', () {
       final stackTrace = StackTrace.current;
-      final result = formatter.format(LogLevel.error, 'Error occurred', stackTrace: stackTrace);
+      final result = formatter.format(
+        LogLevel.error,
+        'Error occurred',
+        stackTrace: stackTrace,
+      );
 
       expect(result, contains('Error occurred'));
       expect(result, contains('ERROR'));
@@ -42,7 +47,11 @@ void main() {
 
     test('should format message with custom timestamp', () {
       final timestamp = DateTime(2023, 1, 1, 12);
-      final result = formatter.format(LogLevel.debug, 'Debug message', timestamp: timestamp);
+      final result = formatter.format(
+        LogLevel.debug,
+        'Debug message',
+        timestamp: timestamp,
+      );
 
       expect(result, contains('2023-01-01T12:00:00'));
     });
@@ -81,7 +90,8 @@ void main() {
 
     test('should format message with context', () {
       final context = {'key': 'value', 'number': 42};
-      final result = formatter.format(LogLevel.debug, 'Debug message', context: context);
+      final result =
+          formatter.format(LogLevel.debug, 'Debug message', context: context);
 
       expect(result, contains('[DEBUG] Debug message'));
       expect(result, contains('Context:'));
@@ -93,7 +103,11 @@ void main() {
 
     test('should format message with stack trace', () {
       final stackTrace = StackTrace.current;
-      final result = formatter.format(LogLevel.critical, 'Critical error', stackTrace: stackTrace);
+      final result = formatter.format(
+        LogLevel.critical,
+        'Critical error',
+        stackTrace: stackTrace,
+      );
 
       expect(result, contains('[CRITICAL] Critical error'));
       expect(result, contains('Stack Trace:'));
@@ -101,13 +115,15 @@ void main() {
 
     test('should format message with custom timestamp', () {
       final timestamp = DateTime(2023, 1, 1, 12);
-      final result = formatter.format(LogLevel.info, 'Test message', timestamp: timestamp);
+      final result =
+          formatter.format(LogLevel.info, 'Test message', timestamp: timestamp);
 
       expect(result, contains('2023-01-01T12:00:00'));
     });
 
     test('should handle empty context', () {
-      final result = formatter.format(LogLevel.info, 'Test message', context: {});
+      final result =
+          formatter.format(LogLevel.info, 'Test message', context: {});
 
       expect(result, contains('[INFO] Test message'));
       expect(result, isNot(contains('Context:')));

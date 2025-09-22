@@ -13,7 +13,6 @@ class TestQueueJob extends QueueJob {
   Future<void> handle() async {
     // Test implementation
   }
-
 }
 
 void main() {

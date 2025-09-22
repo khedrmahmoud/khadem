@@ -55,19 +55,23 @@ class ResponseContext {
   static void header(String name, String value) => response.header(name, value);
 
   /// Set Content-Type to JSON
-  static void contentTypeJson() => response.header('Content-Type', 'application/json');
+  static void contentTypeJson() =>
+      response.header('Content-Type', 'application/json');
 
   /// Set Content-Type to HTML
   static void contentTypeHtml() => response.header('Content-Type', 'text/html');
 
   /// Set Content-Type to XML
-  static void contentTypeXml() => response.header('Content-Type', 'application/xml');
+  static void contentTypeXml() =>
+      response.header('Content-Type', 'application/xml');
 
   /// Set Content-Type to plain text
-  static void contentTypeText() => response.header('Content-Type', 'text/plain');
+  static void contentTypeText() =>
+      response.header('Content-Type', 'text/plain');
 
   /// Set Cache-Control header
-  static void cacheControl(String value) => response.header('Cache-Control', value);
+  static void cacheControl(String value) =>
+      response.header('Cache-Control', value);
 
   /// Set no-cache headers
   static void noCache() {

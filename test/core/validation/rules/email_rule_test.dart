@@ -35,7 +35,11 @@ void main() {
 
       for (final email in invalidEmails) {
         final result = rule.validate('email', email, null, data: {});
-        expect(result, equals('email_validation'), reason: 'Failed for email: $email');
+        expect(
+          result,
+          equals('email_validation'),
+          reason: 'Failed for email: $email',
+        );
       }
     });
 

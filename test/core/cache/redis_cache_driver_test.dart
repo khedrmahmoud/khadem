@@ -113,16 +113,20 @@ void main() {
     });
 
     test('should handle empty keys', () async {
-      expect(() async => driver.put('', 'value', const Duration(seconds: 30)),
-          throwsA(isA<ArgumentError>()),);
+      expect(
+        () async => driver.put('', 'value', const Duration(seconds: 30)),
+        throwsA(isA<ArgumentError>()),
+      );
       expect(() async => driver.get(''), throwsA(isA<ArgumentError>()));
       expect(() async => driver.has(''), throwsA(isA<ArgumentError>()));
       expect(() async => driver.forget(''), throwsA(isA<ArgumentError>()));
     });
 
     test('should handle negative TTL', () async {
-      expect(() async => driver.put('key', 'value', const Duration(seconds: -1)),
-          throwsA(isA<ArgumentError>()),);
+      expect(
+        () async => driver.put('key', 'value', const Duration(seconds: -1)),
+        throwsA(isA<ArgumentError>()),
+      );
     });
   });
 }

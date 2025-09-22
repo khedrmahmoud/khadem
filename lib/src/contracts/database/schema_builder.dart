@@ -11,7 +11,9 @@ abstract interface class SchemaBuilder {
 
   /// Creates the table if it does not exist already.
   void createIfNotExists(
-      String tableName, void Function(Blueprint table) callback,);
+    String tableName,
+    void Function(Blueprint table) callback,
+  );
 
   /// Drops the specified table.
   void drop(String tableName);

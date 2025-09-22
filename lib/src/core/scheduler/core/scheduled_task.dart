@@ -56,13 +56,15 @@ class ScheduledTask {
 
     if (config['cron'] != null) {
       Khadem.logger.warning(
-          '⚠️ Cron expressions are not supported. Task "${config['name']}" will be ignored.',);
+        '⚠️ Cron expressions are not supported. Task "${config['name']}" will be ignored.',
+      );
       throw ArgumentError('Cron is not supported in this version.');
     }
 
     if (config['interval'] == null) {
       throw ArgumentError(
-          'Missing "interval" for scheduled task "${config['name']}"',);
+        'Missing "interval" for scheduled task "${config['name']}"',
+      );
     }
 
     return ScheduledTask(

@@ -19,7 +19,8 @@ class UrlService {
 
   static String _normalizeBaseUrl(String url) {
     var normalized = url.trim();
-    if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
+    if (!normalized.startsWith('http://') &&
+        !normalized.startsWith('https://')) {
       normalized = 'http://$normalized';
     }
     if (normalized.endsWith('/')) {
@@ -30,7 +31,8 @@ class UrlService {
 
   /// Generate a full URL to the given path
   String url(String path, {Map<String, String>? query}) {
-    var fullUrl = '$_baseUrl/${path.startsWith('/') ? path.substring(1) : path}';
+    var fullUrl =
+        '$_baseUrl/${path.startsWith('/') ? path.substring(1) : path}';
 
     if (_forceHttps && fullUrl.startsWith('http://')) {
       fullUrl = fullUrl.replaceFirst('http://', 'https://');
@@ -46,7 +48,8 @@ class UrlService {
 
   /// Generate a URL to an asset
   String asset(String path, {Map<String, String>? query}) {
-    var assetUrl = '$_assetBaseUrl/assets/${path.startsWith('/') ? path.substring(1) : path}';
+    var assetUrl =
+        '$_assetBaseUrl/assets/${path.startsWith('/') ? path.substring(1) : path}';
 
     if (_forceHttps && assetUrl.startsWith('http://')) {
       assetUrl = assetUrl.replaceFirst('http://', 'https://');
@@ -62,22 +65,32 @@ class UrlService {
 
   /// Generate a URL to a CSS file
   String css(String path, {Map<String, String>? query}) {
-    return asset('css/${path.startsWith('/') ? path.substring(1) : path}', query: query);
+    return asset(
+      'css/${path.startsWith('/') ? path.substring(1) : path}',
+      query: query,
+    );
   }
 
   /// Generate a URL to a JavaScript file
   String js(String path, {Map<String, String>? query}) {
-    return asset('js/${path.startsWith('/') ? path.substring(1) : path}', query: query);
+    return asset(
+      'js/${path.startsWith('/') ? path.substring(1) : path}',
+      query: query,
+    );
   }
 
   /// Generate a URL to an image
   String image(String path, {Map<String, String>? query}) {
-    return asset('images/${path.startsWith('/') ? path.substring(1) : path}', query: query);
+    return asset(
+      'images/${path.startsWith('/') ? path.substring(1) : path}',
+      query: query,
+    );
   }
 
   /// Generate a URL to a file in storage
   String storage(String path, {Map<String, String>? query}) {
-    var storageUrl = '$_assetBaseUrl/storage/${path.startsWith('/') ? path.substring(1) : path}';
+    var storageUrl =
+        '$_assetBaseUrl/storage/${path.startsWith('/') ? path.substring(1) : path}';
 
     if (_forceHttps && storageUrl.startsWith('http://')) {
       storageUrl = storageUrl.replaceFirst('http://', 'https://');
@@ -92,7 +105,11 @@ class UrlService {
   }
 
   /// Generate a URL for a named route
-  String route(String name, {Map<String, String>? parameters, Map<String, String>? query}) {
+  String route(
+    String name, {
+    Map<String, String>? parameters,
+    Map<String, String>? query,
+  }) {
     final routePath = _namedRoutes[name];
     if (routePath == null) {
       throw ArgumentError('Route "$name" is not defined');
@@ -111,7 +128,9 @@ class UrlService {
     final missingParams = RegExp(r':(\w+)').allMatches(url);
     if (missingParams.isNotEmpty) {
       final paramNames = missingParams.map((m) => m.group(1)!).toList();
-      throw ArgumentError('Missing required parameters for route "$name": $paramNames');
+      throw ArgumentError(
+        'Missing required parameters for route "$name": $paramNames',
+      );
     }
 
     return this.url(url, query: query);
@@ -125,8 +144,6 @@ class UrlService {
     }
     return secureUrl;
   }
-
-
 
   /// Check if the given URL is valid
   bool isValidUrl(String url) {
@@ -163,7 +180,10 @@ class UrlService {
 
   String _buildQueryString(Map<String, String> query) {
     return query.entries
-        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .map(
+          (e) =>
+              '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+        )
         .join('&');
   }
 }
@@ -297,6 +317,8 @@ class AssetService {
   /// Get file name without extension
   String getFileNameWithoutExtension(String filename) {
     final parts = filename.split('.');
-    return parts.length > 1 ? parts.sublist(0, parts.length - 1).join('.') : filename;
+    return parts.length > 1
+        ? parts.sublist(0, parts.length - 1).join('.')
+        : filename;
   }
 }

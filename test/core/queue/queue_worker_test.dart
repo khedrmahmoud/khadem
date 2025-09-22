@@ -49,7 +49,8 @@ class FailingQueueJob extends QueueJob {
   final String name;
   final Exception error;
 
-  FailingQueueJob(this.name, {Exception? error}) : error = error ?? Exception('Job failed');
+  FailingQueueJob(this.name, {Exception? error})
+      : error = error ?? Exception('Job failed');
 
   @override
   Future<void> handle() async {
@@ -85,7 +86,10 @@ void main() {
       // Start worker with timeout to prevent infinite loop
       final workerWithTimeout = QueueWorker(
         mockDriver,
-        const QueueWorkerConfig(maxJobs: 1, timeout: Duration(milliseconds: 50)),
+        const QueueWorkerConfig(
+          maxJobs: 1,
+          timeout: Duration(milliseconds: 50),
+        ),
       );
 
       await expectLater(workerWithTimeout.start(), completes);
@@ -98,7 +102,10 @@ void main() {
 
       final workerWithTimeout = QueueWorker(
         mockDriver,
-        const QueueWorkerConfig(maxJobs: 1, timeout: Duration(milliseconds: 50)),
+        const QueueWorkerConfig(
+          maxJobs: 1,
+          timeout: Duration(milliseconds: 50),
+        ),
       );
 
       // Should not throw even when processing fails
@@ -167,7 +174,10 @@ void main() {
       final endTime = DateTime.now();
 
       // Should have taken at least the delay time
-      expect(endTime.difference(startTime).inMilliseconds, greaterThanOrEqualTo(100));
+      expect(
+        endTime.difference(startTime).inMilliseconds,
+        greaterThanOrEqualTo(100),
+      );
     });
 
     test('should run in background when configured', () async {
@@ -265,7 +275,10 @@ void main() {
       final endTime = DateTime.now();
 
       // Should have taken at least the delay time
-      expect(endTime.difference(startTime).inMilliseconds, greaterThanOrEqualTo(1000));
+      expect(
+        endTime.difference(startTime).inMilliseconds,
+        greaterThanOrEqualTo(1000),
+      );
     });
 
     test('should handle zero timeout', () async {
@@ -291,10 +304,16 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 10));
       });
 
-      final workers = List.generate(3, (_) => QueueWorker(
-        mockDriver,
-        const QueueWorkerConfig(maxJobs: 1, timeout: Duration(milliseconds: 50)),
-      ),);
+      final workers = List.generate(
+        3,
+        (_) => QueueWorker(
+          mockDriver,
+          const QueueWorkerConfig(
+            maxJobs: 1,
+            timeout: Duration(milliseconds: 50),
+          ),
+        ),
+      );
 
       // Start all workers concurrently
       await Future.wait(workers.map((w) => w.start()));

@@ -17,5 +17,3 @@ class CreateUsersTable extends MigrationFile {
     builder.dropIfExists('users');
   }
 }
-
-

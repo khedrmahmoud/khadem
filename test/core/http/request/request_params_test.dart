@@ -28,7 +28,10 @@ void main() {
       });
 
       test('should get parameter with default value', () {
-        expect(params.paramWithDefault('nonexistent', 'default'), equals('default'));
+        expect(
+          params.paramWithDefault('nonexistent', 'default'),
+          equals('default'),
+        );
         params.setParam('existing', 'value');
         expect(params.paramWithDefault('existing', 'default'), equals('value'));
       });
@@ -121,7 +124,10 @@ void main() {
 
       test('should handle complex attribute types', () {
         final complexData = {
-          'user': {'id': 1, 'roles': ['admin', 'user']},
+          'user': {
+            'id': 1,
+            'roles': ['admin', 'user'],
+          },
           'permissions': ['read', 'write', 'delete'],
           'metadata': {'created_at': DateTime.now(), 'version': 1.0},
         };

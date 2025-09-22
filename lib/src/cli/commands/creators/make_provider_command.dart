@@ -4,7 +4,11 @@ import '../../bus/command.dart';
 
 class MakeProviderCommand extends KhademCommand {
   MakeProviderCommand({required super.logger}) {
-    argParser.addOption('name', abbr: 'n', help: 'Provider name with optional path (e.g. Auth/Event)');
+    argParser.addOption(
+      'name',
+      abbr: 'n',
+      help: 'Provider name with optional path (e.g. Auth/Event)',
+    );
   }
 
   @override
@@ -29,7 +33,8 @@ class MakeProviderCommand extends KhademCommand {
 
     final className = '${_toPascalCase(name)}ServiceProvider';
     final fileName = '${_toSnakeCase(name)}_service_provider.dart';
-    final filePath = 'app/providers/${folder.isEmpty ? '' : '$folder/'}$fileName';
+    final filePath =
+        'app/providers/${folder.isEmpty ? '' : '$folder/'}$fileName';
 
     final file = File(filePath);
     if (await file.exists()) {
@@ -62,11 +67,20 @@ class $className extends ServiceProvider {
 
   String _toPascalCase(String input) {
     if (input.isEmpty) return input;
-    return input.split('_').map((e) => e.isEmpty ? '' : e[0].toUpperCase() + e.substring(1).toLowerCase()).join();
+    return input
+        .split('_')
+        .map(
+          (e) => e.isEmpty
+              ? ''
+              : e[0].toUpperCase() + e.substring(1).toLowerCase(),
+        )
+        .join();
   }
 
   String _toSnakeCase(String input) {
     if (input.isEmpty) return input;
-    return input.replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]}_${m[2]}').toLowerCase();
+    return input
+        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]}_${m[2]}')
+        .toLowerCase();
   }
 }

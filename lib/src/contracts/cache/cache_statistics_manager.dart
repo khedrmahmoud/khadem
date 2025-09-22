@@ -4,7 +4,8 @@ import 'package:khadem/src/core/cache/cache_stats.dart';
 /// Defines the contract for tracking and reporting cache performance metrics.
 abstract class ICacheStatisticsManager {
   /// Updates statistics for a cache operation.
-  void updateStats(String driverName, {
+  void updateStats(
+    String driverName, {
     required bool hit,
     required String operation,
     bool error = false,

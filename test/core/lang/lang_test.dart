@@ -51,13 +51,18 @@ void main() {
         provider.loadNamespace('', 'en', {'welcome': 'Hello :name'});
         provider.setLocale('en');
 
-        expect(Lang.t('welcome', parameters: {'name': 'Alice'}),
-            equals('Hello Alice'),);
+        expect(
+          Lang.t('welcome', parameters: {'name': 'Alice'}),
+          equals('Hello Alice'),
+        );
       });
 
       test('should replace multiple parameters', () {
         provider.loadNamespace(
-            '', 'en', {'message': ':greeting :name, welcome to :app'},);
+          '',
+          'en',
+          {'message': ':greeting :name, welcome to :app'},
+        );
         provider.setLocale('en');
 
         final result = Lang.t(
@@ -83,8 +88,10 @@ void main() {
         provider.loadNamespace('', 'en', {'count': 'You have :number items'});
         provider.setLocale('en');
 
-        expect(Lang.t('count', parameters: {'number': 5}),
-            equals('You have 5 items'),);
+        expect(
+          Lang.t('count', parameters: {'number': 5}),
+          equals('You have 5 items'),
+        );
       });
     });
 
@@ -114,7 +121,10 @@ void main() {
 
       test('should handle complex pluralization', () {
         provider.loadNamespace(
-            '', 'en', {'file': 'There is one file|There are :count files'},);
+          '',
+          'en',
+          {'file': 'There is one file|There are :count files'},
+        );
         provider.setLocale('en');
 
         expect(Lang.choice('file', 1), equals('There is one file'));
@@ -150,8 +160,11 @@ void main() {
 
     group('Field Translation', () {
       test('should translate field labels', () {
-        provider.loadNamespace('', 'en',
-            {'fields.name': 'Full Name', 'fields.email': 'Email Address'},);
+        provider.loadNamespace(
+          'fields',
+          'en',
+          {'name': 'Full Name', 'email': 'Email Address'},
+        );
         provider.setLocale('en');
 
         expect(Lang.getField('name'), equals('Full Name'));
@@ -161,7 +174,7 @@ void main() {
       test('should handle missing field translations', () {
         provider.setLocale('en');
 
-        expect(Lang.getField('nonexistent'), equals('fields.nonexistent'));
+        expect(Lang.getField('nonexistent'), equals('nonexistent'));
       });
     });
 
@@ -265,8 +278,10 @@ void main() {
           return ':$key';
         });
 
-        expect(Lang.t('price', parameters: {'amount': 19.9901}),
-            equals('Price: \$19.99'),);
+        expect(
+          Lang.t('price', parameters: {'amount': 19.9901}),
+          equals('Price: \$19.99'),
+        );
       });
 
       test('should handle multiple custom replacers', () {
@@ -408,7 +423,10 @@ void main() {
         provider.loadNamespace('', 'en', {
           'welcome': 'Welcome :name to :app',
           'items': 'item|items',
-          'fields.email': 'Email Address',
+          
+        });
+        provider.loadNamespace('fields', 'en', {
+          'email': 'Email Address',
         });
         provider.setLocale('en');
 
@@ -454,8 +472,11 @@ void main() {
         expect(result, equals('Your cart has 3 items'));
 
         // Namespaced translation
-        final total = Lang.t('total',
-            namespace: 'checkout', parameters: {'amount': '29.99'},);
+        final total = Lang.t(
+          'total',
+          namespace: 'checkout',
+          parameters: {'amount': '29.99'},
+        );
         expect(total, equals('Total: 29.99'));
       });
     });

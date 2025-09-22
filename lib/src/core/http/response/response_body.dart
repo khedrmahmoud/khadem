@@ -58,7 +58,10 @@ class ResponseBody {
   }
 
   /// Sends binary data.
-  void sendBytes(List<int> bytes, {String contentType = 'application/octet-stream'}) {
+  void sendBytes(
+    List<int> bytes, {
+    String contentType = 'application/octet-stream',
+  }) {
     if (_sent) return;
 
     _headers.setContentTypeString(contentType);
@@ -70,7 +73,8 @@ class ResponseBody {
   Future<void> sendFile(File file, {String? contentType}) async {
     if (_sent) return;
 
-    final mimeType = contentType ?? lookupMimeType(file.path) ?? 'application/octet-stream';
+    final mimeType =
+        contentType ?? lookupMimeType(file.path) ?? 'application/octet-stream';
     _headers.setContentTypeString(mimeType);
 
     // Set content length if file size is available
@@ -103,13 +107,14 @@ class ResponseBody {
     });
 
     // Use default converter for common types
-    final converter = toBytes ?? (T data) {
-      if (data is List<int>) return data;
-      if (data is String) return utf8.encode(data);
-      throw ArgumentError(
-        'Unsupported type: ${data.runtimeType}. Provide a custom toBytes converter.',
-      );
-    };
+    final converter = toBytes ??
+        (T data) {
+          if (data is List<int>) return data;
+          if (data is String) return utf8.encode(data);
+          throw ArgumentError(
+            'Unsupported type: ${data.runtimeType}. Provide a custom toBytes converter.',
+          );
+        };
 
     // Transform and stream the data
     final byteStream = stream.map(converter);

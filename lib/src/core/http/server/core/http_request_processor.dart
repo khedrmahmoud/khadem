@@ -1,7 +1,5 @@
 import 'dart:async';
 
- 
- 
 import 'package:khadem/khadem.dart' show NextFunction;
 
 import '../../../routing/router.dart';
@@ -43,7 +41,10 @@ class HttpRequestProcessor {
     // Inject route-specific middleware
     pipeline.addAll(
       match.middleware
-          .map((m) => (Request req, Response res, NextFunction next) => m.handler(req, res, next))
+          .map(
+            (m) => (Request req, Response res, NextFunction next) =>
+                m.handler(req, res, next),
+          )
           .toList(),
     );
 

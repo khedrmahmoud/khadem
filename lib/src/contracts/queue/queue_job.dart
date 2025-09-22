@@ -1,6 +1,5 @@
- 
 /// Represents a job that can be queued and processed asynchronously.
-/// 
+///
 /// Just extend QueueJob and implement handle()!
 /// No registration required, just dispatch with Queue.dispatch(job).
 ///
@@ -8,15 +7,15 @@
 /// ```dart
 /// class SendEmailJob extends QueueJob {
 ///   final String email;
-///   
+///
 ///   SendEmailJob(this.email);
-///   
+///
 ///   @override
 ///   Future<void> handle() async {
 ///     await sendEmail(email);
 ///   }
 /// }
-/// 
+///
 /// // Dispatch it
 /// Queue.dispatch(SendEmailJob('user@example.com'));
 /// ```

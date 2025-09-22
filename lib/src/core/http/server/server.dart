@@ -150,9 +150,7 @@ class Server {
 
   Future<void> reload() async {
     await _lifecycle.reload();
-    if(Khadem.isDevelopment)
-    _injectReload();
-
+    if (Khadem.isDevelopment) _injectReload();
   }
 
   /// Reloading enpoint when call reload the server

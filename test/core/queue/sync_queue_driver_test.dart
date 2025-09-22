@@ -52,7 +52,8 @@ void main() {
       expect(testJob.executed, isTrue);
     });
 
-    test('should execute job with delay (delay is ignored in sync driver)', () async {
+    test('should execute job with delay (delay is ignored in sync driver)',
+        () async {
       await driver.push(testJob, delay: const Duration(seconds: 5));
 
       expect(testJob.executed, isTrue);
@@ -95,7 +96,10 @@ void main() {
 
       expect(slowJob.executed, isTrue);
       expect(fastJob.executed, isTrue);
-      expect(duration.inMilliseconds, greaterThanOrEqualTo(100)); // At least 100ms for slow job
+      expect(
+        duration.inMilliseconds,
+        greaterThanOrEqualTo(100),
+      ); // At least 100ms for slow job
     });
   });
 }
