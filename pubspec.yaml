@@ -14,21 +14,7 @@ topics:
   - backend
   - server
   - api
-  - http-server
-  - rest-api
   - database
-  - orm
-  - authentication
-  - caching
-  - cli
-  - middleware
-  - routing
-  - validation
-  - queue
-  - job-queue
-  - event-system
-  - dart-backend
-  - framework
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
