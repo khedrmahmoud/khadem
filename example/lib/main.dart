@@ -37,7 +37,9 @@ Future _startHttpServer(int port, ContainerInterface container) async {
 }
 
 Future<void> _startSocketServer(
-    ContainerInterface container, SocketManager manager,) async {
+  ContainerInterface container,
+  SocketManager manager,
+) async {
   final socketPort = Khadem.env.getInt("SOCKET_PORT", defaultValue: 8080);
   final socketServer = SocketServer(socketPort, manager: manager);
 

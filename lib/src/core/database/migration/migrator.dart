@@ -139,7 +139,7 @@ class Migrator {
   }
 
   Future<void> _ensureDatabaseExists() async {
-    final dbName = Khadem.env.get('DB_DATABASE');
+    final dbName = Khadem.config.get('database.database') as String;
     final dbConnection = manager.connection;
 
     try {

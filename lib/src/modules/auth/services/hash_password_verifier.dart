@@ -87,7 +87,8 @@ class HashPasswordVerifier implements PasswordVerifier {
       score += 10;
     }
     if (password.contains(
-        RegExp(r'[!@#$%^&*(),.?\":{}|<>].*[!@#$%^&*(),.?\":{}|<>]'),)) {
+      RegExp(r'[!@#$%^&*(),.?\":{}|<>].*[!@#$%^&*(),.?\":{}|<>]'),
+    )) {
       score += 10;
     }
 
