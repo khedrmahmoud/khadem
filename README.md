@@ -55,8 +55,7 @@ Khadem is a comprehensive backend framework built with Dart, designed for develo
 Install Khadem CLI globally for project management:
 
 ```bash
-# Install from local source (for development)
-dart pub global activate --source path /path/to/khadem
+dart pub global activate khadem
 ```
 
 ### Requirements

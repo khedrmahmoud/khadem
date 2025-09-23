@@ -5,7 +5,7 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
-  khadem: ^1.0.0-beta
+  khadem: ^1.0.1-beta
 
 dev_dependencies:
   lints: ^6.0.0

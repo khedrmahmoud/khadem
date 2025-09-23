@@ -15,8 +15,17 @@ class MemoryQueueDriver implements QueueDriver {
     final now = DateTime.now();
     final ready = _jobs.where((j) => j.scheduledAt.isBefore(now)).toList();
     for (final job in ready) {
-      await job.job.handle();
-      _jobs.remove(job);
+      try {
+        await job.job.handle();
+        _jobs.remove(job);
+      } catch (e) {
+        // Log the error but don't remove the job from queue
+        // In a real implementation, you might want to implement retry logic
+        // or move failed jobs to a dead letter queue
+        print('Job failed: $e');
+        // For now, we'll remove the job even on failure to prevent infinite retries
+        _jobs.remove(job);
+      }
     }
   }
 

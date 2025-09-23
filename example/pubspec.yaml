@@ -1,0 +1,11 @@
+name: khadem_example
+description: Example usage of the Khadem Dart backend framework
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  khadem:
+    path: ../

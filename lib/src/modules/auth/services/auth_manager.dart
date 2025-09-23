@@ -100,7 +100,7 @@ class AuthManager {
     // Fall back to built-in drivers
     switch (driverName.toLowerCase()) {
       case 'jwt':
-        return EnhancedJWTAuthService.create(providerKey);
+        return JWTTokenService.create(providerKey);
       case 'token':
         return EnhancedTokenAuthService.create(providerKey);
       default:

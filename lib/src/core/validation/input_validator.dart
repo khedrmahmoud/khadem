@@ -98,13 +98,31 @@ class InputValidator {
   }
 
   List<String> _expandComplexPattern(String pattern) {
-    // This can be extended to handle more complex patterns like:
-    // "users.*.profile.email", "data.*.files.*", etc.
     final paths = <String>[];
 
-    // For now, just return the pattern as is
-    // This can be enhanced based on specific requirements
-    paths.add(pattern);
+    // Handle patterns like "documents.*.title" or "users.*.profile.email"
+    final parts = pattern.split('.*');
+    if (parts.length >= 2) {
+      final basePattern = parts[0]; // e.g., "documents"
+      final remainingPath = parts.sublist(1).join('.*'); // e.g., ".title"
+
+      final baseValue = _getFieldValue(basePattern);
+
+      if (baseValue is List) {
+        for (int i = 0; i < baseValue.length; i++) {
+          final expandedPath = '$basePattern.$i$remainingPath';
+          paths.add(expandedPath);
+        }
+      } else if (baseValue is Map) {
+        for (final key in baseValue.keys) {
+          final expandedPath = '$basePattern.$key$remainingPath';
+          paths.add(expandedPath);
+        }
+      }
+    } else {
+      // Fallback: return pattern as-is for unsupported patterns
+      paths.add(pattern);
+    }
 
     return paths;
   }

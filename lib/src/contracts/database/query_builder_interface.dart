@@ -20,7 +20,7 @@ abstract class QueryBuilderInterface<T> {
     _validateGenericType();
   }
 
-  /// Ensures the type is either Map<String, dynamic> or a BaseModel subclass.
+  /// Ensures the type is either Map&lt;String, dynamic&gt; or a BaseModel subclass.
   void _validateGenericType() {
     if (!(T is Map || T is Map<String, dynamic> || T is KhademModel)) {
       throw UnsupportedError(

@@ -87,8 +87,8 @@ class AuthServiceProvider extends ServiceProvider {
   /// Registers authentication drivers
   Future<void> _registerAuthDrivers(ContainerInterface container) async {
     // Register JWT Auth Service factory
-    container.bind<EnhancedJWTAuthService>(
-      (c) => EnhancedJWTAuthService(
+    container.bind<JWTTokenService>(
+      (c) => JWTTokenService(
         providerKey: 'users', // Default provider
         repository: c.resolve<AuthRepository>(),
         config: c.resolve<AuthConfig>(),

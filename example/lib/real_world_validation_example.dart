@@ -1,5 +1,4 @@
-import '../lib/src/core/validation/input_validator.dart';
-import '../lib/src/support/exceptions/validation_exception.dart';
+import 'package:khadem/khadem.dart';
 
 /// Real-world example showing how to use enhanced validation in HTTP controllers
 class FileUploadController {
@@ -79,7 +78,7 @@ class FileUploadController {
       'documents.*.expires_at': 'nullable|date|after:today',
 
       // Optional metadata
-      'metadata': 'nullable|array',
+      // 'metadata': 'nullable|object', // Removed - not a registered rule
       'metadata.project_id': 'nullable|int|min:1',
       'metadata.reference_number': 'nullable|string|alpha_num',
     };
@@ -147,16 +146,8 @@ void main() async {
     'title': 'Project Documents',
     'description': 'Important project files',
     'attachments': [
-      UploadedFile(
-        filename: 'doc1.pdf',
-        size: 1024 * 1024,
-        mimeType: 'application/pdf',
-      ),
-      UploadedFile(
-        filename: 'image1.jpg',
-        size: 512 * 1024,
-        mimeType: 'image/jpeg',
-      ),
+      createTestFile('doc1.pdf', 1024 * 1024, 'application/pdf'),
+      createTestFile('image1.jpg', 512 * 1024, 'image/jpeg'),
     ],
     'tags': ['project', 'important', 'draft'],
   };
@@ -175,11 +166,8 @@ void main() async {
   print('─' * 52);
 
   final profileImageData = {
-    'attachment': UploadedFile(
-      filename: 'large_avatar.png',
-      size: 3 * 1024 * 1024, // 3MB - exceeds 2MB limit
-      mimeType: 'image/png',
-    ),
+    'attachment':
+        createTestFile('large_avatar.png', 3 * 1024 * 1024, 'image/png'),
     'alt_text': 'User avatar',
   };
 
@@ -202,21 +190,14 @@ void main() async {
     'documents': [
       {
         'title': 'Contract Agreement',
-        'file': UploadedFile(
-          filename: 'contract.pdf',
-          size: 2 * 1024 * 1024,
-          mimeType: 'application/pdf',
-        ),
+        'file':
+            createTestFile('contract.pdf', 2 * 1024 * 1024, 'application/pdf'),
         'is_confidential': true,
         'expires_at': '2025-12-31',
       },
       {
         'title': 'Invoice',
-        'file': UploadedFile(
-          filename: 'invoice.pdf',
-          size: 1024 * 1024,
-          mimeType: 'application/pdf',
-        ),
+        'file': createTestFile('invoice.pdf', 1024 * 1024, 'application/pdf'),
         'is_confidential': false,
       },
     ],
@@ -234,20 +215,9 @@ void main() async {
   }
 }
 
-/// Mock UploadedFile class
-class UploadedFile {
-  final String filename;
-  final int size;
-  final String mimeType;
-  final String? path;
-
-  UploadedFile({
-    required this.filename,
-    required this.size,
-    required this.mimeType,
-    this.path,
-  });
-
-  @override
-  String toString() => 'UploadedFile($filename, ${(size / 1024).round()}KB)';
+/// Helper function to create test UploadedFile instances
+UploadedFile createTestFile(String filename, int sizeInBytes, String mimeType) {
+  // Create dummy data of the specified size
+  final data = List<int>.filled(sizeInBytes, 0);
+  return UploadedFile(filename, mimeType, data, 'file');
 }

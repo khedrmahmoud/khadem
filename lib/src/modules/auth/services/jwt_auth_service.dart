@@ -12,7 +12,7 @@ import '../repositories/database_auth_repository.dart';
 import '../services/hash_password_verifier.dart';
 import 'base_auth_service.dart';
 
-/// Enhanced JWT-based authentication service
+/// JWT-based authentication service
 ///
 /// This service provides JWT (JSON Web Token) authentication with support for
 /// access tokens and refresh tokens. It extends BaseAuthService and implements
@@ -47,7 +47,7 @@ import 'base_auth_service.dart';
 /// - JWT_ALGORITHM: JWT algorithm (default: HS256)
 /// - JWT_ACCESS_EXPIRY_MINUTES: Access token expiry (default: 15)
 /// - JWT_REFRESH_EXPIRY_DAYS: Refresh token expiry (default: 7)
-class EnhancedJWTAuthService extends BaseAuthService {
+class JWTTokenService extends BaseAuthService {
   /// JWT secret key for token signing
   final String _secret;
 
@@ -63,7 +63,7 @@ class EnhancedJWTAuthService extends BaseAuthService {
   /// Creates an enhanced JWT authentication service
   ///
   /// All dependencies are injected for better testability
-  EnhancedJWTAuthService({
+  JWTTokenService({
     required super.providerKey,
     AuthRepository? repository,
     AuthConfig? config,
@@ -85,8 +85,8 @@ class EnhancedJWTAuthService extends BaseAuthService {
         );
 
   /// Factory constructor for easy instantiation
-  factory EnhancedJWTAuthService.create(String providerKey) {
-    return EnhancedJWTAuthService(providerKey: providerKey);
+  factory JWTTokenService.create(String providerKey) {
+    return JWTTokenService(providerKey: providerKey);
   }
 
   /// Gets JWT secret from environment with enhanced security

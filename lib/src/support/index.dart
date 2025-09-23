@@ -121,10 +121,7 @@ export 'providers/database_service_provider.dart';
 // 📦 Queue_service_provider.dart
 // ========================
 export 'providers/queue_service_provider.dart';
-// ========================
-// 📦 Realtime_service_provider.dart
-// ========================
-export 'providers/realtime_service_provider.dart';
+
 // ========================
 // 📦 Ping_job.dart
 // ========================
