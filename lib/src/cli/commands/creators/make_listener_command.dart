@@ -46,8 +46,8 @@ class MakeListenerCommand extends KhademCommand {
     final fileName =
         '${_snakeCase(listenerName.replaceAll('EventsHandler', ''))}_events_handler.dart';
     final relativePath = folder.isEmpty
-        ? 'app/listeners/$fileName'
-        : 'app/listeners/$folder/$fileName';
+        ? 'lib/app/listeners/$fileName'
+        : 'lib/app/listeners/$folder/$fileName';
 
     final file = File(relativePath);
     await file.create(recursive: true);

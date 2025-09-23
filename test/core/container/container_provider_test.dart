@@ -1,6 +1,6 @@
+import 'package:khadem/src/core/container/container_provider.dart';
+import 'package:khadem/src/core/container/service_container.dart';
 import 'package:test/test.dart';
-import '../../../lib/src/core/container/container_provider.dart';
-import '../../../lib/src/core/container/service_container.dart';
 
 class TestService {
   final String id;

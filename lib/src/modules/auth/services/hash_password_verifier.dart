@@ -69,16 +69,27 @@ class HashPasswordVerifier implements PasswordVerifier {
     score += password.length * 2;
 
     // Character variety scores
-    if (password.contains(RegExp(r'[a-z]'))) score += 10;
-    if (password.contains(RegExp(r'[A-Z]'))) score += 10;
-    if (password.contains(RegExp(r'[0-9]'))) score += 10;
-    if (password.contains(RegExp(r'[!@#$%^&*(),.?\":{}|<>]'))) score += 15;
+    if (password.contains(RegExp(r'[a-z]'))) {
+      score += 10;
+    }
+    if (password.contains(RegExp(r'[A-Z]'))) {
+      score += 10;
+    }
+    if (password.contains(RegExp(r'[0-9]'))) {
+      score += 10;
+    }
+    if (password.contains(RegExp(r'[!@#$%^&*(),.?\":{}|<>]'))) {
+      score += 15;
+    }
 
     // Complexity bonuses
-    if (password.length >= 12) score += 10;
-    if (password
-        .contains(RegExp(r'[!@#$%^&*(),.?\":{}|<>].*[!@#$%^&*(),.?\":{}|<>]')))
+    if (password.length >= 12) {
       score += 10;
+    }
+    if (password.contains(
+        RegExp(r'[!@#$%^&*(),.?\":{}|<>].*[!@#$%^&*(),.?\":{}|<>]'),)) {
+      score += 10;
+    }
 
     return score > 100 ? 100 : score;
   }

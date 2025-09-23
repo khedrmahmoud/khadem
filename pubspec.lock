@@ -201,14 +201,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0"
-  dotenv:
-    dependency: "direct main"
-    description:
-      name: dotenv
-      sha256: "379e64b6fc82d3df29461d349a1796ecd2c436c480d4653f3af6872eccbc90e1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.2.0"
   ed25519_edwards:
     dependency: transitive
     description:
@@ -321,6 +313,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.9.0"
+  lints:
+    dependency: "direct dev"
+    description:
+      name: lints
+      sha256: a5e2b223cb7c9c8efdc663ef484fdd95bb243bff242ef5b13e26883547fce9a0
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.0"
   logging:
     dependency: transitive
     description:

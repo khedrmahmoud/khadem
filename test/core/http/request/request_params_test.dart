@@ -1,6 +1,5 @@
+import 'package:khadem/src/core/http/request/request_params.dart';
 import 'package:test/test.dart';
-
-import '../../../../lib/src/core/http/request/request_params.dart';
 
 void main() {
   group('RequestParams', () {

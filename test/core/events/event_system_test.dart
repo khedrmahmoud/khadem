@@ -1,8 +1,7 @@
-import 'package:test/test.dart';
-
 // Import specific types from contracts to avoid ConfigInterface conflict
-import '../../../lib/src/contracts/events/event_system_interface.dart';
-import '../../../lib/src/core/events/event_system.dart';
+import 'package:khadem/src/contracts/events/event_system_interface.dart';
+import 'package:khadem/src/core/events/event_system.dart';
+import 'package:test/test.dart';
 
 class TestSubscriber {
   final String name;

@@ -1,7 +1,6 @@
+import 'package:khadem/src/contracts/queue/queue_job.dart';
+import 'package:khadem/src/core/queue/queue_monitor.dart';
 import 'package:test/test.dart';
-
-import '../../../lib/src/contracts/queue/queue_job.dart';
-import '../../../lib/src/core/queue/queue_monitor.dart';
 
 // Test job implementation
 class TestQueueJob extends QueueJob {

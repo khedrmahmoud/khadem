@@ -1,8 +1,7 @@
+import 'package:khadem/src/contracts/queue/queue_driver.dart';
+import 'package:khadem/src/core/queue/queue_driver_registry.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
-
-import '../../../lib/src/contracts/queue/queue_driver.dart';
-import '../../../lib/src/core/queue/queue_driver_registry.dart';
 
 // Mock classes for testing
 class MockQueueDriver extends Mock implements QueueDriver {}

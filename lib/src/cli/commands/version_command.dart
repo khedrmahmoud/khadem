@@ -12,7 +12,7 @@ class VersionCommand extends KhademCommand {
   @override
   Future<void> handle(List<String> args) async {
     // Static version information
-    const version = '1.0.1-beta';
+    const version = '1.0.2-beta';
 
     const documentation = 'https://khadem-framework.github.io/khadem-docs/';
     const releaseDate = 'September 2025';

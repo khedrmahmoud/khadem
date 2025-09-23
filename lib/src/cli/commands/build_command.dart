@@ -38,7 +38,7 @@ COPY . .
 RUN dart pub get --offline
 
 # Build AOT executable for production
-RUN dart compile exe bin/server.dart -o bin/server
+RUN dart compile exe lib/main.dart -o bin/server
 
 # Production stage
 FROM debian:bookworm-slim
@@ -58,7 +58,7 @@ COPY --from=build /app/bin/server /app/bin/server
 
 # Copy application files
 COPY --from=build /app/.env* /app/
-COPY --from=build /app/config/ /app/config/
+COPY --from=build /app/lib/config/ /app/lib/config/
 COPY --from=build /app/public/ /app/public/
 COPY --from=build /app/storage/ /app/storage/
 

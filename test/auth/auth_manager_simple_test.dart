@@ -1,6 +1,5 @@
+import 'package:khadem/src/modules/auth/services/auth_manager.dart';
 import 'package:test/test.dart';
-
-import '../../lib/src/modules/auth/services/auth_manager.dart';
 
 void main() {
   group('AuthManager', () {

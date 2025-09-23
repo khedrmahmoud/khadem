@@ -107,7 +107,7 @@ class DbSeedCommand extends KhademCommand {
 
   Future<List<Seeder>> _loadSeedersFromRegistry() async {
     try {
-      const seedersPath = 'database/seeders/seeders.dart';
+      const seedersPath = 'lib/database/seeders/seeders.dart';
       final seedersFile = File(seedersPath);
 
       if (!await seedersFile.exists()) {
@@ -176,9 +176,9 @@ class DbSeedCommand extends KhademCommand {
   }
 
   Future<List<Seeder>> _discoverSeedersManually() async {
-    final seedersDir = Directory('database/seeders');
+    final seedersDir = Directory('lib/database/seeders');
     if (!await seedersDir.exists()) {
-      logger.warning('⚠️ Seeders directory not found: database/seeders');
+      logger.warning('⚠️ Seeders directory not found: lib/database/seeders');
       return [];
     }
 

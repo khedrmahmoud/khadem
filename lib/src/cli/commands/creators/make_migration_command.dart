@@ -24,7 +24,8 @@ class MakeMigrationCommand extends KhademCommand {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final migrationName = 'create_${tableName}_table';
     final className = _toClassName(migrationName);
-    final file = File('database/migrations/${timestamp}_$migrationName.dart');
+    final file =
+        File('lib/database/migrations/${timestamp}_$migrationName.dart');
 
     await file.create(recursive: true);
     await file.writeAsString(_migrationStub(className, tableName));
@@ -67,7 +68,7 @@ class $className extends MigrationFile {
   }
 
   Future<void> _updateMigrationsFile() async {
-    final dir = Directory('database/migrations');
+    final dir = Directory('lib/database/migrations');
     final files = dir
         .listSync()
         .whereType<File>()
@@ -98,7 +99,7 @@ class $className extends MigrationFile {
     }
     buffer.writeln('];');
 
-    final output = File('database/migrations/migrations.dart');
+    final output = File('lib/database/migrations/migrations.dart');
     await output.writeAsString(buffer.toString());
   }
 }

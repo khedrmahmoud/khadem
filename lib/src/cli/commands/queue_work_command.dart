@@ -110,7 +110,7 @@ class QueueWorkCommand extends KhademCommand {
   /// Loads jobs from the jobs.dart registry file using mirrors
   Future<int> _loadJobsFromRegistry() async {
     try {
-      const jobsPath = 'app/jobs/jobs.dart';
+      const jobsPath = 'lib/app/jobs/jobs.dart';
       final jobsFile = File(jobsPath);
 
       if (!await jobsFile.exists()) {
@@ -169,9 +169,9 @@ class QueueWorkCommand extends KhademCommand {
 
   /// Discovers job files manually and registers them
   Future<List<String>> _discoverJobsManually() async {
-    final jobsDir = Directory('app/jobs');
+    final jobsDir = Directory('lib/app/jobs');
     if (!await jobsDir.exists()) {
-      logger.warning('⚠️ Jobs directory not found: app/jobs');
+      logger.warning('⚠️ Jobs directory not found: lib/app/jobs');
       return [];
     }
 

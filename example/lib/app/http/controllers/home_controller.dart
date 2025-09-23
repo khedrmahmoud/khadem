@@ -3,7 +3,7 @@ import 'package:khadem/khadem.dart' show Request, Response;
 class HomeController {
   HomeController._();
   static Future index(Request req, Response res) async {
-    res.sendJson({'message': 'Welcome to Khadem Dart Framework!'});
+    res.sendJson({'message': 'Welcome to Khadem Framework!'});
   }
 
   static Future welcome(Request req, Response res) async {

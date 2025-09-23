@@ -1,11 +1,12 @@
-name: khadem_example
-description: Example usage of the Khadem Dart backend framework
+name: "khadem_app"
+description: A new Khadem project.
 version: 1.0.0
-publish_to: none
-
 environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
-  khadem:
-    path: ../
+  khadem: ^1.0.2-beta
+
+dev_dependencies:
+  lints: ^6.0.0
+  build_runner: ^2.4.6

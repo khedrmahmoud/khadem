@@ -1,9 +1,8 @@
+import 'package:khadem/src/contracts/logging/log_handler.dart';
+import 'package:khadem/src/contracts/logging/log_level.dart';
+import 'package:khadem/src/core/logging/log_channel_manager.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
-
-import '../../../lib/src/contracts/logging/log_handler.dart';
-import '../../../lib/src/contracts/logging/log_level.dart';
-import '../../../lib/src/core/logging/log_channel_manager.dart';
 
 // Mock classes for testing
 class MockLogHandler extends Mock implements LogHandler {}

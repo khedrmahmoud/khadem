@@ -1,7 +1,6 @@
+import 'package:khadem/src/contracts/events/event_system_interface.dart';
+import 'package:khadem/src/core/events/event_registration.dart';
 import 'package:test/test.dart';
-
-import '../../../lib/src/contracts/events/event_system_interface.dart';
-import '../../../lib/src/core/events/event_registration.dart';
 
 void main() {
   group('EventRegistration', () {

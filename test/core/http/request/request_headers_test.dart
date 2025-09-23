@@ -1,8 +1,7 @@
 import 'dart:io';
 
+import 'package:khadem/src/core/http/request/request_headers.dart';
 import 'package:test/test.dart';
-
-import '../../../../lib/src/core/http/request/request_headers.dart';
 
 class FakeHttpHeaders implements HttpHeaders {
   final Map<String, List<String>> _headers = {

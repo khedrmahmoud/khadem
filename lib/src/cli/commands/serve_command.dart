@@ -73,7 +73,7 @@ class ServeCommand extends KhademCommand {
       '--pause-isolates-on-start',
       '--enable-vm-service=$vmServicePort',
       '--disable-service-auth-codes',
-      'bin/server.dart',
+      'lib/main.dart',
     ];
 
     if (port != null && port.isNotEmpty) {

@@ -44,8 +44,9 @@ class MakeJobCommand extends KhademCommand {
 
     final className = _capitalize(jobName);
     final fileName = '${_snakeCase(jobName.replaceAll('Job', ''))}_job.dart';
-    final relativePath =
-        folder.isEmpty ? 'app/jobs/$fileName' : 'app/jobs/$folder/$fileName';
+    final relativePath = folder.isEmpty
+        ? 'lib/app/jobs/$fileName'
+        : 'lib/app/jobs/$folder/$fileName';
 
     final file = File(relativePath);
     await file.create(recursive: true);

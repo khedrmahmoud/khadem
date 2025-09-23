@@ -1,6 +1,6 @@
 name: "khadem"
 description: "A modern Dart backend framework with CLI tools, ORM, authentication, and caching for scalable web applications."
-version: 1.0.1-beta
+version: 1.0.2-beta
 homepage: "https://github.com/khedrmahmoud/khadem"
 documentation: "https://khadem-framework.github.io/khadem-docs/"
 repository: https://github.com/khedrmahmoud/khadem
@@ -21,7 +21,6 @@ environment:
 
 dependencies:
   args: ^2.4.2
-  dotenv: ^4.0.1
   mime: ^2.0.0
   mysql1: ^0.20.0
   redis: ^4.0.0
@@ -46,10 +45,8 @@ dev_dependencies:
   mockito: ^5.5.0
   build_runner: ^2.4.6
   coverage: ^1.15.0
+  lints: ^6.0.0
  
 
 executables:
-  khadem: 
-
-assets:
-  - khadem_template/
+  khadem:

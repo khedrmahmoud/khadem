@@ -41,8 +41,8 @@ class MakeControllerCommand extends KhademCommand {
 
     final fileName = _toSnakeCase(controllerName.replaceAll('Controller', ''));
     final relativePath = folder.isEmpty
-        ? 'app/http/controllers/${fileName}_controller.dart'
-        : 'app/http/controllers/$folder/${fileName}_controller.dart';
+        ? 'lib/app/http/controllers/${fileName}_controller.dart'
+        : 'lib/app/http/controllers/$folder/${fileName}_controller.dart';
 
     final file = File(relativePath);
     await file.create(recursive: true);

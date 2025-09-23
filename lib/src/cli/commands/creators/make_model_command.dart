@@ -34,7 +34,7 @@ class MakeModelCommand extends KhademCommand {
     final className = _toPascalCase(name);
     final fileName = _toSnakeCase(name);
     final filePath =
-        'app/models/${folder.isEmpty ? '' : '$folder/'}$fileName.dart';
+        'lib/app/models/${folder.isEmpty ? '' : '$folder/'}$fileName.dart';
 
     final file = File(filePath);
     if (await file.exists()) {

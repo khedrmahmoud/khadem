@@ -1,10 +1,9 @@
 import 'dart:async';
 
+import 'package:khadem/src/contracts/container/container_interface.dart';
+import 'package:khadem/src/contracts/provider/service_provider.dart';
+import 'package:khadem/src/core/service_provider/index.dart';
 import 'package:test/test.dart';
-
-import '../../../lib/src/contracts/container/container_interface.dart';
-import '../../../lib/src/contracts/provider/service_provider.dart';
-import '../../../lib/src/core/service_provider/index.dart';
 
 // Mock container for testing
 class MockContainer implements ContainerInterface {

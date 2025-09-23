@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 
 // Mock Redis Command class
 class MockCommand extends Mock {
-  Future<dynamic> send_object(List<dynamic> command) {
+  Future<dynamic> sendObject(List<dynamic> command) {
     return Future.value();
   }
 }

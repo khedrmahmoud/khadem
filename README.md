@@ -4,7 +4,7 @@
 
 <div align="center">
   <img src="https://img.shields.io/badge/status-beta-yellow" alt="Status">
-  <img src="https://img.shields.io/badge/version-1.0.0--beta-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.0.2--beta-blue" alt="Version">
   <img src="https://img.shields.io/badge/dart-%3E%3D3.0.0-blue" alt="Dart">
   <img src="https://img.shields.io/badge/license-Apache--2.0-green" alt="License">
 </div>
@@ -64,17 +64,6 @@ dart pub global activate khadem
 - **Database**: MySQL (optional)
 - **Cache**: Redis (optional)
 
-### Core Dependencies
-Khadem uses these key dependencies for optimal performance:
-
-- **args**: Command-line argument parsing for CLI tools
-- **mysql1**: MySQL database connectivity
-- **redis**: Redis caching and queue support
-- **dart_jsonwebtoken**: JWT authentication
-- **dotenv**: Environment variable management
-- **watcher**: File watching for hot reload
-- **yaml**: YAML configuration parsing
-
 ---
 
 ## ⚡ Quick Start
@@ -83,18 +72,18 @@ Get started with Khadem in minutes:
 
 ### 1. Create New Project Structure
 ```bash
+# Create new project from GitHub template
 khadem new --name=my_app
 cd my_app
 dart pub get
 ```
-
 ### 2. Start Development Server
 ```bash
 # Run your Khadem application
-dart run bin/server.dart
+dart run lib/main.dart
 
-# Or use CLI for hot reload:
-# khadem serve
+# Or for development with hot reload:
+khadem serve
 ```
 
 Your application will be running at `http://localhost:3000` with hot reload enabled!
@@ -103,42 +92,59 @@ Your application will be running at `http://localhost:3000` with hot reload enab
 
 ## 📁 Project Structure
 
-A typical Khadem project follows this structure:
+A typical Khadem project follows this modern structure:
 
 ```
 my_app/
-├── app/
-│   ├── http/
-│   │   ├── controllers/     # HTTP controllers
-│   │   └── middleware/      # HTTP middleware
-│   ├── jobs/               # Background job classes
-│   ├── listeners/          # Event listeners
-│   ├── models/             # Data models
-│   └── providers/          # Service providers
-├── bin/
-│   └── server.dart         # Application entry point
+├── lib/
+│   ├── main.dart              # Application entry point
+│   ├── app/
+│   │   ├── http/
+│   │   │   ├── controllers/   # HTTP controllers
+│   │   │   └── middleware/    # HTTP middleware
+│   │   ├── jobs/             # Background job classes
+│   │   ├── listeners/        # Event listeners
+│   │   ├── models/           # Data models
+│   │   └── providers/        # Service providers
+│   ├── bin/                  # CLI commands and utilities
+│   ├── config/
+│   │   └── app.dart         # Application configuration
+│   ├── core/
+│   │   └── kernel.dart      # Application kernel
+│   ├── database/
+│   │   ├── migrations/      # Database migrations
+│   │   └── seeders/         # Database seeders
+│   └── routes/
+│       ├── web.dart         # Web routes
+│       └── socket.dart      # Socket routes
 ├── config/
-│   ├── app.dart           # Application configuration
-│   └── development/       # Environment-specific configs
-├── core/
-│   └── kernel.dart        # Application kernel
-├── database/
-│   ├── migrations/        # Database migrations
-│   └── seeders/          # Database seeders
+│   ├── development/         # Development environment configs
+│   │   └── logging.json
+│   └── production/          # Production environment configs
+│       └── logging.json
 ├── lang/
-│   ├── ar/               # Arabic translations
-│   └── en/               # English translations
+│   ├── ar/                  # Arabic translations
+│   │   ├── ar.json
+│   │   ├── fields.json
+│   │   └── validation.json
+│   └── en/                  # English translations
+│       ├── en.json
+│       ├── fields.json
+│       └── validation.json
 ├── public/
-│   └── index.html        # Static files
+│   └── assets/              # Public assets
+│       └── logo.png
 ├── resources/
-│   └── views/            # View templates
-├── routes/
-│   ├── web.dart          # Web routes
-│   └── socket.dart       # Socket routes
-├── storage/              # File storage
-├── tests/                # Test files
-├── .env                  # Environment variables
-└── pubspec.yaml
+│   └── views/               # View templates
+│       └── welcome.khdm.html
+├── storage/
+│   └── logs/                # Application logs
+│       └── app.log
+├── tests/                   # Test files
+├── .env                     # Environment variables
+├── .gitignore              # Git ignore rules
+├── pubspec.yaml            # Package configuration
+└── pubspec.lock            # Package lock file
 ```
 
 ---
@@ -151,31 +157,37 @@ Khadem features a powerful CLI with **automatic command discovery**:
 
 ### Project Management
 ```bash
-# Create new project
+# Create new project with modern structure
 khadem new --name=project_name
 
 # Start development server with hot reload
 khadem serve
 
-# Build for production
-khadem build
+# Build Docker containers and production assets
+khadem build --services=mysql,redis
 ```
 
 ### Code Generation
 ```bash
-khadem make:model --name=User
-khadem make:controller --name=UserController
-khadem make:middleware --name=AuthMiddleware
-khadem make:provider --name=AuthServiceProvider
-khadem make:job --name=SendEmailJob
-khadem make:listener --name=UserEventListener
-khadem make:migration --name=create_users_table
+# Create models, controllers, and more in the proper lib/app/ structure
+khadem make:model --name=User                    # → lib/app/models/
+khadem make:controller --name=UserController     # → lib/app/http/controllers/
+khadem make:middleware --name=AuthMiddleware     # → lib/app/http/middleware/
+khadem make:provider --name=AuthServiceProvider # → lib/app/providers/
+khadem make:job --name=SendEmailJob              # → lib/app/jobs/
+khadem make:listener --name=UserEventListener   # → lib/app/listeners/
+khadem make:migration --name=users               # → lib/database/migrations/
+
+# Support for nested folders
+khadem make:controller --name=api/v1/UserController  # → lib/app/http/controllers/api/v1/
+khadem make:job --name=email/SendWelcomeEmailJob     # → lib/app/jobs/email/
 ```
+
+
 
 ### Version Information
 ```bash
 khadem --version                  # Show version information
-khadem version --verbose          # Show detailed version info
 ```
 
 The version command reads information dynamically from `pubspec.yaml`, ensuring version information is always up-to-date and synchronized with your package configuration.
@@ -188,12 +200,36 @@ The version command reads information dynamically from `pubspec.yaml`, ensuring 
 Organize your application logic with service providers:
 
 ```dart
+// lib/app/providers/app_service_provider.dart
 class AppServiceProvider extends ServiceProvider {
   @override
-  void register(container) {}
+  void register(container) {
+    // Register services in the container
+  }
 
   @override
-  Future<void> boot(container) async {}
+  Future<void> boot(container) async {
+    // Boot services after registration
+  }
+}
+```
+
+### Background Jobs
+Create background jobs for asynchronous processing:
+
+```dart
+// lib/app/jobs/send_email_job.dart
+class SendEmailJob extends QueueJob {
+  final String email;
+  final String message;
+
+  SendEmailJob(this.email, this.message);
+
+  @override
+  Future<void> handle() async {
+    // Send email logic here
+    print('📧 Sending email to $email: $message');
+  }
 }
 ```
 
@@ -201,12 +237,16 @@ class AppServiceProvider extends ServiceProvider {
 Use the container for clean dependency management:
 
 ```dart
+// lib/app/http/controllers/user_controller.dart
 class UserController {
   final UserRepository repository;
 
   UserController(this.repository);
 
-  // Constructor injection
+  Future<Response> index(Request request) async {
+    final users = await repository.all();
+    return Response.json(users);
+  }
 }
 ```
 
@@ -214,12 +254,13 @@ class UserController {
 Add cross-cutting concerns with middleware:
 
 ```dart
+// lib/app/http/middleware/auth_middleware.dart
 class AuthMiddleware implements Middleware {
   @override
   MiddlewareHandler get handler => (req, res, next) async {
-        // Check authentication logic here (e.g., verify JWT token)
-        await next();
-      };
+    // Check authentication logic here (e.g., verify JWT token)
+    await next();
+  };
 
   @override
   String get name => 'Auth';
@@ -229,19 +270,45 @@ class AuthMiddleware implements Middleware {
 }
 ```
 
+### Database Migrations
+Manage database schema with migrations:
+
+```dart
+// lib/database/migrations/123456_create_users_table.dart
+class CreateUsersTable extends MigrationFile {
+  @override
+  Future<void> up(builder) async {
+    builder.create('users', (table) {
+      table.id();
+      table.string('name');
+      table.string('email').unique();
+      table.string('password');
+      table.timestamps();
+    });
+  }
+
+  @override
+  Future<void> down(builder) async {
+    builder.dropIfExists('users');
+  }
+}
+```
+
 ---
 
 ## 🌟 Why Choose Khadem?
 
 - **⚡ Performance First**: Built with Dart for exceptional speed and efficiency
 - **🎯 Developer Experience**: Intuitive API design with excellent tooling and auto-discovery
+- **🏗️ Modern Structure**: Follows Dart package conventions with `lib/` directory organization
 - **🔧 Full Control**: No magic - complete transparency and control over your application
 - **📈 Scalable**: Designed to handle growth from prototype to production scale
 - **🔒 Secure**: Security best practices built-in from the ground up
 - **🌍 Growing Ecosystem**: Active development with expanding feature set
-- **🤖 Smart CLI**: Powerful command-line tools with automatic discovery
+- **🤖 Smart CLI**: Powerful command-line tools with automatic discovery and nested folder support
 - **🔥 Modern**: Takes advantage of latest Dart features and best practices
 - **📊 Dynamic Configuration**: Version and metadata automatically synchronized
+- **🐳 Production Ready**: Docker support with optimized containers for deployment
 
 ---
 

@@ -1,7 +1,6 @@
+import 'package:khadem/src/modules/auth/exceptions/auth_exception.dart';
+import 'package:khadem/src/modules/auth/services/token_auth_service.dart';
 import 'package:test/test.dart';
-
-import '../../lib/src/modules/auth/exceptions/auth_exception.dart';
-import '../../lib/src/modules/auth/services/token_auth_service.dart';
 
 void main() {
   late EnhancedTokenAuthService tokenAuthService;

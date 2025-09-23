@@ -46,8 +46,8 @@ class MakeMiddlewareCommand extends KhademCommand {
     final fileName =
         '${_toSnakeCase(middlewareName.replaceAll('Middleware', ''))}_middleware.dart';
     final relativePath = folder.isEmpty
-        ? 'app/http/middleware/$fileName'
-        : 'app/http/middleware/$folder/$fileName';
+        ? 'lib/app/http/middleware/$fileName'
+        : 'lib/app/http/middleware/$folder/$fileName';
 
     final file = File(relativePath);
 

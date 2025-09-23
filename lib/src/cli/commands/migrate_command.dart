@@ -115,7 +115,7 @@ class MigrateCommand extends KhademCommand {
 
   Future<List<MigrationFile>> _discoverMigrations() async {
     final migrationsPath =
-        argResults?['path'] as String? ?? 'database/migrations';
+        argResults?['path'] as String? ?? 'lib/database/migrations';
     final migrationsDir = Directory(migrationsPath);
 
     if (!await migrationsDir.exists()) {

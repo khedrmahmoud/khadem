@@ -1,7 +1,7 @@
+import 'package:khadem/src/core/container/service_container.dart';
+import 'package:khadem/src/support/exceptions/circular_dependency_exception.dart';
+import 'package:khadem/src/support/exceptions/service_not_found_exception.dart';
 import 'package:test/test.dart';
-import '../../../lib/src/core/container/service_container.dart';
-import '../../../lib/src/support/exceptions/circular_dependency_exception.dart';
-import '../../../lib/src/support/exceptions/service_not_found_exception.dart';
 
 class TestService {
   final String name;

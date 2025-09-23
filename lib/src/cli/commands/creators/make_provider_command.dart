@@ -34,7 +34,7 @@ class MakeProviderCommand extends KhademCommand {
     final className = '${_toPascalCase(name)}ServiceProvider';
     final fileName = '${_toSnakeCase(name)}_service_provider.dart';
     final filePath =
-        'app/providers/${folder.isEmpty ? '' : '$folder/'}$fileName';
+        'lib/app/providers/${folder.isEmpty ? '' : '$folder/'}$fileName';
 
     final file = File(filePath);
     if (await file.exists()) {

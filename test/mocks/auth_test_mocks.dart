@@ -1,10 +1,9 @@
+import 'package:khadem/src/contracts/config/config_contract.dart';
+import 'package:khadem/src/contracts/container/container_interface.dart';
+import 'package:khadem/src/contracts/env/env_interface.dart';
+import 'package:khadem/src/core/database/database.dart';
+import 'package:khadem/src/modules/auth/contracts/auth_config.dart';
 import 'package:mockito/mockito.dart';
-
-import '../../lib/src/contracts/config/config_contract.dart';
-import '../../lib/src/contracts/container/container_interface.dart';
-import '../../lib/src/contracts/env/env_interface.dart';
-import '../../lib/src/core/database/database.dart';
-import '../../lib/src/modules/auth/contracts/auth_config.dart';
 
 // Mock classes for testing
 class MockContainer extends Mock implements ContainerInterface {}
