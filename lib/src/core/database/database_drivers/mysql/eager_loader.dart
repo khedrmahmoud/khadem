@@ -1,7 +1,28 @@
 import 'package:khadem/khadem.dart';
 
+/// A utility class for eager loading database relations in the Khadem ORM.
+///
+/// This class provides functionality to load related models efficiently by parsing
+/// relation specifications and executing optimized database queries to fetch
+/// related data in batches rather than individual queries.
+///
+/// Supports various relation types including:
+/// - hasOne/hasMany (one-to-one, one-to-many)
+/// - belongsTo (many-to-one)
+/// - belongsToMany (many-to-many with pivot table)
+/// - morphOne/morphMany (polymorphic relations)
 class EagerLoader {
   /// Parses a raw list of relation inputs into a list of [RelationMeta].
+  ///
+  /// Supports multiple input formats:
+  /// - Simple strings: `'posts'`, `'user:paginated'`, `'comments:page=1:perPage=10'`
+  /// - Nested relations: `'user.posts'`
+  /// - Complex objects: `{'posts': {'paginate': true, 'page': 1, 'perPage': 10, 'with': ['comments']}}`
+  ///
+  /// Parameters:
+  /// - [raw]: List of relation specifications (strings or maps)
+  ///
+  /// Returns: List of parsed [RelationMeta] objects containing relation metadata
   static List<RelationMeta> parseRelations(List<dynamic> raw) {
     final result = <RelationMeta>[];
 
@@ -59,6 +80,16 @@ class EagerLoader {
   }
 
   /// Loads relations based on parsed metadata.
+  ///
+  /// This is the main entry point for eager loading. It processes each relation
+  /// specification and delegates to the appropriate loading method based on
+  /// the relation type defined in the model's relation definitions.
+  ///
+  /// Parameters:
+  /// - [models]: List of parent models to load relations for
+  /// - [relations]: List of relation specifications (passed to [parseRelations])
+  ///
+  /// The loaded relations are attached to each model via the model's relation property.
   static Future<void> loadRelations(
     List<KhademModel> models,
     List<dynamic> relations,
@@ -114,6 +145,20 @@ class EagerLoader {
     }
   }
 
+  /// Loads hasOne or hasMany relations for the given parent models.
+  ///
+  /// This method performs a single optimized query to fetch all related records
+  /// for multiple parent models, then groups and attaches them appropriately.
+  ///
+  /// Supports pagination when [meta.paginate] is true, returning both data and
+  /// pagination metadata in the relation result.
+  ///
+  /// Parameters:
+  /// - [parents]: Parent models to load relations for
+  /// - [def]: Relation definition containing table and key information
+  /// - [relationKey]: The key to store the loaded relation under
+  /// - [meta]: Parsed relation metadata (pagination, constraints, etc.)
+  /// - [nested]: List of nested relations to load on the related models
   static Future<void> _loadHasOneOrMany(
     List<KhademModel> parents,
     RelationDefinition def,
@@ -176,6 +221,19 @@ class EagerLoader {
     }
   }
 
+  /// Helper method to attach related models to their parent models.
+  ///
+  /// Groups related models by their foreign key, loads any nested relations,
+  /// and attaches the appropriate data structure based on relation type:
+  /// - hasMany/morphMany: List of related models
+  /// - hasOne/morphOne: Single related model or null
+  ///
+  /// Parameters:
+  /// - [parents]: Parent models to attach relations to
+  /// - [def]: Relation definition
+  /// - [relationKey]: Key to store the relation under
+  /// - [rows]: Raw database rows to convert to models
+  /// - [nested]: Nested relations to load on related models
   static Future<void> _attachRelated(
     List<KhademModel> parents,
     RelationDefinition def,
@@ -210,6 +268,17 @@ class EagerLoader {
     }
   }
 
+  /// Loads belongsTo relations for the given child models.
+  ///
+  /// Performs a single query to fetch all parent records for multiple child models,
+  /// then creates a lookup table to efficiently attach the correct parent to each child.
+  ///
+  /// Parameters:
+  /// - [children]: Child models that belong to parent records
+  /// - [def]: Relation definition containing table and key information
+  /// - [relationKey]: The key to store the loaded relation under
+  /// - [meta]: Parsed relation metadata (constraints, etc.)
+  /// - [nested]: List of nested relations to load on the parent models
   static Future<void> _loadBelongsTo(
     List<KhademModel> children,
     RelationDefinition def,
@@ -256,6 +325,19 @@ class EagerLoader {
     }
   }
 
+  /// Loads belongsToMany (many-to-many) relations using a pivot table.
+  ///
+  /// This method handles the complex case of many-to-many relationships by:
+  /// 1. Querying the pivot table to get related IDs
+  /// 2. Fetching the actual related records
+  /// 3. Grouping results by parent ID for attachment
+  ///
+  /// Parameters:
+  /// - [parents]: Parent models to load relations for
+  /// - [relation]: Relation definition (must include pivot table info)
+  /// - [relationKey]: The key to store the loaded relation under
+  /// - [meta]: Parsed relation metadata (constraints, etc.)
+  /// - [nested]: List of nested relations to load on the related models
   static Future<void> _loadBelongsToMany(
     List<KhademModel> parents,
     RelationDefinition relation,
@@ -311,6 +393,18 @@ class EagerLoader {
     }
   }
 
+  /// Loads polymorphic (morphOne/morphMany) relations.
+  ///
+  /// Polymorphic relations allow a model to belong to multiple other model types.
+  /// This method queries based on both the morph ID and morph type fields to
+  /// ensure only related records of the correct type are loaded.
+  ///
+  /// Parameters:
+  /// - [parents]: Parent models to load relations for
+  /// - [relation]: Relation definition with morph field information
+  /// - [relationKey]: The key to store the loaded relation under
+  /// - [meta]: Parsed relation metadata (constraints, etc.)
+  /// - [nested]: List of nested relations to load on the related models
   static Future<void> _loadMorph(
     List<KhademModel> parents,
     RelationDefinition relation,

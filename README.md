@@ -312,14 +312,6 @@ class CreateUsersTable extends MigrationFile {
 
 ---
 
-## � License
-
-Khadem is licensed under the [Apache License 2.0](LICENSE.md). This permissive license allows you to use, modify, and distribute the framework freely, including for commercial purposes, as long as you include the original copyright notice and license text.
-
-For more details, see the [LICENSE.md](LICENSE.md) file in this repository.
-
----
-
 ## �📞 Support & Community
 
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/khedrmahmoud/khadem/issues)

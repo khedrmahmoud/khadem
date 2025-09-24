@@ -1,3 +1,7 @@
+## 1.0.4-beta
+- Added comprehensive documentation to EagerLoader class with detailed method descriptions
+- Updated LICENSE file with GitHub repository links for better discoverability
+
 ## 1.0.3-beta
 - Fixed migrator database configuration to use config system instead of environment variables
 - Updated `_ensureDatabaseExists()` method to use `Khadem.config.get('database.database')` for better consistency
