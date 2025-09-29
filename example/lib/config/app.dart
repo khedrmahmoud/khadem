@@ -105,6 +105,39 @@ class AppConfig {
             'require_numbers': true,
             'require_symbols': false,
           },
+          'token': {
+            'driver': 'jwt',
+            'secret': env.getOrDefault('JWT_SECRET', 'your-jwt-secret-key'),
+            'ttl': 3600, // 1 hour
+            'algorithm': 'HS256',
+            'refresh_enabled': true,
+            'refresh_ttl': 604800, // 7 days
+            'issuer': 'khadem-app',
+            'audience': 'khadem-users',
+          },
+          'web': {
+            'enable_login': true,
+            'enable_registration': true,
+            'enable_password_reset': true,
+            'enable_email_verification': false,
+            'login_attempts': 5,
+            'lockout_duration': 900, // 15 minutes
+            'remember_me_enabled': true,
+            'remember_me_duration': 604800, // 7 days
+            'login_redirect': '/',
+            'logout_redirect': '/login',
+            'allowed_domains': ['localhost', '127.0.0.1'],
+          },
+          'routes': {
+            'login': '/login',
+            'logout': '/logout',
+            'register': '/register',
+            'password_reset': '/password/reset',
+            'password_reset_request': '/password/email',
+            'email_verification': '/email/verify',
+            'home': '/',
+            'api_prefix': '/api',
+          },
           'session': {
             'driver': 'file',
             'lifetime': 7200,

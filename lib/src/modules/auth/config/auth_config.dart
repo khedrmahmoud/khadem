@@ -7,6 +7,9 @@ class AuthConfig {
   final Map<String, PasswordResetConfig> passwords;
   final PasswordPolicyConfig passwordPolicy;
   final SessionConfig session;
+  final TokenConfig token;
+  final WebConfig web;
+  final RoutesConfig routes;
 
   const AuthConfig({
     required this.defaultGuard,
@@ -16,6 +19,9 @@ class AuthConfig {
     required this.passwords,
     required this.passwordPolicy,
     required this.session,
+    required this.token,
+    required this.web,
+    required this.routes,
   });
 
   /// Create AuthConfig from configuration map
@@ -34,6 +40,9 @@ class AuthConfig {
       ),
       passwordPolicy: PasswordPolicyConfig.fromMap(config['password_policy']),
       session: SessionConfig.fromMap(config['session']),
+      token: TokenConfig.fromMap(config['token'] ?? {}),
+      web: WebConfig.fromMap(config['web'] ?? {}),
+      routes: RoutesConfig.fromMap(config['routes'] ?? {}),
     );
   }
 
@@ -187,6 +196,123 @@ class SessionConfig {
       secure: map['secure'] as bool,
       httpOnly: map['http_only'] as bool,
       sameSite: map['same_site'] as String,
+    );
+  }
+}
+
+/// Configuration for JWT/API token management
+class TokenConfig {
+  final String driver;
+  final String secret;
+  final int ttl;
+  final String algorithm;
+  final bool refreshEnabled;
+  final int refreshTtl;
+  final String? issuer;
+  final String? audience;
+
+  const TokenConfig({
+    required this.driver,
+    required this.secret,
+    required this.ttl,
+    required this.algorithm,
+    required this.refreshEnabled,
+    required this.refreshTtl,
+    this.issuer,
+    this.audience,
+  });
+
+  factory TokenConfig.fromMap(Map<String, dynamic> map) {
+    return TokenConfig(
+      driver: map['driver'] ?? 'jwt',
+      secret: map['secret'] ?? 'your-secret-key',
+      ttl: map['ttl'] ?? 3600, // 1 hour
+      algorithm: map['algorithm'] ?? 'HS256',
+      refreshEnabled: map['refresh_enabled'] ?? true,
+      refreshTtl: map['refresh_ttl'] ?? 604800, // 7 days
+      issuer: map['issuer'] as String?,
+      audience: map['audience'] as String?,
+    );
+  }
+}
+
+/// Configuration for web authentication settings
+class WebConfig {
+  final bool enableLogin;
+  final bool enableRegistration;
+  final bool enablePasswordReset;
+  final bool enableEmailVerification;
+  final int loginAttempts;
+  final int lockoutDuration;
+  final bool rememberMeEnabled;
+  final int rememberMeDuration;
+  final String? loginRedirect;
+  final String? logoutRedirect;
+  final List<String> allowedDomains;
+
+  const WebConfig({
+    required this.allowedDomains,
+    required this.enableLogin,
+    required this.enableRegistration,
+    required this.enablePasswordReset,
+    required this.enableEmailVerification,
+    required this.loginAttempts,
+    required this.lockoutDuration,
+    required this.rememberMeEnabled,
+    required this.rememberMeDuration,
+    this.loginRedirect,
+    this.logoutRedirect,
+  });
+
+  factory WebConfig.fromMap(Map<String, dynamic> map) {
+    return WebConfig(
+      enableLogin: map['enable_login'] ?? true,
+      enableRegistration: map['enable_registration'] ?? true,
+      enablePasswordReset: map['enable_password_reset'] ?? true,
+      enableEmailVerification: map['enable_email_verification'] ?? false,
+      loginAttempts: map['login_attempts'] ?? 5,
+      lockoutDuration: map['lockout_duration'] ?? 900, // 15 minutes
+      rememberMeEnabled: map['remember_me_enabled'] ?? true,
+      rememberMeDuration: map['remember_me_duration'] ?? 604800, // 7 days
+      loginRedirect: map['login_redirect'] as String?,
+      logoutRedirect: map['logout_redirect'] as String?,
+      allowedDomains: List<String>.from(map['allowed_domains'] ?? []),
+    );
+  }
+}
+
+/// Configuration for authentication routes
+class RoutesConfig {
+  final String login;
+  final String logout;
+  final String register;
+  final String passwordReset;
+  final String passwordResetRequest;
+  final String emailVerification;
+  final String home;
+  final String apiPrefix;
+
+  const RoutesConfig({
+    required this.login,
+    required this.logout,
+    required this.register,
+    required this.passwordReset,
+    required this.passwordResetRequest,
+    required this.emailVerification,
+    required this.home,
+    required this.apiPrefix,
+  });
+
+  factory RoutesConfig.fromMap(Map<String, dynamic> map) {
+    return RoutesConfig(
+      login: map['login'] ?? '/login',
+      logout: map['logout'] ?? '/logout',
+      register: map['register'] ?? '/register',
+      passwordReset: map['password_reset'] ?? '/password/reset',
+      passwordResetRequest: map['password_reset_request'] ?? '/password/email',
+      emailVerification: map['email_verification'] ?? '/email/verify',
+      home: map['home'] ?? '/',
+      apiPrefix: map['api_prefix'] ?? '/api',
     );
   }
 }
