@@ -15,34 +15,48 @@ class DatabaseSessionDriver implements SessionDriver {
   @override
   Future<void> write(String sessionId, Map<String, dynamic> data) async {
     final payload = data.toString(); // Simplified - should use proper JSON encoding
+    final lastActivity = data['last_activity'] ?? DateTime.now().toIso8601String();
 
-    await _connection.execute('''
-      INSERT INTO $_tableName (session_id, payload, last_activity)
-      VALUES (?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-        payload = VALUES(payload),
-        last_activity = VALUES(last_activity)
-    ''', [
-      sessionId,
-      payload,
-      data['last_activity'] ?? DateTime.now().toIso8601String(),
-    ]);
+    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(_tableName);
+
+    // Check if session exists
+    final exists = await queryBuilder
+        .where('session_id', '=', sessionId)
+        .exists();
+
+    if (exists) {
+      // Update existing session
+      await queryBuilder
+          .where('session_id', '=', sessionId)
+          .update({
+            'payload': payload,
+            'last_activity': lastActivity,
+          });
+    } else {
+      // Insert new session
+      await queryBuilder.insert({
+        'session_id': sessionId,
+        'payload': payload,
+        'last_activity': lastActivity,
+      });
+    }
   }
 
   @override
   Future<Map<String, dynamic>?> read(String sessionId) async {
-    final response = await _connection.execute(
-      'SELECT payload FROM $_tableName WHERE session_id = ?',
-      [sessionId],
-    );
+    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(_tableName);
 
-    if (response.data == null || (response.data is List && response.data.isEmpty)) {
+    final result = await queryBuilder
+        .select(['payload'])
+        .where('session_id', '=', sessionId)
+        .first();
+
+    if (result == null) {
       return null;
     }
 
     try {
-      final rows = response.data is List ? response.data as List : [response.data];
-      final payload = rows.first['payload'] as String;
+      final payload = result['payload'] as String;
       // Simplified parsing - in production use proper JSON deserialization
       if (payload.startsWith('{') && payload.endsWith('}')) {
         final Map<String, dynamic> data = {};
@@ -65,21 +79,21 @@ class DatabaseSessionDriver implements SessionDriver {
 
   @override
   Future<void> delete(String sessionId) async {
-    await _connection.execute(
-      'DELETE FROM $_tableName WHERE session_id = ?',
-      [sessionId],
-    );
+    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(_tableName);
+
+    await queryBuilder
+        .where('session_id', '=', sessionId)
+        .delete();
   }
 
   @override
   Future<void> cleanup(Duration maxAge) async {
     final cutoffTime = DateTime.now().subtract(maxAge);
+    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(_tableName);
 
-    await _connection.execute('''
-      DELETE FROM $_tableName
-      WHERE last_activity < ?
-    ''', [cutoffTime.toIso8601String()],
-    );
+    await queryBuilder
+        .where('last_activity', '<', cutoffTime.toIso8601String())
+        .delete();
   }
 
   @override
@@ -88,14 +102,19 @@ class DatabaseSessionDriver implements SessionDriver {
   }
 
   /// Create the sessions table if it doesn't exist
+  /// Note: This uses raw SQL for simplicity. In the future, this could be
+  /// updated to use the SchemaBuilder for better database abstraction.
   Future<void> createTable() async {
-    await _connection.execute('''
+    // Use database-agnostic SQL that works across different database types
+    final createTableSql = '''
       CREATE TABLE IF NOT EXISTS $_tableName (
         session_id VARCHAR(255) PRIMARY KEY,
         payload TEXT NOT NULL,
-        last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        last_activity TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
-    ''');
+    ''';
+
+    await _connection.execute(createTableSql);
   }
 }
