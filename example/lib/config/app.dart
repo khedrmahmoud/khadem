@@ -55,22 +55,66 @@ class AppConfig {
 
         /// Auth configuration
         'auth': {
-          'default': 'users',
+          'defaults': {
+            'guard': 'web',
+            'passwords': 'users',
+          },
           'guards': {
-            'users': {'driver': 'token', 'provider': 'users'},
-            'admins': {'driver': 'token', 'provider': 'admins'},
+            'web': {
+              'driver': 'session',
+              'provider': 'users',
+            },
+            'api': {
+              'driver': 'token',
+              'provider': 'users',
+              'hash': false,
+            },
+            'admin': {
+              'driver': 'token',
+              'provider': 'admins',
+            },
           },
           'providers': {
             'users': {
+              'driver': 'eloquent',
+              'model': 'User',
               'table': 'users',
               'primary_key': 'id',
-              'fields': ['email'],
+              'fields': ['email', 'password'],
             },
             'admins': {
+              'driver': 'eloquent',
+              'model': 'Admin',
               'table': 'admins',
               'primary_key': 'id',
-              'fields': ['email'],
+              'fields': ['email', 'password'],
             },
+          },
+          'passwords': {
+            'users': {
+              'provider': 'users',
+              'table': 'password_resets',
+              'expire': 60,
+              'throttle': 60,
+            },
+          },
+          'password_policy': {
+            'min_length': 8,
+            'require_uppercase': true,
+            'require_lowercase': true,
+            'require_numbers': true,
+            'require_symbols': false,
+          },
+          'session': {
+            'driver': 'file',
+            'lifetime': 7200,
+            'expire_on_close': false,
+            'encrypt': false,
+            'path': 'storage/sessions',
+            'domain': null,
+            'secure': false,
+            'http_only': true,
+            'same_site': 'lax',
           },
         },
 
