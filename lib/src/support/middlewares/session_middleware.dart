@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:khadem/khadem.dart'
     show Middleware, NextFunction, Request, Response, CookieHelper;
 
-import '../../core/http/session.dart';
+import '../../contracts/session/session_driver_registry.dart';
+import '../../core/session/drivers/file_session_driver.dart';
+import '../../core/session/session_manager.dart';
 
 /// Session Middleware
 ///
@@ -14,8 +16,19 @@ class SessionMiddleware extends Middleware {
 
   SessionMiddleware({
     SessionManager? sessionManager,
-  })  : _sessionManager = sessionManager ?? SessionManager(),
+  })  : _sessionManager = sessionManager ?? _createDefaultSessionManager(),
         super(_handleSession);
+
+  /// Creates a default session manager with file-based storage
+  static SessionManager _createDefaultSessionManager() {
+    final registry = SessionDriverRegistry();
+    final fileDriver = FileSessionDriver('storage/sessions');
+    registry.registerDriver('file', fileDriver);
+    return SessionManager(
+      driverRegistry: registry,
+      driverName: 'file',
+    );
+  }
 
   /// Handles session management for the request
   static FutureOr<void> _handleSession(

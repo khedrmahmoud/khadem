@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:khadem/khadem.dart' show CookieHelper, Khadem;
 
+import '../../session/session_manager.dart';
 import '../context/request_context.dart';
 import '../context/response_context.dart';
-import '../session.dart';
 import 'response_body.dart';
 import 'response_headers.dart';
 import 'response_renderer.dart';
