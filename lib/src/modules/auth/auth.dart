@@ -1,4 +1,5 @@
 import '../../core/http/request/request.dart';
+import 'core/request_auth.dart';
 
 /// Auth facade providing convenient access to authentication functionality
 ///

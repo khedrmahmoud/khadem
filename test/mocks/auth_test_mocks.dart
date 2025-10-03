@@ -3,6 +3,15 @@ import 'package:khadem/src/contracts/container/container_interface.dart';
 import 'package:khadem/src/contracts/env/env_interface.dart';
 import 'package:khadem/src/core/database/database.dart';
 import 'package:khadem/src/modules/auth/contracts/auth_config.dart';
+import 'package:khadem/src/modules/auth/contracts/authenticatable.dart';
+import 'package:khadem/src/modules/auth/contracts/auth_repository.dart';
+import 'package:khadem/src/modules/auth/contracts/password_verifier.dart';
+import 'package:khadem/src/modules/auth/drivers/auth_driver.dart';
+import 'package:khadem/src/modules/auth/guards/base_guard.dart';
+import 'package:khadem/src/modules/auth/services/auth_manager.dart';
+import 'package:khadem/src/contracts/session/session_interfaces.dart';
+import 'package:khadem/src/core/http/request/request.dart';
+import 'package:khadem/src/core/http/response/response.dart';
 import 'package:mockito/mockito.dart';
 
 // Mock classes for testing
@@ -15,6 +24,33 @@ class MockConfig extends Mock implements ConfigInterface {}
 class MockAuthConfig extends Mock implements AuthConfig {}
 
 class MockDatabaseManager extends Mock implements DatabaseManager {}
+
+class MockAuthDriver extends Mock implements AuthDriver {}
+
+class MockAuthRepository extends Mock implements AuthRepository {}
+
+class MockPasswordVerifier extends Mock implements PasswordVerifier {}
+
+class MockAuthenticatable extends Mock implements Authenticatable {}
+
+class MockSessionManager extends Mock implements ISessionManager {}
+
+class MockAuthManager extends Mock implements AuthManager {}
+
+class MockRequest extends Mock implements Request {}
+
+class MockResponse extends Mock implements Response {}
+
+class MockSession extends Mock {
+  dynamic get(String key) => null;
+  void set(String key, dynamic value) {}
+  void remove(String key) {}
+  void destroy() {}
+  void flash(String key, dynamic value) {}
+  bool has(String key) => false;
+}
+
+class MockGuard extends Mock implements Guard {}
 
 // Test setup utilities
 class TestSetup {
@@ -49,7 +85,7 @@ class TestSetup {
         'users': {
           'table': 'users',
           'primary_key': 'id',
-          'fields': ['email', 'password'],
+          'fields': ['email'], // Only identifier fields, NOT password
         },
       },
     });
@@ -58,7 +94,7 @@ class TestSetup {
     when(mockAuthConfig.getProvider('users')).thenReturn({
       'table': 'users',
       'primary_key': 'id',
-      'fields': ['email', 'password'],
+      'fields': ['email'], // Only identifier fields, NOT password
     });
 
     when(mockAuthConfig.getGuard('api')).thenReturn({

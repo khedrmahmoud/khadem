@@ -7,6 +7,7 @@ import 'package:khadem/khadem.dart';
 ///
 /// Handles session-based authentication for web applications,
 /// Enhanced with powerful session management and security features.
+@Deprecated('Use AuthManager with WebGuard instead')
 class WebAuthService {
   static const String _sessionKey = 'user_id';
   static const String _rememberKey = 'remember_token';
@@ -71,19 +72,19 @@ class WebAuthService {
 
     try {
       // Authenticate user
-      final authResult = await _authManager.login(credentials);
+      final authResult = await _authManager.attempt(credentials);
 
       // Reset login attempts on successful login
       _resetLoginAttempts(request);
 
       // Store user, tokens, and CSRF in session and cookies
-      _saveAuthSession(request, response, authResult, remember);
+      _saveAuthSession(request, response, authResult.toMap(), remember);
 
       request.session.flash('message', 'Successfully logged in!');
       request.session.flash('message_type', 'success');
 
       // Return full auth result
-      return authResult;
+      return authResult.toMap();
     } catch (e) {
       // Track failed login attempts
       _recordFailedAttempt(request);
@@ -213,8 +214,8 @@ class WebAuthService {
     try {
       final accessToken = request.session.get('access_token') as String?;
       if (accessToken != null) {
-        final userData = await _authManager.verify(accessToken);
-        return userData;
+        final user = await _authManager.user(accessToken);
+        return user.toAuthArray();
       }
     } catch (e) {
       // Token invalid, clear session
@@ -249,7 +250,8 @@ class WebAuthService {
     if (rememberToken == null) return null;
 
     try {
-      final userData = await _authManager.verify(rememberToken);
+      final user = await _authManager.user(rememberToken);
+      final userData = user.toAuthArray();
       // Set user in session
       request.setUser(userData);
       request.session.set(_sessionKey, userData['id'].toString());
@@ -374,8 +376,8 @@ class WebAuthService {
     final authManager = Khadem.container.resolve<AuthManager>();
     final token =
         RequestContext.request.cookieHandler.get('access_token') ?? '';
-    final userData = await authManager.verify(token);
-    return userData;
+    final user = await authManager.user(token);
+    return user.toAuthArray();
   }
 
   /// Creates a new instance with default guard

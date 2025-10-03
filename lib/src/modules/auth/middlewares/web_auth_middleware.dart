@@ -1,26 +1,23 @@
-import 'dart:async';
-
-import 'package:khadem/khadem.dart';
+import '../../../contracts/http/middleware_contract.dart';
+import '../../../core/http/request/request.dart';
+import '../../../core/http/response/response.dart';
+import '../services/auth_manager.dart';
 
 /// Web Authentication Middleware
 ///
 /// Middleware for protecting routes that require authentication.
-/// Integrates with WebAuthService for session-based authentication.
+/// Uses the AuthManager with the 'web' guard for session-based authentication.
 class WebAuthMiddleware {
   /// Creates a new web authentication middleware
   ///
   /// [redirectTo] - Where to redirect unauthenticated users (default: '/login')
   /// [except] - Routes to exclude from authentication check
-  /// [regenerateSession] - Whether to regenerate session on each request
-  /// [guard] - Auth guard to use
+  /// [guard] - Auth guard to use (default: 'web')
   static Middleware create({
     String redirectTo = '/login',
     List<String> except = const [],
-    bool regenerateSession = true,
-    String? guard,
+    String guard = 'web',
   }) {
-    final authService = WebAuthService(guard: guard);
-
     return Middleware(
       (Request request, Response response, NextFunction next) async {
         // Check if route is excluded
@@ -28,49 +25,88 @@ class WebAuthMiddleware {
           return next();
         }
 
-        // Check authentication
-        if (!authService.isAuthenticated(request)) {
-          // Handle unauthenticated user
-          await _handleUnauthenticated(request, response, redirectTo);
-          return;
-        }
-
-        // Check if session needs regeneration
-        if (regenerateSession && request.session.shouldRegenerate()) {
-          request.session.regenerateId();
-        }
-
-        // Check if session is expiring soon and extend if needed
-        if (request.session.isExpiringSoon(const Duration(minutes: 10))) {
-          request.session.setTimeout(const Duration(minutes: 30));
-        }
-
-        // Ensure user context is set
-        await _ensureUserContext(request, response, authService, redirectTo);
-
-        // Continue to next middleware
-        return next();
+        // For web guard, check session-based authentication
+        await _handleWebAuth(request, response, next, guard, redirectTo);
       },
       priority: MiddlewarePriority.auth,
       name: 'web-auth',
     );
   }
 
+  /// Handles web authentication using sessions
+  static Future<void> _handleWebAuth(
+    Request request,
+    Response response,
+    NextFunction next,
+    String guard,
+    String redirectTo,
+  ) async {
+    try {
+      // Get session ID from request
+      final sessionId = request.sessionId;
+
+      if (sessionId.isEmpty) {
+        await _handleUnauthenticated(request, response, redirectTo);
+        return;
+      }
+
+      // For web guard, check session-based authentication
+      final authManager = AuthManager(guard: guard, provider: 'users');
+
+      // Check if user is authenticated via session
+      final isAuthenticated = await _checkWithGuard(authManager, guard, sessionId);
+
+      if (!isAuthenticated) {
+        await _handleUnauthenticated(request, response, redirectTo);
+        return;
+      }
+
+      // Get user data
+      final user = await authManager.userWithGuard(guard, sessionId);
+      final userData = user.toAuthArray();
+
+      // Attach user data to request
+      _attachUserToRequest(request, userData);
+
+      // Continue to next middleware
+      await next();
+    } catch (e) {
+      // Authentication failed, clear session
+      request.session.remove('user');
+      request.session.remove('token');
+      await _handleUnauthenticated(request, response, redirectTo);
+    }
+  }
+
+  /// Checks authentication with a specific guard
+  static Future<bool> _checkWithGuard(
+    AuthManager authManager,
+    String guardName,
+    String token,
+  ) async {
+    try {
+      final guard = authManager.getGuard(guardName);
+      return await guard.check(token);
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Factory method for basic auth middleware
   static Middleware auth({
     String redirectTo = '/login',
     List<String> except = const [],
+    String guard = 'web',
   }) {
-    return create(redirectTo: redirectTo, except: except);
+    return create(redirectTo: redirectTo, except: except, guard: guard);
   }
 
   /// Factory method for guest-only middleware (redirects authenticated users)
   static Middleware guest({
     String redirectTo = '/dashboard',
     List<String> except = const [],
+    String guard = 'web',
   }) {
-    final authService = WebAuthService.create();
-
     return Middleware(
       (Request request, Response response, NextFunction next) async {
         // Check if route is excluded
@@ -78,8 +114,11 @@ class WebAuthMiddleware {
           return next();
         }
 
-        // If user is authenticated, redirect
-        if (authService.isAuthenticated(request)) {
+        // Check if user is authenticated
+        final user = request.session.get('user');
+        final token = request.session.get('token') as String?;
+
+        if (user != null && token != null) {
           response.redirect(redirectTo);
           return;
         }
@@ -96,9 +135,8 @@ class WebAuthMiddleware {
   static Middleware admin({
     String redirectTo = '/login',
     List<String> except = const [],
+    String guard = 'web',
   }) {
-    final authService = WebAuthService.create();
-
     return Middleware(
       (Request request, Response response, NextFunction next) async {
         // First check basic authentication
@@ -106,121 +144,24 @@ class WebAuthMiddleware {
           return next();
         }
 
-        if (!authService.isAuthenticated(request)) {
-          await _handleUnauthenticated(request, response, redirectTo);
-          return;
-        }
-
-        // Check admin role
-        if (!request.hasRole('admin')) {
-          request.session
-              .flash('message', 'Access denied. Admin privileges required.');
-          request.session.flash('message_type', 'error');
-          response.redirect('/dashboard');
-          return;
-        }
-
-        return next();
-      },
-      priority: MiddlewarePriority.auth,
-      name: 'web-admin',
-    );
-  }
-
-  /// Factory method for role-based middleware
-  static Middleware roles(
-    List<String> roles, {
-    String redirectTo = '/login',
-    List<String> except = const [],
-    bool requireAll = false,
-  }) {
-    final authService = WebAuthService.create();
-
-    return Middleware(
-      (Request request, Response response, NextFunction next) async {
-        // First check basic authentication
-        if (_isExcluded(request.path, except)) {
-          return next();
-        }
-
-        if (!authService.isAuthenticated(request)) {
-          await _handleUnauthenticated(request, response, redirectTo);
-          return;
-        }
-
-        // Check roles
-        bool hasAccess;
-        if (requireAll) {
-          hasAccess = request.hasAllRoles(roles);
-        } else {
-          hasAccess = request.hasAnyRole(roles);
-        }
-
-        if (!hasAccess) {
-          request.session
-              .flash('message', 'Access denied. Insufficient privileges.');
-          request.session.flash('message_type', 'error');
-          response.redirect('/dashboard');
-          return;
-        }
-
-        return next();
-      },
-      priority: MiddlewarePriority.auth,
-      name: 'web-roles',
-    );
-  }
-
-  /// Factory method for permission-based middleware
-  static Middleware permissions(
-    List<String> permissions, {
-    String redirectTo = '/login',
-    List<String> except = const [],
-    bool requireAll = false,
-  }) {
-    final authService = WebAuthService.create();
-
-    return Middleware(
-      (Request request, Response response, NextFunction next) async {
-        // First check basic authentication
-        if (_isExcluded(request.path, except)) {
-          return next();
-        }
-
-        if (!authService.isAuthenticated(request)) {
-          await _handleUnauthenticated(request, response, redirectTo);
-          return;
-        }
-
-        // Check permissions
-        final user = request.user;
+        final user = request.session.get('user') as Map<String, dynamic>?;
         if (user == null) {
           await _handleUnauthenticated(request, response, redirectTo);
           return;
         }
 
-        final userPermissions = List<String>.from(user['permissions'] ?? []);
-
-        bool hasAccess;
-        if (requireAll) {
-          hasAccess =
-              permissions.every((perm) => userPermissions.contains(perm));
-        } else {
-          hasAccess = permissions.any((perm) => userPermissions.contains(perm));
-        }
-
-        if (!hasAccess) {
-          request.session
-              .flash('message', 'Access denied. Insufficient permissions.');
-          request.session.flash('message_type', 'error');
+        // Check admin role (simplified)
+        final role = user['role'] as String?;
+        if (role != 'admin') {
+          request.session.flash('message', 'Access denied. Admin privileges required.');
           response.redirect('/dashboard');
           return;
         }
 
-        return next();
+        await next();
       },
       priority: MiddlewarePriority.auth,
-      name: 'web-permissions',
+      name: 'web-admin',
     );
   }
 
@@ -254,32 +195,16 @@ class WebAuthMiddleware {
 
     // Set flash message
     request.session.flash('message', 'Please log in to continue');
-    request.session.flash('message_type', 'warning');
 
     // Redirect to login
     response.redirect(redirectTo);
   }
 
-  /// Ensures user context is properly set
-  static Future<void> _ensureUserContext(
-    Request request,
-    Response response,
-    WebAuthService authService,
-    String redirectTo,
-  ) async {
-    // If user is not set in request context, try to get from session
-    if (request.user == null) {
-      try {
-        final user = await authService.getCurrentUser(request);
-        if (user != null) {
-          request.setUser(user);
-        }
-      } catch (e) {
-        // If token verification fails, logout user
-        await authService.logout(request, response);
-        await _handleUnauthenticated(request, response, redirectTo);
-        return;
-      }
-    }
+  /// Attaches user data to the request
+  static void _attachUserToRequest(Request request, Map<String, dynamic> user) {
+    request.setAttribute('user', user);
+    request.setAttribute('userId', user['id']);
+    request.setAttribute('isAuthenticated', true);
+    request.setAttribute('isGuest', false);
   }
 }

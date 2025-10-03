@@ -138,7 +138,6 @@ export 'http/middleware/middleware_pipeline.dart';
 // ========================
 export 'http/request/index.dart';
 export 'http/request/request.dart';
-export 'http/request/request_auth.dart';
 export 'http/request/request_body_parser.dart';
 export 'http/request/request_handler.dart';
 export 'http/request/request_headers.dart';

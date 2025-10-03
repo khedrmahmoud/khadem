@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
 
-import '../../modules/auth/contracts/token_generator.dart';
+import '../contracts/token_generator.dart';
+
 
 /// Secure token generator implementation
 ///

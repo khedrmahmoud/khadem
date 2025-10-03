@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:khadem/khadem.dart' show WebAuthService;
 import 'package:khadem/src/support/helpers/cookie.dart';
 
-import 'request_auth.dart';
 import 'request_body_parser.dart';
 import 'request_headers.dart';
 import 'request_params.dart';
@@ -29,7 +27,6 @@ class Request {
 
   late final RequestBodyParser _bodyParser;
   late final RequestValidator _validator;
-  late final RequestAuth _auth;
   late final RequestHeaders _headers;
   late final RequestParams _params;
   late final RequestSession _session;
@@ -38,7 +35,6 @@ class Request {
     _bodyParser = RequestBodyParser(_raw);
     _headers = RequestHeaders(_raw.headers);
     _params = RequestParams(<String, String>{}, <String, dynamic>{});
-    _auth = RequestAuth(_params.attributes);
     _validator = RequestValidator(_bodyParser);
     _session = RequestSession(_raw);
   }
@@ -63,9 +59,6 @@ class Request {
 
   /// Access to validation functionality
   RequestValidator get validator => _validator;
-
-  /// Access to authentication functionality
-  RequestAuth get auth => _auth;
 
   /// Access to header functionality
   RequestHeaders get headers => _headers;
@@ -166,41 +159,6 @@ class Request {
   /// Checks if a specific cookie is present.
   bool hasCookie(String name) => cookieHandler.has(name);
 
-  /// Returns the currently authenticated user (if any).
-  /// Shortcut for auth.user
-  Map<String, dynamic>? get user => _auth.user;
-
-  /// Returns the ID of the authenticated user (if available).
-  /// Shortcut for auth.userId
-  dynamic get userId => _auth.userId;
-
-  /// Returns true if a user is authenticated.
-  /// Shortcut for auth.isAuthenticated
-  bool get isAuthenticated => _auth.isAuthenticated;
-
-  /// Returns true if no user is authenticated.
-  /// Shortcut for auth.isGuest
-  bool get isGuest => _auth.isGuest;
-
-  /// Sets the authenticated user.
-  /// Shortcut for auth.setUser()
-  void setUser(Map<String, dynamic> userData) => _auth.setUser(userData);
-
-  /// Clears the authenticated user.
-  /// Shortcut for auth.clearUser()
-  void clearUser() => _auth.clearUser();
-
-  /// Checks if the user has a specific role.
-  /// Shortcut for auth.hasRole()
-  bool hasRole(String role) => _auth.hasRole(role);
-
-  /// Checks if the user has any of the specified roles.
-  /// Shortcut for auth.hasAnyRole()
-  bool hasAnyRole(List<String> roles) => _auth.hasAnyRole(roles);
-
-  /// Checks if the user has all of the specified roles.
-  /// Shortcut for auth.hasAllRoles()
-  bool hasAllRoles(List<String> roles) => _auth.hasAllRoles(roles);
 
   /// Gets a header value by name.
   /// Shortcut for headers.header()
@@ -327,70 +285,5 @@ class Request {
   bool isSessionExpiringSoon([Duration within = const Duration(minutes: 5)]) =>
       _session.isExpiringSoon(within);
 
-  /// Web Authentication helpers
-  /// Checks if user is authenticated via web auth service
-  bool get isWebAuthenticated {
-    try {
-      final authService = WebAuthService.create();
-      return authService.isAuthenticated(this);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /// Gets current web user
-  Future<Map<String, dynamic>?> getWebUser() async {
-    try {
-      final authService = WebAuthService.create();
-      return await authService.getCurrentUser(this);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Gets web authentication status
-  Map<String, dynamic> get webAuthStatus {
-    try {
-      final authService = WebAuthService.create();
-      return authService.getAuthStatus(this);
-    } catch (e) {
-      return {'is_authenticated': false};
-    }
-  }
-
-  /// Gets data for web views (auth + flash messages)
-  Map<String, dynamic> get webViewData {
-    try {
-      final authService = WebAuthService.create();
-      return authService.getViewData(this);
-    } catch (e) {
-      return {'is_authenticated': false};
-    }
-  }
-
-  /// Validates CSRF token
-  bool validateCsrfToken(String token) {
-    try {
-      final authService = WebAuthService.create();
-      return authService.validateCsrfToken(this, token);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /// Generates new CSRF token
-  String generateCsrfToken() {
-    final authService = WebAuthService.create();
-    return authService.generateCsrfToken(this);
-  }
-
-  /// Gets current CSRF token from session
-  String? get sessionCsrfToken {
-    try {
-      final authService = WebAuthService.create();
-      return authService.getCsrfToken(this);
-    } catch (e) {
-      return null;
-    }
-  }
+  
 }

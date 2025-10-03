@@ -85,11 +85,61 @@ class DatabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<List<Map<String, dynamic>>> findTokensByUser(dynamic userId, [String? guard,]) async {
+    final query = Khadem.db
+        .table('personal_access_tokens')
+        .where('tokenable_id', '=', userId);
+
+    if (guard != null) {
+      query.where('guard', '=', guard);
+    }
+
+    final results = await query.get();
+    return results.map((row) => row as Map<String, dynamic>).toList();
+  }
+
+  /// Find tokens by their token string prefix
+  /// 
+  /// This is used for finding session-correlated tokens efficiently
+  Future<List<Map<String, dynamic>>> findTokensByPrefix(
+    String prefix, {
+    String? type,
+    String? guard,
+  }) async {
+    final query = Khadem.db.table('personal_access_tokens')
+        .whereRaw('token LIKE ?', ['$prefix%']); // Use SQL LIKE for prefix search
+
+    if (type != null) {
+      query.where('type', '=', type);
+    }
+    if (guard != null) {
+      query.where('guard', '=', guard);
+    }
+
+    final results = await query.get();
+    return results.map((row) => row as Map<String, dynamic>).toList();
+  }
+
+  @override
   Future<int> cleanupExpiredTokens() async {
     await Khadem.db
         .table('personal_access_tokens')
         .where('expires_at', '<', DateTime.now().toIso8601String())
         .delete();
     return 1; // Assuming successful deletion
+  }
+
+  /// Finds tokens by filter criteria
+  ///
+  /// [filters] A map of column names and values to filter by
+  Future<List<Map<String, dynamic>>> findTokensByFilter(Map<String, dynamic> filters) async {
+    final query = Khadem.db.table('personal_access_tokens');
+    
+    filters.forEach((key, value) {
+      query.where(key, '=', value);
+    });
+
+    final results = await query.get();
+    return results.map((row) => row as Map<String, dynamic>).toList();
   }
 }

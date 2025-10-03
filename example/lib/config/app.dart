@@ -56,98 +56,29 @@ class AppConfig {
         /// Auth configuration
         'auth': {
           'defaults': {
-            'guard': 'web',
-            'passwords': 'users',
+            'guard': 'api',
           },
           'guards': {
             'web': {
-              'driver': 'session',
-              'provider': 'users',
+              'driver': 'token',
             },
             'api': {
-              'driver': 'token',
-              'provider': 'users',
-              'hash': false,
-            },
-            'admin': {
-              'driver': 'token',
-              'provider': 'admins',
+              'driver': 'jwt',
             },
           },
           'providers': {
             'users': {
-              'driver': 'eloquent',
               'model': 'User',
               'table': 'users',
               'primary_key': 'id',
-              'fields': ['email', 'password'],
+              'fields': ['email'],
             },
             'admins': {
-              'driver': 'eloquent',
               'model': 'Admin',
               'table': 'admins',
               'primary_key': 'id',
-              'fields': ['email', 'password'],
+              'fields': ['email'],
             },
-          },
-          'passwords': {
-            'users': {
-              'provider': 'users',
-              'table': 'password_resets',
-              'expire': 60,
-              'throttle': 60,
-            },
-          },
-          'password_policy': {
-            'min_length': 8,
-            'require_uppercase': true,
-            'require_lowercase': true,
-            'require_numbers': true,
-            'require_symbols': false,
-          },
-          'token': {
-            'driver': 'jwt',
-            'secret': env.getOrDefault('JWT_SECRET', 'your-jwt-secret-key'),
-            'ttl': 3600, // 1 hour
-            'algorithm': 'HS256',
-            'refresh_enabled': true,
-            'refresh_ttl': 604800, // 7 days
-            'issuer': 'khadem-app',
-            'audience': 'khadem-users',
-          },
-          'web': {
-            'enable_login': true,
-            'enable_registration': true,
-            'enable_password_reset': true,
-            'enable_email_verification': false,
-            'login_attempts': 5,
-            'lockout_duration': 900, // 15 minutes
-            'remember_me_enabled': true,
-            'remember_me_duration': 604800, // 7 days
-            'login_redirect': '/',
-            'logout_redirect': '/login',
-            'allowed_domains': ['localhost', '127.0.0.1'],
-          },
-          'routes': {
-            'login': '/login',
-            'logout': '/logout',
-            'register': '/register',
-            'password_reset': '/password/reset',
-            'password_reset_request': '/password/email',
-            'email_verification': '/email/verify',
-            'home': '/',
-            'api_prefix': '/api',
-          },
-          'session': {
-            'driver': 'file',
-            'lifetime': 7200,
-            'expire_on_close': false,
-            'encrypt': false,
-            'path': 'storage/sessions',
-            'domain': null,
-            'secure': false,
-            'http_only': true,
-            'same_site': 'lax',
           },
         },
 

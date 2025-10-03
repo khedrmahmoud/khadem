@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:khadem/src/core/index.dart';
+import 'package:khadem/src/modules/index.dart';
 import 'package:test/test.dart';
 
 class FakeHttpRequest extends Stream<Uint8List> implements HttpRequest {
@@ -270,7 +271,6 @@ void main() {
       test('should provide access to all components', () {
         expect(request.bodyParser, isA<RequestBodyParser>());
         expect(request.validator, isA<RequestValidator>());
-        expect(request.auth, isA<RequestAuth>());
         expect(request.headers, isA<RequestHeaders>());
         expect(request.params, isA<RequestParams>());
       });
