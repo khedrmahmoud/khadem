@@ -122,16 +122,15 @@ void main() {
 
   group('RouteMatcher', () {
     late RouteRegistry registry;
-    late RouteMatcher matcher;
 
     setUp(() {
       registry = RouteRegistry();
-      matcher = RouteMatcher(registry.routes);
     });
 
     group('Route Matching', () {
       test('should match exact static route', () {
         registry.get('/users', (req, res) async {});
+        final matcher = RouteMatcher(registry.routes);
 
         final result = matcher.match('GET', '/users');
         expect(result, isNotNull);
@@ -140,6 +139,7 @@ void main() {
 
       test('should match dynamic route with parameters', () {
         registry.get('/users/:id', (req, res) async {});
+        final matcher = RouteMatcher(registry.routes);
 
         final result = matcher.match('GET', '/users/123');
         expect(result, isNotNull);
@@ -148,6 +148,7 @@ void main() {
 
       test('should match route with multiple parameters', () {
         registry.get('/users/:userId/posts/:postId', (req, res) async {});
+        final matcher = RouteMatcher(registry.routes);
 
         final result = matcher.match('GET', '/users/123/posts/456');
         expect(result, isNotNull);
@@ -157,6 +158,7 @@ void main() {
 
       test('should return null for non-matching route', () {
         registry.get('/users', (req, res) async {});
+        final matcher = RouteMatcher(registry.routes);
 
         final result = matcher.match('GET', '/posts');
         expect(result, isNull);
@@ -164,6 +166,7 @@ void main() {
 
       test('should return null for non-matching method', () {
         registry.get('/users', (req, res) async {});
+        final matcher = RouteMatcher(registry.routes);
 
         final result = matcher.match('POST', '/users');
         expect(result, isNull);
@@ -172,6 +175,7 @@ void main() {
       test('should prioritize static routes over dynamic', () {
         registry.get('/users/profile', (req, res) async {});
         registry.get('/users/:id', (req, res) async {});
+        final matcher = RouteMatcher(registry.routes);
 
         final result = matcher.match('GET', '/users/profile');
         expect(result, isNotNull);
@@ -181,6 +185,7 @@ void main() {
       test('should match dynamic route when static not found', () {
         registry.get('/users/profile', (req, res) async {});
         registry.get('/users/:id', (req, res) async {});
+        final matcher = RouteMatcher(registry.routes);
 
         final result = matcher.match('GET', '/users/123');
         expect(result, isNotNull);
@@ -191,6 +196,7 @@ void main() {
     group('Multiple Matches', () {
       test('should find all matching routes', () {
         registry.any('/test', (req, res) async {});
+        final matcher = RouteMatcher(registry.routes);
 
         final results = matcher.findAllMatches('GET', '/test');
         expect(results.length, equals(1));
@@ -198,6 +204,7 @@ void main() {
       });
 
       test('should return empty list when no matches', () {
+        final matcher = RouteMatcher(registry.routes);
         final results = matcher.findAllMatches('GET', '/nonexistent');
         expect(results, isEmpty);
       });
@@ -206,15 +213,18 @@ void main() {
     group('Match Checking', () {
       test('should return true when route exists', () {
         registry.get('/test', (req, res) async {});
+        final matcher = RouteMatcher(registry.routes);
         expect(matcher.hasMatch('GET', '/test'), isTrue);
       });
 
       test('should return false when route does not exist', () {
+        final matcher = RouteMatcher(registry.routes);
         expect(matcher.hasMatch('GET', '/nonexistent'), isFalse);
       });
 
       test('should return false when method does not match', () {
         registry.get('/test', (req, res) async {});
+        final matcher = RouteMatcher(registry.routes);
         expect(matcher.hasMatch('POST', '/test'), isFalse);
       });
     });
@@ -475,6 +485,183 @@ void main() {
         expect(methods, contains('DELETE'));
         expect(methods, contains('HEAD'));
       });
+    });
+  });
+
+  group('Trailing Slash Normalization', () {
+    late Router router;
+    final handler = (Request req, Response res) async {};
+
+    setUp(() {
+      router = Router();
+    });
+
+    group('Static Routes', () {
+      test('should match path with and without trailing slash', () {
+        router.get('/users', handler);
+
+        final match1 = router.match('GET', '/users');
+        final match2 = router.match('GET', '/users/');
+
+        expect(match1, isNotNull);
+        expect(match2, isNotNull);
+      });
+
+      test('should preserve root path', () {
+        router.get('/', handler);
+
+        expect(router.match('GET', '/'), isNotNull);
+      });
+
+      test('should work with nested paths', () {
+        router.get('/api/users/profile', handler);
+
+        expect(router.match('GET', '/api/users/profile'), isNotNull);
+        expect(router.match('GET', '/api/users/profile/'), isNotNull);
+      });
+
+      test('should work with multiple segments', () {
+        router.get('/api/v1/users/list', handler);
+
+        expect(router.match('GET', '/api/v1/users/list'), isNotNull);
+        expect(router.match('GET', '/api/v1/users/list/'), isNotNull);
+      });
+    });
+
+    group('Dynamic Routes', () {
+      test('should work with single parameter', () {
+        router.get('/users/:id', handler);
+
+        final match1 = router.match('GET', '/users/123');
+        final match2 = router.match('GET', '/users/123/');
+
+        expect(match1, isNotNull);
+        expect(match2, isNotNull);
+        expect(match1!.params['id'], equals('123'));
+        expect(match2!.params['id'], equals('123'));
+      });
+
+      test('should work with multiple parameters', () {
+        router.get('/users/:userId/posts/:postId', handler);
+
+        final match1 = router.match('GET', '/users/123/posts/456');
+        final match2 = router.match('GET', '/users/123/posts/456/');
+
+        expect(match1, isNotNull);
+        expect(match2, isNotNull);
+        expect(match1!.params['userId'], equals('123'));
+        expect(match1.params['postId'], equals('456'));
+        expect(match2!.params['userId'], equals('123'));
+        expect(match2.params['postId'], equals('456'));
+      });
+
+      test('should work with mixed static and dynamic segments', () {
+        router.get('/api/users/:id/profile', handler);
+
+        final match1 = router.match('GET', '/api/users/123/profile');
+        final match2 = router.match('GET', '/api/users/123/profile/');
+
+        expect(match1, isNotNull);
+        expect(match2, isNotNull);
+        expect(match1!.params['id'], equals('123'));
+        expect(match2!.params['id'], equals('123'));
+      });
+    });
+
+    group('Route Groups', () {
+      test('should normalize paths in route groups', () {
+        router.group(
+          prefix: '/api',
+          routes: (r) {
+            r.get('/users', handler);
+            r.get('/posts/:id', handler);
+          },
+        );
+
+        expect(router.match('GET', '/api/users'), isNotNull);
+        expect(router.match('GET', '/api/users/'), isNotNull);
+        expect(router.match('GET', '/api/posts/123'), isNotNull);
+        expect(router.match('GET', '/api/posts/123/'), isNotNull);
+      });
+    });
+
+    group('HTTP Methods', () {
+      test('should work across all HTTP methods', () {
+        router.get('/users', handler);
+        router.post('/users', handler);
+        router.put('/users/:id', handler);
+        router.delete('/users/:id', handler);
+
+        expect(router.match('GET', '/users/'), isNotNull);
+        expect(router.match('POST', '/users/'), isNotNull);
+        expect(router.match('PUT', '/users/123/'), isNotNull);
+        expect(router.match('DELETE', '/users/123/'), isNotNull);
+      });
+    });
+  });
+
+  group('Performance Optimization', () {
+    late Router router;
+    final handler = (Request req, Response res) async {};
+
+    setUp(() {
+      router = Router();
+    });
+
+    test('should handle large number of static routes efficiently', () {
+      // Register 100 static routes
+      for (int i = 0; i < 100; i++) {
+        router.get('/route$i', handler);
+      }
+
+      final stopwatch = Stopwatch()..start();
+      final match = router.match('GET', '/route99');
+      stopwatch.stop();
+
+      expect(match, isNotNull);
+      // Should be very fast (< 10ms even on slow machines)
+      expect(stopwatch.elapsedMilliseconds, lessThan(10));
+    });
+
+    test('should separate static and dynamic routes', () {
+      // Register mix of static and dynamic routes
+      router.get('/static1', handler);
+      router.get('/static2', handler);
+      router.get('/users/:id', handler);
+      router.get('/posts/:id', handler);
+
+      // Static routes should match faster than dynamic
+      final staticStopwatch = Stopwatch()..start();
+      router.match('GET', '/static1');
+      staticStopwatch.stop();
+
+      final dynamicStopwatch = Stopwatch()..start();
+      router.match('GET', '/users/123');
+      dynamicStopwatch.stop();
+
+      expect(router.match('GET', '/static1'), isNotNull);
+      expect(router.match('GET', '/users/123'), isNotNull);
+      // Both should be fast, but static should be faster or equal
+      expect(staticStopwatch.elapsedMicroseconds,
+          lessThanOrEqualTo(dynamicStopwatch.elapsedMicroseconds + 1000));
+    });
+
+    test('should handle mix of trailing slash and no trailing slash', () {
+      // Register 50 routes
+      for (int i = 0; i < 50; i++) {
+        router.get('/api/resource$i', handler);
+      }
+
+      // Match with and without trailing slashes
+      final stopwatch = Stopwatch()..start();
+      for (int i = 0; i < 50; i++) {
+        router.match('GET', '/api/resource$i');
+        router.match('GET', '/api/resource$i/');
+      }
+      stopwatch.stop();
+
+      // 100 matches should be very fast
+      expect(stopwatch.elapsedMilliseconds, lessThan(50));
     });
   });
 }
