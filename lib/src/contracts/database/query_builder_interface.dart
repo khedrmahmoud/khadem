@@ -49,6 +49,121 @@ abstract class QueryBuilderInterface<T> {
     dynamic value,
   );
 
+  // ---------------------------- Advanced WHERE Clauses ----------------------------
+
+  /// WHERE column IN (values)
+  QueryBuilderInterface<T> whereIn(String column, List<dynamic> values);
+
+  /// WHERE column NOT IN (values)
+  QueryBuilderInterface<T> whereNotIn(String column, List<dynamic> values);
+
+  /// WHERE column IS NULL
+  QueryBuilderInterface<T> whereNull(String column);
+
+  /// WHERE column IS NOT NULL
+  QueryBuilderInterface<T> whereNotNull(String column);
+
+  /// WHERE column BETWEEN start AND end
+  QueryBuilderInterface<T> whereBetween(
+    String column,
+    dynamic start,
+    dynamic end,
+  );
+
+  /// WHERE column NOT BETWEEN start AND end
+  QueryBuilderInterface<T> whereNotBetween(
+    String column,
+    dynamic start,
+    dynamic end,
+  );
+
+  /// WHERE column LIKE pattern
+  QueryBuilderInterface<T> whereLike(String column, String pattern);
+
+  /// WHERE column NOT LIKE pattern
+  QueryBuilderInterface<T> whereNotLike(String column, String pattern);
+
+  /// WHERE DATE(column) = date
+  QueryBuilderInterface<T> whereDate(String column, String date);
+
+  /// WHERE TIME(column) = time
+  QueryBuilderInterface<T> whereTime(String column, String time);
+
+  /// WHERE YEAR(column) = year
+  QueryBuilderInterface<T> whereYear(String column, int year);
+
+  /// WHERE MONTH(column) = month
+  QueryBuilderInterface<T> whereMonth(String column, int month);
+
+  /// WHERE DAY(column) = day
+  QueryBuilderInterface<T> whereDay(String column, int day);
+
+  /// WHERE column1 operator column2 (compare two columns)
+  QueryBuilderInterface<T> whereColumn(
+    String column1,
+    String operator,
+    String column2,
+  );
+
+  // ---------------------------- JSON Operations ----------------------------
+
+  /// WHERE JSON_CONTAINS(column, value, path)
+  QueryBuilderInterface<T> whereJsonContains(
+    String column,
+    dynamic value, [
+    String? path,
+  ]);
+
+  /// WHERE NOT JSON_CONTAINS(column, value, path)
+  QueryBuilderInterface<T> whereJsonDoesntContain(
+    String column,
+    dynamic value, [
+    String? path,
+  ]);
+
+  /// WHERE JSON_LENGTH(column, path) operator value
+  QueryBuilderInterface<T> whereJsonLength(
+    String column,
+    String operator,
+    int length, [
+    String? path,
+  ]);
+
+  /// WHERE JSON_CONTAINS_PATH(column, 'one', path)
+  QueryBuilderInterface<T> whereJsonContainsKey(String column, String path);
+
+  // ---------------------------- Advanced Query Helpers ----------------------------
+
+  /// Matches ANY of the columns with the given operator and value
+  QueryBuilderInterface<T> whereAny(
+    List<String> columns,
+    String operator,
+    dynamic value,
+  );
+
+  /// Matches ALL of the conditions
+  QueryBuilderInterface<T> whereAll(Map<String, dynamic> conditions);
+
+  /// Matches NONE of the conditions
+  QueryBuilderInterface<T> whereNone(Map<String, dynamic> conditions);
+
+  /// Shorthand for orderBy(column, 'DESC')
+  QueryBuilderInterface<T> latest([String column = 'created_at']);
+
+  /// Shorthand for orderBy(column, 'ASC')
+  QueryBuilderInterface<T> oldest([String column = 'created_at']);
+
+  /// ORDER BY RAND()
+  QueryBuilderInterface<T> inRandomOrder();
+
+  /// SELECT DISTINCT
+  QueryBuilderInterface<T> distinct();
+
+  /// Add more columns to select
+  QueryBuilderInterface<T> addSelect(List<String> columns);
+
+  // ---------------------------- Basic Clauses ----------------------------
+
   /// Limits the number of results.
   QueryBuilderInterface<T> limit(int number);
 

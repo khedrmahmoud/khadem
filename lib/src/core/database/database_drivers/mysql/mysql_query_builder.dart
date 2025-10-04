@@ -19,6 +19,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   List<String> _columns = ['*'];
   final List<String> _where = [];
   List<dynamic> _eagerRelations = [];
+  bool _isDistinct = false;
 
   final List<dynamic> _bindings = [];
   int? _limit;
@@ -67,6 +68,259 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     _where.add('OR `$column` $operator ?');
     _bindings.add(value);
     return this;
+  }
+
+  // ---------------------------- Advanced WHERE Clauses ----------------------------
+
+  @override
+  QueryBuilderInterface<T> whereIn(String column, List<dynamic> values) {
+    if (values.isEmpty) return this;
+
+    final placeholders = List.filled(values.length, '?').join(', ');
+    _where.add('`$column` IN ($placeholders)');
+    _bindings.addAll(values);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereNotIn(String column, List<dynamic> values) {
+    if (values.isEmpty) return this;
+
+    final placeholders = List.filled(values.length, '?').join(', ');
+    _where.add('`$column` NOT IN ($placeholders)');
+    _bindings.addAll(values);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereNull(String column) {
+    _where.add('`$column` IS NULL');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereNotNull(String column) {
+    _where.add('`$column` IS NOT NULL');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereBetween(
+    String column,
+    dynamic start,
+    dynamic end,
+  ) {
+    _where.add('`$column` BETWEEN ? AND ?');
+    _bindings.addAll([start, end]);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereNotBetween(
+    String column,
+    dynamic start,
+    dynamic end,
+  ) {
+    _where.add('`$column` NOT BETWEEN ? AND ?');
+    _bindings.addAll([start, end]);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereLike(String column, String pattern) {
+    _where.add('`$column` LIKE ?');
+    _bindings.add(pattern);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereNotLike(String column, String pattern) {
+    _where.add('`$column` NOT LIKE ?');
+    _bindings.add(pattern);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereDate(String column, String date) {
+    _where.add('DATE(`$column`) = ?');
+    _bindings.add(date);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereTime(String column, String time) {
+    _where.add('TIME(`$column`) = ?');
+    _bindings.add(time);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereYear(String column, int year) {
+    _where.add('YEAR(`$column`) = ?');
+    _bindings.add(year);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereMonth(String column, int month) {
+    _where.add('MONTH(`$column`) = ?');
+    _bindings.add(month);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereDay(String column, int day) {
+    _where.add('DAY(`$column`) = ?');
+    _bindings.add(day);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereColumn(
+    String column1,
+    String operator,
+    String column2,
+  ) {
+    _where.add('`$column1` $operator `$column2`');
+    return this;
+  }
+
+  // ---------------------------- JSON Operations ----------------------------
+
+  @override
+  QueryBuilderInterface<T> whereJsonContains(
+    String column,
+    dynamic value, [
+    String? path,
+  ]) {
+    final jsonValue = value is String ? '"$value"' : _jsonEncode(value);
+    if (path != null) {
+      _where.add('JSON_CONTAINS(`$column`, ?, ?)');
+      _bindings.addAll([jsonValue, '\$.$path']);
+    } else {
+      _where.add('JSON_CONTAINS(`$column`, ?)');
+      _bindings.add(jsonValue);
+    }
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereJsonDoesntContain(
+    String column,
+    dynamic value, [
+    String? path,
+  ]) {
+    final jsonValue = value is String ? '"$value"' : _jsonEncode(value);
+    if (path != null) {
+      _where.add('NOT JSON_CONTAINS(`$column`, ?, ?)');
+      _bindings.addAll([jsonValue, '\$.$path']);
+    } else {
+      _where.add('NOT JSON_CONTAINS(`$column`, ?)');
+      _bindings.add(jsonValue);
+    }
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereJsonLength(
+    String column,
+    String operator,
+    int length, [
+    String? path,
+  ]) {
+    if (path != null) {
+      _where.add('JSON_LENGTH(`$column`, ?) $operator ?');
+      _bindings.addAll(['\$.$path', length]);
+    } else {
+      _where.add('JSON_LENGTH(`$column`) $operator ?');
+      _bindings.add(length);
+    }
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereJsonContainsKey(String column, String path) {
+    _where.add("JSON_CONTAINS_PATH(`$column`, 'one', ?)");
+    _bindings.add('\$.$path');
+    return this;
+  }
+
+  // ---------------------------- Advanced Query Helpers ----------------------------
+
+  @override
+  QueryBuilderInterface<T> whereAny(
+    List<String> columns,
+    String operator,
+    dynamic value,
+  ) {
+    if (columns.isEmpty) return this;
+
+    final conditions = columns.map((col) => '`$col` $operator ?').join(' OR ');
+    _where.add('($conditions)');
+    for (int i = 0; i < columns.length; i++) {
+      _bindings.add(value);
+    }
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereAll(Map<String, dynamic> conditions) {
+    conditions.forEach((column, value) {
+      where(column, '=', value);
+    });
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereNone(Map<String, dynamic> conditions) {
+    if (conditions.isEmpty) return this;
+
+    final conditionsList =
+        conditions.entries.map((e) => '`${e.key}` = ?').join(' OR ');
+    _where.add('NOT ($conditionsList)');
+    _bindings.addAll(conditions.values);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> latest([String column = 'created_at']) {
+    return orderBy(column, direction: 'DESC');
+  }
+
+  @override
+  QueryBuilderInterface<T> oldest([String column = 'created_at']) {
+    return orderBy(column, direction: 'ASC');
+  }
+
+  @override
+  QueryBuilderInterface<T> inRandomOrder() {
+    _orderBy = 'RAND()';
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> distinct() {
+    // Store distinct flag - will be used in _buildSelectQuery
+    _isDistinct = true;
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> addSelect(List<String> columns) {
+    if (_columns.contains('*')) {
+      _columns = columns;
+    } else {
+      _columns.addAll(columns);
+    }
+    return this;
+  }
+
+  /// Helper method to encode JSON values
+  String _jsonEncode(dynamic value) {
+    if (value is Map || value is List) {
+      return value.toString().replaceAll("'", '"');
+    }
+    return value.toString();
   }
 
   @override
@@ -257,7 +511,9 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
 
   /// Builds the SELECT query string based on current state.
   String _buildSelectQuery() {
-    final buffer = StringBuffer('SELECT ${_columns.join(', ')} FROM `$_table`');
+    final distinct = _isDistinct ? 'DISTINCT ' : '';
+    final buffer =
+        StringBuffer('SELECT $distinct${_columns.join(', ')} FROM `$_table`');
 
     if (_where.isNotEmpty) buffer.write(' WHERE ${_where.join(' AND ')}');
     if (_groupBy != null) buffer.write(' GROUP BY $_groupBy');
@@ -360,6 +616,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     cloned._where.addAll(_where);
     cloned._bindings.addAll(_bindings);
     cloned._eagerRelations = [..._eagerRelations];
+    cloned._isDistinct = _isDistinct;
     cloned._limit = _limit;
     cloned._offset = _offset;
     cloned._orderBy = _orderBy;
