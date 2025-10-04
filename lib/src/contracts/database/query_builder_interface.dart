@@ -162,6 +162,127 @@ abstract class QueryBuilderInterface<T> {
   /// Add more columns to select
   QueryBuilderInterface<T> addSelect(List<String> columns);
 
+  // ---------------------------- JOIN Operations ----------------------------
+
+  /// INNER JOIN
+  QueryBuilderInterface<T> join(
+    String table,
+    String firstColumn,
+    String operator,
+    String secondColumn,
+  );
+
+  /// LEFT JOIN
+  QueryBuilderInterface<T> leftJoin(
+    String table,
+    String firstColumn,
+    String operator,
+    String secondColumn,
+  );
+
+  /// RIGHT JOIN
+  QueryBuilderInterface<T> rightJoin(
+    String table,
+    String firstColumn,
+    String operator,
+    String secondColumn,
+  );
+
+  /// CROSS JOIN
+  QueryBuilderInterface<T> crossJoin(String table);
+
+  // ---------------------------- Bulk Operations ----------------------------
+
+  /// Insert multiple rows at once
+  Future<List<int>> insertMany(List<Map<String, dynamic>> rows);
+
+  /// Insert or update (UPSERT) - MySQL: INSERT ... ON DUPLICATE KEY UPDATE
+  Future<int> upsert(
+    List<Map<String, dynamic>> rows, {
+    required List<String> uniqueBy,
+    List<String>? update,
+  });
+
+  /// Increment a column value
+  Future<int> increment(String column, [int amount = 1]);
+
+  /// Decrement a column value
+  Future<int> decrement(String column, [int amount = 1]);
+
+  /// Increment multiple columns
+  Future<void> incrementEach(Map<String, int> columns);
+
+  /// Process results in chunks
+  Future<void> chunk(
+    int size,
+    Future<void> Function(List<T> items) callback,
+  );
+
+  /// Process results in chunks by ID (more efficient for large datasets)
+  Future<void> chunkById(
+    int size,
+    Future<void> Function(List<T> items) callback, {
+    String column = 'id',
+    String? alias,
+  });
+
+  /// Lazy load results as a stream (alternative to asStream for chunking)
+  Stream<T> lazy([int chunkSize = 100]);
+
+  // ---------------------------- Advanced Pagination & Locking ----------------------------
+
+  /// Simple pagination without total count (faster)
+  Future<Map<String, dynamic>> simplePaginate({
+    int perPage = 15,
+    int page = 1,
+  });
+
+  /// Cursor-based pagination for efficient large dataset navigation
+  Future<Map<String, dynamic>> cursorPaginate({
+    int perPage = 15,
+    String? cursor,
+    String column = 'id',
+  });
+
+  /// Add shared lock (FOR SHARE) - prevents updates until transaction completes
+  QueryBuilderInterface<T> sharedLock();
+
+  /// Add exclusive lock (FOR UPDATE) - prevents reads and updates
+  QueryBuilderInterface<T> lockForUpdate();
+
+  // ---------------------------- Union & Subqueries ----------------------------
+
+  /// UNION - combines results from two queries (removes duplicates)
+  QueryBuilderInterface<T> union(QueryBuilderInterface<T> query);
+
+  /// UNION ALL - combines results from two queries (keeps duplicates)
+  QueryBuilderInterface<T> unionAll(QueryBuilderInterface<T> query);
+
+  /// WHERE column IN (subquery)
+  QueryBuilderInterface<T> whereInSubquery(
+    String column,
+    String Function(QueryBuilderInterface<dynamic> query) callback,
+  );
+
+  /// WHERE EXISTS (subquery)
+  QueryBuilderInterface<T> whereExists(
+    String Function(QueryBuilderInterface<dynamic> query) callback,
+  );
+
+  /// WHERE NOT EXISTS (subquery)
+  QueryBuilderInterface<T> whereNotExists(
+    String Function(QueryBuilderInterface<dynamic> query) callback,
+  );
+
+  // ---------------------------- Full-Text Search ----------------------------
+
+  /// Full-text search using MySQL MATCH AGAINST
+  QueryBuilderInterface<T> whereFullText(
+    List<String> columns,
+    String searchTerm, {
+    String mode = 'natural', // natural, boolean, query_expansion
+  });
+
   // ---------------------------- Basic Clauses ----------------------------
 
   /// Limits the number of results.

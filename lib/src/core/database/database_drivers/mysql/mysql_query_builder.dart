@@ -20,6 +20,9 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   final List<String> _where = [];
   List<dynamic> _eagerRelations = [];
   bool _isDistinct = false;
+  final List<String> _joins = [];
+  final List<String> _unions = [];
+  String? _lock;
 
   final List<dynamic> _bindings = [];
   int? _limit;
@@ -323,6 +326,362 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     return value.toString();
   }
 
+  // ---------------------------- JOIN Operations ----------------------------
+
+  @override
+  QueryBuilderInterface<T> join(
+    String table,
+    String firstColumn,
+    String operator,
+    String secondColumn,
+  ) {
+    _joins.add('INNER JOIN `$table` ON `$firstColumn` $operator `$secondColumn`');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> leftJoin(
+    String table,
+    String firstColumn,
+    String operator,
+    String secondColumn,
+  ) {
+    _joins.add('LEFT JOIN `$table` ON `$firstColumn` $operator `$secondColumn`');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> rightJoin(
+    String table,
+    String firstColumn,
+    String operator,
+    String secondColumn,
+  ) {
+    _joins.add('RIGHT JOIN `$table` ON `$firstColumn` $operator `$secondColumn`');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> crossJoin(String table) {
+    _joins.add('CROSS JOIN `$table`');
+    return this;
+  }
+
+  // ---------------------------- Bulk Operations ----------------------------
+
+  @override
+  Future<List<int>> insertMany(List<Map<String, dynamic>> rows) async {
+    if (rows.isEmpty) return [];
+
+    final columns = rows.first.keys.map((k) => '`$k`').join(', ');
+    final placeholders = rows.map((row) {
+      return '(${List.filled(row.length, '?').join(', ')})';
+    }).join(', ');
+
+    final values = rows.expand((row) => row.values).toList();
+
+    final sql = 'INSERT INTO `$_table` ($columns) VALUES $placeholders';
+    final result = await _connection.execute(sql, values);
+
+    // Return list of inserted IDs
+    final firstId = result.insertId ?? 0;
+    return List.generate(rows.length, (i) => firstId + i);
+  }
+
+  @override
+  Future<int> upsert(
+    List<Map<String, dynamic>> rows, {
+    required List<String> uniqueBy,
+    List<String>? update,
+  }) async {
+    if (rows.isEmpty) return 0;
+
+    final columns = rows.first.keys.map((k) => '`$k`').join(', ');
+    final placeholders = rows.map((row) {
+      return '(${List.filled(row.length, '?').join(', ')})';
+    }).join(', ');
+
+    final values = rows.expand((row) => row.values).toList();
+
+    // Determine which columns to update
+    final updateColumns = update ?? rows.first.keys.toList();
+    final updateClause = updateColumns
+        .where((col) => !uniqueBy.contains(col))
+        .map((col) => '`$col` = VALUES(`$col`)')
+        .join(', ');
+
+    final sql = '''
+      INSERT INTO `$_table` ($columns) 
+      VALUES $placeholders
+      ON DUPLICATE KEY UPDATE $updateClause
+    ''';
+
+    final result = await _connection.execute(sql, values);
+    return result.affectedRows ?? 0;
+  }
+
+  @override
+  Future<int> increment(String column, [int amount = 1]) async {
+    if (_where.isEmpty) {
+      throw DatabaseException('Increment without WHERE clause is not allowed.');
+    }
+
+    final sql =
+        'UPDATE `$_table` SET `$column` = `$column` + ? WHERE ${_where.join(' AND ')}';
+    final result = await _connection.execute(sql, [amount, ..._bindings]);
+    return result.affectedRows ?? 0;
+  }
+
+  @override
+  Future<int> decrement(String column, [int amount = 1]) async {
+    if (_where.isEmpty) {
+      throw DatabaseException('Decrement without WHERE clause is not allowed.');
+    }
+
+    final sql =
+        'UPDATE `$_table` SET `$column` = `$column` - ? WHERE ${_where.join(' AND ')}';
+    final result = await _connection.execute(sql, [amount, ..._bindings]);
+    return result.affectedRows ?? 0;
+  }
+
+  @override
+  Future<void> incrementEach(Map<String, int> columns) async {
+    if (_where.isEmpty) {
+      throw DatabaseException(
+        'IncrementEach without WHERE clause is not allowed.',
+      );
+    }
+
+    final setClause = columns.entries
+        .map((e) => '`${e.key}` = `${e.key}` + ?')
+        .join(', ');
+    final values = [...columns.values, ..._bindings];
+
+    final sql =
+        'UPDATE `$_table` SET $setClause WHERE ${_where.join(' AND ')}';
+    await _connection.execute(sql, values);
+  }
+
+  @override
+  Future<void> chunk(
+    int size,
+    Future<void> Function(List<T> items) callback,
+  ) async {
+    int page = 1;
+    List<T> items;
+
+    do {
+      final query = clone();
+      items = await query.offset((page - 1) * size).limit(size).get();
+
+      if (items.isNotEmpty) {
+        await callback(items);
+      }
+
+      page++;
+    } while (items.length == size);
+  }
+
+  @override
+  Future<void> chunkById(
+    int size,
+    Future<void> Function(List<T> items) callback, {
+    String column = 'id',
+    String? alias,
+  }) async {
+    final columnName = alias ?? column;
+    dynamic lastId;
+
+    do {
+      final query = clone();
+
+      if (lastId != null) {
+        query.where(column, '>', lastId);
+      }
+
+      final items = await query.orderBy(column).limit(size).get();
+
+      if (items.isEmpty) break;
+
+      await callback(items);
+
+      // Get the last ID from the chunk
+      final lastItem = items.last;
+      if (lastItem is Map<String, dynamic>) {
+        lastId = lastItem[columnName];
+      } else if (lastItem is KhademModel) {
+        lastId = lastItem.rawData[columnName];
+      }
+    } while (true);
+  }
+
+  @override
+  Stream<T> lazy([int chunkSize = 100]) async* {
+    int page = 1;
+    List<T> items;
+
+    do {
+      final query = clone();
+      items = await query.offset((page - 1) * chunkSize).limit(chunkSize).get();
+
+      for (final item in items) {
+        yield item;
+      }
+
+      page++;
+    } while (items.length == chunkSize);
+  }
+
+  // ---------------------------- Advanced Pagination & Locking ----------------------------
+
+  @override
+  Future<Map<String, dynamic>> simplePaginate({
+    int perPage = 15,
+    int page = 1,
+  }) async {
+    // Get one extra item to check if there are more pages
+    final query = clone();
+    final items = await query
+        .offset((page - 1) * perPage)
+        .limit(perPage + 1)
+        .get();
+
+    final hasMorePages = items.length > perPage;
+    final data = hasMorePages ? items.sublist(0, perPage) : items;
+
+    return {
+      'data': data,
+      'perPage': perPage,
+      'currentPage': page,
+      'hasMorePages': hasMorePages,
+      'from': (page - 1) * perPage + 1,
+      'to': (page - 1) * perPage + data.length,
+    };
+  }
+
+  @override
+  Future<Map<String, dynamic>> cursorPaginate({
+    int perPage = 15,
+    String? cursor,
+    String column = 'id',
+  }) async {
+    final query = clone();
+
+    // If cursor is provided, add WHERE condition
+    if (cursor != null) {
+      query.where(column, '>', cursor);
+    }
+
+    // Get one extra item to check if there are more pages
+    final items = await query.orderBy(column).limit(perPage + 1).get();
+
+    final hasMore = items.length > perPage;
+    final data = hasMore ? items.sublist(0, perPage) : items;
+
+    // Get next cursor
+    String? nextCursor;
+    if (hasMore && data.isNotEmpty) {
+      final lastItem = data.last;
+      if (lastItem is Map<String, dynamic>) {
+        nextCursor = lastItem[column]?.toString();
+      } else if (lastItem is KhademModel) {
+        nextCursor = lastItem.rawData[column]?.toString();
+      }
+    }
+
+    return {
+      'data': data,
+      'perPage': perPage,
+      'nextCursor': nextCursor,
+      'previousCursor': cursor,
+      'hasMore': hasMore,
+    };
+  }
+
+  @override
+  QueryBuilderInterface<T> sharedLock() {
+    _lock = 'FOR SHARE';
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> lockForUpdate() {
+    _lock = 'FOR UPDATE';
+    return this;
+  }
+
+  // ---------------------------- Union & Subqueries ----------------------------
+
+  @override
+  QueryBuilderInterface<T> union(QueryBuilderInterface<T> query) {
+    _unions.add('UNION (${query.toSql()})');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> unionAll(QueryBuilderInterface<T> query) {
+    _unions.add('UNION ALL (${query.toSql()})');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereInSubquery(
+    String column,
+    String Function(QueryBuilderInterface<dynamic> query) callback,
+  ) {
+    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, _table);
+    final subquerySql = callback(subquery);
+    _where.add('`$column` IN ($subquerySql)');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereExists(
+    String Function(QueryBuilderInterface<dynamic> query) callback,
+  ) {
+    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, _table);
+    final subquerySql = callback(subquery);
+    _where.add('EXISTS ($subquerySql)');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereNotExists(
+    String Function(QueryBuilderInterface<dynamic> query) callback,
+  ) {
+    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, _table);
+    final subquerySql = callback(subquery);
+    _where.add('NOT EXISTS ($subquerySql)');
+    return this;
+  }
+
+  // ---------------------------- Full-Text Search ----------------------------
+
+  @override
+  QueryBuilderInterface<T> whereFullText(
+    List<String> columns,
+    String searchTerm, {
+    String mode = 'natural',
+  }) {
+    final columnList = columns.map((c) => '`$c`').join(', ');
+
+    String matchMode;
+    switch (mode) {
+      case 'boolean':
+        matchMode = 'IN BOOLEAN MODE';
+        break;
+      case 'query_expansion':
+        matchMode = 'WITH QUERY EXPANSION';
+        break;
+      default:
+        matchMode = 'IN NATURAL LANGUAGE MODE';
+    }
+
+    _where.add('MATCH ($columnList) AGAINST (? $matchMode)');
+    _bindings.add(searchTerm);
+    return this;
+  }
+
   @override
   QueryBuilderInterface<T> limit(int number) {
     _limit = number;
@@ -515,12 +874,19 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     final buffer =
         StringBuffer('SELECT $distinct${_columns.join(', ')} FROM `$_table`');
 
+    if (_joins.isNotEmpty) buffer.write(' ${_joins.join(' ')}');
     if (_where.isNotEmpty) buffer.write(' WHERE ${_where.join(' AND ')}');
     if (_groupBy != null) buffer.write(' GROUP BY $_groupBy');
     if (_having != null) buffer.write(' HAVING $_having');
     if (_orderBy != null) buffer.write(' ORDER BY $_orderBy');
     if (_limit != null) buffer.write(' LIMIT $_limit');
     if (_offset != null) buffer.write(' OFFSET $_offset');
+    if (_lock != null) buffer.write(' $_lock');
+
+    // Add unions at the end
+    if (_unions.isNotEmpty) {
+      buffer.write(' ${_unions.join(' ')}');
+    }
 
     return buffer.toString();
   }
@@ -617,6 +983,9 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     cloned._bindings.addAll(_bindings);
     cloned._eagerRelations = [..._eagerRelations];
     cloned._isDistinct = _isDistinct;
+    cloned._joins.addAll(_joins);
+    cloned._unions.addAll(_unions);
+    cloned._lock = _lock;
     cloned._limit = _limit;
     cloned._offset = _offset;
     cloned._orderBy = _orderBy;
