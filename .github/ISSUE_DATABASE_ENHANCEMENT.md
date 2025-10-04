@@ -1,7 +1,7 @@
 # Database Query Builder Enhancement: Advanced Features, Performance & Security
 
 **Labels:** `enhancement`, `database`, `query-builder`, `performance`, `security`  
-**Milestone:** v1.2.0  
+**Milestone:** v1.2.0-beta 
 **Priority:** High
 
 ---
