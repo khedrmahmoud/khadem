@@ -48,20 +48,17 @@ class TestAuthConfig implements AuthConfig {
   
   @override
   List<String> getAllProviderKeys() {
-    // TODO: implement getAllProviderKeys
-    throw UnimplementedError();
+    return ['users'];
   }
   
   @override
   String getDefaultProvider() {
-    // TODO: implement getDefaultProvider
-    throw UnimplementedError();
+    return 'users';
   }
   
   @override
   List<Map<String, dynamic>> getProvidersForGuard(String guardName) {
-    // TODO: implement getProvidersForGuard
-    throw UnimplementedError();
+    return [getProvider('users')];
   }
 }
 

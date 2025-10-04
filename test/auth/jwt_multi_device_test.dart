@@ -83,22 +83,46 @@ class MockTokenService implements TokenService {
   }
 
   @override
-  Future<int> deleteUserTokens(dynamic userId, [String? guard]) async {
+  Future<int> deleteUserTokens(dynamic userId, {String? guard, Map<String, dynamic>? filter}) async {
     final tokens = _userTokens[userId.toString()] ?? [];
     int deleted = 0;
     
-    for (final tokenData in tokens) {
-      if (guard == null || tokenData['guard'] == guard) {
+    for (final tokenData in [...tokens]) {
+      bool shouldDelete = true;
+      
+      // Check guard filter
+      if (guard != null && tokenData['guard'] != guard) {
+        shouldDelete = false;
+      }
+      
+      // Check custom filters
+      if (filter != null && shouldDelete) {
+        for (final entry in filter.entries) {
+          final key = entry.key;
+          final value = entry.value;
+          
+          if (value is List) {
+            // For list values, check if the token's value is in the list
+            if (!value.contains(tokenData[key])) {
+              shouldDelete = false;
+              break;
+            }
+          } else {
+            // For single values, check for equality
+            if (tokenData[key] != value) {
+              shouldDelete = false;
+              break;
+            }
+          }
+        }
+      }
+      
+      if (shouldDelete) {
         final token = tokenData['token'] as String;
         _tokens.remove(token);
+        _userTokens[userId.toString()]?.remove(tokenData);
         deleted++;
       }
-    }
-    
-    if (guard == null) {
-      _userTokens[userId.toString()]?.clear();
-    } else {
-      _userTokens[userId.toString()]?.removeWhere((t) => t['guard'] == guard);
     }
     
     return deleted;
