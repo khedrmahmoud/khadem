@@ -36,8 +36,8 @@ class DatabaseTokenService implements TokenService {
   }
 
   @override
-  Future<int> deleteUserTokens(dynamic userId, [String? guard]) async {
-    return _repository.deleteUserTokens(userId, guard);
+  Future<int> deleteUserTokens(dynamic userId, {String? guard, Map<String, dynamic>? filter}) async {
+    return _repository.deleteUserTokens(userId, guard: guard, filter: filter);
   }
 
   @override

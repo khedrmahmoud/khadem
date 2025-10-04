@@ -98,16 +98,10 @@ abstract class Guard {
 
   /// Logs out the user from all devices (invalidates all tokens)
   ///
-  /// [userId] The user ID to logout from all devices
-  Future<void> logoutAll(dynamic userId) async {
+  /// [token] The user ID to logout from all devices
+  Future<void> logoutAll(dynamic token) async {
     // Get all tokens for this user and guard
-    final tokens = await repository.findTokensByUser(userId, providerKey);
-
-    // Delete all tokens
-    for (final tokenData in tokens) {
-      final token = tokenData['token'] as String;
-      await repository.deleteToken(token);
-    }
+    return driver.logoutFromAllDevices(token);
   }
 
   /// Logs out the user from other devices (invalidates all tokens except current)

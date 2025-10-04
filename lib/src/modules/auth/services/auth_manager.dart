@@ -219,17 +219,17 @@ class AuthManager {
   /// Logs out the current user from all devices with a specific guard
   ///
   /// [guardName] The guard to use
-  /// [userId] The user ID to logout from all devices
-  Future<void> logoutAllWithGuard(String guardName, dynamic userId) async {
+  /// [token] The user ID to logout from all devices
+  Future<void> logoutAllWithGuard(String guardName, dynamic token) async {
     final guard = _getOrCreateGuard(guardName);
-    await guard.logoutAll(userId);
+    await guard.logoutAll(token);
   }
 
   /// Logs out the current user from all devices
   ///
-  /// [userId] The user ID to logout from all devices
-  Future<void> logoutAll(dynamic userId) async {
-    await _guardInstance.logoutAll(userId);
+  /// [token] The user ID to logout from all devices
+  Future<void> logoutAll(dynamic token) async {
+    await _guardInstance.logoutAll(token);
   }
 
   /// Logs out the user from other devices (keeps current session)

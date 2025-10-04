@@ -47,13 +47,13 @@ class SingleDeviceLogoutStrategy implements TokenInvalidationStrategy {
             await _tokenService.deleteToken(token);
           }
         }
-      } 
+      }
       // Fallback: If no session ID, use the provided refresh token
       else if (context.refreshToken != null) {
         await _tokenService.deleteToken(context.refreshToken!);
       }
     }
-    
+
     // For stateful tokens, simply delete the access token
     else if (context.accessToken != null) {
       await _tokenService.deleteToken(context.accessToken!);
@@ -95,18 +95,12 @@ class AllDevicesLogoutStrategy implements TokenInvalidationStrategy {
     }
 
     // Delete ALL tokens for this user (complete logout from all devices)
-    final userTokens = await _tokenService.findTokensByUser(
+    await _tokenService.deleteUserTokens(
       context.userId,
-      context.guard,
+      guard: context.guard,
+      filter: {
+        "type": ["access", "refresh"],
+      },
     );
-
-    for (final tokenData in userTokens) {
-      final tokenType = tokenData['type'] as String?;
-      // Remove all refresh tokens and access tokens (but not blacklist entries)
-      if (tokenType == 'refresh' || tokenType == 'access') {
-        final token = tokenData['token'] as String;
-        await _tokenService.deleteToken(token);
-      }
-    }
   }
 }

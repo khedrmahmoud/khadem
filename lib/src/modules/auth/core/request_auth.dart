@@ -11,8 +11,7 @@ import '../services/auth_manager.dart';
 /// permissions, and security features.
 extension RequestAuth on Request {
   /// Returns the currently authenticated user data (if any).
-  Map<String, dynamic>? get user =>
-      attribute<Map<String, dynamic>>('user');
+  Map<String, dynamic>? get user => attribute<Map<String, dynamic>>('user');
 
   /// Returns the currently authenticated Authenticatable instance (if available).
   Authenticatable? get authenticatable =>
@@ -196,12 +195,16 @@ extension RequestAuth on Request {
     // Try to check body parameters, but don't fail if body isn't parsed
     bool hasCredentialsInBody = false;
     try {
-      hasCredentialsInBody = input('email') != null || input('username') != null;
+      hasCredentialsInBody =
+          input('email') != null || input('username') != null;
     } catch (e) {
       // Body not parsed yet, can't check body parameters
     }
 
-    return authHeader != null || hasEmailInQuery || hasUsernameInQuery || hasCredentialsInBody;
+    return authHeader != null ||
+        hasEmailInQuery ||
+        hasUsernameInQuery ||
+        hasCredentialsInBody;
   }
 
   /// Gets the Bearer token from the Authorization header.
@@ -274,9 +277,17 @@ extension RequestAuth on Request {
 
     try {
       final authManager = Khadem.container.resolve<AuthManager>();
-      await authManager.logoutAll(userId);
+      final token = this.token ?? bearerToken;
+
+      if (token != null && token.isNotEmpty) {
+        await authManager.logoutAll(token);
+      }
+      // Clear session data
+      clearSession();
       clearUser();
     } catch (e) {
+      // Even if logout fails, clear local state
+      clearSession();
       clearUser();
     }
   }
@@ -321,8 +332,14 @@ extension RequestAuth on Request {
     // Check for common security indicators
     final ua = userAgent.toLowerCase();
     final suspiciousPatterns = [
-      'bot', 'crawler', 'spider', 'scraper',
-      'sqlmap', 'nmap', 'masscan', 'zmap',
+      'bot',
+      'crawler',
+      'spider',
+      'scraper',
+      'sqlmap',
+      'nmap',
+      'masscan',
+      'zmap',
     ];
 
     return suspiciousPatterns.any((pattern) => ua.contains(pattern));
@@ -354,7 +371,8 @@ extension RequestAuth on Request {
   void requireAdmin([String? message]) {
     requireAuth();
     if (!isAdmin) {
-      throw AuthException(message ?? 'Admin privileges required', statusCode: 403);
+      throw AuthException(message ?? 'Admin privileges required',
+          statusCode: 403);
     }
   }
 
@@ -362,7 +380,8 @@ extension RequestAuth on Request {
   void requireSuperAdmin([String? message]) {
     requireAuth();
     if (!isSuperAdmin) {
-      throw AuthException(message ?? 'Super admin privileges required', statusCode: 403);
+      throw AuthException(message ?? 'Super admin privileges required',
+          statusCode: 403);
     }
   }
 
@@ -378,7 +397,8 @@ extension RequestAuth on Request {
   void requirePermission(String permission, [String? message]) {
     requireAuth();
     if (!hasPermission(permission)) {
-      throw AuthException(message ?? 'Permission "$permission" required', statusCode: 403);
+      throw AuthException(message ?? 'Permission "$permission" required',
+          statusCode: 403);
     }
   }
 
@@ -386,7 +406,8 @@ extension RequestAuth on Request {
   void requireOwnership(dynamic resourceOwnerId, [String? message]) {
     requireAuth();
     if (!ownsResource(resourceOwnerId)) {
-      throw AuthException(message ?? 'Access denied: not the owner', statusCode: 403);
+      throw AuthException(message ?? 'Access denied: not the owner',
+          statusCode: 403);
     }
   }
 
