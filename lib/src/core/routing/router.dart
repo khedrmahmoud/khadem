@@ -13,13 +13,11 @@ import 'routing_registry.dart';
 /// and separation of concerns.
 class Router {
   late final RouteRegistry _registry;
-  late final RouteMatcher _matcher;
   late final RouteGroupManager _groupManager;
   late final RouteHandler _handler;
 
   Router() {
     _registry = RouteRegistry();
-    _matcher = RouteMatcher(_registry.routes);
     _groupManager = RouteGroupManager(_registry);
     _handler = RouteHandler();
   }
@@ -27,7 +25,6 @@ class Router {
   /// Private constructor for internal use with existing registry
   Router._withRegistry(RouteRegistry registry) {
     _registry = registry;
-    _matcher = RouteMatcher(_registry.routes);
     _groupManager = RouteGroupManager(_registry);
     _handler = RouteHandler();
   }
@@ -138,7 +135,8 @@ class Router {
   /// Matches a route for the given [method] and [path].
   /// Matches the first route that fits the given method and path.
   RouteMatchResult? match(String method, String path) {
-    final result = _matcher.match(method, path);
+    final matcher = RouteMatcher(_registry.routes);
+    final result = matcher.match(method, path);
     if (result != null) {
       return RouteMatchResult(
         handler: _handler.wrapWithExceptionHandler(result.handler),
