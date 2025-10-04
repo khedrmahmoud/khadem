@@ -283,6 +283,173 @@ abstract class QueryBuilderInterface<T> {
     String mode = 'natural', // natural, boolean, query_expansion
   });
 
+  // ---------------------------- OR WHERE Variants ----------------------------
+
+  /// OR WHERE column IN (values)
+  QueryBuilderInterface<T> orWhereIn(String column, List<dynamic> values);
+
+  /// OR WHERE column NOT IN (values)
+  QueryBuilderInterface<T> orWhereNotIn(String column, List<dynamic> values);
+
+  /// OR WHERE column IS NULL
+  QueryBuilderInterface<T> orWhereNull(String column);
+
+  /// OR WHERE column IS NOT NULL
+  QueryBuilderInterface<T> orWhereNotNull(String column);
+
+  /// OR WHERE column BETWEEN start AND end
+  QueryBuilderInterface<T> orWhereBetween(
+    String column,
+    dynamic start,
+    dynamic end,
+  );
+
+  /// OR WHERE column NOT BETWEEN start AND end
+  QueryBuilderInterface<T> orWhereNotBetween(
+    String column,
+    dynamic start,
+    dynamic end,
+  );
+
+  /// OR WHERE column LIKE pattern
+  QueryBuilderInterface<T> orWhereLike(String column, String pattern);
+
+  /// OR WHERE column NOT LIKE pattern
+  QueryBuilderInterface<T> orWhereNotLike(String column, String pattern);
+
+  /// OR WHERE DATE(column) = date
+  QueryBuilderInterface<T> orWhereDate(String column, String date);
+
+  /// OR WHERE TIME(column) = time
+  QueryBuilderInterface<T> orWhereTime(String column, String time);
+
+  /// OR WHERE YEAR(column) = year
+  QueryBuilderInterface<T> orWhereYear(String column, int year);
+
+  /// OR WHERE MONTH(column) = month
+  QueryBuilderInterface<T> orWhereMonth(String column, int month);
+
+  /// OR WHERE DAY(column) = day
+  QueryBuilderInterface<T> orWhereDay(String column, int day);
+
+  /// OR WHERE column1 operator column2
+  QueryBuilderInterface<T> orWhereColumn(
+    String column1,
+    String operator,
+    String column2,
+  );
+
+  /// OR WHERE JSON_CONTAINS
+  QueryBuilderInterface<T> orWhereJsonContains(
+    String column,
+    dynamic value, [
+    String? path,
+  ]);
+
+  // ---------------------------- Relationship Queries (whereHas) ----------------------------
+
+  /// Query for existence of a relationship with optional constraints
+  /// Equivalent to Laravel's whereHas()
+  ///
+  /// Example:
+  /// ```dart
+  /// Post.query().whereHas('comments', (q) => q.where('approved', '=', true))
+  /// ```
+  QueryBuilderInterface<T> whereHas(
+    String relation, [
+    void Function(QueryBuilderInterface<dynamic> query)? callback,
+    String operator = '>=',
+    int count = 1,
+  ]);
+
+  /// OR version of whereHas
+  QueryBuilderInterface<T> orWhereHas(
+    String relation, [
+    void Function(QueryBuilderInterface<dynamic> query)? callback,
+    String operator = '>=',
+    int count = 1,
+  ]);
+
+  /// Query for absence of a relationship
+  QueryBuilderInterface<T> whereDoesntHave(
+    String relation, [
+    void Function(QueryBuilderInterface<dynamic> query)? callback,
+  ]);
+
+  /// OR version of whereDoesntHave
+  QueryBuilderInterface<T> orWhereDoesntHave(
+    String relation, [
+    void Function(QueryBuilderInterface<dynamic> query)? callback,
+  ]);
+
+  /// Query with relationship count
+  QueryBuilderInterface<T> has(String relation, [String operator = '>=', int count = 1]);
+
+  /// Query without any of the relationship
+  QueryBuilderInterface<T> doesntHave(String relation);
+
+  // ---------------------------- Advanced Column Comparisons ----------------------------
+
+  /// WHERE column value is BETWEEN two other columns' values
+  QueryBuilderInterface<T> whereBetweenColumns(
+    String column,
+    String startColumn,
+    String endColumn,
+  );
+
+  /// WHERE column value is NOT BETWEEN two other columns' values
+  QueryBuilderInterface<T> whereNotBetweenColumns(
+    String column,
+    String startColumn,
+    String endColumn,
+  );
+
+  // ---------------------------- Advanced Date Comparisons ----------------------------
+
+  /// WHERE column is in the past
+  QueryBuilderInterface<T> wherePast(String column);
+
+  /// WHERE column is in the future
+  QueryBuilderInterface<T> whereFuture(String column);
+
+  /// WHERE column date is today
+  QueryBuilderInterface<T> whereToday(String column);
+
+  /// WHERE column date is before today
+  QueryBuilderInterface<T> whereBeforeToday(String column);
+
+  /// WHERE column date is after today
+  QueryBuilderInterface<T> whereAfterToday(String column);
+
+  // ---------------------------- Subquery Methods ----------------------------
+
+  /// Set a subquery as the FROM clause
+  QueryBuilderInterface<T> fromSub(
+    QueryBuilderInterface<dynamic> query,
+    String alias,
+  );
+
+  /// Set raw SQL as the FROM clause
+  QueryBuilderInterface<T> fromRaw(String sql, [List<dynamic> bindings = const []]);
+
+  /// Add a subquery to the SELECT clause
+  QueryBuilderInterface<T> selectSub(
+    QueryBuilderInterface<dynamic> query,
+    String alias,
+  );
+
+  // ---------------------------- Logical Grouping ----------------------------
+
+  /// Add a nested WHERE clause group
+  QueryBuilderInterface<T> whereNested(
+    void Function(QueryBuilderInterface<T> query) callback,
+  );
+
+  /// Add a nested OR WHERE clause group
+  QueryBuilderInterface<T> orWhereNested(
+    void Function(QueryBuilderInterface<T> query) callback,
+  );
+
   // ---------------------------- Basic Clauses ----------------------------
 
   /// Limits the number of results.

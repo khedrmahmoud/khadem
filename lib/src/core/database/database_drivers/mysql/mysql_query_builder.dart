@@ -682,6 +682,454 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     return this;
   }
 
+  // ---------------------------- OR WHERE Variants ----------------------------
+
+  @override
+  QueryBuilderInterface<T> orWhereIn(String column, List<dynamic> values) {
+    if (values.isEmpty) return this;
+    if (_where.isEmpty) return whereIn(column, values);
+
+    final placeholders = List.filled(values.length, '?').join(', ');
+    _where.add('OR `$column` IN ($placeholders)');
+    _bindings.addAll(values);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereNotIn(String column, List<dynamic> values) {
+    if (values.isEmpty) return this;
+    if (_where.isEmpty) return whereNotIn(column, values);
+
+    final placeholders = List.filled(values.length, '?').join(', ');
+    _where.add('OR `$column` NOT IN ($placeholders)');
+    _bindings.addAll(values);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereNull(String column) {
+    if (_where.isEmpty) return whereNull(column);
+    _where.add('OR `$column` IS NULL');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereNotNull(String column) {
+    if (_where.isEmpty) return whereNotNull(column);
+    _where.add('OR `$column` IS NOT NULL');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereBetween(
+    String column,
+    dynamic start,
+    dynamic end,
+  ) {
+    if (_where.isEmpty) return whereBetween(column, start, end);
+    _where.add('OR `$column` BETWEEN ? AND ?');
+    _bindings.addAll([start, end]);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereNotBetween(
+    String column,
+    dynamic start,
+    dynamic end,
+  ) {
+    if (_where.isEmpty) return whereNotBetween(column, start, end);
+    _where.add('OR `$column` NOT BETWEEN ? AND ?');
+    _bindings.addAll([start, end]);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereLike(String column, String pattern) {
+    if (_where.isEmpty) return whereLike(column, pattern);
+    _where.add('OR `$column` LIKE ?');
+    _bindings.add(pattern);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereNotLike(String column, String pattern) {
+    if (_where.isEmpty) return whereNotLike(column, pattern);
+    _where.add('OR `$column` NOT LIKE ?');
+    _bindings.add(pattern);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereDate(String column, String date) {
+    if (_where.isEmpty) return whereDate(column, date);
+    _where.add('OR DATE(`$column`) = ?');
+    _bindings.add(date);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereTime(String column, String time) {
+    if (_where.isEmpty) return whereTime(column, time);
+    _where.add('OR TIME(`$column`) = ?');
+    _bindings.add(time);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereYear(String column, int year) {
+    if (_where.isEmpty) return whereYear(column, year);
+    _where.add('OR YEAR(`$column`) = ?');
+    _bindings.add(year);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereMonth(String column, int month) {
+    if (_where.isEmpty) return whereMonth(column, month);
+    _where.add('OR MONTH(`$column`) = ?');
+    _bindings.add(month);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereDay(String column, int day) {
+    if (_where.isEmpty) return whereDay(column, day);
+    _where.add('OR DAY(`$column`) = ?');
+    _bindings.add(day);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereColumn(
+    String column1,
+    String operator,
+    String column2,
+  ) {
+    if (_where.isEmpty) return whereColumn(column1, operator, column2);
+    _where.add('OR `$column1` $operator `$column2`');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereJsonContains(
+    String column,
+    dynamic value, [
+    String? path,
+  ]) {
+    if (_where.isEmpty) return whereJsonContains(column, value, path);
+
+    final jsonValue = value is String ? '"$value"' : _jsonEncode(value);
+    if (path != null) {
+      _where.add('OR JSON_CONTAINS(`$column`, ?, ?)');
+      _bindings.addAll([jsonValue, '\$.$path']);
+    } else {
+      _where.add('OR JSON_CONTAINS(`$column`, ?)');
+      _bindings.add(jsonValue);
+    }
+    return this;
+  }
+
+  // ---------------------------- Relationship Queries (whereHas) ----------------------------
+
+  @override
+  QueryBuilderInterface<T> whereHas(
+    String relation, [
+    void Function(QueryBuilderInterface<dynamic> query)? callback,
+    String operator = '>=',
+    int count = 1,
+  ]) {
+    // Build subquery that counts related records
+    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, _getRelationTable(relation));
+    
+    // Apply user constraints
+    if (callback != null) {
+      callback(subquery);
+    }
+    
+    // Add foreign key constraint
+    final foreignKey = _getRelationForeignKey(relation);
+    subquery.whereColumn(foreignKey, '=', '$_table.id');
+    
+    // Build EXISTS with COUNT - manually construct FROM and WHERE
+    final fromClause = 'FROM `${subquery._table}`';
+    final whereClause = subquery._where.isNotEmpty 
+      ? 'WHERE ${subquery._where.join(' AND ')}'
+      : '';
+    final countSql = 'SELECT COUNT(*) $fromClause $whereClause';
+    
+    _where.add('($countSql) $operator ?');
+    _bindings.addAll(subquery._bindings);
+    _bindings.add(count);
+    
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereHas(
+    String relation, [
+    void Function(QueryBuilderInterface<dynamic> query)? callback,
+    String operator = '>=',
+    int count = 1,
+  ]) {
+    if (_where.isEmpty) return whereHas(relation, callback, operator, count);
+    
+    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, _getRelationTable(relation));
+    
+    if (callback != null) {
+      callback(subquery);
+    }
+    
+    final foreignKey = _getRelationForeignKey(relation);
+    subquery.whereColumn(foreignKey, '=', '$_table.id');
+    
+    final fromClause = 'FROM `${subquery._table}`';
+    final whereClause = subquery._where.isNotEmpty 
+      ? 'WHERE ${subquery._where.join(' AND ')}'
+      : '';
+    final countSql = 'SELECT COUNT(*) $fromClause $whereClause';
+    
+    _where.add('OR ($countSql) $operator ?');
+    _bindings.addAll(subquery._bindings);
+    _bindings.add(count);
+    
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereDoesntHave(
+    String relation, [
+    void Function(QueryBuilderInterface<dynamic> query)? callback,
+  ]) {
+    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, _getRelationTable(relation));
+    
+    if (callback != null) {
+      callback(subquery);
+    }
+    
+    final foreignKey = _getRelationForeignKey(relation);
+    subquery.whereColumn(foreignKey, '=', '$_table.id');
+    
+    final fromClause = 'FROM `${subquery._table}`';
+    final whereClause = subquery._where.isNotEmpty 
+      ? 'WHERE ${subquery._where.join(' AND ')}'
+      : '';
+    final existsSql = 'SELECT 1 $fromClause $whereClause LIMIT 1';
+    
+    _where.add('NOT EXISTS ($existsSql)');
+    _bindings.addAll(subquery._bindings);
+    
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereDoesntHave(
+    String relation, [
+    void Function(QueryBuilderInterface<dynamic> query)? callback,
+  ]) {
+    if (_where.isEmpty) return whereDoesntHave(relation, callback);
+    
+    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, _getRelationTable(relation));
+    
+    if (callback != null) {
+      callback(subquery);
+    }
+    
+    final foreignKey = _getRelationForeignKey(relation);
+    subquery.whereColumn(foreignKey, '=', '$_table.id');
+    
+    final fromClause = 'FROM `${subquery._table}`';
+    final whereClause = subquery._where.isNotEmpty 
+      ? 'WHERE ${subquery._where.join(' AND ')}'
+      : '';
+    final existsSql = 'SELECT 1 $fromClause $whereClause LIMIT 1';
+    
+    _where.add('OR NOT EXISTS ($existsSql)');
+    _bindings.addAll(subquery._bindings);
+    
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> has(String relation, [String operator = '>=', int count = 1]) {
+    return whereHas(relation, null, operator, count);
+  }
+
+  @override
+  QueryBuilderInterface<T> doesntHave(String relation) {
+    return whereDoesntHave(relation, null);
+  }
+
+  // Helper methods for relationship queries
+  String _getRelationTable(String relation) {
+    // Simple pluralization - can be enhanced
+    // For now, assume relation name matches table name
+    return relation;
+  }
+
+  String _getRelationForeignKey(String relation) {
+    // Convention: tablename_id
+    // Remove trailing 's' if plural, add _id
+    final singularTable = _table.endsWith('s') ? _table.substring(0, _table.length - 1) : _table;
+    return '${singularTable}_id';
+  }
+
+  // ---------------------------- Advanced Column Comparisons ----------------------------
+
+  @override
+  QueryBuilderInterface<T> whereBetweenColumns(
+    String column,
+    String startColumn,
+    String endColumn,
+  ) {
+    _where.add('`$column` BETWEEN `$startColumn` AND `$endColumn`');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereNotBetweenColumns(
+    String column,
+    String startColumn,
+    String endColumn,
+  ) {
+    _where.add('`$column` NOT BETWEEN `$startColumn` AND `$endColumn`');
+    return this;
+  }
+
+  // ---------------------------- Advanced Date Comparisons ----------------------------
+
+  @override
+  QueryBuilderInterface<T> wherePast(String column) {
+    _where.add('`$column` < NOW()');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereFuture(String column) {
+    _where.add('`$column` > NOW()');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereToday(String column) {
+    _where.add('DATE(`$column`) = CURDATE()');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereBeforeToday(String column) {
+    _where.add('DATE(`$column`) < CURDATE()');
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> whereAfterToday(String column) {
+    _where.add('DATE(`$column`) > CURDATE()');
+    return this;
+  }
+
+  // ---------------------------- Subquery Methods ----------------------------
+
+  String? _fromSubquery;
+  String? _fromAlias;
+
+  @override
+  QueryBuilderInterface<T> fromSub(
+    QueryBuilderInterface<dynamic> query,
+    String alias,
+  ) {
+    if (query is MySQLQueryBuilder) {
+      _fromSubquery = query._buildSelectQuery();
+      _fromAlias = alias;
+      _bindings.addAll(query._bindings);
+    }
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> fromRaw(String sql, [List<dynamic> bindings = const []]) {
+    _fromSubquery = sql;
+    _bindings.addAll(bindings);
+    return this;
+  }
+
+  final List<String> _selectSubqueries = [];
+
+  @override
+  QueryBuilderInterface<T> selectSub(
+    QueryBuilderInterface<dynamic> query,
+    String alias,
+  ) {
+    if (query is MySQLQueryBuilder) {
+      final subquerySql = '(${query._buildSelectQuery()}) AS `$alias`';
+      _selectSubqueries.add(subquerySql);
+      _bindings.addAll(query._bindings);
+    }
+    return this;
+  }
+
+  // ---------------------------- Logical Grouping ----------------------------
+
+  @override
+  QueryBuilderInterface<T> whereNested(
+    void Function(QueryBuilderInterface<T> query) callback,
+  ) {
+    final nestedQuery = MySQLQueryBuilder<T>(_connection, _table, modelFactory: _modelFactory);
+    callback(nestedQuery);
+    
+    if (nestedQuery._where.isNotEmpty) {
+      // Build the nested conditions properly, handling OR prefixes
+      final conditions = <String>[];
+      for (var i = 0; i < nestedQuery._where.length; i++) {
+        var condition = nestedQuery._where[i];
+        if (i == 0) {
+          // First condition should not have AND/OR prefix
+          condition = condition.replaceFirst(RegExp(r'^(AND |OR )'), '');
+        } else if (!condition.startsWith('OR ') && !condition.startsWith('AND ')) {
+          // If not explicitly OR/AND, default to AND
+          condition = 'AND $condition';
+        }
+        conditions.add(condition);
+      }
+      final nestedConditions = conditions.join(' ');
+      _where.add('($nestedConditions)');
+      _bindings.addAll(nestedQuery._bindings);
+    }
+    
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereNested(
+    void Function(QueryBuilderInterface<T> query) callback,
+  ) {
+    if (_where.isEmpty) return whereNested(callback);
+    
+    final nestedQuery = MySQLQueryBuilder<T>(_connection, _table, modelFactory: _modelFactory);
+    callback(nestedQuery);
+    
+    if (nestedQuery._where.isNotEmpty) {
+      // Build the nested conditions properly, handling OR prefixes
+      final conditions = <String>[];
+      for (var i = 0; i < nestedQuery._where.length; i++) {
+        var condition = nestedQuery._where[i];
+        if (i == 0) {
+          // First condition should not have AND/OR prefix
+          condition = condition.replaceFirst(RegExp(r'^(AND |OR )'), '');
+        } else if (!condition.startsWith('OR ') && !condition.startsWith('AND ')) {
+          // If not explicitly OR/AND, default to AND
+          condition = 'AND $condition';
+        }
+        conditions.add(condition);
+      }
+      final nestedConditions = conditions.join(' ');
+      _where.add('OR ($nestedConditions)');
+      _bindings.addAll(nestedQuery._bindings);
+    }
+    
+    return this;
+  }
+
   @override
   QueryBuilderInterface<T> limit(int number) {
     _limit = number;
@@ -871,11 +1319,39 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   /// Builds the SELECT query string based on current state.
   String _buildSelectQuery() {
     final distinct = _isDistinct ? 'DISTINCT ' : '';
-    final buffer =
-        StringBuffer('SELECT $distinct${_columns.join(', ')} FROM `$_table`');
+    
+    // Build SELECT clause with subqueries if any
+    final selectColumns = [
+      ..._columns,
+      ..._selectSubqueries,
+    ].join(', ');
+    
+    // Use subquery as FROM clause if set, otherwise use table
+    final fromClause = _fromSubquery != null && _fromAlias != null
+      ? '($_fromSubquery) AS `$_fromAlias`'
+      : (_fromSubquery ?? '`$_table`');
+    
+    final buffer = StringBuffer('SELECT $distinct$selectColumns FROM $fromClause');
 
     if (_joins.isNotEmpty) buffer.write(' ${_joins.join(' ')}');
-    if (_where.isNotEmpty) buffer.write(' WHERE ${_where.join(' AND ')}');
+    
+    // Build WHERE clause, handling OR prefixes properly
+    if (_where.isNotEmpty) {
+      final whereConditions = <String>[];
+      for (var i = 0; i < _where.length; i++) {
+        var condition = _where[i];
+        if (i == 0) {
+          // First condition should not have AND/OR prefix
+          condition = condition.replaceFirst(RegExp(r'^(AND |OR )'), '');
+        } else if (!condition.startsWith('OR ') && !condition.startsWith('AND ')) {
+          // If not explicitly OR/AND, default to AND
+          condition = 'AND $condition';
+        }
+        whereConditions.add(condition);
+      }
+      buffer.write(' WHERE ${whereConditions.join(' ')}');
+    }
+    
     if (_groupBy != null) buffer.write(' GROUP BY $_groupBy');
     if (_having != null) buffer.write(' HAVING $_having');
     if (_orderBy != null) buffer.write(' ORDER BY $_orderBy');
@@ -991,6 +1467,9 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     cloned._orderBy = _orderBy;
     cloned._groupBy = _groupBy;
     cloned._having = _having;
+    cloned._fromSubquery = _fromSubquery;
+    cloned._fromAlias = _fromAlias;
+    cloned._selectSubqueries.addAll(_selectSubqueries);
     return cloned;
   }
 }
