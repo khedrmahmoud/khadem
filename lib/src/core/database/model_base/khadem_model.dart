@@ -37,6 +37,25 @@ abstract class KhademModel<T> {
   /// These are included when listed in `appends`
   Map<String, dynamic> get computed => {};
 
+  /// Default relations to eager load on all queries
+  /// 
+  /// Define relations that should always be loaded when querying this model.
+  /// These will be automatically applied to get(), first(), findById(), and paginate().
+  /// 
+  /// Example:
+  /// ```dart
+  /// @override
+  /// List<dynamic> get withRelations => ['posts', 'profile'];
+  /// // or with nested relations:
+  /// List<dynamic> get withRelations => ['posts.comments', 'profile', 'roles'];
+  /// ```
+  /// 
+  /// You can override this behavior in queries:
+  /// - `query.without(['posts']).get()` - Exclude specific relations
+  /// - `query.withOnly(['messages']).get()` - Replace default relations
+  /// - `query.withRelations(['extra'])` - Add to default relations (in query)
+  List<dynamic> get defaultRelations => [];
+
   /// Mutable backing fields for hidden and appends
   late final List<String> _hiddenList = _getInitialHidden();
   late final List<String> _appendsList = _getInitialAppends();

@@ -19,6 +19,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   List<String> _columns = ['*'];
   final List<String> _where = [];
   List<dynamic> _eagerRelations = [];
+  List<String> _excludedRelations = [];  // Relations to exclude from defaultRelations
+  bool _useOnlyRelations = false;        // If true, ignore defaultRelations
   bool _isDistinct = false;
   final List<String> _joins = [];
   final List<String> _unions = [];
@@ -1165,17 +1167,54 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     }
     final models =
         List<T>.from(rawResults.data.map((e) => _modelFactory?.call(e)));
-    if (_eagerRelations.isNotEmpty) {
-      await _eagerLoadRelations(models);
+    
+    // Merge defaultRelations from model with explicit eager relations
+    final relationsToLoad = _getRelationsToLoad(models);
+    
+    if (relationsToLoad.isNotEmpty) {
+      await _eagerLoadRelations(models, relationsToLoad);
     }
 
     return models;
   }
 
-  Future<void> _eagerLoadRelations(List<T> models) async {
+  /// Determines which relations to load based on model defaults and query settings
+  List<dynamic> _getRelationsToLoad(List<T> models) {
+    if (models.isEmpty) return [];
+    
+    // If withOnly() was called, ignore defaultRelations and use only explicit relations
+    if (_useOnlyRelations) {
+      return _eagerRelations;
+    }
+    
+    // Get defaultRelations from the first model (if it's a KhademModel)
+    List<dynamic> defaultRelations = [];
+    if (models.first is KhademModel) {
+      defaultRelations = (models.first as KhademModel).defaultRelations;
+    }
+    
+    // Start with default relations
+    final relationsToLoad = <dynamic>[...defaultRelations];
+    
+    // Remove excluded relations (from without() method)
+    if (_excludedRelations.isNotEmpty) {
+      relationsToLoad.removeWhere((relation) {
+        final relationName = relation is String ? relation.split('.').first : 
+                           (relation is Map ? relation.keys.first : '');
+        return _excludedRelations.contains(relationName);
+      });
+    }
+    
+    // Add explicit eager relations (from withRelations() method)
+    relationsToLoad.addAll(_eagerRelations);
+    
+    return relationsToLoad;
+  }
+
+  Future<void> _eagerLoadRelations(List<T> models, List<dynamic> relations) async {
     await EagerLoader.loadRelations(
       models.cast<KhademModel>(),
-      _eagerRelations,
+      relations,
     );
   }
 
@@ -1451,6 +1490,19 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   @override
+  QueryBuilderInterface<T> without(List<String> relations) {
+    _excludedRelations = relations;
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> withOnly(List<dynamic> relations) {
+    _useOnlyRelations = true;
+    _eagerRelations = relations;
+    return this;
+  }
+
+  @override
   QueryBuilderInterface<T> clone() {
     final cloned =
         MySQLQueryBuilder<T>(_connection, _table, modelFactory: _modelFactory);
@@ -1458,6 +1510,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     cloned._where.addAll(_where);
     cloned._bindings.addAll(_bindings);
     cloned._eagerRelations = [..._eagerRelations];
+    cloned._excludedRelations = [..._excludedRelations];
+    cloned._useOnlyRelations = _useOnlyRelations;
     cloned._isDistinct = _isDistinct;
     cloned._joins.addAll(_joins);
     cloned._unions.addAll(_unions);
