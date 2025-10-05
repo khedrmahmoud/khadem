@@ -23,6 +23,32 @@ abstract class KhademModel<T> {
   /// Used in serialization
   List<String> get fillable => [];
 
+  /// Attributes that are NOT mass assignable
+  /// 
+  /// Define which attributes should be protected from mass assignment.
+  /// When both `fillable` and `guarded` are empty, all attributes are fillable.
+  /// When `fillable` is specified, `guarded` is ignored.
+  /// 
+  /// Example:
+  /// ```dart
+  /// @override
+  /// List<String> get guarded => ['id', 'created_at', 'updated_at'];
+  /// ```
+  List<String> get guarded => [];
+
+  /// Attributes that should never be included in JSON
+  /// 
+  /// These attributes are completely hidden from serialization,
+  /// even if explicitly requested. Use for sensitive data like passwords,
+  /// API keys, etc.
+  /// 
+  /// Example:
+  /// ```dart
+  /// @override
+  /// List<String> get protected => ['password', 'api_key', 'secret'];
+  /// ```
+  List<String> get protected => [];
+
   /// Hidden attributes
   List<String> get hidden => _hiddenList;
 
@@ -112,6 +138,34 @@ abstract class KhademModel<T> {
 
   void fromJson(Map<String, dynamic> data) {
     json.fromJson(data);
+  }
+
+  /// Mass assign attributes respecting fillable/guarded rules
+  /// 
+  /// Fills the model with data from a map, respecting the fillable and guarded
+  /// attribute lists. Only fillable attributes will be assigned.
+  /// 
+  /// Example:
+  /// ```dart
+  /// final user = User()
+  ///   ..fill({
+  ///     'name': 'John',
+  ///     'email': 'john@example.com',
+  ///     'role': 'admin', // Ignored if not in fillable
+  ///   });
+  /// ```
+  T fill(Map<String, dynamic> attributes) {
+    json.fromJson(attributes, force: false);
+    return this as T;
+  }
+
+  /// Force fill attributes, bypassing fillable/guarded protection
+  /// 
+  /// Use with caution - this bypasses security restrictions.
+  /// Useful for internal operations where you need to set guarded attributes.
+  T forceFill(Map<String, dynamic> attributes) {
+    json.fromJson(attributes, force: true);
+    return this as T;
   }
 
   /// Persistence

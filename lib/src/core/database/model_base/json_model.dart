@@ -11,10 +11,40 @@ class JsonModel<T> {
 
   Map<String, dynamic> get rawData => _rawData;
 
-  void fromJson(Map<String, dynamic> json) {
+  /// Check if an attribute is mass assignable
+  /// 
+  /// An attribute is fillable if:
+  /// - `fillable` list is defined and contains the attribute, OR
+  /// - `fillable` list is empty AND attribute is not in `guarded` list
+  bool isFillable(String key) {
+    // If fillable is specified, only those attributes are fillable
+    if (model.fillable.isNotEmpty) {
+      return model.fillable.contains(key);
+    }
+    
+    // If fillable is empty, everything except guarded is fillable
+    return !model.guarded.contains(key);
+  }
+
+  void fromJson(Map<String, dynamic> json, {bool force = false}) {
     _rawData = Map<String, dynamic>.from(json); // Store raw data
-    model.id = model.id ?? json['id'] as int?;
+    
+    // Handle id separately, respecting fillable/guarded unless force=true
+    if (json.containsKey('id')) {
+      if (force || isFillable('id')) {
+        model.id = model.id ?? json['id'] as int?;
+      }
+    }
+    
     for (final key in json.keys) {
+      // Skip id as we already handled it
+      if (key == 'id') continue;
+      
+      // Skip non-fillable attributes unless force is true
+      if (!force && !isFillable(key)) {
+        continue;
+      }
+      
       var value = json[key];
       final cast = model.casts[key];
       if (cast == DateTime && value is String) {
@@ -48,10 +78,12 @@ class JsonModel<T> {
       }
     }
     for (final key in compinedData.keys) {
-      if (!model.hidden.contains(key)) {
-        final value = model.getField(key);
-        data[key] = value is DateTime ? DateHelper.toResponse(value) : value;
+      // Skip hidden and protected attributes
+      if (model.hidden.contains(key) || model.protected.contains(key)) {
+        continue;
       }
+      final value = model.getField(key);
+      data[key] = value is DateTime ? DateHelper.toResponse(value) : value;
     }
 
     for (final key in model.appends) {
@@ -77,10 +109,12 @@ class JsonModel<T> {
       }
     }
     for (final key in compinedData.keys) {
-      if (!model.hidden.contains(key)) {
-        final value = model.getField(key);
-        data[key] = value is DateTime ? DateHelper.toResponse(value) : value;
+      // Skip hidden and protected attributes
+      if (model.hidden.contains(key) || model.protected.contains(key)) {
+        continue;
       }
+      final value = model.getField(key);
+      data[key] = value is DateTime ? DateHelper.toResponse(value) : value;
     }
 
     // Await async computed properties
