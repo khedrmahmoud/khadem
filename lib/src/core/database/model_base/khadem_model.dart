@@ -90,6 +90,24 @@ abstract class KhademModel<T> {
         ...relation.toJson(),
       };
 
+  /// Async version of toJson() that supports async computed properties
+  /// 
+  /// Use this when your model has async computed properties in `appends`.
+  /// This will properly await async computed values.
+  /// 
+  /// Example:
+  /// ```dart
+  /// final user = await User.query().first();
+  /// final json = await user.toJsonAsync();
+  /// print(json['display_name']); // Async computed property resolved
+  /// ```
+  Future<Map<String, dynamic>> toJsonAsync() async {
+    return {
+      ...await json.toJsonAsync(),
+      ...relation.toJson(),
+    };
+  }
+
   Map<String, dynamic> toDatabaseJson() => json.toDatabaseJson();
 
   void fromJson(Map<String, dynamic> data) {
@@ -280,7 +298,11 @@ abstract class KhademModel<T> {
     }
   }
 
-  /// Get a computed attribute value
+  /// Get a computed attribute value (synchronous)
+  /// 
+  /// Returns the computed value if it's synchronous.
+  /// For async computed properties, use `getComputedAttributeAsync()` instead.
+  /// If the computed property is async, this will return null.
   dynamic getComputedAttribute(String attribute) {
     return _getComputedAttribute(attribute);
   }
@@ -290,13 +312,55 @@ abstract class KhademModel<T> {
     if (computed.containsKey(attribute)) {
       final computedValue = computed[attribute];
       if (computedValue is Function) {
-        return computedValue();
+        try {
+          final result = computedValue();
+          // If result is a Future, return null (use getComputedAttributeAsync instead)
+          if (result is Future) {
+            return null;
+          }
+          return result;
+        } catch (e) {
+          return null;
+        }
       }
       return computedValue;
     }
 
-    // For now, return null if not found in computed
-    // In a full implementation, you might use reflection or code generation
+    return null;
+  }
+
+  /// Get a computed attribute value (async-safe)
+  /// 
+  /// This method handles both synchronous and asynchronous computed properties.
+  /// Use this when you need to support async computed properties.
+  /// 
+  /// Example:
+  /// ```dart
+  /// final displayName = await model.getComputedAttributeAsync('display_name');
+  /// ```
+  Future<dynamic> getComputedAttributeAsync(String attribute) async {
+    return await _getComputedAttributeAsync(attribute);
+  }
+
+  Future<dynamic> _getComputedAttributeAsync(String attribute) async {
+    // Check if it's in computed properties
+    if (computed.containsKey(attribute)) {
+      final computedValue = computed[attribute];
+      if (computedValue is Function) {
+        try {
+          final result = computedValue();
+          // If result is a Future, await it
+          if (result is Future) {
+            return await result;
+          }
+          return result;
+        } catch (e) {
+          return null;
+        }
+      }
+      return computedValue;
+    }
+
     return null;
   }
 }

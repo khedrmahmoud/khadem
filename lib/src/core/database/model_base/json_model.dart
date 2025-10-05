@@ -61,6 +61,36 @@ class JsonModel<T> {
     return data;
   }
 
+  /// Async version of toJson() that properly handles async computed properties
+  /// 
+  /// This method awaits async computed properties before adding them to JSON.
+  /// Use this when your model has async functions in the `computed` map.
+  Future<Map<String, dynamic>> toJsonAsync() async {
+    final data = <String, dynamic>{};
+    if (model.id != null) data['id'] = model.id;
+
+    final compinedData = <String, dynamic>{...model.rawData};
+
+    for (final key in model.fillable) {
+      if (!compinedData.containsKey(key)) {
+        compinedData[key] = model.getField(key);
+      }
+    }
+    for (final key in compinedData.keys) {
+      if (!model.hidden.contains(key)) {
+        final value = model.getField(key);
+        data[key] = value is DateTime ? DateHelper.toResponse(value) : value;
+      }
+    }
+
+    // Await async computed properties
+    for (final key in model.appends) {
+      data[key] = await model.getComputedAttributeAsync(key);
+    }
+
+    return data;
+  }
+
   Map<String, dynamic> toDatabaseJson() {
     final data = <String, dynamic>{};
     for (final key in model.fillable) {
