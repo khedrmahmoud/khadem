@@ -18,7 +18,7 @@ class SocketMiddlewarePipeline {
   }
 
   /// Execute connection middleware during WebSocket upgrade
-  Future<void> executeConnection(Request request) async {
+  Future<void> executeConnection(SocketClient client, Request request) async {
     final connectionMiddlewares = _middlewares
         .where((m) => m.canHandle(SocketMiddlewareType.connection))
         .toList();
@@ -30,13 +30,13 @@ class SocketMiddlewarePipeline {
         final middleware = connectionMiddlewares[index++];
         try {
           if (middleware.connectionHandler != null) {
-            await middleware.connectionHandler!(request, next);
+            await middleware.connectionHandler!(client, request, next);
           } else {
             await next();
           }
         } catch (e, stackTrace) {
           SocketExceptionHandler.handleConnectionError(
-            request,
+            client,
             e,
             stackTrace,
             middleware.name,

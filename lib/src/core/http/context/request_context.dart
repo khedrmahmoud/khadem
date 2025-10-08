@@ -105,7 +105,6 @@ class RequestContext {
   /// ```
   static R run<R>(Request request, R Function() body) {
     final stopwatch = Stopwatch()..start();
-
     try {
       return runZoned(
         () {

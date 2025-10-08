@@ -25,16 +25,18 @@ class ServerLifecycle {
     }
   }
 
-  Future<void> start({int port = 8080}) async {
+  Future<void> start({int port = 8080, String? host}) async {
     final handler = HttpRequestProcessor(
       router: _router.router,
       globalMiddleware: _middleware.pipeline,
       staticHandler: _static.staticHandler,
     );
 
-    final server =
-        await HttpServer.bind(InternetAddress.anyIPv4, port, shared: true);
-    Khadem.logger.info('🟢 HTTP Server started on http://localhost:$port');
+    final server = await HttpServer.bind(
+        host != null ? InternetAddress(host) : InternetAddress.anyIPv4, port,
+        shared: true);
+    Khadem.logger
+        .info('🟢 HTTP Server started on http://${host ?? 'localhost'}:$port');
 
     await for (final raw in server) {
       final req = Request(raw);

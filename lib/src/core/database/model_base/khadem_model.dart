@@ -86,6 +86,23 @@ abstract class KhademModel<T> {
   late final List<String> _hiddenList = _getInitialHidden();
   late final List<String> _appendsList = _getInitialAppends();
 
+  /// Cache for computed property values to prevent multiple evaluations
+  final Map<String, dynamic> _computedCache = {};
+  final Map<String, Future<dynamic>> _computedAsyncCache = {};
+  Map<String, dynamic>? _computedAttributesCache;
+  Future<Map<String, dynamic>>? _computedAttributesAsyncCache;
+
+  /// Clear computed property cache
+  /// 
+  /// Call this when model data changes to ensure computed properties
+  /// are re-evaluated on next access.
+  void _clearComputedCache() {
+    _computedCache.clear();
+    _computedAsyncCache.clear();
+    _computedAttributesCache = null;
+    _computedAttributesAsyncCache = null;
+  }
+
   ///  Initial hidden can be overridden
   List<String> get initialHidden => [];
 
@@ -114,6 +131,7 @@ abstract class KhademModel<T> {
   Map<String, dynamic> toJson() => {
         ...json.toJson(),
         ...relation.toJson(),
+        ..._getComputedAttributes(),
       };
 
   /// Async version of toJson() that supports async computed properties
@@ -131,13 +149,14 @@ abstract class KhademModel<T> {
     return {
       ...await json.toJsonAsync(),
       ...relation.toJson(),
-    };
+    }..addAll(await _getComputedAttributesAsync());
   }
 
   Map<String, dynamic> toDatabaseJson() => json.toDatabaseJson();
 
   void fromJson(Map<String, dynamic> data) {
     json.fromJson(data);
+    _clearComputedCache(); // Clear cache when model data changes
   }
 
   /// Mass assign attributes respecting fillable/guarded rules
@@ -156,6 +175,7 @@ abstract class KhademModel<T> {
   /// ```
   T fill(Map<String, dynamic> attributes) {
     json.fromJson(attributes, force: false);
+    _clearComputedCache(); // Clear cache when model data changes
     return this as T;
   }
 
@@ -165,13 +185,17 @@ abstract class KhademModel<T> {
   /// Useful for internal operations where you need to set guarded attributes.
   T forceFill(Map<String, dynamic> attributes) {
     json.fromJson(attributes, force: true);
+    _clearComputedCache(); // Clear cache when model data changes
     return this as T;
   }
 
   /// Persistence
   Future<void> save() => db.save();
   Future<void> delete() => db.delete();
-  Future<void> refresh() => db.refresh();
+  Future<void> refresh() {
+    _clearComputedCache(); // Clear cache when model data changes
+    return db.refresh();
+  }
   Future<T?> findById(dynamic id) => db.findById(id);
   Future<List<T>> findWhere(String column, String operator, dynamic value) =>
       db.findWhere(column, operator, value);
@@ -208,6 +232,14 @@ abstract class KhademModel<T> {
   /// Get a loaded relation
   dynamic getRelation(String relationName) {
     return relation.get(relationName);
+  }
+
+  /// Get a relation, loading it if it's in defaultRelations and not loaded yet
+  Future<dynamic> getRelationAsync<T>(String relationName) async {
+    if (!relation.isLoaded(relationName) && defaultRelations.contains(relationName)) {
+      await loadRelation(relationName);
+    }
+    return relation.get(relationName) as T;
   }
 
   /// Set a relation value
@@ -362,6 +394,11 @@ abstract class KhademModel<T> {
   }
 
   dynamic _getComputedAttribute(String attribute) {
+    // Check cache first
+    if (_computedCache.containsKey(attribute)) {
+      return _computedCache[attribute];
+    }
+
     // Check if it's in computed properties
     if (computed.containsKey(attribute)) {
       final computedValue = computed[attribute];
@@ -372,11 +409,17 @@ abstract class KhademModel<T> {
           if (result is Future) {
             return null;
           }
+          // Cache the result
+          _computedCache[attribute] = result;
           return result;
         } catch (e) {
+          // Cache null on error
+          _computedCache[attribute] = null;
           return null;
         }
       }
+      // Cache non-function values too
+      _computedCache[attribute] = computedValue;
       return computedValue;
     }
 
@@ -393,10 +436,15 @@ abstract class KhademModel<T> {
   /// final displayName = await model.getComputedAttributeAsync('display_name');
   /// ```
   Future<dynamic> getComputedAttributeAsync(String attribute) async {
-    return await _getComputedAttributeAsync(attribute);
+    return  _getComputedAttributeAsync(attribute);
   }
 
   Future<dynamic> _getComputedAttributeAsync(String attribute) async {
+    // Check cache first
+    if (_computedAsyncCache.containsKey(attribute)) {
+      return _computedAsyncCache[attribute];
+    }
+
     // Check if it's in computed properties
     if (computed.containsKey(attribute)) {
       final computedValue = computed[attribute];
@@ -405,16 +453,55 @@ abstract class KhademModel<T> {
           final result = computedValue();
           // If result is a Future, await it
           if (result is Future) {
-            return await result;
+            final asyncResult = await result;
+            // Cache the Future itself for future calls
+            _computedAsyncCache[attribute] = result;
+            return asyncResult;
           }
+          // Cache non-async results too
+          _computedAsyncCache[attribute] = Future.value(result);
           return result;
         } catch (e) {
+          // Cache null on error
+          _computedAsyncCache[attribute] = Future.value(null);
           return null;
         }
       }
+      // Cache non-function values
+      _computedAsyncCache[attribute] = Future.value(computedValue);
       return computedValue;
     }
 
     return null;
+  }
+
+  /// Helper method to get all computed attributes (sync)
+  Map<String, dynamic> _getComputedAttributes() {
+    if (_computedAttributesCache != null) {
+      return _computedAttributesCache!;
+    }
+    
+    final result = <String, dynamic>{};
+    for (final key in appends) {
+      result[key] = getComputedAttribute(key);
+    }
+    
+    _computedAttributesCache = result;
+    return result;
+  }
+
+  /// Helper method to get all computed attributes (async)
+  Future<Map<String, dynamic>> _getComputedAttributesAsync() async {
+    if (_computedAttributesAsyncCache != null) {
+      return _computedAttributesAsyncCache!;
+    }
+    
+    final result = <String, dynamic>{};
+    for (final key in appends) {
+      result[key] = await getComputedAttributeAsync(key);
+    }
+    
+    _computedAttributesAsyncCache = Future.value(result);
+    return result;
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:khadem/khadem.dart';
+
 import 'socket_manager.dart';
 
 class SocketClient {
@@ -9,42 +11,52 @@ class SocketClient {
   final Set<String> rooms = {};
   final HttpHeaders? headers;
 
-  final Map<String, dynamic> _context;
+  final Request _request;
+  Request get request => _request;
 
   SocketClient({
     required this.id,
     required this.socket,
     required this.manager,
+    required Request request,
     this.headers,
-    Map<String, dynamic>? context,
-  }) : _context = context ?? const {};
+  }) : _request = request;
 
   void set(String key, dynamic value) {
-    _context[key] = value;
+    _request.setAttribute(key, value);
   }
 
   dynamic get(String key) {
-    return _context[key];
+    return _request.attribute(key);
   }
 
   void send(String event, dynamic data) {
-    final payload = jsonEncode({'event': event, 'data': data});
-    socket.add(payload);
+    
+    RequestContext.run(_request, () {
+      final payload = jsonEncode({'event': event, 'data': data});
+      socket.add(payload);
+    });
   }
 
   void close([int code = 1000, String reason = '']) {
-    socket.close(code, reason);
-    manager.removeClient(this);
+    RequestContext.run(_request, () {
+      socket.close(code, reason);
+      manager.removeClient(this);
+    });
   }
 
   void joinRoom(String room) {
-    rooms.add(room);
-    manager.join(room, this);
+    RequestContext.run(_request, () {
+      rooms.add(room);
+      manager.join(room, this);
+    });
   }
 
   void leaveRoom(String room) {
-    rooms.remove(room);
-    manager.leave(room, this);
+    RequestContext.run(_request, () {
+      rooms.remove(room);
+      manager.leave(room, this);
+    });
   }
 
   bool isInRoom(String room) => rooms.contains(room);
@@ -53,10 +65,12 @@ class SocketClient {
   bool get isAuthorized => get('authorized') == true;
 
   /// Check if client is authenticated (has user info)
-  bool get isAuthenticated => get('user') != null;
+  bool get isAuthenticated => _request.isAuthenticated;
+
+  Authenticatable? get authenticatedUser => _request.authenticatable;
 
   /// Get user information from context
-  Map<String, dynamic>? get user => get('user');
+  Map<String, dynamic>? get user => _request.user;
 
   /// Get authorization token from headers
   String? get authToken {

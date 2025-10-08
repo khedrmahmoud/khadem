@@ -26,7 +26,7 @@ class JsonModel<T> {
     return !model.guarded.contains(key);
   }
 
-  void fromJson(Map<String, dynamic> json, {bool force = false}) {
+  void fromJson(Map<String, dynamic> json, {bool force = true}) {
     _rawData = Map<String, dynamic>.from(json); // Store raw data
     
     // Handle id separately, respecting fillable/guarded unless force=true
@@ -86,9 +86,8 @@ class JsonModel<T> {
       data[key] = value is DateTime ? DateHelper.toResponse(value) : value;
     }
 
-    for (final key in model.appends) {
-      data[key] = model.getComputedAttribute(key);
-    }
+    // Note: Computed properties are now handled in KhademModel.toJson()
+    // after relations are loaded
 
     return data;
   }
@@ -117,10 +116,8 @@ class JsonModel<T> {
       data[key] = value is DateTime ? DateHelper.toResponse(value) : value;
     }
 
-    // Await async computed properties
-    for (final key in model.appends) {
-      data[key] = await model.getComputedAttributeAsync(key);
-    }
+    // Note: Computed properties are now handled in KhademModel.toJsonAsync()
+    // after relations are loaded
 
     return data;
   }
