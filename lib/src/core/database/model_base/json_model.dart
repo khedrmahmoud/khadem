@@ -51,7 +51,7 @@ class JsonModel<T> {
       
       // Handle new AttributeCaster system (dynamic check)
       if (cast is AttributeCaster) {
-        value = (cast as AttributeCaster).get(value);
+        value = cast.get(value);
       }
       // Legacy Type-based casts (backward compatibility)
       else if (cast == DateTime && value is String) {
@@ -139,7 +139,7 @@ class JsonModel<T> {
       // Apply caster's set() method if applicable
       final cast = model.casts[key];
       if (cast is AttributeCaster) {
-        value = (cast as AttributeCaster).set(value);
+        value = cast.set(value);
         if (value == null) continue; // Skip if caster returns null
       }
       // Legacy DateTime handling

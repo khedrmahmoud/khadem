@@ -1570,6 +1570,13 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       await _loadRelationAggregates(models.cast<KhademModel>());
     }
 
+    // Call retrieved observer hook for each model
+    for (final model in models) {
+      if (model is KhademModel) {
+        model.event.afterRetrieve();
+      }
+    }
+
     return models;
   }
 

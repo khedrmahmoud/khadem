@@ -1,7 +1,7 @@
 import '../../../application/khadem.dart';
 import '../orm/model_events.dart';
-import '../orm/observers/observer_registry.dart';
 import '../orm/observers/model_observer.dart';
+import '../orm/observers/observer_registry.dart';
 import 'khadem_model.dart';
 
 class EventModel<T> {
