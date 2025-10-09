@@ -1,10 +1,10 @@
+import 'package:khadem/src/contracts/database/query_builder_interface.dart';
 import 'package:khadem/src/core/database/model_base/khadem_model.dart';
 import 'package:khadem/src/core/database/orm/traits/query_scopes.dart';
-import 'package:khadem/src/contracts/database/query_builder_interface.dart';
 import 'package:test/test.dart';
 
 // Test model with query scopes
-class TestUser extends KhademModel<TestUser> with QueryScopes {
+class TestUser extends KhademModel<TestUser> with QueryScopes<TestUser> {
   int? id;
   String? name;
   String? email;
