@@ -1565,6 +1565,11 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       await _eagerLoadRelations(models, relationsToLoad);
     }
 
+    // Load relationship aggregates (withCount, withSum, etc.)
+    if (_relationAggregates.isNotEmpty && models.isNotEmpty) {
+      await _loadRelationAggregates(models.cast<KhademModel>());
+    }
+
     return models;
   }
 
@@ -1606,6 +1611,146 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       models.cast<KhademModel>(),
       relations,
     );
+  }
+
+  /// Load relationship aggregates (counts, sums, etc.) and add as attributes
+  Future<void> _loadRelationAggregates(List<KhademModel> models) async {
+    if (models.isEmpty) return;
+
+    // Get the model's relation definitions
+    final firstModel = models.first;
+    final relationDefinitions = firstModel.relations;
+
+    for (final aggregate in _relationAggregates) {
+      final relationType = aggregate['type'] as String;
+      final relationName = aggregate['relation'] as String;
+      final column = aggregate['column'] as String?;
+      final callback = aggregate['callback'] as Function?;
+
+      // Get relation definition
+      final relationDef = relationDefinitions[relationName];
+      if (relationDef == null) {
+        throw DatabaseException(
+          'Relation "$relationName" not found on ${firstModel.runtimeType}',
+        );
+      }
+
+      // Build attribute name (e.g., "postsCount", "ordersAmountSum")
+      String attributeName;
+      if (relationType == 'count') {
+        attributeName = '${relationName}Count';
+      } else {
+        final columnCamelCase = _toCamelCase(column!);
+        attributeName = '$relationName${columnCamelCase}${_capitalize(relationType)}';
+      }
+
+      // Extract model IDs
+      final modelIds = models.map((m) => m.id).where((id) => id != null).toList();
+      if (modelIds.isEmpty) continue;
+
+      // Build aggregate query based on relation type
+      Map<int, dynamic> aggregateResults = {};
+
+      if (relationDef.type == RelationType.hasMany || 
+          relationDef.type == RelationType.hasOne) {
+        // For hasMany/hasOne: SELECT foreign_key, COUNT(*) FROM related_table WHERE foreign_key IN (ids) GROUP BY foreign_key
+        final selectClause = relationType == 'count'
+            ? 'COUNT(*)'
+            : '$relationType(`$column`)';
+        
+        String sql = '''
+          SELECT `${relationDef.foreignKey}` as _fk, $selectClause as _aggregate
+          FROM `${relationDef.relatedTable}`
+          WHERE `${relationDef.foreignKey}` IN (${modelIds.map((_) => '?').join(',')})
+        ''';
+
+        // Apply callback constraints if provided
+        if (callback != null) {
+          final subQuery = MySQLQueryBuilder(_connection, relationDef.relatedTable);
+          callback(subQuery);
+          final whereClause = subQuery._where.join(' AND ');
+          if (whereClause.isNotEmpty) {
+            sql += ' AND $whereClause';
+          }
+        }
+
+        sql += ' GROUP BY `${relationDef.foreignKey}`';
+
+        final result = await _connection.execute(sql, modelIds);
+        for (final row in result.data) {
+          aggregateResults[row['_fk'] as int] = row['_aggregate'];
+        }
+      } 
+      else if (relationDef.type == RelationType.belongsTo) {
+        // For belongsTo: SELECT local_key, COUNT(*) FROM related_table WHERE local_key IN (foreign_keys) GROUP BY local_key
+        final foreignKeys = models
+            .map((m) => m.getField(relationDef.localKey))
+            .where((fk) => fk != null)
+            .toList();
+        
+        if (foreignKeys.isEmpty) continue;
+
+        final selectClause = relationType == 'count'
+            ? 'COUNT(*)'
+            : '$relationType(`$column`)';
+
+        String sql = '''
+          SELECT `${relationDef.foreignKey}` as _fk, $selectClause as _aggregate
+          FROM `${relationDef.relatedTable}`
+          WHERE `${relationDef.foreignKey}` IN (${foreignKeys.map((_) => '?').join(',')})
+          GROUP BY `${relationDef.foreignKey}`
+        ''';
+
+        final result = await _connection.execute(sql, foreignKeys);
+        for (final row in result.data) {
+          aggregateResults[row['_fk'] as int] = row['_aggregate'];
+        }
+      }
+      else if (relationDef.type == RelationType.belongsToMany) {
+        // For belongsToMany: Use pivot table
+        final pivotTable = relationDef.pivotTable!;
+        final foreignPivotKey = relationDef.foreignPivotKey!;
+        final relatedPivotKey = relationDef.relatedPivotKey!;
+
+        final selectClause = relationType == 'count'
+            ? 'COUNT(DISTINCT pivot.`$relatedPivotKey`)'
+            : '$relationType(related.`$column`)';
+
+        String sql = '''
+          SELECT pivot.`$foreignPivotKey` as _fk, $selectClause as _aggregate
+          FROM `$pivotTable` pivot
+          INNER JOIN `${relationDef.relatedTable}` related
+            ON pivot.`$relatedPivotKey` = related.`${relationDef.foreignKey}`
+          WHERE pivot.`$foreignPivotKey` IN (${modelIds.map((_) => '?').join(',')})
+          GROUP BY pivot.`$foreignPivotKey`
+        ''';
+
+        final result = await _connection.execute(sql, modelIds);
+        for (final row in result.data) {
+          aggregateResults[row['_fk'] as int] = row['_aggregate'];
+        }
+      }
+
+      // Set aggregate values on models
+      for (final model in models) {
+        final aggregateValue = aggregateResults[model.id] ?? (relationType == 'count' ? 0 : null);
+        model.setField(attributeName, aggregateValue);
+      }
+    }
+  }
+
+  /// Convert snake_case to CamelCase
+  String _toCamelCase(String str) {
+    return str.split('_').map((part) {
+      if (part.isEmpty) return '';
+      return part[0].toUpperCase() + part.substring(1);
+    }).join();
+  }
+
+  /// Capitalize first letter
+  String _capitalize(String str) {
+    if (str.isEmpty) return '';
+    return str[0].toUpperCase() + str.substring(1);
   }
 
   /// Fetches the first matching result and converts to type `T`.
@@ -1889,6 +2034,83 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   QueryBuilderInterface<T> withOnly(List<dynamic> relations) {
     _useOnlyRelations = true;
     _eagerRelations = relations;
+    return this;
+  }
+
+  // ---------------------------- Relationship Aggregates ----------------------------
+
+  /// Stores relationship aggregate queries to run
+  final List<Map<String, dynamic>> _relationAggregates = [];
+
+  @override
+  QueryBuilderInterface<T> withCount(dynamic relations) {
+    if (relations is String) {
+      _relationAggregates.add({
+        'type': 'count',
+        'relation': relations,
+        'callback': null,
+      });
+    } else if (relations is List<String>) {
+      for (final relation in relations) {
+        _relationAggregates.add({
+          'type': 'count',
+          'relation': relation,
+          'callback': null,
+        });
+      }
+    } else if (relations is Map<String, Function>) {
+      for (final entry in relations.entries) {
+        _relationAggregates.add({
+          'type': 'count',
+          'relation': entry.key,
+          'callback': entry.value,
+        });
+      }
+    }
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> withSum(String relation, String column) {
+    _relationAggregates.add({
+      'type': 'sum',
+      'relation': relation,
+      'column': column,
+      'callback': null,
+    });
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> withAvg(String relation, String column) {
+    _relationAggregates.add({
+      'type': 'avg',
+      'relation': relation,
+      'column': column,
+      'callback': null,
+    });
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> withMax(String relation, String column) {
+    _relationAggregates.add({
+      'type': 'max',
+      'relation': relation,
+      'column': column,
+      'callback': null,
+    });
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> withMin(String relation, String column) {
+    _relationAggregates.add({
+      'type': 'min',
+      'relation': relation,
+      'column': column,
+      'callback': null,
+    });
     return this;
   }
 

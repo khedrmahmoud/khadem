@@ -23,7 +23,12 @@ class DatabaseModel<T> {
   }
 
   Future<void> delete() async {
-    await model.event.beforeDelete();
+    final allowed = await model.event.beforeDelete();
+    if (!allowed) {
+      // Deletion was cancelled by an observer
+      return;
+    }
+    
     // Use parameterized query to prevent SQL injection
     await model.query.where('id', '=', model.id).delete();
     await model.event.afterDelete();

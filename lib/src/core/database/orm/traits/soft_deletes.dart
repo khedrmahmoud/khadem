@@ -97,10 +97,19 @@ mixin SoftDeletes<T> on KhademModel<T> {
       return false; // Not deleted, nothing to restore
     }
 
+    // Call observer beforeRestore hook
+    final allowed = event.beforeRestore();
+    if (!allowed) {
+      return false; // Restoration cancelled by observer
+    }
+
     deletedAt = null;
 
     // Save the change
     await db.save();
+
+    // Call observer afterRestore hook
+    event.afterRestore();
 
     return true;
   }
@@ -109,8 +118,17 @@ mixin SoftDeletes<T> on KhademModel<T> {
   /// 
   /// This bypasses soft delete and actually removes the record.
   Future<bool> forceDelete() async {
+    // Call observer beforeForceDelete hook
+    final allowed = event.beforeForceDelete();
+    if (!allowed) {
+      return false; // Force deletion cancelled by observer
+    }
+
     // Permanently delete
     await db.delete();
+
+    // Call observer afterForceDelete hook
+    event.afterForceDelete();
 
     return true;
   }

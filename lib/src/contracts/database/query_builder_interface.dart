@@ -548,6 +548,84 @@ abstract class QueryBuilderInterface<T> {
   /// ```
   QueryBuilderInterface<T> without(List<String> relations);
 
+  // ---------------------------- Relationship Aggregates ----------------------------
+
+  /// Load relationship counts without loading the full relationships.
+  ///
+  /// Adds a `{relation}Count` attribute to each model with the count.
+  ///
+  /// ```dart
+  /// final users = await User.query()
+  ///   .withCount(['posts', 'comments'])
+  ///   .get();
+  ///
+  /// print(users.first.postsCount); // 25
+  /// print(users.first.commentsCount); // 150
+  /// ```
+  ///
+  /// You can also apply constraints to the count:
+  /// ```dart
+  /// final users = await User.query()
+  ///   .withCount({
+  ///     'posts': (q) => q.where('published', '=', true),
+  ///     'comments': (q) => q.where('approved', '=', true),
+  ///   })
+  ///   .get();
+  /// ```
+  QueryBuilderInterface<T> withCount(dynamic relations);
+
+  /// Load relationship sum aggregates without loading the full relationships.
+  ///
+  /// Adds a `{relation}{Column}Sum` attribute to each model.
+  ///
+  /// ```dart
+  /// final users = await User.query()
+  ///   .withSum('orders', 'amount')
+  ///   .get();
+  ///
+  /// print(users.first.ordersAmountSum); // 1500.50
+  /// ```
+  QueryBuilderInterface<T> withSum(String relation, String column);
+
+  /// Load relationship average aggregates without loading the full relationships.
+  ///
+  /// Adds a `{relation}{Column}Avg` attribute to each model.
+  ///
+  /// ```dart
+  /// final users = await User.query()
+  ///   .withAvg('orders', 'rating')
+  ///   .get();
+  ///
+  /// print(users.first.ordersRatingAvg); // 4.5
+  /// ```
+  QueryBuilderInterface<T> withAvg(String relation, String column);
+
+  /// Load relationship maximum aggregates without loading the full relationships.
+  ///
+  /// Adds a `{relation}{Column}Max` attribute to each model.
+  ///
+  /// ```dart
+  /// final users = await User.query()
+  ///   .withMax('posts', 'views')
+  ///   .get();
+  ///
+  /// print(users.first.postsViewsMax); // 50000
+  /// ```
+  QueryBuilderInterface<T> withMax(String relation, String column);
+
+  /// Load relationship minimum aggregates without loading the full relationships.
+  ///
+  /// Adds a `{relation}{Column}Min` attribute to each model.
+  ///
+  /// ```dart
+  /// final users = await User.query()
+  ///   .withMin('posts', 'views')
+  ///   .get();
+  ///
+  /// print(users.first.postsViewsMin); // 10
+  /// ```
+  QueryBuilderInterface<T> withMin(String relation, String column);
+
   /// Replaces the model's defaultRelations with the specified relations.
   ///
   /// Use this when you want to load completely different relations

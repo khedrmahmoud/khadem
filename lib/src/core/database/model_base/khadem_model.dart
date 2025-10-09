@@ -1,5 +1,7 @@
 import 'package:khadem/khadem.dart' show QueryBuilderInterface, Khadem;
 
+import '../orm/observers/observer_registry.dart';
+import '../orm/observers/model_observer.dart';
 import '../orm/relation_definition.dart';
 import '../orm/relation_type.dart';
 import 'database_model.dart';
@@ -16,6 +18,32 @@ abstract class KhademModel<T> {
   late final DatabaseModel<T> db = DatabaseModel<T>(this);
 
   Map<String, dynamic> get rawData => json.rawData;
+
+  /// Register an observer for this model type.
+  ///
+  /// Observers provide a clean way to handle model lifecycle events
+  /// outside of the model itself.
+  ///
+  /// Example:
+  /// ```dart
+  /// class UserObserver extends ModelObserver<User> {
+  ///   @override
+  ///   void creating(User user) {
+  ///     user.uuid = Uuid().v4();
+  ///   }
+  ///
+  ///   @override
+  ///   void created(User user) {
+  ///     sendWelcomeEmail(user);
+  ///   }
+  /// }
+  ///
+  /// // Register the observer
+  /// User.observe(UserObserver());
+  /// ```
+  static void observe<T extends KhademModel<T>>(ModelObserver<T> observer) {
+    ObserverRegistry().register<T>(observer);
+  }
 
   /// Used to generate instances inside query builder
   T newFactory(Map<String, dynamic> data);
@@ -56,7 +84,25 @@ abstract class KhademModel<T> {
   List<String> get appends => _appendsList;
 
   /// Type casting for fields
-  Map<String, Type> get casts => {};
+  /// Type casting for attributes
+  /// 
+  /// Supports both legacy Type-based casts and new AttributeCaster instances:
+  /// 
+  /// ```dart
+  /// // Legacy (still supported):
+  /// Map<String, dynamic> get casts => {
+  ///   'created_at': DateTime,
+  ///   'count': int,
+  /// };
+  /// 
+  /// // New advanced casters:
+  /// Map<String, dynamic> get casts => {
+  ///   'settings': JsonCast(),
+  ///   'roles': ArrayCast(),
+  ///   'password': EncryptedCast(),
+  /// };
+  /// ```
+  Map<String, dynamic> get casts => {};
 
   /// Computed properties (getters)
   /// E.g., 'full_name': () => '$firstName $lastName'

@@ -1,6 +1,7 @@
 import 'package:mysql1/mysql1.dart';
 
 import '../../../support/helpers/date_helper.dart';
+import '../orm/casting/attribute_caster.dart';
 import 'khadem_model.dart';
 
 class JsonModel<T> {
@@ -47,7 +48,13 @@ class JsonModel<T> {
       
       var value = json[key];
       final cast = model.casts[key];
-      if (cast == DateTime && value is String) {
+      
+      // Handle new AttributeCaster system (dynamic check)
+      if (cast is AttributeCaster) {
+        value = (cast as AttributeCaster).get(value);
+      }
+      // Legacy Type-based casts (backward compatibility)
+      else if (cast == DateTime && value is String) {
         value = DateTime.tryParse(value);
       } else if (cast == int && value is String) {
         value = int.tryParse(value);
@@ -62,6 +69,7 @@ class JsonModel<T> {
       } else if (value is Blob) {
         value = value.toString();
       }
+      
       model.setField(key, value);
     }
   }
@@ -125,9 +133,21 @@ class JsonModel<T> {
   Map<String, dynamic> toDatabaseJson() {
     final data = <String, dynamic>{};
     for (final key in model.fillable) {
-      final value = model.getField(key);
+      var value = model.getField(key);
       if (value == null) continue;
-      data[key] = value is DateTime ? value.toUtc() : value;
+      
+      // Apply caster's set() method if applicable
+      final cast = model.casts[key];
+      if (cast is AttributeCaster) {
+        value = (cast as AttributeCaster).set(value);
+        if (value == null) continue; // Skip if caster returns null
+      }
+      // Legacy DateTime handling
+      else if (value is DateTime) {
+        value = value.toUtc();
+      }
+      
+      data[key] = value;
     }
     return data;
   }
