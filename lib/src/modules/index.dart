@@ -4,3 +4,8 @@
 library;
 
 export 'auth/index.dart';
+
+/// ========================
+/// Mail
+/// ========================
+export 'mail/index.dart';
