@@ -27,15 +27,15 @@
 - ✅ Query builder access (`query` getter)
 
 **Current Limitations:**
-- ❌ Computed properties are synchronous only (no `Future<dynamic>` support)
-- ❌ Relations not directly accessible as model properties
-- ❌ No `guarded` (blacklist) mechanism for mass assignment
-- ❌ No `protected` attributes
+- ❌ Computed properties are synchronous only (no `Future<dynamic>` support) ✅ **FIXED**
+- ❌ Relations not directly accessible as model properties (IN PROGRESS)
+- ❌ No `guarded` (blacklist) mechanism for mass assignment ✅ **FIXED**
+- ❌ No `protected` attributes ✅ **FIXED**
 - ❌ No query scopes
 - ❌ No soft delete support
 - ❌ No automatic timestamps (`created_at`, `updated_at`)
 - ❌ No model observers/lifecycle hooks (only events)
-- ❌ `fillable` is whitelist-only, no flexible mass assignment control
+- ❌ `fillable` is whitelist-only, no flexible mass assignment control ✅ **FIXED**
 
 #### 2. **RelationModel** (Relation Management)
 **Location:** `lib/src/core/database/model_base/relation_model.dart`
@@ -78,7 +78,7 @@ final users = chatRoom.users
 - ❌ No array/collection casting
 - ❌ No encrypted attribute support
 - ❌ No automatic date formatting
-- ❌ Computed properties can't be async
+- ❌ Computed properties can't be async ✅ **FIXED**
 
 #### 4. **DatabaseModel** (Persistence)
 **Location:** `lib/src/core/database/model_base/database_model.dart`
@@ -513,24 +513,47 @@ final users = await User.query()
 ## 📋 Implementation Plan
 
 ### Phase 1: Core Enhancements (Week 1)
-1. ✅ Add model-level `defaultRelations` property for default eager loading *(COMPLETE - 2-3 hours)*
-2. ⬜ Implement async computed properties *(2-3 hours)*
-3. ⬜ Add guarded/protected attributes *(2 hours)*
-4. ⬜ Create direct relation accessors pattern *(3-4 hours)*
+1. ✅ Add model-level `defaultRelations` property for default eager loading *(COMPLETE - Oct 5, 2025)*
+2. ✅ Implement async computed properties *(COMPLETE - Oct 7, 2025)*
+3. ✅ Add guarded/protected attributes *(COMPLETE - Oct 7, 2025)*
+4. ⬜ Create direct relation accessors pattern *(3-4 hours)* - IN PROGRESS
+5. ✅ Enhanced request context cleanup *(COMPLETE - Oct 7, 2025)*
 
 ### Phase 2: Advanced Features (Week 2)
-5. ⬜ Implement query scopes *(4-5 hours)*
-6. ⬜ Add soft deletes mixin *(3-4 hours)*
-7. ⬜ Add timestamps mixin *(2-3 hours)*
-8. ⬜ Create model observers *(4-5 hours)*
+6. ⬜ Implement query scopes *(4-5 hours)*
+7. ⬜ Add soft deletes mixin *(3-4 hours)*
+8. ⬜ Add timestamps mixin *(2-3 hours)*
+9. ⬜ Create model observers *(4-5 hours)*
 
 ### Phase 3: Polish & Testing (Week 3)
-9. ⬜ Advanced casting (Json, Array, Encrypted) *(4-5 hours)*
-10. ⬜ Relationship counts/aggregates *(3-4 hours)*
-11. ⬜ Comprehensive test suite *(8-10 hours)*
-12. ⬜ Documentation and examples *(4-5 hours)*
+10. ⬜ Advanced casting (Json, Array, Encrypted) *(4-5 hours)*
+11. ⬜ Relationship counts/aggregates *(3-4 hours)*
+12. ⬜ Comprehensive test suite *(8-10 hours)*
+13. ⬜ Documentation and examples *(4-5 hours)*
 
-**Total Estimated Time:** 40-50 hours
+### Phase 4: Database Query Enhancements (Future - separate branch)
+14. ⬜ Nested `whereHas()` support *(3-4 hours)*
+    - Allow nested relation queries: `whereHas('relation.nestedRelation', callback)`
+    - Example:
+      ```dart
+      // Current: Direct nested path (limited)
+      .whereHas('chat_room_users.user', (subQb) {
+        subQb.where('id', '=', userId);
+        subQb.whereLike('name', '%search%');
+      })
+      
+      // Desired: Nested whereHas within whereHas (more flexible)
+      .whereHas('chat_room_users', (subQb) {
+        subQb.where('user_id', '=', userId);
+        subQb.whereHas('user', (userQb) {
+          userQb.whereLike('name', '%search%');
+        });
+      })
+      ```
+    - **Branch:** `feature/database-query-builder-enhancements`
+    - **Benefits:** More intuitive nested queries, better query composition
+
+**Total Estimated Time:** 50-60 hours
 
 ---
 
@@ -707,5 +730,6 @@ void main() async {
 
 ---
 
-**Status:** 📝 Analysis Complete - Awaiting Approval  
-**Next:** Implement Phase 1 Core Enhancements
+**Status:** � In Progress - Phase 1 Nearly Complete  
+**Last Updated:** October 8, 2025  
+**Next:** Complete direct relation accessors, then move to Phase 2
