@@ -56,7 +56,25 @@ abstract class KhademModel<T> {
   List<String> get appends => _appendsList;
 
   /// Type casting for fields
-  Map<String, Type> get casts => {};
+  /// Type casting for attributes
+  /// 
+  /// Supports both legacy Type-based casts and new AttributeCaster instances:
+  /// 
+  /// ```dart
+  /// // Legacy (still supported):
+  /// Map<String, dynamic> get casts => {
+  ///   'created_at': DateTime,
+  ///   'count': int,
+  /// };
+  /// 
+  /// // New advanced casters:
+  /// Map<String, dynamic> get casts => {
+  ///   'settings': JsonCast(),
+  ///   'roles': ArrayCast(),
+  ///   'password': EncryptedCast(),
+  /// };
+  /// ```
+  Map<String, dynamic> get casts => {};
 
   /// Computed properties (getters)
   /// E.g., 'full_name': () => '$firstName $lastName'
