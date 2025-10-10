@@ -81,9 +81,6 @@ mixin Timestamps<T> on KhademModel<T> {
   DateTime? _createdAt;
   DateTime? _updatedAt;
 
-  @override
-  List<String> get fillable =>
-      timestamps ? ['created_at', 'updated_at', ...super.fillable] : [];
 
   /// Get the created_at value
   DateTime? get createdAt {

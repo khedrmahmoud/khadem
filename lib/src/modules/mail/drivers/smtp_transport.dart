@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -29,6 +30,7 @@ class SmtpTransport implements TransportInterface {
   SecureSocket? _socket;
   Socket? _plainSocket;
   bool _isConnected = false;
+  Stream<List<int>>? _socketStream;
 
   SmtpTransport(this._config);
 
@@ -106,34 +108,69 @@ class SmtpTransport implements TransportInterface {
 
       if (_config.encryption == 'ssl') {
         // Direct SSL connection
-        _socket = await SecureSocket.connect(
-          _config.host,
-          _config.port,
-          timeout: timeout,
-        );
-        _isConnected = true;
-        await _readResponse(); // Read server greeting
+        try {
+          _socket = await SecureSocket.connect(
+            _config.host,
+            _config.port,
+            timeout: timeout,
+          );
+          _socketStream = _socket!.asBroadcastStream();
+          _isConnected = true;
+          await _readResponse(); // Read server greeting
+        } on SocketException catch (e) {
+          throw MailTransportException(
+            'Failed to connect to SMTP server ${_config.host}:${_config.port} using SSL. '
+            'Please check:\n'
+            '1. SMTP host and port are correct\n'
+            '2. Firewall allows outbound connections on port ${_config.port}\n'
+            '3. SMTP server supports SSL on this port\n'
+            'Error: ${e.message}',
+          );
+        }
       } else {
         // Plain connection (will upgrade to TLS if needed)
-        _plainSocket = await Socket.connect(
-          _config.host,
-          _config.port,
-          timeout: timeout,
-        );
-        _isConnected = true;
-        await _readResponse(); // Read server greeting
-
-        if (_config.encryption == 'tls') {
-          // Upgrade to TLS
-          await _sendCommand('STARTTLS', expectedCode: 220);
-          _socket = await SecureSocket.secure(
-            _plainSocket!,
-            host: _config.host,
+        try {
+          _plainSocket = await Socket.connect(
+            _config.host,
+            _config.port,
+            timeout: timeout,
           );
-          _plainSocket = null;
+          _socketStream = _plainSocket!.asBroadcastStream();
+          _isConnected = true;
+          await _readResponse(); // Read server greeting
+
+          if (_config.encryption == 'tls') {
+            // Upgrade to TLS
+            await _sendCommand('STARTTLS', expectedCode: 220);
+            _socket = await SecureSocket.secure(
+              _plainSocket!,
+              host: _config.host,
+            );
+            _socketStream = _socket!.asBroadcastStream();
+            _plainSocket = null;
+          }
+        } on SocketException catch (e) {
+          throw MailTransportException(
+            'Failed to connect to SMTP server ${_config.host}:${_config.port}. '
+            'Please check:\n'
+            '1. SMTP host and port are correct\n'
+            '2. Firewall allows outbound connections on port ${_config.port}\n'
+            '3. Network connectivity is working\n'
+            'Error: ${e.message}',
+          );
+        } on TimeoutException {
+          throw MailTransportException(
+            'Connection to SMTP server ${_config.host}:${_config.port} timed out after ${_config.timeout} seconds. '
+            'Please check:\n'
+            '1. SMTP server is running and accessible\n'
+            '2. Firewall is not blocking the connection\n'
+            '3. Network latency is acceptable\n'
+            'Consider increasing the timeout in your configuration.',
+          );
         }
       }
     } catch (e) {
+      if (e is MailTransportException) rethrow;
       throw MailTransportException('Failed to connect to SMTP server: $e');
     }
   }
@@ -148,6 +185,7 @@ class SmtpTransport implements TransportInterface {
     } finally {
       _socket = null;
       _plainSocket = null;
+      _socketStream = null;
       _isConnected = false;
     }
   }
@@ -377,13 +415,12 @@ class SmtpTransport implements TransportInterface {
 
   /// Reads a response from the SMTP server.
   Future<String> _readResponse() async {
-    final socket = _socket ?? _plainSocket;
-    if (socket == null) {
+    if (_socketStream == null) {
       throw MailTransportException('Not connected to SMTP server');
     }
 
     final response = StringBuffer();
-    await for (final data in socket) {
+    await for (final data in _socketStream!) {
       final text = utf8.decode(data);
       response.write(text);
 

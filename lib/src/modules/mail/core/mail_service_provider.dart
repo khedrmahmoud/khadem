@@ -1,14 +1,6 @@
-import '../../../contracts/container/container_interface.dart';
-import '../../../contracts/provider/service_provider.dart';
-import '../../../core/queue/queue_manager.dart';
+import 'package:khadem/khadem.dart';
+
 import '../config/mail_config.dart';
-import '../drivers/array_transport.dart';
-import '../drivers/log_transport.dart';
-import '../drivers/mailgun_transport.dart';
-import '../drivers/postmark_transport.dart';
-import '../drivers/ses_transport.dart';
-import '../drivers/smtp_transport.dart';
-import 'mail_manager.dart';
 
 /// Service provider for the mail module.
 ///
@@ -21,7 +13,7 @@ class MailServiceProvider implements ServiceProvider {
   void register(ContainerInterface container) {
     // Register MailManager as singleton
     container.singleton<MailManager>((c) {
-      final config = c.resolve();
+      final config = c.resolve<ConfigInterface>();
       final queueManager = c.has<QueueManager>() 
           ? c.resolve<QueueManager>() 
           : null;
@@ -45,8 +37,8 @@ class MailServiceProvider implements ServiceProvider {
     MailManager mailManager,
     ContainerInterface container,
   ) {
-    final config = container.resolve();
-    final logger = container.resolve();
+    final config = Khadem.config;
+    final logger = Khadem.logger;
 
     // Register log transport (for development)
     mailManager.registerTransport('log', LogTransport(logger));

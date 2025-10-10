@@ -21,3 +21,5 @@ export 'drivers/smtp_transport.dart';
 export 'exceptions/mail_exception.dart';
 // Facade
 export 'mail.dart';
+// Utils
+export 'utils/smtp_diagnostics.dart';
