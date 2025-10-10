@@ -13,6 +13,9 @@ export 'core/mailer.dart';
 // Drivers
 export 'drivers/array_transport.dart';
 export 'drivers/log_transport.dart';
+export 'drivers/mailgun_transport.dart';
+export 'drivers/postmark_transport.dart';
+export 'drivers/ses_transport.dart';
 export 'drivers/smtp_transport.dart';
 // Exceptions
 export 'exceptions/mail_exception.dart';

@@ -4,6 +4,9 @@ import '../../../core/queue/queue_manager.dart';
 import '../config/mail_config.dart';
 import '../drivers/array_transport.dart';
 import '../drivers/log_transport.dart';
+import '../drivers/mailgun_transport.dart';
+import '../drivers/postmark_transport.dart';
+import '../drivers/ses_transport.dart';
 import '../drivers/smtp_transport.dart';
 import 'mail_manager.dart';
 
@@ -61,25 +64,34 @@ class MailServiceProvider implements ServiceProvider {
     // Register Mailgun transport if configured
     final mailgunConfig = config.get<Map<String, dynamic>>('mail.mailgun');
     if (mailgunConfig != null) {
-      // TODO: Implement MailgunTransport when needed
-      // final mailgun = MailgunConfig.fromMap(mailgunConfig);
-      // mailManager.registerTransport('mailgun', MailgunTransport(mailgun));
+      final mailgun = MailgunConfig(
+        domain: mailgunConfig['domain'] as String,
+        apiKey: mailgunConfig['api_key'] as String,
+        endpoint: mailgunConfig['endpoint'] as String? ?? 'https://api.mailgun.net',
+      );
+      mailManager.registerTransport('mailgun', MailgunTransport(mailgun));
     }
 
     // Register SES transport if configured
     final sesConfig = config.get<Map<String, dynamic>>('mail.ses');
     if (sesConfig != null) {
-      // TODO: Implement SesTransport when needed
-      // final ses = SesConfig.fromMap(sesConfig);
-      // mailManager.registerTransport('ses', SesTransport(ses));
+      final ses = SesConfig(
+        accessKeyId: sesConfig['access_key_id'] as String,
+        secretAccessKey: sesConfig['secret_access_key'] as String,
+        region: sesConfig['region'] as String,
+        configurationSet: sesConfig['configuration_set'] as String?,
+      );
+      mailManager.registerTransport('ses', SesTransport(ses));
     }
 
     // Register Postmark transport if configured
     final postmarkConfig = config.get<Map<String, dynamic>>('mail.postmark');
     if (postmarkConfig != null) {
-      // TODO: Implement PostmarkTransport when needed
-      // final postmark = PostmarkConfig.fromMap(postmarkConfig);
-      // mailManager.registerTransport('postmark', PostmarkTransport(postmark));
+      final postmark = PostmarkConfig(
+        serverToken: postmarkConfig['server_token'] as String,
+        messageStream: postmarkConfig['message_stream'] as String?,
+      );
+      mailManager.registerTransport('postmark', PostmarkTransport(postmark));
     }
   }
 }
