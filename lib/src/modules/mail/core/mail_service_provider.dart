@@ -1,9 +1,9 @@
 import '../../../contracts/container/container_interface.dart';
 import '../../../contracts/provider/service_provider.dart';
 import '../../../core/queue/queue_manager.dart';
-import 'mail_manager.dart';
 import '../drivers/array_transport.dart';
 import '../drivers/log_transport.dart';
+import 'mail_manager.dart';
 
 /// Service provider for the mail module.
 ///

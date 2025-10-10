@@ -296,7 +296,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> oldest([String column = 'created_at']) {
-    return orderBy(column, direction: 'ASC');
+    return orderBy(column);
   }
 
   @override
@@ -1312,7 +1312,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> doesntHave(String relation) {
-    return whereDoesntHave(relation, null);
+    return whereDoesntHave(relation);
   }
 
   // Helper methods for relationship queries
@@ -1656,7 +1656,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       if (modelIds.isEmpty) continue;
 
       // Build aggregate query based on relation type
-      Map<int, dynamic> aggregateResults = {};
+      final Map<int, dynamic> aggregateResults = {};
 
       if (relationDef.type == RelationType.hasMany || 
           relationDef.type == RelationType.hasOne) {
@@ -1701,7 +1701,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
             ? 'COUNT(*)'
             : '$relationType(`$column`)';
 
-        String sql = '''
+        final String sql = '''
           SELECT `${relationDef.foreignKey}` as _fk, $selectClause as _aggregate
           FROM `${relationDef.relatedTable}`
           WHERE `${relationDef.foreignKey}` IN (${foreignKeys.map((_) => '?').join(',')})
@@ -1723,7 +1723,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
             ? 'COUNT(DISTINCT pivot.`$relatedPivotKey`)'
             : '$relationType(related.`$column`)';
 
-        String sql = '''
+        final String sql = '''
           SELECT pivot.`$foreignPivotKey` as _fk, $selectClause as _aggregate
           FROM `$pivotTable` pivot
           INNER JOIN `${relationDef.relatedTable}` related

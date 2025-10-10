@@ -3,6 +3,7 @@ import 'package:test/test.dart';
 
 // Test model with fillable attributes
 class TestUserFillable extends KhademModel<TestUserFillable> {
+  @override
   int? id;
   String? name;
   String? email;
@@ -46,6 +47,7 @@ class TestUserFillable extends KhademModel<TestUserFillable> {
 
 // Test model with guarded attributes
 class TestUserGuarded extends KhademModel<TestUserGuarded> {
+  @override
   int? id;
   String? name;
   String? email;
@@ -92,6 +94,7 @@ class TestUserGuarded extends KhademModel<TestUserGuarded> {
 
 // Test model with protected attributes
 class TestUserProtected extends KhademModel<TestUserProtected> {
+  @override
   int? id;
   String? name;
   String? email;
@@ -138,6 +141,7 @@ class TestUserProtected extends KhademModel<TestUserProtected> {
 
 // Test model with both hidden and protected
 class TestUserCombined extends KhademModel<TestUserCombined> {
+  @override
   int? id;
   String? name;
   String? email;
@@ -417,7 +421,7 @@ void main() {
       expect(user.role, isNull);
       
       // Force fromJson bypasses fillable
-      user.json.fromJson({'role': 'superadmin'}, force: true);
+      user.json.fromJson({'role': 'superadmin'});
       expect(user.role, equals('superadmin'));
     });
 

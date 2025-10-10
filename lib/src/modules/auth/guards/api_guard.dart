@@ -17,10 +17,8 @@ class ApiGuard extends Guard {
   /// Creates an API guard
   ApiGuard({
     required super.config,
-    super.repository,
+    required super.driver, required super.providerKey, super.repository,
     super.passwordVerifier,
-    required super.driver,
-    required super.providerKey,
   });
 
   /// Factory constructor for easy instantiation

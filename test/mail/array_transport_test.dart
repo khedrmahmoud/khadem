@@ -146,15 +146,15 @@ void main() {
         await transport.send(_createTestMessage(
           to: 'admin@example.com',
           subject: 'Admin Alert',
-        ));
+        ),);
         await transport.send(_createTestMessage(
           to: 'user@example.com',
           subject: 'Welcome',
-        ));
+        ),);
         await transport.send(_createTestMessage(
           to: 'admin@example.com',
           subject: 'Another Alert',
-        ));
+        ),);
 
         // Find all admin emails
         final adminEmails = transport.findSent(
@@ -173,13 +173,13 @@ void main() {
 
       test('should support test assertions pattern', () async {
         // Arrange
-        final userEmail = 'newuser@example.com';
+        const userEmail = 'newuser@example.com';
 
         // Act - simulate sending welcome email
         await transport.send(_createTestMessage(
           to: userEmail,
           subject: 'Welcome to our app!',
-        ));
+        ),);
 
         // Assert
         expect(transport.hasSent, isTrue);

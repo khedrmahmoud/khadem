@@ -17,7 +17,7 @@ void main() {
     });
 
     test('should create exception with stack trace', () {
-      final stackTrace = 'Mock stack trace';
+      const stackTrace = 'Mock stack trace';
       final exception = AuthException('Error with stack', stackTrace: stackTrace);
       expect(exception.message, equals('Error with stack'));
       expect(exception.details, equals(stackTrace));

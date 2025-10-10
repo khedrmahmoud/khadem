@@ -548,7 +548,7 @@ void main() {
       observer.created(user);
 
       expect(observer.events.indexOf('creating'),
-          lessThan(observer.events.indexOf('created')));
+          lessThan(observer.events.indexOf('created')),);
     });
 
     test('updating fires before updated', () {
@@ -561,7 +561,7 @@ void main() {
       observer.updated(user);
 
       expect(observer.events.indexOf('updating'),
-          lessThan(observer.events.indexOf('updated')));
+          lessThan(observer.events.indexOf('updated')),);
     });
 
     test('saving fires for both creates and updates', () {
@@ -598,7 +598,7 @@ void main() {
       observer.deleted(user);
 
       expect(observer.events.indexOf('deleting'),
-          lessThan(observer.events.indexOf('deleted')));
+          lessThan(observer.events.indexOf('deleted')),);
     });
   });
 

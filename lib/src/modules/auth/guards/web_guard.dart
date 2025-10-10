@@ -30,10 +30,8 @@ class WebGuard extends Guard {
   /// Creates a web guard
   WebGuard({
     required super.config,
-    super.repository,
+    required super.driver, required super.providerKey, super.repository,
     super.passwordVerifier,
-    required super.driver,
-    required super.providerKey,
     ISessionManager? sessionManager,
   }) : _sessionManager = sessionManager;
 

@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 
 // Test models for async computed properties
 class TestUser extends KhademModel<TestUser> {
+  @override
   int? id;
   String? firstName;
   String? lastName;
@@ -23,7 +24,7 @@ class TestUser extends KhademModel<TestUser> {
     
     // Async computed property with Future
     'greeting': () async {
-      await Future.delayed(Duration(milliseconds: 10));
+      await Future.delayed(const Duration(milliseconds: 10));
       return 'Hello, $firstName!';
     },
     
@@ -44,7 +45,7 @@ class TestUser extends KhademModel<TestUser> {
       }
       // Async
       return Future.delayed(
-        Duration(milliseconds: 5),
+        const Duration(milliseconds: 5),
         () => 0,
       );
     },
@@ -89,6 +90,7 @@ class TestUser extends KhademModel<TestUser> {
 }
 
 class TestPost extends KhademModel<TestPost> {
+  @override
   int? id;
   int? userId;
   String? title;

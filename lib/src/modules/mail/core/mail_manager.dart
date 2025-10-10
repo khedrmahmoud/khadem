@@ -124,7 +124,7 @@ class MailManager implements MailerInterface {
 
   @override
   Future<MailerInterface> view(String viewName,
-          [Map<String, dynamic>? data]) =>
+          [Map<String, dynamic>? data,]) =>
       defaultMailer.view(viewName, data);
 
   @override
@@ -133,7 +133,7 @@ class MailManager implements MailerInterface {
 
   @override
   MailerInterface attachData(List<int> data, String name,
-          {String? mimeType}) =>
+          {String? mimeType,}) =>
       defaultMailer.attachData(data, name, mimeType: mimeType);
 
   @override

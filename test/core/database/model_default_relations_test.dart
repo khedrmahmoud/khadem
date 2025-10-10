@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 class _MockConnection implements ConnectionInterface {
   @override
   Future<DatabaseResponse> execute(String query, [List<dynamic> bindings = const []]) async {
-    return DatabaseResponse(data: [], insertId: null, affectedRows: 0);
+    return DatabaseResponse(data: [], affectedRows: 0);
   }
 
   @override
@@ -40,7 +40,7 @@ class _MockConnection implements ConnectionInterface {
     Future<void> Function(dynamic error)? onFailure,
     Future<void> Function()? onFinally,
   }) async {
-    return await callback();
+    return callback();
   }
 
   @override
@@ -49,6 +49,7 @@ class _MockConnection implements ConnectionInterface {
 
 // Test models
 class TestUser extends KhademModel<TestUser> {
+  @override
   int? id;
   String? name;
   String? email;
@@ -111,6 +112,7 @@ class TestUser extends KhademModel<TestUser> {
 }
 
 class TestPost extends KhademModel<TestPost> {
+  @override
   int? id;
   int? userId;
   String? title;
@@ -159,6 +161,7 @@ class TestPost extends KhademModel<TestPost> {
 }
 
 class TestProfile extends KhademModel<TestProfile> {
+  @override
   int? id;
   int? userId;
   String? bio;
@@ -192,6 +195,7 @@ class TestProfile extends KhademModel<TestProfile> {
 }
 
 class TestComment extends KhademModel<TestComment> {
+  @override
   int? id;
   int? postId;
   String? content;

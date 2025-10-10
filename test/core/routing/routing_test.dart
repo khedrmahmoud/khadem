@@ -643,7 +643,7 @@ void main() {
       expect(router.match('GET', '/users/123'), isNotNull);
       // Both should be fast, but static should be faster or equal
       expect(staticStopwatch.elapsedMicroseconds,
-          lessThanOrEqualTo(dynamicStopwatch.elapsedMicroseconds + 1000));
+          lessThanOrEqualTo(dynamicStopwatch.elapsedMicroseconds + 1000),);
     });
 
     test('should handle mix of trailing slash and no trailing slash', () {

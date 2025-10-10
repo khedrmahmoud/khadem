@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 class _MockConnection implements ConnectionInterface {
   @override
   Future<DatabaseResponse> execute(String query, [List<dynamic> bindings = const []]) async {
-    return DatabaseResponse(data: [], insertId: null, affectedRows: 0);
+    return DatabaseResponse(data: [], affectedRows: 0);
   }
 
   @override
@@ -37,7 +37,7 @@ class _MockConnection implements ConnectionInterface {
     Future<void> Function(dynamic error)? onFailure,
     Future<void> Function()? onFinally,
   }) async {
-    return await callback();
+    return callback();
   }
 
   @override
@@ -324,7 +324,7 @@ void main() {
         q.where('published', '=', true)
             .where('views', '>', 1000)
             .whereNotNull('featured_image');
-      }, '>=', 3).toSql();
+      }, '>=', 3,).toSql();
 
       expect(sql, contains('SELECT COUNT(*)'));
       expect(sql, contains('`published` = ?'));

@@ -22,8 +22,7 @@ class MailConfig {
   final PostmarkConfig? postmark;
 
   const MailConfig({
-    this.defaultTransport = 'log',
-    required this.from,
+    required this.from, this.defaultTransport = 'log',
     this.smtp,
     this.mailgun,
     this.ses,

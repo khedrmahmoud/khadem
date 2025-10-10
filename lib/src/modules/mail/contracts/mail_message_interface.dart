@@ -24,9 +24,8 @@ class MailAttachment {
   final String? mimeType;
 
   const MailAttachment({
-    this.path,
+    required this.filename, this.path,
     this.data,
-    required this.filename,
     this.mimeType,
   }) : assert(path != null || data != null, 'Either path or data must be provided');
 

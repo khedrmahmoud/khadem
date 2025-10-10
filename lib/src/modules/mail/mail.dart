@@ -66,7 +66,7 @@ class Mail {
 
   /// Renders a view template for the email body.
   static Future<MailerInterface> view(String viewName,
-          [Map<String, dynamic>? data]) =>
+          [Map<String, dynamic>? data,]) =>
       manager.view(viewName, data);
 
   /// Attaches a file.
@@ -75,7 +75,7 @@ class Mail {
 
   /// Attaches raw data.
   static MailerInterface attachData(List<int> data, String name,
-          {String? mimeType}) =>
+          {String? mimeType,}) =>
       manager.attachData(data, name, mimeType: mimeType);
 
   /// Embeds an inline image.

@@ -1,6 +1,6 @@
-import 'package:test/test.dart';
 import 'package:khadem/src/core/database/model_base/khadem_model.dart';
 import 'package:khadem/src/core/database/orm/casting/built_in_casters.dart';
+import 'package:test/test.dart';
 
 /// Test model using advanced casters
 class TestUser extends KhademModel<TestUser> {

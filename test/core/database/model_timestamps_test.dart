@@ -4,10 +4,13 @@ import 'package:test/test.dart';
 
 // Test model with timestamps
 class TestUser extends KhademModel<TestUser> with Timestamps<TestUser> {
+  @override
   int? id;
   String? name;
   String? email;
+  @override
   DateTime? createdAt;
+  @override
   DateTime? updatedAt;
 
   @override
@@ -60,6 +63,7 @@ class TestUser extends KhademModel<TestUser> with Timestamps<TestUser> {
 
 // Test model with disabled timestamps
 class TestSession extends KhademModel<TestSession> with Timestamps<TestSession> {
+  @override
   int? id;
   String? token;
 
@@ -101,6 +105,7 @@ class TestSession extends KhademModel<TestSession> with Timestamps<TestSession> 
 
 // Test model with custom timestamp columns
 class TestPost extends KhademModel<TestPost> with Timestamps<TestPost> {
+  @override
   int? id;
   String? title;
   DateTime? publishedAt;
@@ -211,7 +216,7 @@ void main() {
     });
 
     test('timestamps handle DateTime values', () {
-      final created = DateTime(2024, 1, 1);
+      final created = DateTime(2024, 1);
       final updated = DateTime(2024, 1, 2);
 
       user.setField('created_at', created);
@@ -232,7 +237,7 @@ void main() {
     });
 
     test('setTimestamps manually sets timestamps', () {
-      final created = DateTime(2024, 1, 1);
+      final created = DateTime(2024, 1);
       final updated = DateTime(2024, 1, 2);
 
       user.setTimestamps(createdAt: created, updatedAt: updated);
@@ -256,7 +261,7 @@ void main() {
   group('Timestamp Helpers', () {
     test('age returns duration since creation', () {
       final user = TestUser()
-        ..createdAt = DateTime.now().subtract(Duration(days: 5));
+        ..createdAt = DateTime.now().subtract(const Duration(days: 5));
 
       final age = user.age;
 
@@ -272,7 +277,7 @@ void main() {
 
     test('timeSinceUpdate returns duration since last update', () {
       final user = TestUser()
-        ..updatedAt = DateTime.now().subtract(Duration(hours: 2));
+        ..updatedAt = DateTime.now().subtract(const Duration(hours: 2));
 
       final timeSinceUpdate = user.timeSinceUpdate;
 
@@ -288,16 +293,16 @@ void main() {
 
     test('wasRecentlyCreated returns true for recent records', () {
       final user = TestUser()
-        ..createdAt = DateTime.now().subtract(Duration(minutes: 30));
+        ..createdAt = DateTime.now().subtract(const Duration(minutes: 30));
 
-      expect(user.wasRecentlyCreated(hours: 1), isTrue);
+      expect(user.wasRecentlyCreated(), isTrue);
     });
 
     test('wasRecentlyCreated returns false for old records', () {
       final user = TestUser()
-        ..createdAt = DateTime.now().subtract(Duration(hours: 2));
+        ..createdAt = DateTime.now().subtract(const Duration(hours: 2));
 
-      expect(user.wasRecentlyCreated(hours: 1), isFalse);
+      expect(user.wasRecentlyCreated(), isFalse);
     });
 
     test('wasRecentlyCreated returns false when createdAt is null', () {
@@ -308,16 +313,16 @@ void main() {
 
     test('wasRecentlyUpdated returns true for recent updates', () {
       final user = TestUser()
-        ..updatedAt = DateTime.now().subtract(Duration(minutes: 15));
+        ..updatedAt = DateTime.now().subtract(const Duration(minutes: 15));
 
-      expect(user.wasRecentlyUpdated(minutes: 30), isTrue);
+      expect(user.wasRecentlyUpdated(), isTrue);
     });
 
     test('wasRecentlyUpdated returns false for old updates', () {
       final user = TestUser()
-        ..updatedAt = DateTime.now().subtract(Duration(hours: 1));
+        ..updatedAt = DateTime.now().subtract(const Duration(hours: 1));
 
-      expect(user.wasRecentlyUpdated(minutes: 30), isFalse);
+      expect(user.wasRecentlyUpdated(), isFalse);
     });
 
     test('wasRecentlyUpdated returns false when updatedAt is null', () {
@@ -333,7 +338,7 @@ void main() {
         ..id = 1
         ..title = 'Test Post';
 
-      final published = DateTime(2024, 1, 1);
+      final published = DateTime(2024, 1);
       final modified = DateTime(2024, 1, 2);
 
       post.publishedAt = published;
@@ -347,7 +352,7 @@ void main() {
     test('setTimestamps works with custom columns', () {
       final post = TestPost();
 
-      final published = DateTime(2024, 1, 1);
+      final published = DateTime(2024, 1);
       final modified = DateTime(2024, 1, 2);
 
       post.setTimestamps(createdAt: published, updatedAt: modified);

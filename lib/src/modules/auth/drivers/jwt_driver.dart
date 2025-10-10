@@ -49,13 +49,11 @@ class JWTDriver implements AuthDriver {
   /// Creates a JWT driver with dependency injection
   JWTDriver({
     required String secret,
-    Duration accessTokenExpiry = const Duration(hours: 1),
+    required AuthConfig config, required String providerKey, Duration accessTokenExpiry = const Duration(hours: 1),
     Duration refreshTokenExpiry = const Duration(days: 7),
     TokenGenerator? tokenGenerator,
     TokenService? tokenService,
     TokenInvalidationStrategyFactory? strategyFactory,
-    required AuthConfig config,
-    required String providerKey,
   })  : _secret = secret,
         _accessTokenExpiry = accessTokenExpiry,
         _refreshTokenExpiry = refreshTokenExpiry,
@@ -308,7 +306,6 @@ class JWTDriver implements AuthDriver {
       user: user.toAuthArray(),
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
-      tokenType: 'Bearer',
       expiresIn: _accessTokenExpiry.inSeconds,
       refreshExpiresIn: _refreshTokenExpiry.inSeconds,
     );

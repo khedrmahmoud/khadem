@@ -119,7 +119,7 @@ void main() {
 
     test('throws exception for invalid guard creation', () {
       expect(() => AuthManager(guard: 'nonexistent_guard', authConfig: testAuthConfig),
-          throwsA(isA<AuthException>()));
+          throwsA(isA<AuthException>()),);
     });
 
     test('getGuard returns guard instance', () {

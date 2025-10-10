@@ -109,7 +109,7 @@ class Mailer implements MailerInterface {
       path: path,
       filename: name ?? file.uri.pathSegments.last,
       mimeType: mimeType,
-    ));
+    ),);
     return this;
   }
 
@@ -123,7 +123,7 @@ class Mailer implements MailerInterface {
       data: data,
       filename: name,
       mimeType: mimeType ?? 'application/octet-stream',
-    ));
+    ),);
     return this;
   }
 
@@ -137,7 +137,7 @@ class Mailer implements MailerInterface {
     _message.addEmbedded(MailEmbedded(
       path: path,
       cid: cid,
-    ));
+    ),);
     return this;
   }
 
@@ -251,9 +251,9 @@ class Mailer implements MailerInterface {
   String _stripHtmlTags(String html) {
     return html
         .replaceAll(RegExp(r'<script[^>]*>.*?</script>',
-            multiLine: true, caseSensitive: false), '')
+            multiLine: true, caseSensitive: false,), '',)
         .replaceAll(RegExp(r'<style[^>]*>.*?</style>',
-            multiLine: true, caseSensitive: false), '')
+            multiLine: true, caseSensitive: false,), '',)
         .replaceAll(RegExp(r'<[^>]+>'), '')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();

@@ -1,5 +1,4 @@
 import 'dart:io' show exit;
-import 'package:khadem/khadem.dart';
 import 'app/models/user.dart';
 import 'core/kernel.dart';
 

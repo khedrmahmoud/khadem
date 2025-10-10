@@ -11,40 +11,40 @@ void main() {
 
     test('should detect expired sessions', () {
       final expiredData = {
-        'last_activity': DateTime.now().subtract(Duration(hours: 25)).toIso8601String(),
-        'data': {'key': 'value'}
+        'last_activity': DateTime.now().subtract(const Duration(hours: 25)).toIso8601String(),
+        'data': {'key': 'value'},
       };
 
       final validData = {
         'last_activity': DateTime.now().toIso8601String(),
-        'data': {'key': 'value'}
+        'data': {'key': 'value'},
       };
 
-      expect(validator.isExpired(expiredData, Duration(hours: 24)), isTrue);
-      expect(validator.isExpired(validData, Duration(hours: 24)), isFalse);
+      expect(validator.isExpired(expiredData, const Duration(hours: 24)), isTrue);
+      expect(validator.isExpired(validData, const Duration(hours: 24)), isFalse);
     });
 
     test('should handle missing last_activity field', () {
       final dataWithoutActivity = {
-        'data': {'key': 'value'}
+        'data': {'key': 'value'},
       };
 
-      expect(validator.isExpired(dataWithoutActivity, Duration(hours: 24)), isFalse);
+      expect(validator.isExpired(dataWithoutActivity, const Duration(hours: 24)), isFalse);
     });
 
     test('should handle invalid last_activity format', () {
       final dataWithInvalidActivity = {
         'last_activity': 'invalid-date-format',
-        'data': {'key': 'value'}
+        'data': {'key': 'value'},
       };
 
-      expect(validator.isExpired(dataWithInvalidActivity, Duration(hours: 24)), isFalse);
+      expect(validator.isExpired(dataWithInvalidActivity, const Duration(hours: 24)), isFalse);
     });
 
     test('should update last accessed timestamp', () {
       final data = {
         'last_activity': '2023-01-01T00:00:00.000Z',
-        'data': {'key': 'value'}
+        'data': {'key': 'value'},
       };
 
       final oldActivity = data['last_activity'];

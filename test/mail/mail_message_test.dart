@@ -83,7 +83,7 @@ void main() {
 
     group('Attachments', () {
       test('should add file attachment', () {
-        final attachment = MailAttachment(
+        const attachment = MailAttachment(
           path: '/path/to/file.pdf',
           filename: 'document.pdf',
           mimeType: 'application/pdf',
@@ -97,7 +97,7 @@ void main() {
       });
 
       test('should add data attachment', () {
-        final attachment = MailAttachment(
+        const attachment = MailAttachment(
           data: [1, 2, 3, 4],
           filename: 'data.bin',
           mimeType: 'application/octet-stream',
@@ -110,7 +110,7 @@ void main() {
       });
 
       test('should add embedded file', () {
-        final embedded = MailEmbedded(
+        const embedded = MailEmbedded(
           path: '/path/to/logo.png',
           cid: 'logo',
           mimeType: 'image/png',
@@ -281,36 +281,36 @@ void main() {
 
   group('MailAddress', () {
     test('should create address with email only', () {
-      final address = MailAddress('user@example.com');
+      const address = MailAddress('user@example.com');
 
       expect(address.email, equals('user@example.com'));
       expect(address.name, isNull);
     });
 
     test('should create address with name', () {
-      final address = MailAddress('user@example.com', 'John Doe');
+      const address = MailAddress('user@example.com', 'John Doe');
 
       expect(address.email, equals('user@example.com'));
       expect(address.name, equals('John Doe'));
     });
 
     test('should format toString without name', () {
-      final address = MailAddress('user@example.com');
+      const address = MailAddress('user@example.com');
 
       expect(address.toString(), equals('user@example.com'));
     });
 
     test('should format toString with name', () {
-      final address = MailAddress('user@example.com', 'John Doe');
+      const address = MailAddress('user@example.com', 'John Doe');
 
       expect(address.toString(), equals('John Doe <user@example.com>'));
     });
 
     test('should compare addresses correctly', () {
-      final addr1 = MailAddress('user@example.com', 'John');
-      final addr2 = MailAddress('user@example.com', 'John');
-      final addr3 = MailAddress('user@example.com', 'Jane');
-      final addr4 = MailAddress('other@example.com', 'John');
+      const addr1 = MailAddress('user@example.com', 'John');
+      const addr2 = MailAddress('user@example.com', 'John');
+      const addr3 = MailAddress('user@example.com', 'Jane');
+      const addr4 = MailAddress('other@example.com', 'John');
 
       expect(addr1, equals(addr2));
       expect(addr1, isNot(equals(addr3)));
@@ -320,7 +320,7 @@ void main() {
 
   group('MailAttachment', () {
     test('should create file attachment', () {
-      final attachment = MailAttachment(
+      const attachment = MailAttachment(
         path: '/path/to/file.pdf',
         filename: 'document.pdf',
       );
@@ -330,7 +330,7 @@ void main() {
     });
 
     test('should create data attachment', () {
-      final attachment = MailAttachment(
+      const attachment = MailAttachment(
         data: [1, 2, 3],
         filename: 'data.bin',
       );

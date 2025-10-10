@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:khadem/khadem.dart';
 
-import 'socket_manager.dart';
 
 class SocketClient {
   final String id;

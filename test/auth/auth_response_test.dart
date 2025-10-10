@@ -9,7 +9,6 @@ void main() {
         user: user,
         accessToken: 'access_token_123',
         refreshToken: 'refresh_token_456',
-        tokenType: 'Bearer',
         expiresIn: 3600,
         refreshExpiresIn: 86400,
         metadata: {'device': 'mobile'},
@@ -65,7 +64,6 @@ void main() {
         user: user,
         accessToken: 'access_token_123',
         refreshToken: 'refresh_token_456',
-        tokenType: 'Bearer',
         expiresIn: 3600,
         refreshExpiresIn: 86400,
         metadata: {'device': 'mobile'},
@@ -135,7 +133,6 @@ void main() {
       final response2 = AuthResponse(
         user: {'id': 1},
         accessToken: 'token123',
-        tokenType: 'Bearer',
       );
       expect(response2.authorizationHeader, equals('Bearer token123'));
 

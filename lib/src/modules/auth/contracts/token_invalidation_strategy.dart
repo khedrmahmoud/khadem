@@ -38,10 +38,9 @@ class TokenInvalidationContext {
   final Map<String, dynamic>? metadata;
 
   const TokenInvalidationContext({
-    this.accessToken,
+    required this.guard, this.accessToken,
     this.refreshToken,
     this.userId,
-    required this.guard,
     this.tokenPayload,
     this.tokenExpiry,
     this.metadata,
@@ -49,10 +48,8 @@ class TokenInvalidationContext {
 
   /// Creates context from an access token and optional refresh token
   factory TokenInvalidationContext.fromTokens({
-    String? accessToken,
+    required dynamic userId, required String guard, String? accessToken,
     String? refreshToken,
-    required dynamic userId,
-    required String guard,
     Map<String, dynamic>? tokenPayload,
     int? tokenExpiry,
     Map<String, dynamic>? metadata,
