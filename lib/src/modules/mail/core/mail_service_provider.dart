@@ -1,8 +1,10 @@
 import '../../../contracts/container/container_interface.dart';
 import '../../../contracts/provider/service_provider.dart';
 import '../../../core/queue/queue_manager.dart';
+import '../config/mail_config.dart';
 import '../drivers/array_transport.dart';
 import '../drivers/log_transport.dart';
+import '../drivers/smtp_transport.dart';
 import 'mail_manager.dart';
 
 /// Service provider for the mail module.
@@ -40,13 +42,44 @@ class MailServiceProvider implements ServiceProvider {
     MailManager mailManager,
     ContainerInterface container,
   ) {
-    // Register log transport (for development)
+    final config = container.resolve();
     final logger = container.resolve();
+
+    // Register log transport (for development)
     mailManager.registerTransport('log', LogTransport(logger));
 
     // Register array transport (for testing)
     mailManager.registerTransport('array', ArrayTransport());
 
-    // Future: SMTP, SES, Mailgun, etc. will be registered here
+    // Register SMTP transport if configured
+    final smtpConfig = config.get<Map<String, dynamic>>('mail.smtp');
+    if (smtpConfig != null) {
+      final smtp = SmtpConfig.fromMap(smtpConfig);
+      mailManager.registerTransport('smtp', SmtpTransport(smtp));
+    }
+
+    // Register Mailgun transport if configured
+    final mailgunConfig = config.get<Map<String, dynamic>>('mail.mailgun');
+    if (mailgunConfig != null) {
+      // TODO: Implement MailgunTransport when needed
+      // final mailgun = MailgunConfig.fromMap(mailgunConfig);
+      // mailManager.registerTransport('mailgun', MailgunTransport(mailgun));
+    }
+
+    // Register SES transport if configured
+    final sesConfig = config.get<Map<String, dynamic>>('mail.ses');
+    if (sesConfig != null) {
+      // TODO: Implement SesTransport when needed
+      // final ses = SesConfig.fromMap(sesConfig);
+      // mailManager.registerTransport('ses', SesTransport(ses));
+    }
+
+    // Register Postmark transport if configured
+    final postmarkConfig = config.get<Map<String, dynamic>>('mail.postmark');
+    if (postmarkConfig != null) {
+      // TODO: Implement PostmarkTransport when needed
+      // final postmark = PostmarkConfig.fromMap(postmarkConfig);
+      // mailManager.registerTransport('postmark', PostmarkTransport(postmark));
+    }
   }
 }
