@@ -5,7 +5,10 @@ Complete email sending solution for the Khadem framework with support for multip
 ## Features
 
 - ✅ **Multiple Mail Drivers**
-  - SMTP (production email sending)
+  - SMTP (production email sending with TLS/SSL)
+  - Mailgun (cloud email API)
+  - Amazon SES (AWS Simple Email Service)
+  - Postmark (transactional email service)
   - Log (development logging)
   - Array (testing with assertions)
   
@@ -62,6 +65,21 @@ Add to your `config/app.dart`:
     'encryption': env.getOrDefault('SMTP_ENCRYPTION', 'tls'),
     'timeout': env.getInt('SMTP_TIMEOUT', defaultValue: 30),
   },
+  'mailgun': {
+    'domain': env.get('MAILGUN_DOMAIN'),
+    'api_key': env.get('MAILGUN_API_KEY'),
+    'endpoint': env.getOrDefault('MAILGUN_ENDPOINT', 'https://api.mailgun.net'),
+  },
+  'ses': {
+    'access_key_id': env.get('AWS_ACCESS_KEY_ID'),
+    'secret_access_key': env.get('AWS_SECRET_ACCESS_KEY'),
+    'region': env.getOrDefault('AWS_DEFAULT_REGION', 'us-east-1'),
+    'configuration_set': env.get('AWS_SES_CONFIGURATION_SET'),
+  },
+  'postmark': {
+    'server_token': env.get('POSTMARK_SERVER_TOKEN'),
+    'message_stream': env.getOrDefault('POSTMARK_MESSAGE_STREAM', 'outbound'),
+  },
 },
 ```
 
@@ -72,13 +90,28 @@ MAIL_DRIVER=log
 MAIL_FROM_ADDRESS=noreply@example.com
 MAIL_FROM_NAME="Khadem Framework"
 
-# SMTP Configuration (for production)
+# SMTP Configuration
 SMTP_HOST=smtp.mailtrap.io
 SMTP_PORT=2525
 SMTP_USERNAME=your_username
 SMTP_PASSWORD=your_password
 SMTP_ENCRYPTION=tls
 SMTP_TIMEOUT=30
+
+# Mailgun Configuration (optional)
+MAILGUN_DOMAIN=mg.example.com
+MAILGUN_API_KEY=key-xxxxx
+MAILGUN_ENDPOINT=https://api.mailgun.net
+
+# Amazon SES Configuration (optional)
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_DEFAULT_REGION=us-east-1
+AWS_SES_CONFIGURATION_SET=my-config-set
+
+# Postmark Configuration (optional)
+POSTMARK_SERVER_TOKEN=your-server-token
+POSTMARK_MESSAGE_STREAM=outbound
 ```
 
 ### 3. Send Your First Email
@@ -299,22 +332,57 @@ transport.clear();
 }
 ```
 
-### Mailgun Configuration (Coming Soon)
+### Mailgun Configuration
 
 ```dart
 'mailgun': {
-  'domain': 'your-domain.com',
-  'apiKey': 'your-api-key',
+  'domain': 'mg.your-domain.com',
+  'api_key': 'key-xxxxx',
   'endpoint': 'https://api.mailgun.net',
 }
 ```
 
-### Amazon SES Configuration (Coming Soon)
+### Amazon SES Configuration
 
 ```dart
 'ses': {
-  'accessKeyId': 'your-access-key',
-  'secretAccessKey': 'your-secret-key',
+  'access_key_id': 'AKIAIOSFODNN7EXAMPLE',
+  'secret_access_key': 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+  'region': 'us-east-1',
+  'configuration_set': 'my-config-set', // optional
+}
+```
+
+### Postmark Configuration
+
+```dart
+'postmark': {
+  'server_token': 'your-server-token',
+  'message_stream': 'outbound', // optional, defaults to 'outbound'
+}
+```
+
+## Transport Comparison
+
+| Feature | SMTP | Mailgun | SES | Postmark | Log | Array |
+|---------|------|---------|-----|----------|-----|-------|
+| **Best For** | Self-hosted | High volume | AWS ecosystem | Transactional | Development | Testing |
+| **Cost** | Server costs | Pay-per-email | Very low | Per-email | Free | Free |
+| **Setup** | Complex | Simple API | AWS setup | Simple API | None | None |
+| **Delivery Speed** | Variable | Fast | Fast | Very fast | Instant | Instant |
+| **Attachments** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Inline Images** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Analytics** | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| **Bounce Handling** | Manual | ✅ | ✅ | ✅ | ❌ | ❌ |
+
+### Choosing a Transport
+
+- **Development**: Use `log` transport to see emails in your logs
+- **Testing**: Use `array` transport with assertions
+- **Production - Self-hosted**: Use `smtp` with your mail server
+- **Production - High volume**: Use `mailgun` for reliable delivery
+- **Production - AWS**: Use `ses` for cost-effective sending
+- **Production - Transactional**: Use `postmark` for fast delivery
   'region': 'us-east-1',
 }
 ```
