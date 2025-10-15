@@ -1565,6 +1565,25 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       await _eagerLoadRelations(models, relationsToLoad);
     }
 
+    // Auto-load counts from model's withCounts property
+    final countsToLoad = _getCountsToLoad(models);
+    if (countsToLoad.isNotEmpty) {
+      // Add model's withCounts to _relationAggregates if not already there
+      for (final countRelation in countsToLoad) {
+        // Check if this count is not already in _relationAggregates
+        final alreadyAdded = _relationAggregates.any(
+          (agg) => agg['relation'] == countRelation && agg['type'] == 'count'
+        );
+        if (!alreadyAdded) {
+          _relationAggregates.add({
+            'type': 'count',
+            'relation': countRelation,
+            'callback': null,
+          });
+        }
+      }
+    }
+
     // Load relationship aggregates (withCount, withSum, etc.)
     if (_relationAggregates.isNotEmpty && models.isNotEmpty) {
       await _loadRelationAggregates(models.cast<KhademModel>());
@@ -1606,6 +1625,19 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     return relationsToLoad;
   }
 
+  /// Get the list of relations to automatically count based on model's withCounts property
+  List<String> _getCountsToLoad(List<T> models) {
+    if (models.isEmpty) return [];
+    
+    // Get withCounts from the first model (if it's a KhademModel)
+    if (models.first is KhademModel) {
+      final withCounts = (models.first as KhademModel).withCounts;
+      return List<String>.from(withCounts);
+    }
+    
+    return [];
+  }
+
   Future<void> _eagerLoadRelations(List<T> models, List<dynamic> relations) async {
     await EagerLoader.loadRelations(
       models.cast<KhademModel>(),
@@ -1635,13 +1667,12 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         );
       }
 
-      // Build attribute name (e.g., "postsCount", "ordersAmountSum")
+      // Build attribute name using snake_case (e.g., "posts_count", "orders_amount_sum")
       String attributeName;
       if (relationType == 'count') {
-        attributeName = '${relationName}Count';
+        attributeName = '${relationName}_count';
       } else {
-        final columnCamelCase = _toCamelCase(column!);
-        attributeName = '$relationName${columnCamelCase}${_capitalize(relationType)}';
+        attributeName = '${relationName}_${column}_${relationType}';
       }
 
       // Extract model IDs
@@ -1731,26 +1762,12 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         }
       }
 
-      // Set aggregate values on models
+      // Set aggregate values on models in their relation storage
       for (final model in models) {
         final aggregateValue = aggregateResults[model.id] ?? (relationType == 'count' ? 0 : null);
-        model.setField(attributeName, aggregateValue);
+        model.relation.set(attributeName, aggregateValue);
       }
     }
-  }
-
-  /// Convert snake_case to CamelCase
-  String _toCamelCase(String str) {
-    return str.split('_').map((part) {
-      if (part.isEmpty) return '';
-      return part[0].toUpperCase() + part.substring(1);
-    }).join();
-  }
-
-  /// Capitalize first letter
-  String _capitalize(String str) {
-    if (str.isEmpty) return '';
-    return str[0].toUpperCase() + str.substring(1);
   }
 
   /// Fetches the first matching result and converts to type `T`.
