@@ -117,9 +117,9 @@ abstract class KhademModel<T> {
   /// Example:
   /// ```dart
   /// @override
-  /// List<dynamic> get withRelations => ['posts', 'profile'];
+  /// List<dynamic> get defaultRelations => ['posts', 'profile'];
   /// // or with nested relations:
-  /// List<dynamic> get withRelations => ['posts.comments', 'profile', 'roles'];
+  /// List<dynamic> get defaultRelations => ['posts.comments', 'profile', 'roles'];
   /// ```
   /// 
   /// You can override this behavior in queries:
@@ -127,6 +127,31 @@ abstract class KhademModel<T> {
   /// - `query.withOnly(['messages']).get()` - Replace default relations
   /// - `query.withRelations(['extra'])` - Add to default relations (in query)
   List<dynamic> get defaultRelations => [];
+
+  /// Default relation counts to automatically load and include in JSON
+  /// 
+  /// Define relation counts that should always be loaded and included when
+  /// serializing this model to JSON. Count attributes will be named as
+  /// `{relation}_count` (e.g., `posts_count`, `comments_count`).
+  /// 
+  /// Example:
+  /// ```dart
+  /// @override
+  /// List<String> get withCounts => ['posts', 'comments', 'likes'];
+  /// 
+  /// // When serialized, the JSON will include:
+  /// // {
+  /// //   "id": 1,
+  /// //   "name": "John",
+  /// //   "posts_count": 10,
+  /// //   "comments_count": 25,
+  /// //   "likes_count": 100
+  /// // }
+  /// ```
+  /// 
+  /// These counts are automatically included in `toJson()` output.
+  /// You can also use `query.withCount(['extra'])` for one-off queries.
+  List<String> get withCounts => [];
 
   /// Mutable backing fields for hidden and appends
   late final List<String> _hiddenList = _getInitialHidden();
@@ -174,11 +199,18 @@ abstract class KhademModel<T> {
   String get tableName => '${runtimeType.toString().toLowerCase()}s';
 
   /// Delegates
-  Map<String, dynamic> toJson() => {
-        ...json.toJson(),
-        ...relation.toJson(),
-        ..._getComputedAttributes(),
-      };
+  Map<String, dynamic> toJson() {
+    final result = {
+      ...json.toJson(),
+      ...relation.toJson(),
+      ..._getComputedAttributes(),
+    };
+    
+    // Add relation counts to JSON output
+    _addCountsToJson(result);
+    
+    return result;
+  }
 
   /// Async version of toJson() that supports async computed properties
   /// 
@@ -192,10 +224,15 @@ abstract class KhademModel<T> {
   /// print(json['display_name']); // Async computed property resolved
   /// ```
   Future<Map<String, dynamic>> toJsonAsync() async {
-    return {
+    final result = {
       ...await json.toJsonAsync(),
-      ...relation.toJson(),
+      ...await relation.toJsonAsync(),
     }..addAll(await _getComputedAttributesAsync());
+    
+    // Add relation counts to JSON output
+    _addCountsToJson(result);
+    
+    return result;
   }
 
   Map<String, dynamic> toDatabaseJson() => json.toDatabaseJson();
@@ -549,5 +586,23 @@ abstract class KhademModel<T> {
     
     _computedAttributesAsyncCache = Future.value(result);
     return result;
+  }
+
+  /// Add relation counts to JSON output
+  /// 
+  /// This method checks for count attributes stored in the relation model
+  /// and adds them to the JSON output. Count attributes are named as
+  /// `{relation}_count` (e.g., `posts_count`).
+  void _addCountsToJson(Map<String, dynamic> result) {
+    // Get all count attributes from the relation model
+    final relationData = relation.getAllLoaded();
+    
+    for (final entry in relationData.entries) {
+      final key = entry.key;
+      // Check if this is a count attribute (ends with _count)
+      if (key.endsWith('_count') && !hidden.contains(key)) {
+        result[key] = entry.value;
+      }
+    }
   }
 }
