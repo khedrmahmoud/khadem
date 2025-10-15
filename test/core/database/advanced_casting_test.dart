@@ -24,7 +24,7 @@ void main() {
     });
 
     test('converts JSON string to Map', () {
-      final jsonString = '{"name":"John","age":30}';
+      const jsonString = '{"name":"John","age":30}';
       final result = caster.get(jsonString);
       
       expect(result, isA<Map<String, dynamic>>());
@@ -79,7 +79,7 @@ void main() {
     });
 
     test('converts JSON array to List<String>', () {
-      final jsonString = '["admin","editor","user"]';
+      const jsonString = '["admin","editor","user"]';
       final result = caster.get(jsonString);
       
       expect(result, isA<List<String>>());
@@ -142,7 +142,7 @@ void main() {
     });
 
     test('converts JSON to List<Map<String, dynamic>>', () {
-      final jsonString = '[{"name":"John","age":30},{"name":"Jane","age":25}]';
+      const jsonString = '[{"name":"John","age":30},{"name":"Jane","age":25}]';
       final result = caster.get(jsonString);
       
       expect(result, isA<List<Map<String, dynamic>>>());
@@ -212,7 +212,7 @@ void main() {
     });
 
     test('hashes string values (one-way)', () {
-      final password = 'my_secret_password';
+      const password = 'my_secret_password';
       final hashed = caster.set(password);
       
       expect(hashed, isA<String>());
@@ -221,7 +221,7 @@ void main() {
     });
 
     test('produces consistent hashes', () {
-      final password = 'test123';
+      const password = 'test123';
       final hash1 = caster.set(password);
       final hash2 = caster.set(password);
       
@@ -236,7 +236,7 @@ void main() {
     });
 
     test('get returns hash as-is (one-way encryption)', () {
-      final hash = 'abc123';
+      const hash = 'abc123';
       final result = caster.get(hash);
       
       expect(result, equals(hash));
@@ -373,7 +373,7 @@ void main() {
     });
 
     test('converts ISO 8601 string to DateTime', () {
-      final isoString = '2024-10-09T12:00:00.000Z';
+      const isoString = '2024-10-09T12:00:00.000Z';
       final result = caster.get(isoString);
       
       expect(result, isA<DateTime>());
@@ -383,7 +383,7 @@ void main() {
     });
 
     test('converts date string to DateTime', () {
-      final dateString = '2024-10-09';
+      const dateString = '2024-10-09';
       final result = caster.get(dateString);
       
       expect(result, isA<DateTime>());
@@ -406,7 +406,7 @@ void main() {
   group('Edge Cases', () {
     test('JsonCast handles arrays in JSON', () {
       final caster = JsonCast();
-      final jsonString = '["not", "a", "map"]';
+      const jsonString = '["not", "a", "map"]';
       
       // Should return null because it's not a Map
       expect(caster.get(jsonString), isNull);
@@ -414,7 +414,7 @@ void main() {
 
     test('ArrayCast handles JSON with objects', () {
       final caster = ArrayCast();
-      final jsonString = '[{"key": "value"}]';
+      const jsonString = '[{"key": "value"}]';
       final result = caster.get(jsonString);
       
       // Should convert objects to strings
@@ -452,7 +452,7 @@ void main() {
 
     test('EncryptedCast handles Unicode', () {
       final caster = EncryptedCast();
-      final text = '🔒 Secure 密码 пароль';
+      const text = '🔒 Secure 密码 пароль';
       final hash = caster.set(text);
       
       expect(hash, isA<String>());

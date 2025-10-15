@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 class _MockConnection implements ConnectionInterface {
   @override
   Future<DatabaseResponse> execute(String query,
-      [List<dynamic> bindings = const []]) async {
+      [List<dynamic> bindings = const [],]) async {
     return DatabaseResponse(data: [], insertId: 1, affectedRows: 0);
   }
 
@@ -38,7 +38,7 @@ class _MockConnection implements ConnectionInterface {
     Future<void> Function(dynamic error)? onFailure,
     Future<void> Function()? onFinally,
   }) async {
-    return await callback();
+    return callback();
   }
 
   @override
@@ -282,7 +282,7 @@ void main() {
   group('Phase 4: Advanced Pagination & Locking', () {
     group('simplePaginate', () {
       test('returns simple pagination result', () async {
-        final result = await queryBuilder.simplePaginate(perPage: 15, page: 1);
+        final result = await queryBuilder.simplePaginate(page: 1);
 
         expect(result, isA<Map<String, dynamic>>());
         expect(result, containsPair('data', anything));
@@ -314,7 +314,6 @@ void main() {
         final result = await queryBuilder.cursorPaginate(
           perPage: 10,
           cursor: '100',
-          column: 'id',
         );
 
         expect(result, isA<Map<String, dynamic>>());

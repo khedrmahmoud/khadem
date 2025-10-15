@@ -135,8 +135,7 @@ class AppConfig {
         'mail': {
           'default': env.getOrDefault('MAIL_DRIVER', 'log'),
           'from': {
-            'address':
-                env.getOrDefault('MAIL_FROM_ADDRESS', 'noreply@example.com'),
+            'address': env.getOrDefault('MAIL_FROM_ADDRESS', 'noreply@example.com'),
             'name': env.getOrDefault('MAIL_FROM_NAME', 'Khadem Framework'),
           },
           'smtp': {
@@ -150,8 +149,7 @@ class AppConfig {
           'mailgun': {
             'domain': env.get('MAILGUN_DOMAIN'),
             'apiKey': env.get('MAILGUN_API_KEY'),
-            'endpoint':
-                env.getOrDefault('MAILGUN_ENDPOINT', 'https://api.mailgun.net'),
+            'endpoint': env.getOrDefault('MAILGUN_ENDPOINT', 'https://api.mailgun.net'),
           },
           'ses': {
             'accessKeyId': env.get('SES_ACCESS_KEY_ID'),
@@ -160,8 +158,7 @@ class AppConfig {
           },
           'postmark': {
             'serverToken': env.get('POSTMARK_SERVER_TOKEN'),
-            'messageStream':
-                env.getOrDefault('POSTMARK_MESSAGE_STREAM', 'outbound'),
+            'messageStream': env.getOrDefault('POSTMARK_MESSAGE_STREAM', 'outbound'),
           },
         },
       };

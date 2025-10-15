@@ -44,7 +44,7 @@ void main() {
 
     test('should set custom max age for session cookie', () {
       const sessionId = 'test_session_custom';
-      final customMaxAge = Duration(hours: 2);
+      const customMaxAge = Duration(hours: 2);
 
       cookieHandler.setSessionCookie(mockResponse, sessionId, maxAge: customMaxAge);
 
@@ -72,7 +72,7 @@ void main() {
     test('should handle custom cookie configuration', () {
       final customHandler = SessionCookieHandler(
         cookieName: 'custom_session',
-        defaultMaxAge: Duration(hours: 12),
+        defaultMaxAge: const Duration(hours: 12),
         secure: true,
         httpOnly: false,
         sameSite: 'strict',

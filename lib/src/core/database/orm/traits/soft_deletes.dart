@@ -138,7 +138,7 @@ mixin SoftDeletes<T> on KhademModel<T> {
   /// To permanently delete, use forceDelete() instead.
   @override
   Future<bool> delete() async {
-    return await softDelete();
+    return softDelete();
   }
 
   /// Check if the model is currently soft deleted

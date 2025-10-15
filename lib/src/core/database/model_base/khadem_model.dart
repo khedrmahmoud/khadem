@@ -267,7 +267,7 @@ abstract class KhademModel<T> {
   /// Use with caution - this bypasses security restrictions.
   /// Useful for internal operations where you need to set guarded attributes.
   T forceFill(Map<String, dynamic> attributes) {
-    json.fromJson(attributes, force: true);
+    json.fromJson(attributes);
     _clearComputedCache(); // Clear cache when model data changes
     return this as T;
   }
@@ -546,7 +546,7 @@ abstract class KhademModel<T> {
           return result;
         } catch (e) {
           // Cache null on error
-          _computedAsyncCache[attribute] = Future.value(null);
+          _computedAsyncCache[attribute] = Future.value();
           return null;
         }
       }

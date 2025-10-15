@@ -4,9 +4,11 @@ import 'package:test/test.dart';
 
 // Test model with soft deletes
 class TestPost extends KhademModel<TestPost> with SoftDeletes<TestPost> {
+  @override
   int? id;
   String? title;
   String? content;
+  @override
   DateTime? deletedAt;
 
   @override
@@ -54,6 +56,7 @@ class TestPost extends KhademModel<TestPost> with SoftDeletes<TestPost> {
 
 // Test model with custom deleted_at column name
 class TestProduct extends KhademModel<TestProduct> with SoftDeletes<TestProduct> {
+  @override
   int? id;
   String? name;
   DateTime? removedAt;
@@ -164,7 +167,7 @@ void main() {
     });
 
     test('deletedAt handles String values', () {
-      final dateString = '2024-01-01T12:00:00.000Z';
+      const dateString = '2024-01-01T12:00:00.000Z';
       post.setField('deleted_at', dateString);
       
       expect(post.deletedAt, isNotNull);

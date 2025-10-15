@@ -44,13 +44,11 @@ class TokenDriver implements AuthDriver {
 
   /// Creates a token driver with dependency injection
   TokenDriver({
-    AuthRepository? repository,
+    required String providerKey, required AuthConfig config, AuthRepository? repository,
     TokenService? tokenService,
     TokenGenerator? tokenGenerator,
     TokenInvalidationStrategyFactory? strategyFactory,
     Duration? tokenExpiry,
-    required String providerKey,
-    required AuthConfig config,
   })  : _repository = repository ?? DatabaseAuthRepository(),
         _tokenService = tokenService ?? DatabaseTokenService(),
         _tokenGenerator = tokenGenerator ?? SecureTokenGenerator(),
@@ -136,7 +134,6 @@ class TokenDriver implements AuthDriver {
     final userId = user.getAuthIdentifier();
     final accessToken = _tokenGenerator.generateToken(
       prefix: userId.toString(),
-      length: 64,
     );
 
     // Store access token in database using injected service
@@ -157,7 +154,7 @@ class TokenDriver implements AuthDriver {
 
     // For Token driver, we can optionally generate refresh tokens too
     // This provides consistency with JWT driver behavior
-    final refreshToken = _tokenGenerator.generateToken(length: 64);
+    final refreshToken = _tokenGenerator.generateToken();
 
     // Store refresh token
     final refreshTokenData = {
@@ -175,7 +172,6 @@ class TokenDriver implements AuthDriver {
       user: user.toAuthArray(),
       accessToken: accessToken,
       refreshToken: refreshToken,
-      tokenType: 'Bearer',
       expiresIn: _tokenExpiry?.inSeconds,
       refreshExpiresIn: 604800, // 7 days
     );
@@ -224,10 +220,9 @@ class TokenDriver implements AuthDriver {
     // Generate new tokens
     final newAccessToken = _tokenGenerator.generateToken(
       prefix: userId.toString(),
-      length: 64,
     );
 
-    final newRefreshToken = _tokenGenerator.generateToken(length: 64);
+    final newRefreshToken = _tokenGenerator.generateToken();
 
     // Store new access token
     final accessTokenData = {
@@ -264,7 +259,6 @@ class TokenDriver implements AuthDriver {
       user: user.toAuthArray(),
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
-      tokenType: 'Bearer',
       expiresIn: _tokenExpiry?.inSeconds,
       refreshExpiresIn: 604800, // 7 days
     );

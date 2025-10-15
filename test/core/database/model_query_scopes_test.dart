@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 
 // Test model with query scopes
 class TestUser extends KhademModel<TestUser> with QueryScopes<TestUser> {
+  @override
   int? id;
   String? name;
   String? email;

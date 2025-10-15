@@ -372,7 +372,7 @@ extension RequestAuth on Request {
     requireAuth();
     if (!isAdmin) {
       throw AuthException(message ?? 'Admin privileges required',
-          statusCode: 403);
+          statusCode: 403,);
     }
   }
 
@@ -381,7 +381,7 @@ extension RequestAuth on Request {
     requireAuth();
     if (!isSuperAdmin) {
       throw AuthException(message ?? 'Super admin privileges required',
-          statusCode: 403);
+          statusCode: 403,);
     }
   }
 
@@ -398,7 +398,7 @@ extension RequestAuth on Request {
     requireAuth();
     if (!hasPermission(permission)) {
       throw AuthException(message ?? 'Permission "$permission" required',
-          statusCode: 403);
+          statusCode: 403,);
     }
   }
 
@@ -407,7 +407,7 @@ extension RequestAuth on Request {
     requireAuth();
     if (!ownsResource(resourceOwnerId)) {
       throw AuthException(message ?? 'Access denied: not the owner',
-          statusCode: 403);
+          statusCode: 403,);
     }
   }
 

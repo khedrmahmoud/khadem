@@ -18,7 +18,7 @@ void main() {
       sessionManager = SessionManager(
         driverRegistry: registry,
         driverName: 'file',
-        maxAge: Duration(hours: 24),
+        maxAge: const Duration(hours: 24),
       );
     });
 
@@ -134,13 +134,13 @@ void main() {
       final shortLivedManager = SessionManager(
         driverRegistry: shortLivedRegistry,
         driverName: 'file',
-        maxAge: Duration(milliseconds: 1),
+        maxAge: const Duration(milliseconds: 1),
       );
 
       final sessionId = await shortLivedManager.createSession({'key': 'value'});
 
       // Wait a bit for session to expire
-      await Future.delayed(Duration(milliseconds: 2));
+      await Future.delayed(const Duration(milliseconds: 2));
 
       // Try to get the session - should return null due to expiration
       final sessionData = await shortLivedManager.getSession(sessionId);
@@ -204,9 +204,9 @@ void main() {
       // Manually modify the session file to make it old
       final fileDriver = FileSessionDriver(tempDir.path);
       final expiredData = {
-        'created_at': DateTime.now().subtract(Duration(hours: 25)).toIso8601String(),
-        'last_activity': DateTime.now().subtract(Duration(hours: 25)).toIso8601String(),
-        'data': {'expired': true}
+        'created_at': DateTime.now().subtract(const Duration(hours: 25)).toIso8601String(),
+        'last_activity': DateTime.now().subtract(const Duration(hours: 25)).toIso8601String(),
+        'data': {'expired': true},
       };
       await fileDriver.write(expiredSessionId, expiredData);
 
@@ -255,7 +255,7 @@ void main() {
       sessionManager = SessionManager(
         driverRegistry: registry,
         driverName: 'file1',
-        maxAge: Duration(hours: 24),
+        maxAge: const Duration(hours: 24),
       );
     });
 
@@ -294,7 +294,7 @@ void main() {
 
     test('should throw error when switching to non-existent driver', () async {
       expect(
-        () async => await sessionManager.switchDriver('non_existent'),
+        () async => sessionManager.switchDriver('non_existent'),
         throwsA(isA<ArgumentError>()),
       );
     });

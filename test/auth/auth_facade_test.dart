@@ -155,7 +155,7 @@ void main() {
     });
 
     test('should handle null request', () {
-      final nullAuth = Auth(null);
+      final nullAuth = Auth();
 
       expect(nullAuth.user, isNull);
       expect(nullAuth.id, isNull);

@@ -135,7 +135,7 @@ class MockTokenService implements TokenService {
 
   @override
   Future<Map<String, dynamic>> blacklistToken(Map<String, dynamic> tokenData) async {
-    return await storeToken(tokenData);
+    return storeToken(tokenData);
   }
 
   @override

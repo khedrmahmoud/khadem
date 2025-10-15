@@ -33,10 +33,8 @@ abstract class Guard {
   /// Creates a base guard
   Guard({
     required this.config,
-    AuthRepository? repository,
+    required this.driver, required this.providerKey, AuthRepository? repository,
     PasswordVerifier? passwordVerifier,
-    required this.driver,
-    required this.providerKey,
   })  : repository = repository ?? DatabaseAuthRepository(),
         passwordVerifier = passwordVerifier ?? HashPasswordVerifier();
 

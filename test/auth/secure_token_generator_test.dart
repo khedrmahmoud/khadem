@@ -89,7 +89,7 @@ void main() {
 
         for (final token in validTokens) {
           expect(generator.isValidTokenFormat(token), isTrue,
-              reason: 'Token "$token" should be valid');
+              reason: 'Token "$token" should be valid',);
         }
       });
 
@@ -103,7 +103,7 @@ void main() {
 
         for (final token in validTokens) {
           expect(generator.isValidTokenFormat(token), isTrue,
-              reason: 'Token "$token" should be valid');
+              reason: 'Token "$token" should be valid',);
         }
       });
 
@@ -130,7 +130,7 @@ void main() {
 
         for (final token in invalidTokens) {
           expect(generator.isValidTokenFormat(token), isFalse,
-              reason: 'Token "$token" should be invalid');
+              reason: 'Token "$token" should be invalid',);
         }
       });
 
@@ -165,7 +165,7 @@ void main() {
 
         for (final token in invalidTokens) {
           expect(generator.isValidTokenFormat(token), isFalse,
-              reason: 'Token "$token" should be invalid');
+              reason: 'Token "$token" should be invalid',);
         }
       });
     });
@@ -233,7 +233,7 @@ void main() {
         const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
         for (final char in token.split('')) {
           expect(validChars.contains(char), isTrue,
-              reason: 'Character "$char" should be in valid character set');
+              reason: 'Character "$char" should be in valid character set',);
         }
       });
     });

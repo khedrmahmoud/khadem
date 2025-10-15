@@ -25,7 +25,7 @@ void main() {
         'username': 'testuser',
         'created_at': DateTime.now().toIso8601String(),
         'last_activity': DateTime.now().toIso8601String(),
-        'data': {'key': 'value'}
+        'data': {'key': 'value'},
       };
 
       // Write data
@@ -69,15 +69,15 @@ void main() {
       const sessionId2 = 'valid_session';
 
       final expiredData = {
-        'created_at': DateTime.now().subtract(Duration(hours: 25)).toIso8601String(),
-        'last_activity': DateTime.now().subtract(Duration(hours: 25)).toIso8601String(),
-        'data': {'expired': true}
+        'created_at': DateTime.now().subtract(const Duration(hours: 25)).toIso8601String(),
+        'last_activity': DateTime.now().subtract(const Duration(hours: 25)).toIso8601String(),
+        'data': {'expired': true},
       };
 
       final validData = {
         'created_at': DateTime.now().toIso8601String(),
         'last_activity': DateTime.now().toIso8601String(),
-        'data': {'valid': true}
+        'data': {'valid': true},
       };
 
       // Write both sessions
@@ -86,11 +86,11 @@ void main() {
 
       // Manually set the expired file to be old
       final expiredFile = File('${tempDir.path}/$sessionId1.session');
-      final oldTime = DateTime.now().subtract(Duration(hours: 25));
+      final oldTime = DateTime.now().subtract(const Duration(hours: 25));
       await expiredFile.setLastModified(oldTime);
 
       // Cleanup with 1 hour max age
-      await storage.cleanup(Duration(hours: 1));
+      await storage.cleanup(const Duration(hours: 1));
 
       // Check that expired session is gone
       final expiredRead = await storage.read(sessionId1);

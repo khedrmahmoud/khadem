@@ -108,7 +108,7 @@ class AuthManager {
         return ApiGuard.fromConfig(_authConfig, guardName, providerKey);
       case 'web':
         return WebGuard.fromConfig(_authConfig, guardName,
-            providerKey: providerKey);
+            providerKey: providerKey,);
       default:
         // Default to API guard for token-based auth
         return ApiGuard.fromConfig(_authConfig, guardName, providerKey);

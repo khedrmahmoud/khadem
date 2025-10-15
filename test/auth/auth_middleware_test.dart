@@ -39,7 +39,7 @@ void main() {
     });
 
     test('should create middleware with caching enabled', () {
-      final middleware = AuthMiddleware.bearer().withCaching(true);
+      final middleware = AuthMiddleware.bearer().withCaching();
       expect(middleware, isNotNull);
       expect(middleware.name, equals('auth-bearer'));
     });
