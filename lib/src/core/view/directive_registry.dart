@@ -1,3 +1,4 @@
+import 'package:khadem/src/application/khadem.dart';
 import 'package:khadem/src/contracts/views/directive_contract.dart';
 
 import 'directives/array_directives.dart';
@@ -99,9 +100,16 @@ class DirectiveRegistry {
     String content,
     Map<String, dynamic> context,
   ) async {
+   
     for (final directive in _directives) {
+      try{
       content = await directive.apply(content, context);
+      } catch(e){
+        // Log error but continue processing other directives
+        Khadem.logger.error('Error applying directive ${directive.runtimeType}: $e');
+      }
     }
     return content;
+  
   }
 }
