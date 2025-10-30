@@ -35,8 +35,11 @@ class InvoiceMail extends Mailable {
         .subject('Invoice $invoiceNumber')
         .html(_buildHtmlContent())
         .text(_buildTextContent())
-        .attach(pdfPath,
-            name: '$invoiceNumber.pdf', mimeType: 'application/pdf',);
+        .attach(
+          pdfPath,
+          name: '$invoiceNumber.pdf',
+          mimeType: 'application/pdf',
+        );
   }
 
   String _buildHtmlContent() {

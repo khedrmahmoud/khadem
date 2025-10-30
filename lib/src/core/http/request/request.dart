@@ -104,8 +104,10 @@ class Request {
 
   /// Validates the request body input against the given rules.
   /// Shortcut for validator.validateBody()
-  Future<Map<String, dynamic>> validate(Map<String, String> rules,
-          {Map<String, String>? messages,}) =>
+  Future<Map<String, dynamic>> validate(
+    Map<String, String> rules, {
+    Map<String, String>? messages,
+  }) =>
       _validator.validateBody(rules, messages: messages);
 
   /// Validates specific input data against rules.

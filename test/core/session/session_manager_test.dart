@@ -65,7 +65,9 @@ void main() {
       final updatedData = await sessionManager.getSession(sessionId);
       expect(updatedData, isNotNull);
       expect(
-          updatedData!['data'], equals({'initial': 'data', 'updated': 'data'}),);
+        updatedData!['data'],
+        equals({'initial': 'data', 'updated': 'data'}),
+      );
     });
 
     test('should get and set session values', () async {

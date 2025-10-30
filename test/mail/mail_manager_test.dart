@@ -228,18 +228,22 @@ class MockConfig implements ConfigInterface {
 /// Simple test logger that extends Logger
 class TestLogger extends Logger {
   @override
-  void info(String message,
-      {String? channel,
-      Map<String, dynamic>? context,
-      StackTrace? stackTrace,}) {
+  void info(
+    String message, {
+    String? channel,
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+  }) {
     // Capture message if needed
   }
 
   @override
-  void error(String message,
-      {String? channel,
-      Map<String, dynamic>? context,
-      StackTrace? stackTrace,}) {
+  void error(
+    String message, {
+    String? channel,
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+  }) {
     // Capture error if needed
   }
 }

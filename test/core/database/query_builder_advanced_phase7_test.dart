@@ -7,8 +7,10 @@ import 'package:test/test.dart';
 // Simple mock connection for testing SQL generation only
 class _MockConnection implements ConnectionInterface {
   @override
-  Future<DatabaseResponse> execute(String query,
-      [List<dynamic> bindings = const [],]) async {
+  Future<DatabaseResponse> execute(
+    String query, [
+    List<dynamic> bindings = const [],
+  ]) async {
     return DatabaseResponse(data: [], affectedRows: 0);
   }
 
@@ -380,7 +382,8 @@ void main() {
       final sql = query
           .wherePast('expires_at')
           .whereFuture(
-              'renew_at',) // Use whereFuture and chain with orWhere if needed
+            'renew_at',
+          ) // Use whereFuture and chain with orWhere if needed
           .toSql();
 
       expect(sql, contains('`expires_at` < NOW()'));
@@ -411,7 +414,9 @@ void main() {
           .select(['name']).toSql();
 
       expect(
-          sql, contains('FROM (SELECT * FROM users WHERE age > 18) AS adults'),);
+        sql,
+        contains('FROM (SELECT * FROM users WHERE age > 18) AS adults'),
+      );
     });
 
     test('selectSub adds subquery to SELECT clause', () {
@@ -445,8 +450,10 @@ void main() {
           .toSql();
 
       expect(sql, contains('(SELECT COUNT(*) FROM `posts`) AS `posts_count`'));
-      expect(sql,
-          contains('(SELECT COUNT(*) FROM `comments`) AS `comments_count`'),);
+      expect(
+        sql,
+        contains('(SELECT COUNT(*) FROM `comments`) AS `comments_count`'),
+      );
     });
   });
 

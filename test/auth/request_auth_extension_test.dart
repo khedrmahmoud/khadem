@@ -236,12 +236,16 @@ void main() {
       expect(request.hasPermission('any_permission'), isTrue);
 
       expect(request.hasAnyPermission(['read', 'delete']), isTrue);
-      expect(request.hasAnyPermission(['delete', 'update']),
-          isTrue,); // Admin has all permissions
+      expect(
+        request.hasAnyPermission(['delete', 'update']),
+        isTrue,
+      ); // Admin has all permissions
 
       expect(request.hasAllPermissions(['read', 'write']), isTrue);
-      expect(request.hasAllPermissions(['read', 'delete']),
-          isTrue,); // Admin has all permissions
+      expect(
+        request.hasAllPermissions(['read', 'delete']),
+        isTrue,
+      ); // Admin has all permissions
     });
 
     test('should check ownership correctly', () {
@@ -343,7 +347,9 @@ void main() {
       expect(() => request.requireSuperAdmin(), throwsA(isA<Exception>()));
       expect(() => request.requireRole('admin'), throwsA(isA<Exception>()));
       expect(
-          () => request.requirePermission('read'), throwsA(isA<Exception>()),);
+        () => request.requirePermission('read'),
+        throwsA(isA<Exception>()),
+      );
       expect(() => request.requireOwnership(2), throwsA(isA<Exception>()));
     });
 

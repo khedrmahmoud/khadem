@@ -141,7 +141,8 @@ class SesTransport implements TransportInterface {
       if (message.htmlBody != null && message.textBody != null) {
         final boundary = _generateBoundary();
         buffer.writeln(
-            'Content-Type: multipart/alternative; boundary="$boundary"',);
+          'Content-Type: multipart/alternative; boundary="$boundary"',
+        );
         buffer.writeln();
         buffer.writeln('--$boundary');
         buffer.writeln('Content-Type: text/plain; charset=UTF-8');

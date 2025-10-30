@@ -146,8 +146,10 @@ void main() {
         final result = verifier.validatePasswordStrength(password);
 
         expect(result['isValid'], isFalse);
-        expect(result['issues'],
-            contains('Password must be at least 8 characters long'),);
+        expect(
+          result['issues'],
+          contains('Password must be at least 8 characters long'),
+        );
       });
 
       test('should reject password without uppercase letter', () {
@@ -156,8 +158,10 @@ void main() {
         final result = verifier.validatePasswordStrength(password);
 
         expect(result['isValid'], isFalse);
-        expect(result['issues'],
-            contains('Password must contain at least one uppercase letter'),);
+        expect(
+          result['issues'],
+          contains('Password must contain at least one uppercase letter'),
+        );
       });
 
       test('should reject password without lowercase letter', () {
@@ -166,8 +170,10 @@ void main() {
         final result = verifier.validatePasswordStrength(password);
 
         expect(result['isValid'], isFalse);
-        expect(result['issues'],
-            contains('Password must contain at least one lowercase letter'),);
+        expect(
+          result['issues'],
+          contains('Password must contain at least one lowercase letter'),
+        );
       });
 
       test('should reject password without number', () {
@@ -176,8 +182,10 @@ void main() {
         final result = verifier.validatePasswordStrength(password);
 
         expect(result['isValid'], isFalse);
-        expect(result['issues'],
-            contains('Password must contain at least one number'),);
+        expect(
+          result['issues'],
+          contains('Password must contain at least one number'),
+        );
       });
 
       test('should reject password without special character', () {
@@ -186,8 +194,10 @@ void main() {
         final result = verifier.validatePasswordStrength(password);
 
         expect(result['isValid'], isFalse);
-        expect(result['issues'],
-            contains('Password must contain at least one special character'),);
+        expect(
+          result['issues'],
+          contains('Password must contain at least one special character'),
+        );
       });
 
       test('should calculate strength correctly', () {

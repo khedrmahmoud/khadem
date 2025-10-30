@@ -364,8 +364,10 @@ void main() {
           expect(e, isA<ValidationException>());
           final errors = (e as ValidationException).errors;
           expect(errors.length, greaterThanOrEqualTo(1));
-          expect(errors.containsKey('name') || errors.containsKey('email'),
-              isTrue,);
+          expect(
+            errors.containsKey('name') || errors.containsKey('email'),
+            isTrue,
+          );
         }
       });
 
@@ -446,8 +448,10 @@ void main() {
 
           // The custom messages should be used instead of default ones
           expect(errors['email'], contains('Email is required custom'));
-          expect(errors['password'],
-              contains('Password must be at least 8 chars custom'),);
+          expect(
+            errors['password'],
+            contains('Password must be at least 8 chars custom'),
+          );
         }
       });
     });
@@ -505,7 +509,9 @@ void main() {
         await formRequest.validate(request);
 
         expect(
-            formRequest.callOrder, equals(['authorize', 'prepare', 'passed']),);
+          formRequest.callOrder,
+          equals(['authorize', 'prepare', 'passed']),
+        );
       });
 
       test('calls hooks in correct order on failure', () async {
@@ -516,8 +522,10 @@ void main() {
         try {
           await formRequest.validate(request);
         } catch (e) {
-          expect(formRequest.callOrder,
-              equals(['authorize', 'prepare', 'failed']),);
+          expect(
+            formRequest.callOrder,
+            equals(['authorize', 'prepare', 'failed']),
+          );
         }
       });
 
@@ -911,8 +919,10 @@ void main() {
         } catch (e) {
           expect(e, isA<UnauthorizedException>());
           final unauthorizedException = e as UnauthorizedException;
-          expect(unauthorizedException.message,
-              equals('This action is unauthorized.'),);
+          expect(
+            unauthorizedException.message,
+            equals('This action is unauthorized.'),
+          );
         }
       });
 

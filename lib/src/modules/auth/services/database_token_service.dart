@@ -13,7 +13,8 @@ class DatabaseTokenService implements TokenService {
 
   @override
   Future<Map<String, dynamic>> storeToken(
-      Map<String, dynamic> tokenData,) async {
+    Map<String, dynamic> tokenData,
+  ) async {
     await _repository.storeToken(tokenData);
     return tokenData;
   }
@@ -37,8 +38,11 @@ class DatabaseTokenService implements TokenService {
   }
 
   @override
-  Future<int> deleteUserTokens(dynamic userId,
-      {String? guard, Map<String, dynamic>? filter,}) async {
+  Future<int> deleteUserTokens(
+    dynamic userId, {
+    String? guard,
+    Map<String, dynamic>? filter,
+  }) async {
     return _repository.deleteUserTokens(userId, guard: guard, filter: filter);
   }
 
@@ -49,7 +53,8 @@ class DatabaseTokenService implements TokenService {
 
   @override
   Future<Map<String, dynamic>> blacklistToken(
-      Map<String, dynamic> tokenData,) async {
+    Map<String, dynamic> tokenData,
+  ) async {
     await _repository.storeToken(tokenData);
     return tokenData;
   }

@@ -347,7 +347,9 @@ class JWTDriver implements AuthDriver {
   /// [logoutType] The type of logout strategy to use
   @override
   Future<void> invalidateTokenWithStrategy(
-      String token, LogoutType logoutType,) async {
+    String token,
+    LogoutType logoutType,
+  ) async {
     final strategy = _strategyFactory.createStrategy(logoutType);
 
     // Verify token to get context

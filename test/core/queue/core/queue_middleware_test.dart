@@ -313,8 +313,10 @@ void main() {
 
       // Should succeed after 3 attempts
       expect(attempts, equals(3));
-      expect(context.getMetadata<int>('attempts'),
-          equals(2),); // 2 retries after first attempt
+      expect(
+        context.getMetadata<int>('attempts'),
+        equals(2),
+      ); // 2 retries after first attempt
     });
 
     test('should respect max attempts', () async {

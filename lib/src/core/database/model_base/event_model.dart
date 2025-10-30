@@ -104,7 +104,8 @@ class EventModel<T> {
   /// Observer hook for force deleting soft-deleted models
   bool beforeForceDelete() {
     return _callCancelableObservers(
-        (observer) => observer.forceDeleting(model),);
+      (observer) => observer.forceDeleting(model),
+    );
   }
 
   void afterForceDelete() {

@@ -125,7 +125,8 @@ class RequestBodyParser {
         // Handle connection closed or timeout gracefully
         if (e is HttpException || e is TimeoutException) {
           print(
-              'Warning: Connection closed or timed out during multipart upload: $e',);
+            'Warning: Connection closed or timed out during multipart upload: $e',
+          );
           return {'fields': fields, 'files': files};
         }
         rethrow;

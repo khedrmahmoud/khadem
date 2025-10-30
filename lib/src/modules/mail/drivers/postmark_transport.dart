@@ -96,7 +96,8 @@ class PostmarkTransport implements TransportInterface {
 
   /// Builds the Postmark API payload.
   Future<Map<String, dynamic>> _buildPayload(
-      MailMessageInterface message,) async {
+    MailMessageInterface message,
+  ) async {
     final payload = <String, dynamic>{
       'From': message.from?.toString() ?? 'noreply@example.com',
       'To': message.to.map((addr) => addr.toString()).join(', '),

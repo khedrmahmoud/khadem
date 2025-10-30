@@ -220,7 +220,8 @@ class RedisStorageDriver extends BaseQueueDriver {
 
         if (!QueueJobRegistry.isRegistered(jobType)) {
           throw Exception(
-              'Job type "$jobType" not registered in QueueJobRegistry',);
+            'Job type "$jobType" not registered in QueueJobRegistry',
+          );
         }
 
         final job = QueueJobRegistry.create(jobType, payload);

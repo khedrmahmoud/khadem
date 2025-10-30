@@ -120,7 +120,8 @@ class WebGuard extends Guard {
   Future<Authenticatable> user(String sessionId) async {
     if (_sessionManager == null) {
       throw AuthException(
-          'Session manager not available for web authentication',);
+        'Session manager not available for web authentication',
+      );
     }
 
     // Try to get user ID from session
@@ -175,7 +176,9 @@ class WebGuard extends Guard {
   /// [sessionId] The session ID to store user in
   /// Returns authentication response
   Future<AuthResponse> loginWithSessionId(
-      Authenticatable user, String sessionId,) async {
+    Authenticatable user,
+    String sessionId,
+  ) async {
     // Generate tokens using driver
     final authResponse = await driver.generateTokens(user);
 
@@ -237,7 +240,9 @@ class WebGuard extends Guard {
 
   /// Stores remember token in specific session
   Future<void> _storeRememberTokenInSessionById(
-      String sessionId, String token,) async {
+    String sessionId,
+    String token,
+  ) async {
     if (_sessionManager == null) return;
 
     await _sessionManager!

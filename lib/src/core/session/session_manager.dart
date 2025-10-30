@@ -117,7 +117,10 @@ class SessionManager implements ISessionManager {
   /// Set session value
   @override
   Future<void> setSessionValue(
-      String sessionId, String key, dynamic value,) async {
+    String sessionId,
+    String key,
+    dynamic value,
+  ) async {
     final data = await getSession(sessionId);
     if (data == null) return;
 
@@ -229,7 +232,9 @@ class SessionManager implements ISessionManager {
   /// Flash old input data to session for form repopulation
   @override
   Future<void> flashOldInput(
-      String sessionId, Map<String, dynamic> inputData,) async {
+    String sessionId,
+    Map<String, dynamic> inputData,
+  ) async {
     await flash(sessionId, 'old_input', inputData);
   }
 

@@ -7,8 +7,10 @@ import 'package:test/test.dart';
 // Simple mock connection for testing SQL generation only
 class _MockConnection implements ConnectionInterface {
   @override
-  Future<DatabaseResponse> execute(String query,
-      [List<dynamic> bindings = const [],]) async {
+  Future<DatabaseResponse> execute(
+    String query, [
+    List<dynamic> bindings = const [],
+  ]) async {
     return DatabaseResponse(data: [], affectedRows: 0);
   }
 

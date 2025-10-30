@@ -935,11 +935,14 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
             // Get the next relation definition
             final nextRelation = remainingParts[0];
             final nextRelationDef = _getRelationDefinitionFromFactory(
-                relatedModelFactory, nextRelation,);
+              relatedModelFactory,
+              nextRelation,
+            );
 
             if (nextRelationDef == null) {
               print(
-                  'Warning: Could not find relation definition for $nextRelation',);
+                'Warning: Could not find relation definition for $nextRelation',
+              );
               return;
             }
 
@@ -1012,11 +1015,14 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
             // Get the next relation definition
             final nextRelation = remainingParts[0];
             final nextRelationDef = _getRelationDefinitionFromFactory(
-                relatedModelFactory, nextRelation,);
+              relatedModelFactory,
+              nextRelation,
+            );
 
             if (nextRelationDef == null) {
               print(
-                  'Warning: Could not find relation definition for $nextRelation',);
+                'Warning: Could not find relation definition for $nextRelation',
+              );
               return;
             }
 
@@ -1105,7 +1111,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
 
   /// Get the model factory for a related model
   dynamic Function(Map<String, dynamic>)? _getRelatedModelFactory(
-      String relation,) {
+    String relation,
+  ) {
     if (_modelFactory == null) return null;
 
     try {
@@ -1152,14 +1159,16 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       case RelationType.belongsToMany:
         // For belongsToMany: need pivot table logic (not implemented in this basic version)
         throw UnimplementedError(
-            'belongsToMany in whereHas is not yet supported',);
+          'belongsToMany in whereHas is not yet supported',
+        );
 
       case RelationType.morphOne:
       case RelationType.morphMany:
       case RelationType.morphTo:
         // For polymorphic relations: need morph type and ID fields
         throw UnimplementedError(
-            'Polymorphic relations in whereHas are not yet supported',);
+          'Polymorphic relations in whereHas are not yet supported',
+        );
     }
   }
 
@@ -1326,8 +1335,11 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   @override
-  QueryBuilderInterface<T> has(String relation,
-      [String operator = '>=', int count = 1,]) {
+  QueryBuilderInterface<T> has(
+    String relation, [
+    String operator = '>=',
+    int count = 1,
+  ]) {
     return whereHas(relation, null, operator, count);
   }
 
@@ -1463,8 +1475,10 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   @override
-  QueryBuilderInterface<T> fromRaw(String sql,
-      [List<dynamic> bindings = const [],]) {
+  QueryBuilderInterface<T> fromRaw(
+    String sql, [
+    List<dynamic> bindings = const [],
+  ]) {
     _fromSubquery = sql;
     _bindings.addAll(bindings);
     return this;
@@ -1676,7 +1690,9 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   Future<void> _eagerLoadRelations(
-      List<T> models, List<dynamic> relations,) async {
+    List<T> models,
+    List<dynamic> relations,
+  ) async {
     await EagerLoader.loadRelations(
       models.cast<KhademModel>(),
       relations,

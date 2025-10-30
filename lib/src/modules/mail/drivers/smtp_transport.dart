@@ -260,7 +260,8 @@ class SmtpTransport implements TransportInterface {
         // Multipart alternative
         final boundary = _generateBoundary();
         buffer.writeln(
-            'Content-Type: multipart/alternative; boundary="$boundary"',);
+          'Content-Type: multipart/alternative; boundary="$boundary"',
+        );
         buffer.writeln();
         buffer.writeln('--$boundary');
         buffer.writeln('Content-Type: text/plain; charset=utf-8');
@@ -299,7 +300,8 @@ class SmtpTransport implements TransportInterface {
       if (message.htmlBody != null && message.textBody != null) {
         final altBoundary = _generateBoundary();
         buffer.writeln(
-            'Content-Type: multipart/alternative; boundary="$altBoundary"',);
+          'Content-Type: multipart/alternative; boundary="$altBoundary"',
+        );
         buffer.writeln();
         buffer.writeln('--$altBoundary');
         buffer.writeln('Content-Type: text/plain; charset=utf-8');
@@ -357,7 +359,8 @@ class SmtpTransport implements TransportInterface {
     buffer.writeln('Content-Type: $mimeType; name="${attachment.filename}"');
     buffer.writeln('Content-Transfer-Encoding: base64');
     buffer.writeln(
-        'Content-Disposition: attachment; filename="${attachment.filename}"',);
+      'Content-Disposition: attachment; filename="${attachment.filename}"',
+    );
     buffer.writeln();
 
     List<int> data;

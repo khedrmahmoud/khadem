@@ -399,7 +399,8 @@ class QueueMetrics {
     buffer.writeln('${prefix}_total_queued $totalQueued');
 
     buffer.writeln(
-        '# HELP ${prefix}_total_completed Total number of jobs completed',);
+      '# HELP ${prefix}_total_completed Total number of jobs completed',
+    );
     buffer.writeln('# TYPE ${prefix}_total_completed counter');
     buffer.writeln('${prefix}_total_completed $totalCompleted');
 
@@ -408,7 +409,8 @@ class QueueMetrics {
     buffer.writeln('${prefix}_total_failed $totalFailed');
 
     buffer.writeln(
-        '# HELP ${prefix}_currently_processing Number of jobs currently processing',);
+      '# HELP ${prefix}_currently_processing Number of jobs currently processing',
+    );
     buffer.writeln('# TYPE ${prefix}_currently_processing gauge');
     buffer.writeln('${prefix}_currently_processing $currentlyProcessing');
 
@@ -417,21 +419,26 @@ class QueueMetrics {
     buffer.writeln('${prefix}_throughput $throughput');
 
     buffer.writeln(
-        '# HELP ${prefix}_processing_time_seconds Job processing time',);
+      '# HELP ${prefix}_processing_time_seconds Job processing time',
+    );
     buffer.writeln('# TYPE ${prefix}_processing_time_seconds summary');
     buffer.writeln(
-        '${prefix}_processing_time_seconds{quantile="0.5"} ${p50ProcessingTime.inMilliseconds / 1000}',);
+      '${prefix}_processing_time_seconds{quantile="0.5"} ${p50ProcessingTime.inMilliseconds / 1000}',
+    );
     buffer.writeln(
-        '${prefix}_processing_time_seconds{quantile="0.95"} ${p95ProcessingTime.inMilliseconds / 1000}',);
+      '${prefix}_processing_time_seconds{quantile="0.95"} ${p95ProcessingTime.inMilliseconds / 1000}',
+    );
     buffer.writeln(
-        '${prefix}_processing_time_seconds{quantile="0.99"} ${p99ProcessingTime.inMilliseconds / 1000}',);
+      '${prefix}_processing_time_seconds{quantile="0.99"} ${p99ProcessingTime.inMilliseconds / 1000}',
+    );
 
     buffer.writeln('# HELP ${prefix}_queue_depth Current queue depth');
     buffer.writeln('# TYPE ${prefix}_queue_depth gauge');
     buffer.writeln('${prefix}_queue_depth $currentQueueDepth');
 
     buffer.writeln(
-        '# HELP ${prefix}_worker_utilization Worker utilization (0-1)',);
+      '# HELP ${prefix}_worker_utilization Worker utilization (0-1)',
+    );
     buffer.writeln('# TYPE ${prefix}_worker_utilization gauge');
     buffer.writeln('${prefix}_worker_utilization $currentWorkerUtilization');
 

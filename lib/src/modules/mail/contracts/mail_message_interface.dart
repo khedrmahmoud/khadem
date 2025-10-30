@@ -28,8 +28,10 @@ class MailAttachment {
     this.path,
     this.data,
     this.mimeType,
-  }) : assert(path != null || data != null,
-            'Either path or data must be provided',);
+  }) : assert(
+          path != null || data != null,
+          'Either path or data must be provided',
+        );
 
   bool get isFilePath => path != null;
   bool get isRawData => data != null;

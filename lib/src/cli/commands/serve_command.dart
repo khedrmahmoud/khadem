@@ -184,7 +184,8 @@ class ServeCommand extends KhademCommand {
           } catch (e) {
             // Isolate might already be running, which is fine
             logger.warning(
-                '⚠️ Could not resume isolate (might already be running): $e',);
+              '⚠️ Could not resume isolate (might already be running): $e',
+            );
           }
           logger.info(
             '✅ Connected to VM Service. Hot reload and restart are active.',
@@ -232,7 +233,8 @@ class ServeCommand extends KhademCommand {
   void _setupStdinListener() {
     if (_stdinSubscription != null) return;
     logger.info(
-        '💡 Press "r" for hot reload, "f" for full restart, "q" to quit.',);
+      '💡 Press "r" for hot reload, "f" for full restart, "q" to quit.',
+    );
     try {
       stdin.lineMode = false;
       stdin.echoMode = false;

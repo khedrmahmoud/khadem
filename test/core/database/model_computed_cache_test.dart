@@ -103,8 +103,10 @@ void main() {
 
       expect(json1['computed_name'], 'Computed: Test');
       expect(json2['computed_name'], 'Computed: Test');
-      expect(TestModel.getEvaluationCount(),
-          1,); // Should only be evaluated once total
+      expect(
+        TestModel.getEvaluationCount(),
+        1,
+      ); // Should only be evaluated once total
     });
   });
 }

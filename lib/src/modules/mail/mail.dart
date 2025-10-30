@@ -72,8 +72,11 @@ class Mail {
       manager.view(viewName, data);
 
   /// Attaches a file.
-  static MailerInterface attach(String path,
-          {String? name, String? mimeType,}) =>
+  static MailerInterface attach(
+    String path, {
+    String? name,
+    String? mimeType,
+  }) =>
       manager.attach(path, name: name, mimeType: mimeType);
 
   /// Attaches raw data.

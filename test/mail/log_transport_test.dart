@@ -35,11 +35,17 @@ void main() {
 
       expect(result, isTrue);
       expect(
-          logger.infoMessages.any((m) => m.contains('Email logged')), isTrue,);
-      expect(logger.infoMessages.any((m) => m.contains('user@example.com')),
-          isTrue,);
+        logger.infoMessages.any((m) => m.contains('Email logged')),
+        isTrue,
+      );
       expect(
-          logger.infoMessages.any((m) => m.contains('Test Subject')), isTrue,);
+        logger.infoMessages.any((m) => m.contains('user@example.com')),
+        isTrue,
+      );
+      expect(
+        logger.infoMessages.any((m) => m.contains('Test Subject')),
+        isTrue,
+      );
     });
 
     test('should log CC recipients when present', () async {
@@ -53,7 +59,9 @@ void main() {
 
       expect(logger.infoMessages.any((m) => m.contains('CC:')), isTrue);
       expect(
-          logger.infoMessages.any((m) => m.contains('cc@example.com')), isTrue,);
+        logger.infoMessages.any((m) => m.contains('cc@example.com')),
+        isTrue,
+      );
     });
 
     test('should log BCC recipients when present', () async {
@@ -66,8 +74,10 @@ void main() {
       await transport.send(message);
 
       expect(logger.infoMessages.any((m) => m.contains('BCC:')), isTrue);
-      expect(logger.infoMessages.any((m) => m.contains('bcc@example.com')),
-          isTrue,);
+      expect(
+        logger.infoMessages.any((m) => m.contains('bcc@example.com')),
+        isTrue,
+      );
     });
 
     test('should log verbose details when enabled', () async {
@@ -121,7 +131,9 @@ void main() {
       await verboseTransport.send(message);
 
       expect(
-          logger.infoMessages.any((m) => m.contains('Attachments: 2')), isTrue,);
+        logger.infoMessages.any((m) => m.contains('Attachments: 2')),
+        isTrue,
+      );
       expect(logger.infoMessages.any((m) => m.contains('file1.pdf')), isTrue);
       expect(logger.infoMessages.any((m) => m.contains('file2.pdf')), isTrue);
     });
@@ -169,18 +181,22 @@ class TestLogger extends Logger {
   final List<String> errorMessages = [];
 
   @override
-  void info(String message,
-      {String? channel,
-      Map<String, dynamic>? context,
-      StackTrace? stackTrace,}) {
+  void info(
+    String message, {
+    String? channel,
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+  }) {
     infoMessages.add(message);
   }
 
   @override
-  void error(String message,
-      {String? channel,
-      Map<String, dynamic>? context,
-      StackTrace? stackTrace,}) {
+  void error(
+    String message, {
+    String? channel,
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+  }) {
     errorMessages.add(message);
   }
 }
@@ -190,20 +206,24 @@ class FailingLogger extends Logger {
   final List<String> errorMessages = [];
 
   @override
-  void info(String message,
-      {String? channel,
-      Map<String, dynamic>? context,
-      StackTrace? stackTrace,}) {
+  void info(
+    String message, {
+    String? channel,
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+  }) {
     if (message.contains('Email logged')) {
       throw Exception('Logger failure');
     }
   }
 
   @override
-  void error(String message,
-      {String? channel,
-      Map<String, dynamic>? context,
-      StackTrace? stackTrace,}) {
+  void error(
+    String message, {
+    String? channel,
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+  }) {
     errorMessages.add(message);
   }
 }

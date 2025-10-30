@@ -23,9 +23,13 @@ void main() {
       };
 
       expect(
-          validator.isExpired(expiredData, const Duration(hours: 24)), isTrue,);
+        validator.isExpired(expiredData, const Duration(hours: 24)),
+        isTrue,
+      );
       expect(
-          validator.isExpired(validData, const Duration(hours: 24)), isFalse,);
+        validator.isExpired(validData, const Duration(hours: 24)),
+        isFalse,
+      );
     });
 
     test('should handle missing last_activity field', () {
@@ -34,8 +38,9 @@ void main() {
       };
 
       expect(
-          validator.isExpired(dataWithoutActivity, const Duration(hours: 24)),
-          isFalse,);
+        validator.isExpired(dataWithoutActivity, const Duration(hours: 24)),
+        isFalse,
+      );
     });
 
     test('should handle invalid last_activity format', () {
@@ -45,9 +50,12 @@ void main() {
       };
 
       expect(
-          validator.isExpired(
-              dataWithInvalidActivity, const Duration(hours: 24),),
-          isFalse,);
+        validator.isExpired(
+          dataWithInvalidActivity,
+          const Duration(hours: 24),
+        ),
+        isFalse,
+      );
     });
 
     test('should update last accessed timestamp', () {
@@ -76,7 +84,9 @@ void main() {
       // Verify timestamps are valid
       expect(DateTime.tryParse(sessionData['created_at'] as String), isNotNull);
       expect(
-          DateTime.tryParse(sessionData['last_activity'] as String), isNotNull,);
+        DateTime.tryParse(sessionData['last_activity'] as String),
+        isNotNull,
+      );
     });
 
     test('should initialize session data with empty initial data', () {

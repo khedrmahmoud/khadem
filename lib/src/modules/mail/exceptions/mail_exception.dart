@@ -25,8 +25,11 @@ class MailConfigException extends MailException {
 
 /// Exception thrown when mail transport fails.
 class MailTransportException extends MailException {
-  MailTransportException(super.message,
-      [super.originalError, super.stackTrace,]);
+  MailTransportException(
+    super.message, [
+    super.originalError,
+    super.stackTrace,
+  ]);
 
   @override
   String toString() => 'MailTransportException: $message';

@@ -12,7 +12,8 @@ class MockTokenService implements TokenService {
 
   @override
   Future<Map<String, dynamic>> storeToken(
-      Map<String, dynamic> tokenData,) async {
+    Map<String, dynamic> tokenData,
+  ) async {
     final token = tokenData['token'] as String;
     _tokens[token] = tokenData;
 
@@ -28,8 +29,10 @@ class MockTokenService implements TokenService {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> findTokensByUser(dynamic userId,
-      [String? guard,]) async {
+  Future<List<Map<String, dynamic>>> findTokensByUser(
+    dynamic userId, [
+    String? guard,
+  ]) async {
     final tokens = _userTokens[userId.toString()] ?? [];
     if (guard != null) {
       return tokens.where((t) => t['guard'] == guard).toList();
@@ -38,7 +41,8 @@ class MockTokenService implements TokenService {
   }
 
   Future<List<Map<String, dynamic>>> findTokensByPrefix(
-      String tokenPrefix,) async {
+    String tokenPrefix,
+  ) async {
     return _tokens.values
         .where((t) => (t['token'] as String).startsWith(tokenPrefix))
         .toList();
@@ -86,8 +90,11 @@ class MockTokenService implements TokenService {
   }
 
   @override
-  Future<int> deleteUserTokens(dynamic userId,
-      {String? guard, Map<String, dynamic>? filter,}) async {
+  Future<int> deleteUserTokens(
+    dynamic userId, {
+    String? guard,
+    Map<String, dynamic>? filter,
+  }) async {
     final tokens = _userTokens[userId.toString()] ?? [];
     int deleted = 0;
 
@@ -139,7 +146,8 @@ class MockTokenService implements TokenService {
 
   @override
   Future<Map<String, dynamic>> blacklistToken(
-      Map<String, dynamic> tokenData,) async {
+    Map<String, dynamic> tokenData,
+  ) async {
     return storeToken(tokenData);
   }
 
@@ -294,12 +302,18 @@ void main() {
       final device3Tokens = await jwtDriver.generateTokens(testUser);
 
       // Verify tokens are stored
-      expect(await mockTokenService.findToken(device1Tokens.refreshToken!),
-          isNotNull,);
-      expect(await mockTokenService.findToken(device2Tokens.refreshToken!),
-          isNotNull,);
-      expect(await mockTokenService.findToken(device3Tokens.refreshToken!),
-          isNotNull,);
+      expect(
+        await mockTokenService.findToken(device1Tokens.refreshToken!),
+        isNotNull,
+      );
+      expect(
+        await mockTokenService.findToken(device2Tokens.refreshToken!),
+        isNotNull,
+      );
+      expect(
+        await mockTokenService.findToken(device3Tokens.refreshToken!),
+        isNotNull,
+      );
 
       // Logout from all devices
       await jwtDriver.logoutFromAllDevices(device1Tokens.accessToken!);
@@ -312,7 +326,9 @@ void main() {
 
       // All refresh tokens should be deleted
       final userTokens = await mockTokenService.findTokensByUser(
-          testUser.getAuthIdentifier(), 'users',);
+        testUser.getAuthIdentifier(),
+        'users',
+      );
       final refreshTokens =
           userTokens.where((t) => t['type'] == 'refresh').toList();
       expect(refreshTokens, isEmpty);
@@ -335,10 +351,14 @@ void main() {
       expect(device1SessionId, isNot(equals(device2SessionId)));
 
       // Verify refresh tokens have correct session correlation
-      expect(getRefreshTokenSessionId(device1Tokens.refreshToken!),
-          equals(device1SessionId),);
-      expect(getRefreshTokenSessionId(device2Tokens.refreshToken!),
-          equals(device2SessionId),);
+      expect(
+        getRefreshTokenSessionId(device1Tokens.refreshToken!),
+        equals(device1SessionId),
+      );
+      expect(
+        getRefreshTokenSessionId(device2Tokens.refreshToken!),
+        equals(device2SessionId),
+      );
 
       // Logout from device 1 using access token
       await jwtDriver.invalidateToken(device1Tokens.accessToken!);

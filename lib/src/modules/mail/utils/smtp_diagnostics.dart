@@ -135,7 +135,8 @@ class SmtpDiagnostics {
       buffer.writeln('• Verify the SMTP port is correct');
       buffer.writeln('  - Common ports: 25 (plain), 587 (TLS), 465 (SSL)');
       buffer.writeln(
-          '• Check firewall settings (allow outbound on port ${report.config.port})',);
+        '• Check firewall settings (allow outbound on port ${report.config.port})',
+      );
       buffer.writeln('• Verify the SMTP server is running');
       buffer.writeln('• Try increasing the timeout value');
     } else if (report.success) {

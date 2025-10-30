@@ -47,8 +47,11 @@ void main() {
       const sessionId = 'test_session_custom';
       const customMaxAge = Duration(hours: 2);
 
-      cookieHandler.setSessionCookie(mockResponse, sessionId,
-          maxAge: customMaxAge,);
+      cookieHandler.setSessionCookie(
+        mockResponse,
+        sessionId,
+        maxAge: customMaxAge,
+      );
 
       final cookies = (mockResponse as _MockHttpResponse).cookies;
       expect(cookies, hasLength(1));

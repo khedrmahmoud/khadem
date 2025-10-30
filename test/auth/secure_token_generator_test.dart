@@ -260,9 +260,11 @@ void main() {
         expect(token, isNotEmpty);
         expect(token.length, equals(36)); // UUID format: 8-4-4-4-12
         expect(
-            token,
-            matches(
-                r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',),);
+          token,
+          matches(
+            r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+          ),
+        );
       });
 
       test('should generate different UUID tokens', () {

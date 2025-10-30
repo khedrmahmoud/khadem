@@ -35,8 +35,11 @@ class ApiGuard extends Guard {
   }
 
   /// Factory constructor with config
-  factory ApiGuard.fromConfig(AuthConfig config, String guardName,
-      [String? providerKey,]) {
+  factory ApiGuard.fromConfig(
+    AuthConfig config,
+    String guardName, [
+    String? providerKey,
+  ]) {
     final guardConfig = config.getGuard(guardName);
     final driverName = guardConfig['driver'] as String;
 
