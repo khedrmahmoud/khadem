@@ -11,6 +11,17 @@ abstract class AuthConfig {
   /// Throws [AuthException] if provider is not found
   Map<String, dynamic> getProvider(String providerKey);
 
+  /// Gets providers for a specific guard
+  ///
+  /// [guardName] The guard name to get providers for
+  /// Returns a list of provider configurations for the guard
+  List<Map<String, dynamic>> getProvidersForGuard(String guardName);
+
+  /// Gets all available provider keys
+  ///
+  /// Returns a list of all provider keys
+  List<String> getAllProviderKeys();
+
   /// Gets the guard configuration
   ///
   /// [guardName] The guard name to retrieve
@@ -22,6 +33,11 @@ abstract class AuthConfig {
   ///
   /// Returns the default guard name
   String getDefaultGuard();
+
+  /// Gets the default provider key
+  ///
+  /// Returns the default provider key
+  String getDefaultProvider();
 
   /// Gets a configuration value with a default fallback
   ///

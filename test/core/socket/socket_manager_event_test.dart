@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:khadem/src/core/http/request/request.dart';
 import 'package:khadem/src/core/socket/socket_client.dart';
 import 'package:khadem/src/core/socket/socket_manager.dart';
+import 'package:khadem/src/modules/auth/contracts/authenticatable.dart';
 import 'package:test/test.dart';
 
 // Simple mock classes for testing
@@ -89,6 +91,14 @@ class TestSocketClient implements SocketClient {
   @override
   // TODO: implement userAgent
   String? get userAgent => throw UnimplementedError();
+
+  @override
+  // TODO: implement authenticatedUser
+  Authenticatable? get authenticatedUser => throw UnimplementedError();
+
+  @override
+  // TODO: implement request
+  Request get request => throw UnimplementedError();
 }
 
 void main() {

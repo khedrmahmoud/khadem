@@ -55,7 +55,7 @@ class RequestContext {
   static Auth get auth => Auth(request);
 
   /// Get the current user ID if authenticated
-  static String? get userId => auth.id;
+  static dynamic get userId => auth.id;
 
   /// Check if the current request is authenticated
   static bool get isAuthenticated => auth.check;
@@ -105,7 +105,6 @@ class RequestContext {
   /// ```
   static R run<R>(Request request, R Function() body) {
     final stopwatch = Stopwatch()..start();
-
     try {
       return runZoned(
         () {

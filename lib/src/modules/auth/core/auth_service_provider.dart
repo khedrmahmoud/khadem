@@ -1,6 +1,5 @@
 import '../../../contracts/container/container_interface.dart';
 import '../../../contracts/provider/service_provider.dart';
-import '../../../support/services/secure_token_generator.dart';
 import '../config/khadem_auth_config.dart';
 import '../contracts/auth_config.dart';
 import '../contracts/auth_repository.dart';
@@ -9,8 +8,7 @@ import '../contracts/token_generator.dart';
 import '../repositories/database_auth_repository.dart';
 import '../services/auth_manager.dart';
 import '../services/hash_password_verifier.dart';
-import '../services/jwt_auth_service.dart';
-import '../services/token_auth_service.dart';
+import '../services/secure_token_generator.dart';
 
 /// Enhanced Authentication Service Provider
 ///
@@ -23,19 +21,19 @@ import '../services/token_auth_service.dart';
 /// - AuthRepository: Data access layer
 /// - PasswordVerifier: Password hashing and verification
 /// - TokenGenerator: Secure token generation
-/// - EnhancedAuthManager: Main authentication facade
+/// - AuthManager: Main authentication facade
 /// - Individual auth drivers (JWT, Token)
 ///
 /// Example usage:
 /// ```dart
 /// // In application bootstrap
 /// final container = Container();
-/// final authProvider = EnhancedAuthServiceProvider();
+/// final authProvider = AuthServiceProvider();
 /// await authProvider.register(container);
 /// await authProvider.boot(container);
 ///
 /// // Later in the application
-/// final authManager = container.make<EnhancedAuthManager>();
+/// final authManager = container.make<AuthManager>();
 /// final jwtService = authManager.driver('jwt');
 /// ```
 class AuthServiceProvider extends ServiceProvider {
@@ -49,9 +47,6 @@ class AuthServiceProvider extends ServiceProvider {
   Future<void> register(ContainerInterface container) async {
     // Register core contracts
     await _registerCoreContracts(container);
-
-    // Register authentication drivers
-    await _registerAuthDrivers(container);
 
     // Register the main auth manager
     await _registerAuthManager(container);
@@ -84,31 +79,6 @@ class AuthServiceProvider extends ServiceProvider {
     container.singleton<TokenGenerator>((_) => SecureTokenGenerator());
   }
 
-  /// Registers authentication drivers
-  Future<void> _registerAuthDrivers(ContainerInterface container) async {
-    // Register JWT Auth Service factory
-    container.bind<JWTTokenService>(
-      (c) => JWTTokenService(
-        providerKey: 'users', // Default provider
-        repository: c.resolve<AuthRepository>(),
-        config: c.resolve<AuthConfig>(),
-        passwordVerifier: c.resolve<PasswordVerifier>(),
-        tokenGenerator: c.resolve<TokenGenerator>(),
-      ),
-    );
-
-    // Register Token Auth Service factory
-    container.bind<EnhancedTokenAuthService>(
-      (c) => EnhancedTokenAuthService(
-        providerKey: 'users', // Default provider
-        repository: c.resolve<AuthRepository>(),
-        config: c.resolve<AuthConfig>(),
-        passwordVerifier: c.resolve<PasswordVerifier>(),
-        tokenGenerator: c.resolve<TokenGenerator>(),
-      ),
-    );
-  }
-
   /// Registers the main authentication manager
   Future<void> _registerAuthManager(ContainerInterface container) async {
     container.singleton<AuthManager>(
@@ -118,33 +88,33 @@ class AuthServiceProvider extends ServiceProvider {
     );
 
     // Note: Container doesn't support aliases, use direct resolution
-    // For backward compatibility, users should resolve EnhancedAuthManager directly
+    // For backward compatibility, users should resolve AuthManager directly
   }
 
   /// Performs post-registration boot operations
   Future<void> _bootAuthServices(ContainerInterface container) async {
     // Register custom driver factories with the auth manager
-    _registerCustomDriverFactories();
+    _registerCustomGuardFactories();
 
     // Set up any cleanup schedules
     await _setupCleanupSchedules(container);
   }
 
-  /// Registers custom authentication driver factories
-  void _registerCustomDriverFactories() {
-    // Example: Register a custom OAuth driver factory
-    AuthManager.registerDriverFactory(
+  /// Registers custom authentication guard factories
+  void _registerCustomGuardFactories() {
+    // Example: Register a custom OAuth guard factory
+    AuthManager.registerGuardFactory(
       'oauth',
-      (providerKey) => throw UnsupportedError(
-        'OAuth driver not implemented. Please implement and register an OAuth driver.',
+      (config, guardName) => throw UnsupportedError(
+        'OAuth guard not implemented. Please implement and register an OAuth guard.',
       ),
     );
 
-    // Example: Register a custom LDAP driver factory
-    AuthManager.registerDriverFactory(
+    // Example: Register a custom LDAP guard factory
+    AuthManager.registerGuardFactory(
       'ldap',
-      (providerKey) => throw UnsupportedError(
-        'LDAP driver not implemented. Please implement and register an LDAP driver.',
+      (config, guardName) => throw UnsupportedError(
+        'LDAP guard not implemented. Please implement and register an LDAP guard.',
       ),
     );
   }
@@ -155,7 +125,7 @@ class AuthServiceProvider extends ServiceProvider {
     // For now, this is a placeholder for future implementation
 
     // Example implementation:
-    // final authManager = container.make<EnhancedAuthManager>();
+    // final authManager = container.make<AuthManager>();
     // Timer.periodic(Duration(hours: 1), (timer) {
     //   authManager.driver.cleanupExpiredTokens();
     // });

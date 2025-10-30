@@ -174,8 +174,8 @@ class Server {
   /// Starts the HTTP server on the specified [port].
   ///
   /// Automatically applies global middleware and routes.
-  Future<void> start({int port = 8080}) async {
+  Future<void> start({int port = 8080, String? host}) async {
     _injectReload(); // Inject the reload endpoint
-    await _lifecycle.start(port: port);
+    await _lifecycle.start(port: port, host: host);
   }
 }

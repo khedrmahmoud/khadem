@@ -13,6 +13,7 @@ typedef SocketMiddlewareHandler = FutureOr<void> Function(
 
 /// Connection middleware handler - runs during WebSocket upgrade
 typedef SocketConnectionHandler = FutureOr<void> Function(
+  SocketClient client,
   Request request,
   SocketNextFunction next,
 );

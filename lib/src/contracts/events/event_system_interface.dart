@@ -131,7 +131,6 @@ abstract class EventSystemInterface {
   /// - [event]: The event name to emit.
   /// - [payload]: Optional data passed to listeners.
   /// - [queue]: If true, queue the emission for async processing.
-  /// - [broadcast]: If true, broadcast to all instances (e.g., in distributed systems).
   ///
   /// Returns a [Future] that completes when all listeners have finished.
   ///
@@ -143,7 +142,6 @@ abstract class EventSystemInterface {
     String event, [
     dynamic payload,
     bool queue = false,
-    bool broadcast = false,
   ]);
 
   /// Emits all events within a named group.
@@ -154,7 +152,6 @@ abstract class EventSystemInterface {
   /// - [groupName]: The name of the group to emit.
   /// - [payload]: Optional data for all events.
   /// - [queue]: Queue the emissions.
-  /// - [broadcast]: Broadcast the emissions.
   ///
   /// Returns a [Future] that completes when all group events are emitted.
   ///
@@ -166,7 +163,6 @@ abstract class EventSystemInterface {
     String groupName, [
     dynamic payload,
     bool queue = false,
-    bool broadcast = false,
   ]);
 
   /// Removes a specific listener from an event.

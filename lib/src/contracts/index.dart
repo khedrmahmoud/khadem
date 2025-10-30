@@ -111,9 +111,39 @@ export 'logging/logger_contract.dart';
 // ========================
 export 'provider/service_provider.dart';
 // ========================
+// 📦 Dlq
+// ========================
+export 'queue/dlq/dead_letter_queue_contract.dart';
+export 'queue/dlq/failed_job.dart';
+export 'queue/dlq/failed_job_handler_contract.dart';
+export 'queue/dlq/index.dart';
+// ========================
+// 📦 Index.dart
+// ========================
+export 'queue/index.dart';
+// ========================
+// 📦 Metrics
+// ========================
+export 'queue/metrics/index.dart';
+export 'queue/metrics/queue_metrics_contract.dart';
+// ========================
+// 📦 Middleware
+// ========================
+export 'queue/middleware/index.dart';
+export 'queue/middleware/queue_job_context.dart';
+export 'queue/middleware/queue_middleware_contract.dart';
+// ========================
+// 📦 Queue_config_loader.dart
+// ========================
+export 'queue/queue_config_loader.dart';
+// ========================
 // 📦 Queue_driver.dart
 // ========================
 export 'queue/queue_driver.dart';
+// ========================
+// 📦 Queue_driver_registry.dart
+// ========================
+export 'queue/queue_driver_registry.dart';
 // ========================
 // 📦 Queue_job.dart
 // ========================
@@ -142,6 +172,14 @@ export 'scheduler/scheduler_engine_contract.dart';
 // 📦 Task_stats.dart
 // ========================
 export 'scheduler/task_stats.dart';
+// ========================
+// 📦 Session_driver_registry.dart
+// ========================
+export 'session/session_driver_registry.dart';
+// ========================
+// 📦 Session_interfaces.dart
+// ========================
+export 'session/session_interfaces.dart';
 // ========================
 // 📦 Socket_event_handler.dart
 // ========================

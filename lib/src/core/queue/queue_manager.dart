@@ -2,32 +2,26 @@ import 'package:khadem/src/contracts/config/config_contract.dart';
 import 'package:khadem/src/contracts/queue/queue_driver.dart';
 import 'package:khadem/src/contracts/queue/queue_driver_registry.dart';
 import 'package:khadem/src/contracts/queue/queue_job.dart';
-import 'package:khadem/src/contracts/queue/queue_monitor.dart';
 import 'package:khadem/src/core/queue/config/queue_config_loader.dart';
-import 'package:khadem/src/core/queue/queue_driver_registry.dart';
-import 'package:khadem/src/core/queue/queue_monitor.dart';
-import 'package:khadem/src/core/queue/queue_worker.dart';
+import 'package:khadem/src/core/queue/registry/index.dart';
+import 'package:khadem/src/core/queue/worker.dart';
 import 'package:khadem/src/support/exceptions/queue_exception.dart';
 
-/// Simplified queue manager that handles job dispatch and processing
-/// without requiring job registration.
+/// Queue manager that handles job dispatch and processing
 class QueueManager {
   QueueDriver? _defaultDriver;
   String? _defaultDriverName;
   final ConfigInterface _config;
-  final QueueMonitor _monitor;
   final IQueueDriverRegistry _registry;
   final QueueConfigLoader _configLoader;
 
   QueueManager(
     this._config, {
-    QueueMonitor? monitor,
     QueueDriver? driver,
     String? driverName,
     IQueueDriverRegistry? registry,
     QueueConfigLoader? configLoader,
-  })  : _monitor = monitor ?? BasicQueueMonitor(),
-        _registry = registry ?? QueueDriverRegistry(),
+  })  : _registry = registry ?? QueueDriverRegistry(),
         _configLoader = configLoader ?? QueueConfigLoader() {
     if (driver != null) {
       _defaultDriver = driver;
@@ -40,9 +34,6 @@ class QueueManager {
 
   /// Gets the name of the default driver.
   String get defaultDriverName => _defaultDriverName!;
-
-  /// Gets the queue monitor for metrics.
-  QueueMonitor get monitor => _monitor;
 
   /// Gets the driver registry.
   IQueueDriverRegistry get registry => _registry;
@@ -127,14 +118,7 @@ class QueueManager {
   /// Dispatches a job to the queue with optional delay.
   /// This is the main method - just dispatch any job without registration!
   Future<void> dispatch(QueueJob job, {Duration? delay}) async {
-    _monitor.jobQueued(job);
-
-    try {
-      await _defaultDriver!.push(job, delay: delay);
-    } catch (e) {
-      _monitor.jobFailed(job, e, Duration.zero);
-      rethrow;
-    }
+    await _defaultDriver!.push(job, delay: delay);
   }
 
   /// Convenient method to dispatch multiple jobs at once.
@@ -181,13 +165,11 @@ class QueueManager {
   }
 
   /// Gets current queue metrics.
-  Map<String, dynamic> getMetrics() {
-    return _monitor.getMetrics().toJson();
-  }
-
-  /// Resets queue metrics.
-  void resetMetrics() {
-    _monitor.reset();
+  /// Returns metrics from the driver if it supports metrics tracking.
+  Map<String, dynamic>? getMetrics() {
+    // Metrics are tracked in the driver's metrics object
+    // This is a placeholder - implement based on your driver
+    return null;
   }
 
   /// Gets all registered driver names.

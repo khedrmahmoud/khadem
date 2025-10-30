@@ -1,4 +1,5 @@
-import '../../core/queue/queue_monitor.dart';
+import 'package:khadem/src/core/queue/metrics/index.dart';
+
 import 'queue_job.dart';
 
 /// Interface for queue monitoring and metrics collection.

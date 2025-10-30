@@ -17,9 +17,22 @@ class Route {
   /// Checks if the route has a name
   bool get isNamed => name != null && name!.isNotEmpty;
 
-  Route(this.method, this.path, this.handler, this.middleware, {this.name})
-      : matcher = _createMatcher(path),
+  Route(this.method, String path, this.handler, this.middleware, {this.name})
+      : path = _normalizePath(path),
+        matcher = _createMatcher(_normalizePath(path)),
         paramNames = _extractParamNames(path);
+
+  /// Normalizes a path by removing trailing slashes
+  /// Preserves root path '/' as-is
+  static String _normalizePath(String path) {
+    // Special case: root path
+    if (path == '/' || path.isEmpty) {
+      return '/';
+    }
+
+    // Remove trailing slash
+    return path.endsWith('/') ? path.substring(0, path.length - 1) : path;
+  }
 
   static RegExp _createMatcher(String path) {
     final regex =
@@ -32,11 +45,13 @@ class Route {
   }
 
   bool matches(String method, String path) {
-    return this.method == method && matcher.hasMatch(path);
+    final normalizedPath = _normalizePath(path);
+    return this.method == method && matcher.hasMatch(normalizedPath);
   }
 
   Map<String, String> extractParams(String path) {
-    final match = matcher.firstMatch(path);
+    final normalizedPath = _normalizePath(path);
+    final match = matcher.firstMatch(normalizedPath);
     if (match == null) return {};
     return {
       for (final name in paramNames) name: match.namedGroup('_$name') ?? '',

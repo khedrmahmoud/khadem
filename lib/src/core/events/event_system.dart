@@ -119,14 +119,12 @@ class EventSystem implements EventSystemInterface {
   /// [event] - The name of the event to emit
   /// [payload] - Optional data to pass to all listeners
   /// [queue] - Whether to execute listeners asynchronously in separate futures
-  /// [broadcast] - Whether to broadcast the event via socket (if available)
   /// Returns a Future that completes when all listeners have finished executing
   @override
   Future<void> emit(
     String event, [
     dynamic payload,
     bool queue = false,
-    bool broadcast = false,
   ]) async {
     final listeners = _listeners[event];
 
@@ -187,10 +185,6 @@ class EventSystem implements EventSystemInterface {
       listeners.clear();
       listeners.addAll(remaining);
     }
-
-    if (broadcast) {
-      Khadem.socket.broadcastEvent(event, payload);
-    }
   }
 
   /// Emits all events inside a [groupName] with optional [payload].
@@ -201,20 +195,18 @@ class EventSystem implements EventSystemInterface {
   /// [groupName] - The name of the event group to emit
   /// [payload] - Optional data to pass to all event listeners
   /// [queue] - Whether to execute listeners asynchronously
-  /// [broadcast] - Whether to broadcast events via socket
   /// Returns a Future that completes when all group events have been emitted
   @override
   Future<void> emitGroup(
     String groupName, [
     dynamic payload,
     bool queue = false,
-    bool broadcast = false,
   ]) async {
     final events = _eventGroups[groupName];
     if (events == null) return;
 
     for (final event in events) {
-      await emit(event, payload, queue, broadcast);
+      await emit(event, payload, queue);
     }
   }
 

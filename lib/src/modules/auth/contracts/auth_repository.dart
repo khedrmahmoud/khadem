@@ -50,8 +50,23 @@ abstract class AuthRepository {
   ///
   /// [userId] The user ID
   /// [guard] Optional guard name filter
+  /// [filter] Optional metadata to filter tokens
   /// Returns the number of affected rows
-  Future<int> deleteUserTokens(dynamic userId, [String? guard]);
+  Future<int> deleteUserTokens(
+    dynamic userId, {
+    String? guard,
+    Map<String, dynamic>? filter,
+  });
+
+  /// Finds all tokens for a user
+  ///
+  /// [userId] The user ID
+  /// [guard] Optional guard name filter
+  /// Returns a list of token records
+  Future<List<Map<String, dynamic>>> findTokensByUser(
+    dynamic userId, [
+    String? guard,
+  ]);
 
   /// Cleans up expired tokens
   ///

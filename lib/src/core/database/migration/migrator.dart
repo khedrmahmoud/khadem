@@ -147,15 +147,44 @@ class Migrator {
     } catch (_) {
       Khadem.logger.warning('⚠️ Database "$dbName" does not exist.');
 
-      stdout.write('❓ Create it now? (y/n): ');
-      final input = stdin.readLineSync();
-      if (input?.toLowerCase() == 'y') {
-        await dbConnection.execute('CREATE DATABASE IF NOT EXISTS `$dbName`');
-        Khadem.logger.info('✅ Database "$dbName" created.');
-        await dbConnection.execute('USE $dbName');
-      } else {
-        throw Exception('❌ Database "$dbName" must exist to run migrations.');
+      // Check if stdin is available and in terminal mode
+      if (stdin.hasTerminal) {
+        try {
+          // Temporarily restore terminal settings for user input
+          final wasLineMode = stdin.lineMode;
+          final wasEchoMode = stdin.echoMode;
+
+          stdin.lineMode = true;
+          stdin.echoMode = true;
+
+          stdout.write('❓ Create it now? (y/n): ');
+          final input = stdin.readLineSync();
+
+          // Restore previous terminal settings
+          try {
+            stdin.lineMode = wasLineMode;
+            stdin.echoMode = wasEchoMode;
+          } catch (_) {
+            // Ignore if we can't restore settings
+          }
+
+          if (input?.toLowerCase() == 'y') {
+            await dbConnection
+                .execute('CREATE DATABASE IF NOT EXISTS `$dbName`');
+            Khadem.logger.info('✅ Database "$dbName" created.');
+            await dbConnection.execute('USE $dbName');
+            return;
+          }
+        } catch (e) {
+          Khadem.logger.error('❌ Error reading user input: $e');
+        }
       }
+
+      // If we can't read input or user declined, auto-create the database
+      Khadem.logger.info('🔧 Auto-creating database "$dbName"...');
+      await dbConnection.execute('CREATE DATABASE IF NOT EXISTS `$dbName`');
+      Khadem.logger.info('✅ Database "$dbName" created.');
+      await dbConnection.execute('USE $dbName');
     }
   }
 }

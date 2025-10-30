@@ -1,3 +1,5 @@
+import 'package:khadem/src/support/exceptions/not_found_exception.dart';
+
 import '../../../application/khadem.dart';
 import '../contracts/auth_config.dart';
 import '../exceptions/auth_exception.dart';
@@ -39,6 +41,22 @@ class KhademAuthConfig implements AuthConfig {
   }
 
   @override
+  List<Map<String, dynamic>> getProvidersForGuard(String guardName) {
+    final config = _getAuthConfig();
+    final providers = config['providers'] as Map<String, dynamic>?;
+
+    if (providers == null) {
+      return [];
+    }
+
+    // With the new structure, all providers can work with any guard
+    // The guard determines the driver, provider provides model/table info
+    return providers.values
+        .map((provider) => provider as Map<String, dynamic>)
+        .toList();
+  }
+
+  @override
   Map<String, dynamic> getGuard(String guardName) {
     final config = _getAuthConfig();
     final guards = config['guards'] as Map<String, dynamic>?;
@@ -55,10 +73,12 @@ class KhademAuthConfig implements AuthConfig {
   @override
   String getDefaultGuard() {
     final config = _getAuthConfig();
-    final defaultGuard = config['default'] as String?;
+    final defaults = config['defaults'] as Map<String, dynamic>?;
+    final defaultGuard =
+        defaults?['guard'] as String? ?? config['default'] as String?;
 
     if (defaultGuard == null) {
-      throw AuthException(
+      throw NotFoundException(
         'No default guard specified in authentication configuration.',
       );
     }
@@ -92,8 +112,31 @@ class KhademAuthConfig implements AuthConfig {
     }
   }
 
-  /// Clears the configuration cache
-  void clearCache() {
-    _authConfig = null;
+  @override
+  List<String> getAllProviderKeys() {
+    final config = _getAuthConfig();
+    final providers = config['providers'] as Map<String, dynamic>?;
+
+    if (providers == null) {
+      return [];
+    }
+
+    return providers.keys.toList();
+  }
+
+  @override
+  String getDefaultProvider() {
+    final config = _getAuthConfig();
+    final defaults = config['defaults'] as Map<String, dynamic>?;
+    final defaultProvider =
+        defaults?['provider'] as String? ?? config['default'] as String?;
+
+    if (defaultProvider == null) {
+      throw NotFoundException(
+        'No default provider specified in authentication configuration.',
+      );
+    }
+
+    return defaultProvider;
   }
 }

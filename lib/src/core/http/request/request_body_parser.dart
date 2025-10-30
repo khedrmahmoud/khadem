@@ -34,6 +34,8 @@ class RequestBodyParser {
   final HttpRequest _raw;
   Map<String, dynamic>? _parsedBody;
   Map<String, UploadedFile>? _uploadedFiles;
+  bool _isParsing = false;
+  bool _parsingFailed = false;
 
   RequestBodyParser(this._raw);
 
@@ -41,22 +43,43 @@ class RequestBodyParser {
   /// Supports `application/json`, `application/x-www-form-urlencoded`, and `multipart/form-data`.
   Future<Map<String, dynamic>> parseBody() async {
     if (_parsedBody != null) return _parsedBody!;
-
-    final contentType = _raw.headers.contentType?.mimeType;
-
-    if (contentType == 'application/json') {
-      _parsedBody = await _parseJsonBody();
-    } else if (contentType == 'application/x-www-form-urlencoded') {
-      _parsedBody = await _parseFormBody();
-    } else if (contentType?.startsWith('multipart/') == true) {
-      final result = await _parseMultipartBody();
-      _parsedBody = result['fields'] ?? {};
-      _uploadedFiles = result['files'];
-    } else {
-      _parsedBody = {};
+    if (_parsingFailed) return {};
+    if (_isParsing) {
+      // Wait for ongoing parsing to complete
+      while (_isParsing) {
+        await Future.delayed(const Duration(milliseconds: 10));
+      }
+      return _parsedBody ?? {};
     }
 
-    return _parsedBody!;
+    _isParsing = true;
+    try {
+      final contentType = _raw.headers.contentType?.mimeType;
+
+      if (contentType == 'application/json') {
+        _parsedBody = await _parseJsonBody();
+      } else if (contentType == 'application/x-www-form-urlencoded') {
+        _parsedBody = await _parseFormBody();
+      } else if (contentType?.startsWith('multipart/') == true) {
+        final result = await _parseMultipartBody();
+        _parsedBody = result['fields'] ?? {};
+        _uploadedFiles = result['files'];
+      } else {
+        _parsedBody = {};
+      }
+
+      return _parsedBody!;
+    } catch (e) {
+      _parsingFailed = true;
+      // Log the error but don't crash the server
+      // In a real application, you'd want to use a proper logger
+      print('Warning: Failed to parse request body: $e');
+      _parsedBody = {};
+      _uploadedFiles = {};
+      return _parsedBody!;
+    } finally {
+      _isParsing = false;
+    }
   }
 
   /// Parses JSON body content.
@@ -92,10 +115,21 @@ class RequestBodyParser {
         );
       }
 
-      // Read all bytes from the request
+      // Read all bytes from the request with timeout and error handling
       final bytes = <int>[];
-      await for (final chunk in _raw) {
-        bytes.addAll(chunk);
+      try {
+        await _raw.timeout(const Duration(seconds: 30)).forEach((chunk) {
+          bytes.addAll(chunk);
+        });
+      } catch (e) {
+        // Handle connection closed or timeout gracefully
+        if (e is HttpException || e is TimeoutException) {
+          print(
+            'Warning: Connection closed or timed out during multipart upload: $e',
+          );
+          return {'fields': fields, 'files': files};
+        }
+        rethrow;
       }
 
       // Parse multipart data
@@ -180,7 +214,12 @@ class RequestBodyParser {
         'files': files,
       };
     } catch (e) {
-      throw FormatException('Invalid multipart data: $e');
+      // For any other parsing errors, return empty results instead of crashing
+      print('Warning: Failed to parse multipart data: $e');
+      return {
+        'fields': fields,
+        'files': files,
+      };
     }
   }
 
