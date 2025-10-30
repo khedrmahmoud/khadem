@@ -1,7 +1,7 @@
 import '../../../contracts/config/config_contract.dart';
 import '../../../core/queue/queue_manager.dart';
-import '../contracts/mailable.dart';
 import '../contracts/mail_message_interface.dart';
+import '../contracts/mailable.dart';
 import '../contracts/mailer_interface.dart';
 import '../contracts/transport_interface.dart';
 import '../exceptions/mail_exception.dart';
@@ -15,13 +15,13 @@ import 'mailer.dart';
 /// Example:
 /// ```dart
 /// final mailManager = MailManager(config, queueManager);
-/// 
+///
 /// // Use default mailer
 /// await mailManager.to('user@example.com')
 ///     .subject('Hello')
 ///     .text('Hello World')
 ///     .send();
-/// 
+///
 /// // Use specific mailer
 /// await mailManager.mailer('ses')
 ///     .to('user@example.com')
@@ -123,8 +123,10 @@ class MailManager implements MailerInterface {
   MailerInterface html(String content) => defaultMailer.html(content);
 
   @override
-  Future<MailerInterface> view(String viewName,
-          [Map<String, dynamic>? data,]) =>
+  Future<MailerInterface> view(
+    String viewName, [
+    Map<String, dynamic>? data,
+  ]) =>
       defaultMailer.view(viewName, data);
 
   @override
@@ -132,8 +134,11 @@ class MailManager implements MailerInterface {
       defaultMailer.attach(path, name: name, mimeType: mimeType);
 
   @override
-  MailerInterface attachData(List<int> data, String name,
-          {String? mimeType,}) =>
+  MailerInterface attachData(
+    List<int> data,
+    String name, {
+    String? mimeType,
+  }) =>
       defaultMailer.attachData(data, name, mimeType: mimeType);
 
   @override
@@ -171,7 +176,7 @@ class MailManager implements MailerInterface {
   Future<bool> testTransport([String? name]) async {
     final mailerName = name ?? _defaultMailer ?? 'smtp';
     final transport = _transports[mailerName];
-    
+
     if (transport == null) {
       throw MailConfigException('Mail transport "$mailerName" not registered');
     }

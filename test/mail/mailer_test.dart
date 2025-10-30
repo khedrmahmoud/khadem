@@ -108,7 +108,7 @@ void main() {
 
       test('should attach data', () async {
         final data = [1, 2, 3, 4, 5];
-        
+
         await mailer
             .to('user@example.com')
             .subject('Test')
@@ -239,10 +239,7 @@ class TestMailable extends Mailable {
 
   @override
   Future<void> build(MailerInterface mailer) async {
-    mailer
-        .to(toEmail)
-        .subject(emailSubject)
-        .text('Test mailable content');
+    mailer.to(toEmail).subject(emailSubject).text('Test mailable content');
   }
 }
 
@@ -256,10 +253,7 @@ class HookedMailable extends Mailable {
   @override
   Future<void> build(MailerInterface mailer) async {
     buildCalled = true;
-    mailer
-        .to('user@example.com')
-        .subject('Hooked')
-        .text('Content');
+    mailer.to('user@example.com').subject('Hooked').text('Content');
   }
 
   @override

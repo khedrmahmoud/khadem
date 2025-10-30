@@ -2,28 +2,28 @@ import '../../../../contracts/database/query_builder_interface.dart';
 import '../../model_base/khadem_model.dart';
 
 /// Mixin that enables query scopes on models with helper utilities
-/// 
+///
 /// Query scopes allow you to define reusable query constraints
 /// that can be chained in a fluent interface.
-/// 
+///
 /// Example:
 /// ```dart
 /// class User extends KhademModel<User> with QueryScopes {
 ///   QueryBuilderInterface<User> scopeActive(QueryBuilderInterface<User> query) {
 ///     return query.where('active', '=', true);
 ///   }
-///   
+///
 ///   QueryBuilderInterface<User> scopeVerified(QueryBuilderInterface<User> query) {
 ///     return query.whereNotNull('email_verified_at');
 ///   }
-///   
+///
 ///   QueryBuilderInterface<User> scopeRole(
 ///     QueryBuilderInterface<User> query,
 ///     String role,
 ///   ) {
 ///     return query.where('role', '=', role);
 ///   }
-///   
+///
 ///   // Helper to chain multiple scopes
 ///   QueryBuilderInterface<User> activeVerifiedAdmins() {
 ///     return applyScopes([
@@ -33,27 +33,27 @@ import '../../model_base/khadem_model.dart';
 ///     ]);
 ///   }
 /// }
-/// 
+///
 /// // Usage:
 /// final users = await User().activeVerifiedAdmins().get();
-/// 
+///
 /// // Or manually chain:
 /// final user = User();
 /// final query = user.scopeActive(user.query);
 /// final activeAdmins = await user.scopeRole(query, 'admin').get();
 /// ```
-/// 
+///
 /// ## Scope Naming Convention
-/// 
+///
 /// - Scope method names must start with `scope` (e.g., `scopeActive`)
 /// - Helper methods can combine multiple scopes
 /// - All scopes receive QueryBuilderInterface and return QueryBuilderInterface
 mixin QueryScopes<T> on KhademModel<T> {
   /// Apply multiple scope functions in sequence
-  /// 
+  ///
   /// This helper method allows you to chain multiple scopes programmatically
   /// without manually passing the query builder between them.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// class User extends KhademModel<User> with QueryScopes {
@@ -64,12 +64,13 @@ mixin QueryScopes<T> on KhademModel<T> {
   ///     ]);
   ///   }
   /// }
-  /// 
+  ///
   /// // Usage:
   /// final users = await User().activeAdmins().get();
   /// ```
   QueryBuilderInterface<T> applyScopes<T>(
-    List<QueryBuilderInterface<T> Function(QueryBuilderInterface<T>)> scopeFunctions,
+    List<QueryBuilderInterface<T> Function(QueryBuilderInterface<T>)>
+        scopeFunctions,
   ) {
     var currentQuery = query as QueryBuilderInterface<T>;
     for (final scopeFunction in scopeFunctions) {
@@ -79,10 +80,10 @@ mixin QueryScopes<T> on KhademModel<T> {
   }
 
   /// Conditionally apply a scope based on a condition
-  /// 
+  ///
   /// This helper method allows you to apply scopes only when certain
   /// conditions are met, making your queries more dynamic.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// class User extends KhademModel<User> with QueryScopes {
@@ -93,7 +94,7 @@ mixin QueryScopes<T> on KhademModel<T> {
   ///     return q;
   ///   }
   /// }
-  /// 
+  ///
   /// // Usage:
   /// final users = await User().filteredUsers(role: 'admin', active: true).get();
   /// ```
@@ -109,9 +110,9 @@ mixin QueryScopes<T> on KhademModel<T> {
   }
 
   /// Apply scope only when value is not null
-  /// 
+  ///
   /// Convenience method for conditional scopes based on null checks.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// QueryBuilderInterface<User> searchUsers(String? searchTerm, String? role) {
@@ -124,7 +125,8 @@ mixin QueryScopes<T> on KhademModel<T> {
   QueryBuilderInterface<T> whenNotNull<T, V>(
     V? value,
     QueryBuilderInterface<T> initialQuery,
-    QueryBuilderInterface<T> Function(QueryBuilderInterface<T>, V) scopeFunction,
+    QueryBuilderInterface<T> Function(QueryBuilderInterface<T>, V)
+        scopeFunction,
   ) {
     if (value != null) {
       return scopeFunction(initialQuery, value);
@@ -133,10 +135,10 @@ mixin QueryScopes<T> on KhademModel<T> {
   }
 
   /// Tap into query builder for debugging or side effects
-  /// 
+  ///
   /// Allows you to execute a function on the query builder without
   /// modifying it. Useful for logging or debugging.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final users = await User()
@@ -153,9 +155,9 @@ mixin QueryScopes<T> on KhademModel<T> {
   }
 
   /// Pipe query builder through multiple transformations
-  /// 
+  ///
   /// Similar to applyScopes but with a more functional style.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final users = await User().pipe([
@@ -165,7 +167,8 @@ mixin QueryScopes<T> on KhademModel<T> {
   /// ]).get();
   /// ```
   QueryBuilderInterface<T> pipe<T>(
-    List<QueryBuilderInterface<T> Function(QueryBuilderInterface<T>)> transformations, [
+    List<QueryBuilderInterface<T> Function(QueryBuilderInterface<T>)>
+        transformations, [
     QueryBuilderInterface<T>? initialQuery,
   ]) {
     var currentQuery = initialQuery ?? query as QueryBuilderInterface<T>;
@@ -175,4 +178,3 @@ mixin QueryScopes<T> on KhademModel<T> {
     return currentQuery;
   }
 }
-

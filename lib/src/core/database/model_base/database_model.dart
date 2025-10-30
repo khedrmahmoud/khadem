@@ -28,7 +28,7 @@ class DatabaseModel<T> {
       // Deletion was cancelled by an observer
       return;
     }
-    
+
     // Use parameterized query to prevent SQL injection
     await model.query.where('id', '=', model.id).delete();
     await model.event.afterDelete();

@@ -1,44 +1,44 @@
 import 'package:khadem/khadem.dart';
 
 /// Mixin that adds soft delete functionality to models
-/// 
+///
 /// Soft deletes allow you to "delete" records without actually removing them
 /// from the database. Instead, a `deleted_at` timestamp is set.
-/// 
+///
 /// ## Usage
-/// 
+///
 /// ```dart
 /// class Post extends KhademModel<Post> with SoftDeletes {
 ///   // Your model properties...
 /// }
-/// 
+///
 /// // Soft delete (sets deleted_at)
 /// await post.delete();
-/// 
+///
 /// // Restore a soft-deleted record
 /// await post.restore();
-/// 
+///
 /// // Permanently delete
 /// await post.forceDelete();
-/// 
+///
 /// // Query with soft deletes
 /// final posts = await Post.query().get(); // Excludes deleted
 /// final all = await Post.query().withTrashed().get(); // Includes deleted
 /// final trashed = await Post.query().onlyTrashed().get(); // Only deleted
 /// ```
-/// 
+///
 /// ## Database Requirements
-/// 
+///
 /// Your table must have a `deleted_at` column (nullable timestamp):
-/// 
+///
 /// ```sql
 /// ALTER TABLE posts ADD COLUMN deleted_at TIMESTAMP NULL;
 /// ```
-/// 
+///
 /// ## Customization
-/// 
+///
 /// Override `deletedAtColumn` to use a different column name:
-/// 
+///
 /// ```dart
 /// class Post extends KhademModel<Post> with SoftDeletes {
 ///   @override
@@ -47,7 +47,7 @@ import 'package:khadem/khadem.dart';
 /// ```
 mixin SoftDeletes<T> on KhademModel<T> {
   /// The name of the "deleted at" column
-  /// 
+  ///
   /// Override this to use a different column name.
   String get deletedAtColumn => 'deleted_at';
 
@@ -68,7 +68,7 @@ mixin SoftDeletes<T> on KhademModel<T> {
   bool get trashed => deletedAt != null;
 
   /// Soft delete the model (set deleted_at timestamp)
-  /// 
+  ///
   /// This overrides the default delete() behavior to perform a soft delete
   /// instead of permanently removing the record from the database.
   Future<bool> softDelete() async {
@@ -77,7 +77,7 @@ mixin SoftDeletes<T> on KhademModel<T> {
     }
 
     deletedAt = DateTime.now().toUtc();
-    
+
     // Fire deleting event
     await event.beforeDelete();
 
@@ -90,7 +90,7 @@ mixin SoftDeletes<T> on KhademModel<T> {
   }
 
   /// Restore a soft-deleted model
-  /// 
+  ///
   /// Sets deleted_at to null, making the record "active" again.
   Future<bool> restore() async {
     if (!trashed) {
@@ -115,7 +115,7 @@ mixin SoftDeletes<T> on KhademModel<T> {
   }
 
   /// Permanently delete the model from the database
-  /// 
+  ///
   /// This bypasses soft delete and actually removes the record.
   Future<bool> forceDelete() async {
     // Call observer beforeForceDelete hook
@@ -134,7 +134,7 @@ mixin SoftDeletes<T> on KhademModel<T> {
   }
 
   /// Override default delete to use soft delete
-  /// 
+  ///
   /// To permanently delete, use forceDelete() instead.
   @override
   Future<bool> delete() async {
@@ -149,15 +149,16 @@ mixin SoftDeletes<T> on KhademModel<T> {
 }
 
 /// Extension methods for QueryBuilder to work with soft deletes
-/// 
+///
 /// Note: These methods need to be manually applied to query builders
 /// until automatic scope detection is implemented.
-extension SoftDeleteQueryExtensions<T extends KhademModel<T>> on QueryBuilderInterface<T> {
+extension SoftDeleteQueryExtensions<T extends KhademModel<T>>
+    on QueryBuilderInterface<T> {
   /// Include soft-deleted records in the query results
-  /// 
+  ///
   /// By default, queries exclude soft-deleted records. This method
   /// allows you to retrieve all records, including soft-deleted ones.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final allPosts = await Post.query().withTrashed().get();
@@ -169,7 +170,7 @@ extension SoftDeleteQueryExtensions<T extends KhademModel<T>> on QueryBuilderInt
   }
 
   /// Only retrieve soft-deleted records
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final deletedPosts = await Post.query().onlyTrashed().get();
@@ -179,10 +180,10 @@ extension SoftDeleteQueryExtensions<T extends KhademModel<T>> on QueryBuilderInt
   }
 
   /// Exclude soft-deleted records (default behavior)
-  /// 
+  ///
   /// This is the default behavior, but can be useful to explicitly
   /// state the intent or override a previous withTrashed() call.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final activePosts = await Post.query().withoutTrashed().get();

@@ -18,15 +18,15 @@ class LogTransport implements TransportInterface {
       _logger.info('📧 Email logged (not sent)');
       _logger.info('  From: ${message.from}');
       _logger.info('  To: ${message.to.join(', ')}');
-      
+
       if (message.cc.isNotEmpty) {
         _logger.info('  CC: ${message.cc.join(', ')}');
       }
-      
+
       if (message.bcc.isNotEmpty) {
         _logger.info('  BCC: ${message.bcc.join(', ')}');
       }
-      
+
       _logger.info('  Subject: ${message.subject}');
 
       if (_verbose) {

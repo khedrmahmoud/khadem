@@ -37,7 +37,11 @@ abstract class TokenService {
   /// [userId] The user ID
   /// [guard] Optional guard name to filter by
   /// Returns number of deleted records
-  Future<int> deleteUserTokens(dynamic userId, {String? guard, Map<String, dynamic>? filter, });
+  Future<int> deleteUserTokens(
+    dynamic userId, {
+    String? guard,
+    Map<String, dynamic>? filter,
+  });
 
   /// Finds tokens by session ID
   ///

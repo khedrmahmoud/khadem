@@ -45,17 +45,17 @@ class TestAuthConfig implements AuthConfig {
 
   @override
   bool hasGuard(String guardName) => ['api', 'web'].contains(guardName);
-  
+
   @override
   List<String> getAllProviderKeys() {
     return ['users'];
   }
-  
+
   @override
   String getDefaultProvider() {
     return 'users';
   }
-  
+
   @override
   List<Map<String, dynamic>> getProvidersForGuard(String guardName) {
     return [getProvider('users')];
@@ -93,17 +93,21 @@ void main() {
     });
 
     test('guard caching works', () {
-      final authManager1 = AuthManager(guard: 'api', authConfig: testAuthConfig);
-      final authManager2 = AuthManager(guard: 'api', authConfig: testAuthConfig);
+      final authManager1 =
+          AuthManager(guard: 'api', authConfig: testAuthConfig);
+      final authManager2 =
+          AuthManager(guard: 'api', authConfig: testAuthConfig);
 
       // Should return the same guard instance from cache
       expect(authManager1.guardInstance, authManager2.guardInstance);
     });
 
     test('clears guard cache', () {
-      final authManager1 = AuthManager(guard: 'api', authConfig: testAuthConfig);
+      final authManager1 =
+          AuthManager(guard: 'api', authConfig: testAuthConfig);
       AuthManager.clearGuardCache();
-      final authManager2 = AuthManager(guard: 'api', authConfig: testAuthConfig);
+      final authManager2 =
+          AuthManager(guard: 'api', authConfig: testAuthConfig);
 
       // Should be different instances after cache clear
       expect(authManager1.guardInstance, isNot(authManager2.guardInstance));
@@ -118,8 +122,11 @@ void main() {
     });
 
     test('throws exception for invalid guard creation', () {
-      expect(() => AuthManager(guard: 'nonexistent_guard', authConfig: testAuthConfig),
-          throwsA(isA<AuthException>()),);
+      expect(
+        () =>
+            AuthManager(guard: 'nonexistent_guard', authConfig: testAuthConfig),
+        throwsA(isA<AuthException>()),
+      );
     });
 
     test('getGuard returns guard instance', () {

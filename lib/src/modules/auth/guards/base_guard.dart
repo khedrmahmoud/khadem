@@ -33,7 +33,9 @@ abstract class Guard {
   /// Creates a base guard
   Guard({
     required this.config,
-    required this.driver, required this.providerKey, AuthRepository? repository,
+    required this.driver,
+    required this.providerKey,
+    AuthRepository? repository,
     PasswordVerifier? passwordVerifier,
   })  : repository = repository ?? DatabaseAuthRepository(),
         passwordVerifier = passwordVerifier ?? HashPasswordVerifier();
@@ -187,4 +189,3 @@ abstract class Guard {
     return DatabaseAuthenticatable.fromProviderConfig(userData, provider);
   }
 }
-

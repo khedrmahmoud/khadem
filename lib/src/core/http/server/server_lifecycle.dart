@@ -33,8 +33,10 @@ class ServerLifecycle {
     );
 
     final server = await HttpServer.bind(
-        host != null ? InternetAddress(host) : InternetAddress.anyIPv4, port,
-        shared: true,);
+      host != null ? InternetAddress(host) : InternetAddress.anyIPv4,
+      port,
+      shared: true,
+    );
     Khadem.logger
         .info('🟢 HTTP Server started on http://${host ?? 'localhost'}:$port');
 

@@ -7,8 +7,10 @@ import 'package:test/test.dart';
 // Simple mock connection for testing SQL generation
 class _MockConnection implements ConnectionInterface {
   @override
-  Future<DatabaseResponse> execute(String query,
-      [List<dynamic> bindings = const [],]) async {
+  Future<DatabaseResponse> execute(
+    String query, [
+    List<dynamic> bindings = const [],
+  ]) async {
     return DatabaseResponse(data: [], insertId: 1, affectedRows: 0);
   }
 
@@ -282,7 +284,7 @@ void main() {
   group('Phase 4: Advanced Pagination & Locking', () {
     group('simplePaginate', () {
       test('returns simple pagination result', () async {
-        final result = await queryBuilder.simplePaginate(page: 1);
+        final result = await queryBuilder.simplePaginate();
 
         expect(result, isA<Map<String, dynamic>>());
         expect(result, containsPair('data', anything));
@@ -417,10 +419,7 @@ void main() {
     group('whereNotExists', () {
       test('builds WHERE NOT EXISTS with subquery', () {
         queryBuilder.whereNotExists((q) {
-          return q
-              .select(['1'])
-              .where('bans.user_id', '=', 'users.id')
-              .toSql();
+          return q.select(['1']).where('bans.user_id', '=', 'users.id').toSql();
         });
 
         final sql = queryBuilder.toSql();
@@ -522,8 +521,7 @@ void main() {
     test('clone preserves all new features', () {
       queryBuilder
           .join('posts', 'users.id', '=', 'posts.user_id')
-          .whereIn('status', ['active'])
-          .sharedLock();
+          .whereIn('status', ['active']).sharedLock();
 
       final cloned = queryBuilder.clone();
       final originalSql = queryBuilder.toSql();

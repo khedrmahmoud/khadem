@@ -45,7 +45,9 @@ class TestPost extends KhademModel<TestPost> with SoftDeletes<TestPost> {
         content = value;
         break;
       case 'deleted_at':
-        deletedAt = value is DateTime ? value : (value is String ? DateTime.tryParse(value) : null);
+        deletedAt = value is DateTime
+            ? value
+            : (value is String ? DateTime.tryParse(value) : null);
         break;
     }
   }
@@ -55,7 +57,8 @@ class TestPost extends KhademModel<TestPost> with SoftDeletes<TestPost> {
 }
 
 // Test model with custom deleted_at column name
-class TestProduct extends KhademModel<TestProduct> with SoftDeletes<TestProduct> {
+class TestProduct extends KhademModel<TestProduct>
+    with SoftDeletes<TestProduct> {
   @override
   int? id;
   String? name;
@@ -93,7 +96,9 @@ class TestProduct extends KhademModel<TestProduct> with SoftDeletes<TestProduct>
         name = value;
         break;
       case 'removed_at':
-        removedAt = value is DateTime ? value : (value is String ? DateTime.tryParse(value) : null);
+        removedAt = value is DateTime
+            ? value
+            : (value is String ? DateTime.tryParse(value) : null);
         break;
     }
   }
@@ -147,14 +152,14 @@ void main() {
 
     test('isTrashed is alias for trashed', () {
       expect(post.isTrashed, equals(post.trashed));
-      
+
       post.deletedAt = DateTime.now();
       expect(post.isTrashed, equals(post.trashed));
     });
 
     test('isNotTrashed returns opposite of trashed', () {
       expect(post.isNotTrashed, isTrue);
-      
+
       post.deletedAt = DateTime.now();
       expect(post.isNotTrashed, isFalse);
     });
@@ -162,21 +167,21 @@ void main() {
     test('deletedAt handles DateTime values', () {
       final now = DateTime.now();
       post.setField('deleted_at', now);
-      
+
       expect(post.deletedAt, equals(now));
     });
 
     test('deletedAt handles String values', () {
       const dateString = '2024-01-01T12:00:00.000Z';
       post.setField('deleted_at', dateString);
-      
+
       expect(post.deletedAt, isNotNull);
       expect(post.deletedAt, isA<DateTime>());
     });
 
     test('deletedAt handles null values', () {
       post.setField('deleted_at', null);
-      
+
       expect(post.deletedAt, isNull);
     });
   });
@@ -190,10 +195,10 @@ void main() {
       // Note: This won't actually save to DB in unit test
       // Just testing the logic
       expect(post.deletedAt, isNull);
-      
+
       // Manually set for testing
       post.deletedAt = DateTime.now();
-      
+
       expect(post.deletedAt, isNotNull);
       expect(post.trashed, isTrue);
     });
@@ -259,8 +264,7 @@ void main() {
     });
 
     test('handles not-deleted records on restore', () async {
-      final post = TestPost()
-        ..id = 1;
+      final post = TestPost()..id = 1;
 
       expect(post.trashed, isFalse);
 

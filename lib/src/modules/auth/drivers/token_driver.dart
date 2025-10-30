@@ -18,7 +18,7 @@ import 'auth_driver.dart';
 /// This driver handles simple token authentication with database storage.
 /// It generates secure random tokens and stores them in the database
 /// with optional expiry times.
-/// 
+///
 /// Follows SOLID principles with dependency injection and strategy pattern.
 class TokenDriver implements AuthDriver {
   /// Authentication repository (legacy - being phased out)
@@ -44,7 +44,9 @@ class TokenDriver implements AuthDriver {
 
   /// Creates a token driver with dependency injection
   TokenDriver({
-    required String providerKey, required AuthConfig config, AuthRepository? repository,
+    required String providerKey,
+    required AuthConfig config,
+    AuthRepository? repository,
     TokenService? tokenService,
     TokenGenerator? tokenGenerator,
     TokenInvalidationStrategyFactory? strategyFactory,
@@ -52,14 +54,16 @@ class TokenDriver implements AuthDriver {
   })  : _repository = repository ?? DatabaseAuthRepository(),
         _tokenService = tokenService ?? DatabaseTokenService(),
         _tokenGenerator = tokenGenerator ?? SecureTokenGenerator(),
-        _strategyFactory = strategyFactory ?? TokenInvalidationStrategyFactory(tokenService ?? DatabaseTokenService()),
+        _strategyFactory = strategyFactory ??
+            TokenInvalidationStrategyFactory(
+                tokenService ?? DatabaseTokenService(),),
         _tokenExpiry = tokenExpiry,
         _providerKey = providerKey,
         _config = config;
 
   /// Factory constructor with config and dependency injection
   factory TokenDriver.fromConfig(
-    AuthConfig config, 
+    AuthConfig config,
     String providerKey, {
     AuthRepository? repository,
     TokenService? tokenService,
@@ -78,7 +82,8 @@ class TokenDriver implements AuthDriver {
       repository: repository,
       tokenService: tokenServiceInstance,
       tokenGenerator: tokenGenerator,
-      strategyFactory: strategyFactory ?? TokenInvalidationStrategyFactory(tokenServiceInstance),
+      strategyFactory: strategyFactory ??
+          TokenInvalidationStrategyFactory(tokenServiceInstance),
       providerKey: providerKey,
       tokenExpiry: tokenExpiry,
       config: config,
@@ -163,7 +168,8 @@ class TokenDriver implements AuthDriver {
       'guard': _providerKey,
       'type': 'refresh',
       'created_at': DateTime.now().toIso8601String(),
-      'expires_at': DateTime.now().add(const Duration(days: 7)).toIso8601String(),
+      'expires_at':
+          DateTime.now().add(const Duration(days: 7)).toIso8601String(),
     };
 
     await _tokenService.storeToken(refreshTokenData);
@@ -247,7 +253,8 @@ class TokenDriver implements AuthDriver {
       'guard': _providerKey,
       'type': 'refresh',
       'created_at': DateTime.now().toIso8601String(),
-      'expires_at': DateTime.now().add(const Duration(days: 7)).toIso8601String(),
+      'expires_at':
+          DateTime.now().add(const Duration(days: 7)).toIso8601String(),
     };
 
     await _tokenService.storeToken(refreshTokenData);
@@ -268,15 +275,15 @@ class TokenDriver implements AuthDriver {
   Future<void> invalidateToken(String token) async {
     // Use single device logout strategy by default for stateful tokens
     final strategy = _strategyFactory.createStrategy(LogoutType.singleDevice);
-    
+
     // Get token info to create context
     final tokenRecord = await _tokenService.findToken(token);
     if (tokenRecord == null) {
       throw AuthException('Invalid token');
     }
-    
+
     final userId = tokenRecord['tokenable_id'];
-    
+
     // For Token driver, we don't have JWT expiry, so we pass null
     // This tells the strategy to handle it as a stateful token
     final context = TokenInvalidationContext.fromTokens(
@@ -286,7 +293,7 @@ class TokenDriver implements AuthDriver {
       // No tokenExpiry for stateful tokens - this signals the strategy
       // to use delete instead of blacklist
     );
-    
+
     await strategy.invalidateTokens(context);
   }
 
@@ -295,23 +302,24 @@ class TokenDriver implements AuthDriver {
   /// [token] The access token
   /// [logoutType] The type of logout strategy to use
   @override
-  Future<void> invalidateTokenWithStrategy(String token, LogoutType logoutType) async {
+  Future<void> invalidateTokenWithStrategy(
+      String token, LogoutType logoutType,) async {
     final strategy = _strategyFactory.createStrategy(logoutType);
-    
+
     // Get token info to create context
     final tokenRecord = await _tokenService.findToken(token);
     if (tokenRecord == null) {
       throw AuthException('Invalid token');
     }
-    
+
     final userId = tokenRecord['tokenable_id'];
-    
+
     final context = TokenInvalidationContext.fromTokens(
       accessToken: token,
       userId: userId,
       guard: _providerKey,
     );
-    
+
     await strategy.invalidateTokens(context);
   }
 
@@ -320,8 +328,6 @@ class TokenDriver implements AuthDriver {
   Future<void> logoutFromAllDevices(String token) async {
     await invalidateTokenWithStrategy(token, LogoutType.allDevices);
   }
-
-
 
   @override
   bool validateTokenFormat(String token) {
@@ -332,6 +338,4 @@ class TokenDriver implements AuthDriver {
   Future<Map<String, dynamic>> _getProviderConfig() async {
     return _config.getProvider(_providerKey);
   }
-
 }
-

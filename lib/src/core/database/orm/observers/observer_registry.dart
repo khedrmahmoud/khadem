@@ -6,10 +6,10 @@ import 'model_observer.dart';
 /// This class manages the registration and retrieval of observers for models.
 class ObserverRegistry {
   static final ObserverRegistry _instance = ObserverRegistry._internal();
-  
+
   /// Get the singleton instance of the registry.
   static ObserverRegistry get instance => _instance;
-  
+
   factory ObserverRegistry() => _instance;
   ObserverRegistry._internal();
 

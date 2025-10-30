@@ -1,6 +1,7 @@
-import 'package:test/test.dart';
 import 'dart:io';
+
 import 'package:khadem/src/core/session/session_storage.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('FileSessionStorage', () {
@@ -69,8 +70,12 @@ void main() {
       const sessionId2 = 'valid_session';
 
       final expiredData = {
-        'created_at': DateTime.now().subtract(const Duration(hours: 25)).toIso8601String(),
-        'last_activity': DateTime.now().subtract(const Duration(hours: 25)).toIso8601String(),
+        'created_at': DateTime.now()
+            .subtract(const Duration(hours: 25))
+            .toIso8601String(),
+        'last_activity': DateTime.now()
+            .subtract(const Duration(hours: 25))
+            .toIso8601String(),
         'data': {'expired': true},
       };
 

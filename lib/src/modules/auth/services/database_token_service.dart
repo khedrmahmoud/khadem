@@ -12,7 +12,8 @@ class DatabaseTokenService implements TokenService {
       : _repository = repository ?? DatabaseAuthRepository();
 
   @override
-  Future<Map<String, dynamic>> storeToken(Map<String, dynamic> tokenData) async {
+  Future<Map<String, dynamic>> storeToken(
+      Map<String, dynamic> tokenData,) async {
     await _repository.storeToken(tokenData);
     return tokenData;
   }
@@ -36,7 +37,8 @@ class DatabaseTokenService implements TokenService {
   }
 
   @override
-  Future<int> deleteUserTokens(dynamic userId, {String? guard, Map<String, dynamic>? filter}) async {
+  Future<int> deleteUserTokens(dynamic userId,
+      {String? guard, Map<String, dynamic>? filter,}) async {
     return _repository.deleteUserTokens(userId, guard: guard, filter: filter);
   }
 
@@ -46,7 +48,8 @@ class DatabaseTokenService implements TokenService {
   }
 
   @override
-  Future<Map<String, dynamic>> blacklistToken(Map<String, dynamic> tokenData) async {
+  Future<Map<String, dynamic>> blacklistToken(
+      Map<String, dynamic> tokenData,) async {
     await _repository.storeToken(tokenData);
     return tokenData;
   }
@@ -76,7 +79,7 @@ class DatabaseTokenService implements TokenService {
   Future<int> invalidateSession(String sessionId, [String? guard]) async {
     // Find all tokens for this session
     final sessionTokens = await findTokensBySession(sessionId, guard);
-    
+
     int invalidatedCount = 0;
     for (final tokenData in sessionTokens) {
       final token = tokenData['token'] as String?;
@@ -84,7 +87,7 @@ class DatabaseTokenService implements TokenService {
         invalidatedCount += await deleteToken(token);
       }
     }
-    
+
     return invalidatedCount;
   }
 }

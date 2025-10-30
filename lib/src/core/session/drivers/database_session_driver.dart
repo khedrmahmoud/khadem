@@ -14,24 +14,24 @@ class DatabaseSessionDriver implements SessionDriver {
 
   @override
   Future<void> write(String sessionId, Map<String, dynamic> data) async {
-    final payload = data.toString(); // Simplified - should use proper JSON encoding
-    final lastActivity = data['last_activity'] ?? DateTime.now().toIso8601String();
+    final payload =
+        data.toString(); // Simplified - should use proper JSON encoding
+    final lastActivity =
+        data['last_activity'] ?? DateTime.now().toIso8601String();
 
-    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(_tableName);
+    final queryBuilder =
+        _connection.queryBuilder<Map<String, dynamic>>(_tableName);
 
     // Check if session exists
-    final exists = await queryBuilder
-        .where('session_id', '=', sessionId)
-        .exists();
+    final exists =
+        await queryBuilder.where('session_id', '=', sessionId).exists();
 
     if (exists) {
       // Update existing session
-      await queryBuilder
-          .where('session_id', '=', sessionId)
-          .update({
-            'payload': payload,
-            'last_activity': lastActivity,
-          });
+      await queryBuilder.where('session_id', '=', sessionId).update({
+        'payload': payload,
+        'last_activity': lastActivity,
+      });
     } else {
       // Insert new session
       await queryBuilder.insert({
@@ -44,7 +44,8 @@ class DatabaseSessionDriver implements SessionDriver {
 
   @override
   Future<Map<String, dynamic>?> read(String sessionId) async {
-    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(_tableName);
+    final queryBuilder =
+        _connection.queryBuilder<Map<String, dynamic>>(_tableName);
 
     final result = await queryBuilder
         .select(['payload'])
@@ -79,17 +80,17 @@ class DatabaseSessionDriver implements SessionDriver {
 
   @override
   Future<void> delete(String sessionId) async {
-    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(_tableName);
+    final queryBuilder =
+        _connection.queryBuilder<Map<String, dynamic>>(_tableName);
 
-    await queryBuilder
-        .where('session_id', '=', sessionId)
-        .delete();
+    await queryBuilder.where('session_id', '=', sessionId).delete();
   }
 
   @override
   Future<void> cleanup(Duration maxAge) async {
     final cutoffTime = DateTime.now().subtract(maxAge);
-    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(_tableName);
+    final queryBuilder =
+        _connection.queryBuilder<Map<String, dynamic>>(_tableName);
 
     await queryBuilder
         .where('last_activity', '<', cutoffTime.toIso8601String())

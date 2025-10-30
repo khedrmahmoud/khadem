@@ -43,7 +43,7 @@ class PostmarkTransport implements TransportInterface {
 
       // Send request
       final url = Uri.parse('https://api.postmarkapp.com/email');
-      
+
       final response = await _client.post(
         url,
         headers: {
@@ -79,7 +79,7 @@ class PostmarkTransport implements TransportInterface {
     try {
       // Test by getting server details
       final url = Uri.parse('https://api.postmarkapp.com/server');
-      
+
       final response = await _client.get(
         url,
         headers: {
@@ -95,7 +95,8 @@ class PostmarkTransport implements TransportInterface {
   }
 
   /// Builds the Postmark API payload.
-  Future<Map<String, dynamic>> _buildPayload(MailMessageInterface message) async {
+  Future<Map<String, dynamic>> _buildPayload(
+      MailMessageInterface message,) async {
     final payload = <String, dynamic>{
       'From': message.from?.toString() ?? 'noreply@example.com',
       'To': message.to.map((addr) => addr.toString()).join(', '),
@@ -153,7 +154,7 @@ class PostmarkTransport implements TransportInterface {
     // Add attachments
     if (message.attachments.isNotEmpty) {
       final attachments = <Map<String, dynamic>>[];
-      
+
       for (final attachment in message.attachments) {
         List<int> data;
         if (attachment.isFilePath) {
@@ -176,7 +177,7 @@ class PostmarkTransport implements TransportInterface {
     // Add inline images
     if (message.embedded.isNotEmpty) {
       final inlineImages = <Map<String, dynamic>>[];
-      
+
       for (final embedded in message.embedded) {
         final file = File(embedded.path);
         final data = await file.readAsBytes();

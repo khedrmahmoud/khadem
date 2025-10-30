@@ -14,9 +14,8 @@ class MailServiceProvider implements ServiceProvider {
     // Register MailManager as singleton
     container.singleton<MailManager>((c) {
       final config = c.resolve<ConfigInterface>();
-      final queueManager = c.has<QueueManager>() 
-          ? c.resolve<QueueManager>() 
-          : null;
+      final queueManager =
+          c.has<QueueManager>() ? c.resolve<QueueManager>() : null;
 
       final mailManager = MailManager(config, queueManager: queueManager);
 
@@ -59,7 +58,8 @@ class MailServiceProvider implements ServiceProvider {
       final mailgun = MailgunConfig(
         domain: mailgunConfig['domain'] as String,
         apiKey: mailgunConfig['api_key'] as String,
-        endpoint: mailgunConfig['endpoint'] as String? ?? 'https://api.mailgun.net',
+        endpoint:
+            mailgunConfig['endpoint'] as String? ?? 'https://api.mailgun.net',
       );
       mailManager.registerTransport('mailgun', MailgunTransport(mailgun));
     }

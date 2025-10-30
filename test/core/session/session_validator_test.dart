@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:khadem/src/core/session/session_validator.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('SessionValidator', () {
@@ -11,7 +11,9 @@ void main() {
 
     test('should detect expired sessions', () {
       final expiredData = {
-        'last_activity': DateTime.now().subtract(const Duration(hours: 25)).toIso8601String(),
+        'last_activity': DateTime.now()
+            .subtract(const Duration(hours: 25))
+            .toIso8601String(),
         'data': {'key': 'value'},
       };
 
@@ -20,8 +22,10 @@ void main() {
         'data': {'key': 'value'},
       };
 
-      expect(validator.isExpired(expiredData, const Duration(hours: 24)), isTrue);
-      expect(validator.isExpired(validData, const Duration(hours: 24)), isFalse);
+      expect(
+          validator.isExpired(expiredData, const Duration(hours: 24)), isTrue,);
+      expect(
+          validator.isExpired(validData, const Duration(hours: 24)), isFalse,);
     });
 
     test('should handle missing last_activity field', () {
@@ -29,7 +33,9 @@ void main() {
         'data': {'key': 'value'},
       };
 
-      expect(validator.isExpired(dataWithoutActivity, const Duration(hours: 24)), isFalse);
+      expect(
+          validator.isExpired(dataWithoutActivity, const Duration(hours: 24)),
+          isFalse,);
     });
 
     test('should handle invalid last_activity format', () {
@@ -38,7 +44,10 @@ void main() {
         'data': {'key': 'value'},
       };
 
-      expect(validator.isExpired(dataWithInvalidActivity, const Duration(hours: 24)), isFalse);
+      expect(
+          validator.isExpired(
+              dataWithInvalidActivity, const Duration(hours: 24),),
+          isFalse,);
     });
 
     test('should update last accessed timestamp', () {
@@ -66,7 +75,8 @@ void main() {
 
       // Verify timestamps are valid
       expect(DateTime.tryParse(sessionData['created_at'] as String), isNotNull);
-      expect(DateTime.tryParse(sessionData['last_activity'] as String), isNotNull);
+      expect(
+          DateTime.tryParse(sessionData['last_activity'] as String), isNotNull,);
     });
 
     test('should initialize session data with empty initial data', () {

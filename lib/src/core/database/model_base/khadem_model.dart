@@ -1,7 +1,7 @@
 import 'package:khadem/khadem.dart' show QueryBuilderInterface, Khadem;
 
-import '../orm/observers/observer_registry.dart';
 import '../orm/observers/model_observer.dart';
+import '../orm/observers/observer_registry.dart';
 import '../orm/relation_definition.dart';
 import '../orm/relation_type.dart';
 import 'database_model.dart';
@@ -52,11 +52,11 @@ abstract class KhademModel<T> {
   List<String> get fillable => [];
 
   /// Attributes that are NOT mass assignable
-  /// 
+  ///
   /// Define which attributes should be protected from mass assignment.
   /// When both `fillable` and `guarded` are empty, all attributes are fillable.
   /// When `fillable` is specified, `guarded` is ignored.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// @override
@@ -65,11 +65,11 @@ abstract class KhademModel<T> {
   List<String> get guarded => [];
 
   /// Attributes that should never be included in JSON
-  /// 
+  ///
   /// These attributes are completely hidden from serialization,
   /// even if explicitly requested. Use for sensitive data like passwords,
   /// API keys, etc.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// @override
@@ -85,16 +85,16 @@ abstract class KhademModel<T> {
 
   /// Type casting for fields
   /// Type casting for attributes
-  /// 
+  ///
   /// Supports both legacy Type-based casts and new AttributeCaster instances:
-  /// 
+  ///
   /// ```dart
   /// // Legacy (still supported):
   /// Map<String, dynamic> get casts => {
   ///   'created_at': DateTime,
   ///   'count': int,
   /// };
-  /// 
+  ///
   /// // New advanced casters:
   /// Map<String, dynamic> get casts => {
   ///   'settings': JsonCast(),
@@ -110,10 +110,10 @@ abstract class KhademModel<T> {
   Map<String, dynamic> get computed => {};
 
   /// Default relations to eager load on all queries
-  /// 
+  ///
   /// Define relations that should always be loaded when querying this model.
   /// These will be automatically applied to get(), first(), findById(), and paginate().
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// @override
@@ -121,7 +121,7 @@ abstract class KhademModel<T> {
   /// // or with nested relations:
   /// List<dynamic> get defaultRelations => ['posts.comments', 'profile', 'roles'];
   /// ```
-  /// 
+  ///
   /// You can override this behavior in queries:
   /// - `query.without(['posts']).get()` - Exclude specific relations
   /// - `query.withOnly(['messages']).get()` - Replace default relations
@@ -129,16 +129,16 @@ abstract class KhademModel<T> {
   List<dynamic> get defaultRelations => [];
 
   /// Default relation counts to automatically load and include in JSON
-  /// 
+  ///
   /// Define relation counts that should always be loaded and included when
   /// serializing this model to JSON. Count attributes will be named as
   /// `{relation}_count` (e.g., `posts_count`, `comments_count`).
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// @override
   /// List<String> get withCounts => ['posts', 'comments', 'likes'];
-  /// 
+  ///
   /// // When serialized, the JSON will include:
   /// // {
   /// //   "id": 1,
@@ -148,7 +148,7 @@ abstract class KhademModel<T> {
   /// //   "likes_count": 100
   /// // }
   /// ```
-  /// 
+  ///
   /// These counts are automatically included in `toJson()` output.
   /// You can also use `query.withCount(['extra'])` for one-off queries.
   List<String> get withCounts => [];
@@ -164,7 +164,7 @@ abstract class KhademModel<T> {
   Future<Map<String, dynamic>>? _computedAttributesAsyncCache;
 
   /// Clear computed property cache
-  /// 
+  ///
   /// Call this when model data changes to ensure computed properties
   /// are re-evaluated on next access.
   void _clearComputedCache() {
@@ -205,18 +205,18 @@ abstract class KhademModel<T> {
       ...relation.toJson(),
       ..._getComputedAttributes(),
     };
-    
+
     // Add relation counts to JSON output
     _addCountsToJson(result);
-    
+
     return result;
   }
 
   /// Async version of toJson() that supports async computed properties
-  /// 
+  ///
   /// Use this when your model has async computed properties in `appends`.
   /// This will properly await async computed values.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final user = await User.query().first();
@@ -228,10 +228,10 @@ abstract class KhademModel<T> {
       ...await json.toJsonAsync(),
       ...await relation.toJsonAsync(),
     }..addAll(await _getComputedAttributesAsync());
-    
+
     // Add relation counts to JSON output
     _addCountsToJson(result);
-    
+
     return result;
   }
 
@@ -243,10 +243,10 @@ abstract class KhademModel<T> {
   }
 
   /// Mass assign attributes respecting fillable/guarded rules
-  /// 
+  ///
   /// Fills the model with data from a map, respecting the fillable and guarded
   /// attribute lists. Only fillable attributes will be assigned.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final user = User()
@@ -263,7 +263,7 @@ abstract class KhademModel<T> {
   }
 
   /// Force fill attributes, bypassing fillable/guarded protection
-  /// 
+  ///
   /// Use with caution - this bypasses security restrictions.
   /// Useful for internal operations where you need to set guarded attributes.
   T forceFill(Map<String, dynamic> attributes) {
@@ -279,6 +279,7 @@ abstract class KhademModel<T> {
     _clearComputedCache(); // Clear cache when model data changes
     return db.refresh();
   }
+
   Future<T?> findById(dynamic id) => db.findById(id);
   Future<List<T>> findWhere(String column, String operator, dynamic value) =>
       db.findWhere(column, operator, value);
@@ -319,7 +320,8 @@ abstract class KhademModel<T> {
 
   /// Get a relation, loading it if it's in defaultRelations and not loaded yet
   Future<dynamic> getRelationAsync<T>(String relationName) async {
-    if (!relation.isLoaded(relationName) && defaultRelations.contains(relationName)) {
+    if (!relation.isLoaded(relationName) &&
+        defaultRelations.contains(relationName)) {
       await loadRelation(relationName);
     }
     return relation.get(relationName) as T;
@@ -468,7 +470,7 @@ abstract class KhademModel<T> {
   }
 
   /// Get a computed attribute value (synchronous)
-  /// 
+  ///
   /// Returns the computed value if it's synchronous.
   /// For async computed properties, use `getComputedAttributeAsync()` instead.
   /// If the computed property is async, this will return null.
@@ -510,16 +512,16 @@ abstract class KhademModel<T> {
   }
 
   /// Get a computed attribute value (async-safe)
-  /// 
+  ///
   /// This method handles both synchronous and asynchronous computed properties.
   /// Use this when you need to support async computed properties.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final displayName = await model.getComputedAttributeAsync('display_name');
   /// ```
   Future<dynamic> getComputedAttributeAsync(String attribute) async {
-    return  _getComputedAttributeAsync(attribute);
+    return _getComputedAttributeAsync(attribute);
   }
 
   Future<dynamic> _getComputedAttributeAsync(String attribute) async {
@@ -563,12 +565,12 @@ abstract class KhademModel<T> {
     if (_computedAttributesCache != null) {
       return _computedAttributesCache!;
     }
-    
+
     final result = <String, dynamic>{};
     for (final key in appends) {
       result[key] = getComputedAttribute(key);
     }
-    
+
     _computedAttributesCache = result;
     return result;
   }
@@ -578,25 +580,25 @@ abstract class KhademModel<T> {
     if (_computedAttributesAsyncCache != null) {
       return _computedAttributesAsyncCache!;
     }
-    
+
     final result = <String, dynamic>{};
     for (final key in appends) {
       result[key] = await getComputedAttributeAsync(key);
     }
-    
+
     _computedAttributesAsyncCache = Future.value(result);
     return result;
   }
 
   /// Add relation counts to JSON output
-  /// 
+  ///
   /// This method checks for count attributes stored in the relation model
   /// and adds them to the JSON output. Count attributes are named as
   /// `{relation}_count` (e.g., `posts_count`).
   void _addCountsToJson(Map<String, dynamic> result) {
     // Get all count attributes from the relation model
     final relationData = relation.getAllLoaded();
-    
+
     for (final entry in relationData.entries) {
       final key = entry.key;
       // Check if this is a count attribute (ends with _count)

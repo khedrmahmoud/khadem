@@ -65,17 +65,23 @@ class Mail {
   static MailerInterface html(String content) => manager.html(content);
 
   /// Renders a view template for the email body.
-  static Future<MailerInterface> view(String viewName,
-          [Map<String, dynamic>? data,]) =>
+  static Future<MailerInterface> view(
+    String viewName, [
+    Map<String, dynamic>? data,
+  ]) =>
       manager.view(viewName, data);
 
   /// Attaches a file.
-  static MailerInterface attach(String path, {String? name, String? mimeType}) =>
+  static MailerInterface attach(String path,
+          {String? name, String? mimeType,}) =>
       manager.attach(path, name: name, mimeType: mimeType);
 
   /// Attaches raw data.
-  static MailerInterface attachData(List<int> data, String name,
-          {String? mimeType,}) =>
+  static MailerInterface attachData(
+    List<int> data,
+    String name, {
+    String? mimeType,
+  }) =>
       manager.attachData(data, name, mimeType: mimeType);
 
   /// Embeds an inline image.
@@ -90,8 +96,7 @@ class Mail {
   static MailerInterface priority(int priority) => manager.priority(priority);
 
   /// Sends a mailable.
-  static Future<bool> send(Mailable mailable) =>
-      manager.sendMailable(mailable);
+  static Future<bool> send(Mailable mailable) => manager.sendMailable(mailable);
 
   /// Queues a mailable.
   static Future<void> queue(Mailable mailable, [Duration? delay]) =>

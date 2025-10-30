@@ -1,6 +1,6 @@
+import 'package:khadem/src/contracts/http/middleware_contract.dart';
 import 'package:khadem/src/modules/auth/middlewares/auth_middleware.dart';
 import 'package:khadem/src/modules/auth/middlewares/web_auth_middleware.dart';
-import 'package:khadem/src/contracts/http/middleware_contract.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -33,7 +33,8 @@ void main() {
     });
 
     test('should create middleware with permissions', () {
-      final middleware = AuthMiddleware.bearer().withPermissions(['user.create']);
+      final middleware =
+          AuthMiddleware.bearer().withPermissions(['user.create']);
       expect(middleware, isNotNull);
       expect(middleware.name, equals('auth-bearer'));
     });

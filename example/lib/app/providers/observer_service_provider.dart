@@ -11,19 +11,19 @@ class ObserverServiceProvider extends ServiceProvider {
   void register(ContainerInterface container) {
     // Register observers for models
     print('📋 Registering Model Observers...');
-    
+
     // Register UserObserver for User model
     KhademModel.observe<User>(UserObserver());
     print('   ✓ UserObserver registered');
-    
+
     // You can register multiple observers for the same model
     // KhademModel.observe<User>(UserAuditObserver());
     // KhademModel.observe<User>(UserCacheObserver());
-    
+
     // Register observers for other models
     // KhademModel.observe<Post>(PostObserver());
     // KhademModel.observe<Order>(OrderObserver());
-    
+
     print('✅ Model Observers registered successfully!');
   }
 

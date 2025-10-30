@@ -7,7 +7,8 @@ import 'package:test/test.dart';
 // Simple mock connection for testing SQL generation only
 class _MockConnection implements ConnectionInterface {
   @override
-  Future<DatabaseResponse> execute(String query, [List<dynamic> bindings = const []]) async {
+  Future<DatabaseResponse> execute(String query,
+      [List<dynamic> bindings = const [],]) async {
     return DatabaseResponse(data: [], affectedRows: 0);
   }
 
@@ -45,7 +46,7 @@ class _MockConnection implements ConnectionInterface {
 }
 
 /// Comprehensive tests for Phase 7 - Advanced Query Builder Features
-/// 
+///
 /// Tests cover:
 /// - OR WHERE variants (15+ methods)
 /// - whereHas/whereDoesntHave for relationship queries
@@ -65,8 +66,7 @@ void main() {
     test('orWhereIn adds OR IN clause', () {
       final sql = query
           .where('role', '=', 'admin')
-          .orWhereIn('status', ['active', 'pending'])
-          .toSql();
+          .orWhereIn('status', ['active', 'pending']).toSql();
 
       expect(sql, contains('`role` = ?'));
       expect(sql, contains('OR `status` IN (?, ?)'));
@@ -82,18 +82,15 @@ void main() {
     test('orWhereNotIn adds OR NOT IN clause', () {
       final sql = query
           .where('active', '=', true)
-          .orWhereNotIn('id', [5, 10, 15])
-          .toSql();
+          .orWhereNotIn('id', [5, 10, 15]).toSql();
 
       expect(sql, contains('`active` = ?'));
       expect(sql, contains('OR `id` NOT IN (?, ?, ?)'));
     });
 
     test('orWhereNull adds OR IS NULL clause', () {
-      final sql = query
-          .where('active', '=', true)
-          .orWhereNull('deleted_at')
-          .toSql();
+      final sql =
+          query.where('active', '=', true).orWhereNull('deleted_at').toSql();
 
       expect(sql, contains('`active` = ?'));
       expect(sql, contains('OR `deleted_at` IS NULL'));
@@ -110,10 +107,8 @@ void main() {
     });
 
     test('orWhereBetween adds OR BETWEEN clause', () {
-      final sql = query
-          .where('age', '<', 18)
-          .orWhereBetween('age', 65, 100)
-          .toSql();
+      final sql =
+          query.where('age', '<', 18).orWhereBetween('age', 65, 100).toSql();
 
       expect(sql, contains('`age` < ?'));
       expect(sql, contains('OR `age` BETWEEN ? AND ?'));
@@ -180,20 +175,16 @@ void main() {
     });
 
     test('orWhereMonth adds OR MONTH clause', () {
-      final sql = query
-          .whereMonth('birthday', 1)
-          .orWhereMonth('birthday', 12)
-          .toSql();
+      final sql =
+          query.whereMonth('birthday', 1).orWhereMonth('birthday', 12).toSql();
 
       expect(sql, contains('MONTH(`birthday`) = ?'));
       expect(sql, contains('OR MONTH(`birthday`) = ?'));
     });
 
     test('orWhereDay adds OR DAY clause', () {
-      final sql = query
-          .whereDay('created_at', 1)
-          .orWhereDay('created_at', 15)
-          .toSql();
+      final sql =
+          query.whereDay('created_at', 1).orWhereDay('created_at', 15).toSql();
 
       expect(sql, contains('DAY(`created_at`) = ?'));
       expect(sql, contains('OR DAY(`created_at`) = ?'));
@@ -261,12 +252,9 @@ void main() {
     });
 
     test('orWhereHas adds OR relationship check', () {
-      final sql = query
-          .where('active', '=', true)
-          .orWhereHas('posts', (q) {
-            q.where('featured', '=', true);
-          })
-          .toSql();
+      final sql = query.where('active', '=', true).orWhereHas('posts', (q) {
+        q.where('featured', '=', true);
+      }).toSql();
 
       expect(sql, contains('`active` = ?'));
       expect(sql, contains('OR'));
@@ -320,11 +308,17 @@ void main() {
     });
 
     test('complex whereHas with multiple constraints', () {
-      final sql = query.whereHas('posts', (q) {
-        q.where('published', '=', true)
-            .where('views', '>', 1000)
-            .whereNotNull('featured_image');
-      }, '>=', 3,).toSql();
+      final sql = query.whereHas(
+        'posts',
+        (q) {
+          q
+              .where('published', '=', true)
+              .where('views', '>', 1000)
+              .whereNotNull('featured_image');
+        },
+        '>=',
+        3,
+      ).toSql();
 
       expect(sql, contains('SELECT COUNT(*)'));
       expect(sql, contains('`published` = ?'));
@@ -344,9 +338,8 @@ void main() {
     });
 
     test('whereNotBetweenColumns adds NOT BETWEEN columns clause', () {
-      final sql = query
-          .whereNotBetweenColumns('age', 'min_age', 'max_age')
-          .toSql();
+      final sql =
+          query.whereNotBetweenColumns('age', 'min_age', 'max_age').toSql();
 
       expect(sql, contains('`age` NOT BETWEEN `min_age` AND `max_age`'));
     });
@@ -386,7 +379,8 @@ void main() {
     test('date comparisons can be combined', () {
       final sql = query
           .wherePast('expires_at')
-          .whereFuture('renew_at') // Use whereFuture and chain with orWhere if needed
+          .whereFuture(
+              'renew_at',) // Use whereFuture and chain with orWhere if needed
           .toSql();
 
       expect(sql, contains('`expires_at` < NOW()'));
@@ -396,14 +390,14 @@ void main() {
 
   group('Subquery Methods', () {
     test('fromSub uses subquery as FROM clause', () {
-      final subquery = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
-          .where('active', '=', true)
-          .select(['id', 'name']);
+      final subquery =
+          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
+              .where('active', '=', true)
+              .select(['id', 'name']);
 
       final sql = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'temp')
           .fromSub(subquery, 'active_users')
-          .select(['name'])
-          .toSql();
+          .select(['name']).toSql();
 
       expect(sql, contains('FROM ('));
       expect(sql, contains('SELECT id, name FROM `users`'));
@@ -414,16 +408,17 @@ void main() {
     test('fromRaw uses raw SQL as FROM clause', () {
       final sql = query
           .fromRaw('(SELECT * FROM users WHERE age > 18) AS adults')
-          .select(['name'])
-          .toSql();
+          .select(['name']).toSql();
 
-      expect(sql, contains('FROM (SELECT * FROM users WHERE age > 18) AS adults'));
+      expect(
+          sql, contains('FROM (SELECT * FROM users WHERE age > 18) AS adults'),);
     });
 
     test('selectSub adds subquery to SELECT clause', () {
-      final subquery = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'posts')
-          .where('posts.user_id', '=', 'users.id')
-          .select(['COUNT(*)']);
+      final subquery =
+          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'posts')
+              .where('posts.user_id', '=', 'users.id')
+              .select(['COUNT(*)']);
 
       final sql = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
           .select(['id', 'name'])
@@ -435,11 +430,13 @@ void main() {
     });
 
     test('multiple selectSub clauses', () {
-      final postsCount = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'posts')
-          .select(['COUNT(*)']);
-      
-      final commentsCount = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'comments')
-          .select(['COUNT(*)']);
+      final postsCount =
+          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'posts')
+              .select(['COUNT(*)']);
+
+      final commentsCount =
+          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'comments')
+              .select(['COUNT(*)']);
 
       final sql = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
           .select(['id'])
@@ -448,46 +445,36 @@ void main() {
           .toSql();
 
       expect(sql, contains('(SELECT COUNT(*) FROM `posts`) AS `posts_count`'));
-      expect(sql, contains('(SELECT COUNT(*) FROM `comments`) AS `comments_count`'));
+      expect(sql,
+          contains('(SELECT COUNT(*) FROM `comments`) AS `comments_count`'),);
     });
   });
 
   group('Logical Grouping', () {
     test('whereNested groups conditions in parentheses', () {
-      final sql = query
-          .where('active', '=', true)
-          .whereNested((q) {
-            q.where('role', '=', 'admin').orWhere('role', '=', 'editor');
-          })
-          .toSql();
+      final sql = query.where('active', '=', true).whereNested((q) {
+        q.where('role', '=', 'admin').orWhere('role', '=', 'editor');
+      }).toSql();
 
       expect(sql, contains('`active` = ?'));
       expect(sql, contains('(`role` = ? OR `role` = ?)'));
     });
 
     test('orWhereNested adds OR grouped conditions', () {
-      final sql = query
-          .where('status', '=', 'published')
-          .orWhereNested((q) {
-            q.where('draft', '=', true).where('owner_id', '=', 1);
-          })
-          .toSql();
+      final sql = query.where('status', '=', 'published').orWhereNested((q) {
+        q.where('draft', '=', true).where('owner_id', '=', 1);
+      }).toSql();
 
       expect(sql, contains('`status` = ?'));
       expect(sql, contains('OR (`draft` = ? AND `owner_id` = ?)'));
     });
 
     test('nested groups can be deeply nested', () {
-      final sql = query
-          .where('active', '=', true)
-          .whereNested((q) {
-            q.where('role', '=', 'admin')
-                .orWhereNested((q2) {
-                  q2.where('role', '=', 'editor')
-                      .where('verified', '=', true);
-                });
-          })
-          .toSql();
+      final sql = query.where('active', '=', true).whereNested((q) {
+        q.where('role', '=', 'admin').orWhereNested((q2) {
+          q2.where('role', '=', 'editor').where('verified', '=', true);
+        });
+      }).toSql();
 
       expect(sql, contains('`active` = ?'));
       expect(sql, contains('(`role` = ?'));
@@ -505,16 +492,11 @@ void main() {
 
   group('Complex Combinations', () {
     test('OR variants + whereHas + nested conditions', () {
-      final sql = query
-          .where('active', '=', true)
-          .orWhereNested((q) {
-            q.where('role', '=', 'admin')
-                .whereHas('permissions', (pq) {
-                  pq.where('name', '=', 'manage_users');
-                });
-          })
-          .orWhereIn('id', [1, 2, 3])
-          .toSql();
+      final sql = query.where('active', '=', true).orWhereNested((q) {
+        q.where('role', '=', 'admin').whereHas('permissions', (pq) {
+          pq.where('name', '=', 'manage_users');
+        });
+      }).orWhereIn('id', [1, 2, 3]).toSql();
 
       expect(sql, contains('`active` = ?'));
       expect(sql, contains('OR (`role` = ?'));
@@ -523,15 +505,11 @@ void main() {
     });
 
     test('date helpers + OR variants + subqueries', () {
-      final sql = query
-          .wherePast('trial_ends_at')
-          .orWhereNested((q) {
-            q.whereFuture('premium_until')
-                .whereHas('subscriptions', (sq) {
-                  sq.where('plan', '=', 'pro');
-                });
-          })
-          .toSql();
+      final sql = query.wherePast('trial_ends_at').orWhereNested((q) {
+        q.whereFuture('premium_until').whereHas('subscriptions', (sq) {
+          sq.where('plan', '=', 'pro');
+        });
+      }).toSql();
 
       expect(sql, contains('`trial_ends_at` < NOW()'));
       expect(sql, contains('OR (`premium_until` > NOW()'));
@@ -543,16 +521,13 @@ void main() {
           .select(['id', 'name', 'email'])
           .distinct()
           .whereNested((q) {
-            q.where('verified', '=', true)
-                .orWhereHas('verifications', (vq) {
-                  vq.where('method', '=', 'email')
-                      .whereFuture('expires_at');
-                });
+            q.where('verified', '=', true).orWhereHas('verifications', (vq) {
+              vq.where('method', '=', 'email').whereFuture('expires_at');
+            });
           })
           .whereBetweenColumns('salary', 'min_salary', 'max_salary')
           .orWhereNested((q) {
-            q.whereToday('created_at')
-                .whereDoesntHave('violations');
+            q.whereToday('created_at').whereDoesntHave('violations');
           })
           .orWhereIn('role', ['admin', 'moderator'])
           .orderBy('created_at', direction: 'DESC')
@@ -573,12 +548,14 @@ void main() {
 
   group('Clone Preserves New Fields', () {
     test('clone preserves fromSubquery and selectSubqueries', () {
-      final subquery = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'active_users')
-          .where('active', '=', true);
+      final subquery =
+          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'active_users')
+              .where('active', '=', true);
 
-      final original = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
-          .fromSub(subquery, 'au')
-          .selectSub(subquery, 'count');
+      final original =
+          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
+              .fromSub(subquery, 'au')
+              .selectSub(subquery, 'count');
 
       final cloned = original.clone();
       final sql1 = original.toSql();
@@ -592,11 +569,9 @@ void main() {
     test('clone with all new features', () {
       final original = query
           .whereHas('posts')
-          .orWhereIn('status', ['active'])
-          .whereNested((q) {
-            q.wherePast('expires_at');
-          })
-          .whereBetweenColumns('a', 'b', 'c');
+          .orWhereIn('status', ['active']).whereNested((q) {
+        q.wherePast('expires_at');
+      }).whereBetweenColumns('a', 'b', 'c');
 
       final cloned = original.clone();
       final sql1 = original.toSql();
@@ -608,31 +583,23 @@ void main() {
 
   group('Edge Cases and Error Handling', () {
     test('orWhere methods as first clause fallback to regular WHERE', () {
-      final sql = query
-          .orWhereIn('id', [1, 2])
-          .toSql();
+      final sql = query.orWhereIn('id', [1, 2]).toSql();
 
       // When first clause is OR, it should behave like normal WHERE
       expect(sql, contains('WHERE `id` IN (?, ?)'));
       expect(sql, isNot(contains('OR `id`')));
     });
-    
+
     test('orWhere methods work correctly after a WHERE clause', () {
-      final sql = query
-          .whereIn('id', [1, 2])
-          .orWhereNull('deleted_at')
-          .toSql();
+      final sql = query.whereIn('id', [1, 2]).orWhereNull('deleted_at').toSql();
 
       expect(sql, contains('WHERE `id` IN (?, ?) OR `deleted_at` IS NULL'));
     });
 
     test('empty whereNested does not add clause', () {
-      final sql = query
-          .where('active', '=', true)
-          .whereNested((q) {
-            // Empty callback
-          })
-          .toSql();
+      final sql = query.where('active', '=', true).whereNested((q) {
+        // Empty callback
+      }).toSql();
 
       expect(sql, equals('SELECT * FROM `users` WHERE `active` = ?'));
     });

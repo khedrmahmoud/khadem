@@ -16,15 +16,19 @@ class TestModel extends KhademModel<TestModel> {
   @override
   dynamic getField(String key) {
     switch (key) {
-      case 'name': return name;
-      default: return null;
+      case 'name':
+        return name;
+      default:
+        return null;
     }
   }
 
   @override
   void setField(String key, dynamic value) {
     switch (key) {
-      case 'name': name = value; break;
+      case 'name':
+        name = value;
+        break;
     }
   }
 
@@ -99,7 +103,8 @@ void main() {
 
       expect(json1['computed_name'], 'Computed: Test');
       expect(json2['computed_name'], 'Computed: Test');
-      expect(TestModel.getEvaluationCount(), 1); // Should only be evaluated once total
+      expect(TestModel.getEvaluationCount(),
+          1,); // Should only be evaluated once total
     });
   });
 }

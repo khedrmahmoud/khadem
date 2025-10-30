@@ -81,7 +81,6 @@ mixin Timestamps<T> on KhademModel<T> {
   DateTime? _createdAt;
   DateTime? _updatedAt;
 
-
   /// Get the created_at value
   DateTime? get createdAt {
     if (!timestamps) return null;

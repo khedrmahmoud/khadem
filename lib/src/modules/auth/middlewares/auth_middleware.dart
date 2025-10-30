@@ -484,5 +484,3 @@ enum AuthType {
   apiKey,
   custom,
 }
-
-

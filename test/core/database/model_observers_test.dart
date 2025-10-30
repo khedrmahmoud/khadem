@@ -1,7 +1,7 @@
-import 'package:test/test.dart';
+import 'package:khadem/src/core/database/model_base/khadem_model.dart';
 import 'package:khadem/src/core/database/orm/observers/model_observer.dart';
 import 'package:khadem/src/core/database/orm/observers/observer_registry.dart';
-import 'package:khadem/src/core/database/model_base/khadem_model.dart';
+import 'package:test/test.dart';
 
 // Test models
 class TestUser extends KhademModel<TestUser> {
@@ -547,8 +547,10 @@ void main() {
       observer.creating(user);
       observer.created(user);
 
-      expect(observer.events.indexOf('creating'),
-          lessThan(observer.events.indexOf('created')),);
+      expect(
+        observer.events.indexOf('creating'),
+        lessThan(observer.events.indexOf('created')),
+      );
     });
 
     test('updating fires before updated', () {
@@ -560,8 +562,10 @@ void main() {
       observer.updating(user);
       observer.updated(user);
 
-      expect(observer.events.indexOf('updating'),
-          lessThan(observer.events.indexOf('updated')),);
+      expect(
+        observer.events.indexOf('updating'),
+        lessThan(observer.events.indexOf('updated')),
+      );
     });
 
     test('saving fires for both creates and updates', () {
@@ -597,8 +601,10 @@ void main() {
       observer.deleting(user);
       observer.deleted(user);
 
-      expect(observer.events.indexOf('deleting'),
-          lessThan(observer.events.indexOf('deleted')),);
+      expect(
+        observer.events.indexOf('deleting'),
+        lessThan(observer.events.indexOf('deleted')),
+      );
     });
   });
 

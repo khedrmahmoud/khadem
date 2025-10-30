@@ -26,7 +26,8 @@ class PasswordResetMail extends Mailable {
   bool get shouldQueue => true; // Queue password resets for reliability
 
   @override
-  Duration? get queueDelay => Duration(seconds: 5); // Small delay to prevent spam
+  Duration? get queueDelay =>
+      const Duration(seconds: 5); // Small delay to prevent spam
 
   @override
   Future<void> build(MailerInterface mailer) async {

@@ -29,7 +29,8 @@ class DatabaseAuthenticatable implements Authenticatable {
     Map<String, dynamic> providerConfig,
   ) {
     final primaryKey = providerConfig['primary_key'] as String? ?? 'id';
-    final passwordField = providerConfig['password_field'] as String? ?? 'password';
+    final passwordField =
+        providerConfig['password_field'] as String? ?? 'password';
 
     return DatabaseAuthenticatable(
       userData,

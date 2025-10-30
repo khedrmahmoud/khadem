@@ -79,9 +79,10 @@ class EventModel<T> {
   }
 
   Future<bool> beforeDelete() async {
-    final allowed = _callCancelableObservers((observer) => observer.deleting(model));
+    final allowed =
+        _callCancelableObservers((observer) => observer.deleting(model));
     if (!allowed) return false;
-    
+
     await fireEvent(ModelEvents.deleting);
     return true;
   }
@@ -102,7 +103,8 @@ class EventModel<T> {
 
   /// Observer hook for force deleting soft-deleted models
   bool beforeForceDelete() {
-    return _callCancelableObservers((observer) => observer.forceDeleting(model));
+    return _callCancelableObservers(
+        (observer) => observer.forceDeleting(model),);
   }
 
   void afterForceDelete() {

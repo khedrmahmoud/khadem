@@ -19,48 +19,48 @@ class TestUser extends KhademModel<TestUser> {
 
   @override
   Map<String, dynamic> get computed => {
-    // Synchronous computed property
-    'full_name': () => '$firstName $lastName',
-    
-    // Async computed property with Future
-    'greeting': () async {
-      await Future.delayed(const Duration(milliseconds: 10));
-      return 'Hello, $firstName!';
-    },
-    
-    // Async computed property using relations
-    'post_summary': () async {
-      // Only try to load if not already loaded
-      if (!isRelationLoaded('posts')) {
-        return 'No posts loaded';
-      }
-      final posts = getRelation('posts') as List<TestPost>? ?? [];
-      return '${posts.length} posts';
-    },
-    
-    // Mixed - can return sync or async based on condition
-    'dynamic_value': () {
-      if (postCount != null && postCount! > 0) {
-        return postCount; // Sync
-      }
-      // Async
-      return Future.delayed(
-        const Duration(milliseconds: 5),
-        () => 0,
-      );
-    },
-  };
+        // Synchronous computed property
+        'full_name': () => '$firstName $lastName',
+
+        // Async computed property with Future
+        'greeting': () async {
+          await Future.delayed(const Duration(milliseconds: 10));
+          return 'Hello, $firstName!';
+        },
+
+        // Async computed property using relations
+        'post_summary': () async {
+          // Only try to load if not already loaded
+          if (!isRelationLoaded('posts')) {
+            return 'No posts loaded';
+          }
+          final posts = getRelation('posts') as List<TestPost>? ?? [];
+          return '${posts.length} posts';
+        },
+
+        // Mixed - can return sync or async based on condition
+        'dynamic_value': () {
+          if (postCount != null && postCount! > 0) {
+            return postCount; // Sync
+          }
+          // Async
+          return Future.delayed(
+            const Duration(milliseconds: 5),
+            () => 0,
+          );
+        },
+      };
 
   @override
   Map<String, RelationDefinition> get relations => {
-    'posts': RelationDefinition<TestPost>(
-      type: RelationType.hasMany,
-      relatedTable: 'posts',
-      foreignKey: 'user_id',
-      localKey: 'id',
-      factory: () => TestPost(),
-    ),
-  };
+        'posts': RelationDefinition<TestPost>(
+          type: RelationType.hasMany,
+          relatedTable: 'posts',
+          foreignKey: 'user_id',
+          localKey: 'id',
+          factory: () => TestPost(),
+        ),
+      };
 
   @override
   TestUser newFactory(Map<String, dynamic> data) {
@@ -70,21 +70,34 @@ class TestUser extends KhademModel<TestUser> {
   @override
   dynamic getField(String key) {
     switch (key) {
-      case 'id': return id;
-      case 'first_name': return firstName;
-      case 'last_name': return lastName;
-      case 'post_count': return postCount;
-      default: return null;
+      case 'id':
+        return id;
+      case 'first_name':
+        return firstName;
+      case 'last_name':
+        return lastName;
+      case 'post_count':
+        return postCount;
+      default:
+        return null;
     }
   }
 
   @override
   void setField(String key, dynamic value) {
     switch (key) {
-      case 'id': id = value; break;
-      case 'first_name': firstName = value; break;
-      case 'last_name': lastName = value; break;
-      case 'post_count': postCount = value; break;
+      case 'id':
+        id = value;
+        break;
+      case 'first_name':
+        firstName = value;
+        break;
+      case 'last_name':
+        lastName = value;
+        break;
+      case 'post_count':
+        postCount = value;
+        break;
     }
   }
 }
@@ -103,19 +116,29 @@ class TestPost extends KhademModel<TestPost> {
   @override
   dynamic getField(String key) {
     switch (key) {
-      case 'id': return id;
-      case 'user_id': return userId;
-      case 'title': return title;
-      default: return null;
+      case 'id':
+        return id;
+      case 'user_id':
+        return userId;
+      case 'title':
+        return title;
+      default:
+        return null;
     }
   }
 
   @override
   void setField(String key, dynamic value) {
     switch (key) {
-      case 'id': id = value; break;
-      case 'user_id': userId = value; break;
-      case 'title': title = value; break;
+      case 'id':
+        id = value;
+        break;
+      case 'user_id':
+        userId = value;
+        break;
+      case 'title':
+        title = value;
+        break;
     }
   }
 
@@ -130,7 +153,7 @@ void main() {
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
       final fullName = user.getComputedAttribute('full_name');
-      
+
       expect(fullName, equals('John Doe'));
     });
 
@@ -140,16 +163,17 @@ void main() {
 
       // Sync getter returns null for async properties
       final greeting = user.getComputedAttribute('greeting');
-      
+
       expect(greeting, isNull);
     });
 
-    test('async computed property resolves with getComputedAttributeAsync', () async {
+    test('async computed property resolves with getComputedAttributeAsync',
+        () async {
       final user = TestUser()
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
       final greeting = await user.getComputedAttributeAsync('greeting');
-      
+
       expect(greeting, equals('Hello, John!'));
     });
 
@@ -158,7 +182,7 @@ void main() {
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
       final fullName = await user.getComputedAttributeAsync('full_name');
-      
+
       expect(fullName, equals('John Doe'));
     });
 
@@ -174,7 +198,7 @@ void main() {
       user.relation.set('posts', posts);
 
       final summary = await user.getComputedAttributeAsync('post_summary');
-      
+
       expect(summary, equals('2 posts'));
     });
 
@@ -186,13 +210,14 @@ void main() {
       user.relation.set('posts', <TestPost>[]);
 
       final json = user.toJson();
-      
+
       expect(json['full_name'], equals('John Doe')); // Sync works
       expect(json['greeting'], isNull); // Async returns null
       expect(json['post_summary'], isNull); // Async returns null
     });
 
-    test('toJsonAsync properly resolves all async computed properties', () async {
+    test('toJsonAsync properly resolves all async computed properties',
+        () async {
       final user = TestUser()
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
@@ -200,7 +225,7 @@ void main() {
       user.relation.set('posts', <TestPost>[]);
 
       final json = await user.toJsonAsync();
-      
+
       expect(json['full_name'], equals('John Doe'));
       expect(json['greeting'], equals('Hello, John!'));
       expect(json['post_summary'], equals('0 posts'));
@@ -218,7 +243,7 @@ void main() {
       user.relation.set('posts', posts);
 
       final json = await user.toJsonAsync();
-      
+
       expect(json['first_name'], equals('Jane'));
       expect(json['last_name'], equals('Smith'));
       expect(json['full_name'], equals('Jane Smith'));
@@ -232,7 +257,7 @@ void main() {
 
       // Non-existent computed property
       final result = await user.getComputedAttributeAsync('non_existent');
-      
+
       expect(result, isNull);
     });
 
@@ -285,7 +310,7 @@ void main() {
         ..fromJson({'id': 1, 'user_id': 1, 'title': 'Test'});
 
       final json = post.toJson();
-      
+
       expect(json['id'], equals(1));
       expect(json['title'], equals('Test'));
     });
@@ -295,7 +320,7 @@ void main() {
         ..fromJson({'id': 1, 'user_id': 1, 'title': 'Test'});
 
       final json = await post.toJsonAsync();
-      
+
       expect(json['id'], equals(1));
       expect(json['title'], equals('Test'));
     });

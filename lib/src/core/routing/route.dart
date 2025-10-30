@@ -29,7 +29,7 @@ class Route {
     if (path == '/' || path.isEmpty) {
       return '/';
     }
-    
+
     // Remove trailing slash
     return path.endsWith('/') ? path.substring(0, path.length - 1) : path;
   }

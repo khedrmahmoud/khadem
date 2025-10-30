@@ -59,10 +59,13 @@ class SocketServer {
 
   Future<void> start() async {
     _server = await HttpServer.bind(
-        host != null ? InternetAddress(host!) : InternetAddress.anyIPv4, _port,
-        shared: true,);
+      host != null ? InternetAddress(host!) : InternetAddress.anyIPv4,
+      _port,
+      shared: true,
+    );
     Khadem.logger.info(
-        '🟢 WebSocket Server started on ws://${host ?? 'localhost'}:$_port',);
+      '🟢 WebSocket Server started on ws://${host ?? 'localhost'}:$_port',
+    );
 
     _server!.listen((HttpRequest request) async {
       final req = Request(request);

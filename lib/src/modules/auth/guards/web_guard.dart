@@ -1,3 +1,4 @@
+import '../../../contracts/session/session_interfaces.dart';
 import '../config/khadem_auth_config.dart';
 import '../contracts/auth_config.dart';
 import '../contracts/authenticatable.dart';
@@ -9,7 +10,6 @@ import '../drivers/token_driver.dart';
 import '../exceptions/auth_exception.dart';
 import '../repositories/database_auth_repository.dart';
 import '../services/hash_password_verifier.dart';
-import '../../../contracts/session/session_interfaces.dart';
 import 'base_guard.dart';
 
 /// Web authentication guard
@@ -30,13 +30,17 @@ class WebGuard extends Guard {
   /// Creates a web guard
   WebGuard({
     required super.config,
-    required super.driver, required super.providerKey, super.repository,
+    required super.driver,
+    required super.providerKey,
+    super.repository,
     super.passwordVerifier,
     ISessionManager? sessionManager,
   }) : _sessionManager = sessionManager;
 
   /// Factory constructor for easy instantiation
-  factory WebGuard.create(String providerKey, AuthDriver driver, {
+  factory WebGuard.create(
+    String providerKey,
+    AuthDriver driver, {
     ISessionManager? sessionManager,
   }) {
     return WebGuard(
@@ -50,7 +54,9 @@ class WebGuard extends Guard {
   }
 
   /// Factory constructor with config
-  factory WebGuard.fromConfig(AuthConfig config, String guardName, {
+  factory WebGuard.fromConfig(
+    AuthConfig config,
+    String guardName, {
     ISessionManager? sessionManager,
     String? providerKey,
   }) {
@@ -113,7 +119,8 @@ class WebGuard extends Guard {
   @override
   Future<Authenticatable> user(String sessionId) async {
     if (_sessionManager == null) {
-      throw AuthException('Session manager not available for web authentication');
+      throw AuthException(
+          'Session manager not available for web authentication',);
     }
 
     // Try to get user ID from session
@@ -167,7 +174,8 @@ class WebGuard extends Guard {
   /// [user] The user to log in
   /// [sessionId] The session ID to store user in
   /// Returns authentication response
-  Future<AuthResponse> loginWithSessionId(Authenticatable user, String sessionId) async {
+  Future<AuthResponse> loginWithSessionId(
+      Authenticatable user, String sessionId,) async {
     // Generate tokens using driver
     final authResponse = await driver.generateTokens(user);
 
@@ -228,10 +236,12 @@ class WebGuard extends Guard {
   }
 
   /// Stores remember token in specific session
-  Future<void> _storeRememberTokenInSessionById(String sessionId, String token) async {
+  Future<void> _storeRememberTokenInSessionById(
+      String sessionId, String token,) async {
     if (_sessionManager == null) return;
 
-    await _sessionManager!.setSessionValue(sessionId, _sessionRememberKey, token);
+    await _sessionManager!
+        .setSessionValue(sessionId, _sessionRememberKey, token);
   }
 
   /// Clears user from session
@@ -255,4 +265,3 @@ class WebGuard extends Guard {
     return DatabaseAuthenticatable.fromProviderConfig(userData, provider);
   }
 }
-

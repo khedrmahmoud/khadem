@@ -47,7 +47,8 @@ class SessionManager implements ISessionManager {
   }
 
   /// Get the current session driver
-  SessionDriver get _currentDriver => _driverRegistry.getDriver(_currentDriverName)!;
+  SessionDriver get _currentDriver =>
+      _driverRegistry.getDriver(_currentDriverName)!;
 
   /// Create a new session
   @override
@@ -115,11 +116,13 @@ class SessionManager implements ISessionManager {
 
   /// Set session value
   @override
-  Future<void> setSessionValue(String sessionId, String key, dynamic value) async {
+  Future<void> setSessionValue(
+      String sessionId, String key, dynamic value,) async {
     final data = await getSession(sessionId);
     if (data == null) return;
 
-    final sessionData = Map<String, dynamic>.from(data['data'] as Map<String, dynamic>);
+    final sessionData =
+        Map<String, dynamic>.from(data['data'] as Map<String, dynamic>);
     sessionData[key] = value;
 
     final updatedData = {
@@ -137,7 +140,8 @@ class SessionManager implements ISessionManager {
     final data = await getSession(sessionId);
     if (data == null) return;
 
-    final sessionData = Map<String, dynamic>.from(data['data'] as Map<String, dynamic>);
+    final sessionData =
+        Map<String, dynamic>.from(data['data'] as Map<String, dynamic>);
     sessionData.remove(key);
 
     final updatedData = {
@@ -224,7 +228,8 @@ class SessionManager implements ISessionManager {
 
   /// Flash old input data to session for form repopulation
   @override
-  Future<void> flashOldInput(String sessionId, Map<String, dynamic> inputData) async {
+  Future<void> flashOldInput(
+      String sessionId, Map<String, dynamic> inputData,) async {
     await flash(sessionId, 'old_input', inputData);
   }
 

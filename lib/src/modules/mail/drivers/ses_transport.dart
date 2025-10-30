@@ -140,7 +140,8 @@ class SesTransport implements TransportInterface {
       // Simple message
       if (message.htmlBody != null && message.textBody != null) {
         final boundary = _generateBoundary();
-        buffer.writeln('Content-Type: multipart/alternative; boundary="$boundary"');
+        buffer.writeln(
+            'Content-Type: multipart/alternative; boundary="$boundary"',);
         buffer.writeln();
         buffer.writeln('--$boundary');
         buffer.writeln('Content-Type: text/plain; charset=UTF-8');
@@ -209,7 +210,8 @@ class SesTransport implements TransportInterface {
   ) {
     // This is a simplified version
     // Full AWS Signature V4 implementation would be more complex
-    final credential = '${_config.accessKeyId}/$dateStamp/${_config.region}/ses/aws4_request';
+    final credential =
+        '${_config.accessKeyId}/$dateStamp/${_config.region}/ses/aws4_request';
     return 'AWS4-HMAC-SHA256 Credential=$credential, SignedHeaders=content-type;host;x-amz-date, Signature=placeholder';
   }
 

@@ -1,6 +1,5 @@
-import 'package:test/test.dart';
-
 import 'package:khadem/src/modules/auth/services/secure_token_generator.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('SecureTokenGenerator', () {
@@ -88,8 +87,11 @@ void main() {
         ];
 
         for (final token in validTokens) {
-          expect(generator.isValidTokenFormat(token), isTrue,
-              reason: 'Token "$token" should be valid',);
+          expect(
+            generator.isValidTokenFormat(token),
+            isTrue,
+            reason: 'Token "$token" should be valid',
+          );
         }
       });
 
@@ -102,8 +104,11 @@ void main() {
         ];
 
         for (final token in validTokens) {
-          expect(generator.isValidTokenFormat(token), isTrue,
-              reason: 'Token "$token" should be valid',);
+          expect(
+            generator.isValidTokenFormat(token),
+            isTrue,
+            reason: 'Token "$token" should be valid',
+          );
         }
       });
 
@@ -129,8 +134,11 @@ void main() {
         ];
 
         for (final token in invalidTokens) {
-          expect(generator.isValidTokenFormat(token), isFalse,
-              reason: 'Token "$token" should be invalid',);
+          expect(
+            generator.isValidTokenFormat(token),
+            isFalse,
+            reason: 'Token "$token" should be invalid',
+          );
         }
       });
 
@@ -164,8 +172,11 @@ void main() {
         ];
 
         for (final token in invalidTokens) {
-          expect(generator.isValidTokenFormat(token), isFalse,
-              reason: 'Token "$token" should be invalid',);
+          expect(
+            generator.isValidTokenFormat(token),
+            isFalse,
+            reason: 'Token "$token" should be invalid',
+          );
         }
       });
     });
@@ -230,10 +241,14 @@ void main() {
       test('should only contain valid characters', () {
         final token = generator.generateAlphanumericToken(length: 100);
 
-        const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+        const validChars =
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
         for (final char in token.split('')) {
-          expect(validChars.contains(char), isTrue,
-              reason: 'Character "$char" should be in valid character set',);
+          expect(
+            validChars.contains(char),
+            isTrue,
+            reason: 'Character "$char" should be in valid character set',
+          );
         }
       });
     });
@@ -244,7 +259,10 @@ void main() {
 
         expect(token, isNotEmpty);
         expect(token.length, equals(36)); // UUID format: 8-4-4-4-12
-        expect(token, matches(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'));
+        expect(
+            token,
+            matches(
+                r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',),);
       });
 
       test('should generate different UUID tokens', () {

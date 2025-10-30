@@ -88,7 +88,7 @@ class SocketExceptionHandler {
   /// Handle connection upgrade errors
   static void handleConnectionError(
     SocketClient client,
-     Object error,
+    Object error,
     StackTrace? stackTrace,
     String middlewareName,
   ) {

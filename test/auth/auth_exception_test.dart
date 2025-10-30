@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:khadem/src/modules/auth/exceptions/auth_exception.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('AuthException', () {
@@ -18,7 +18,8 @@ void main() {
 
     test('should create exception with stack trace', () {
       const stackTrace = 'Mock stack trace';
-      final exception = AuthException('Error with stack', stackTrace: stackTrace);
+      final exception =
+          AuthException('Error with stack', stackTrace: stackTrace);
       expect(exception.message, equals('Error with stack'));
       expect(exception.details, equals(stackTrace));
     });

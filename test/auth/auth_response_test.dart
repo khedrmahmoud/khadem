@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:khadem/src/modules/auth/core/auth_response.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('AuthResponse', () {

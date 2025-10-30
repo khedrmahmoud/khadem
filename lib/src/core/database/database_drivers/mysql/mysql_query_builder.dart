@@ -21,8 +21,9 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   List<String> _columns = ['*'];
   final List<String> _where = [];
   List<dynamic> _eagerRelations = [];
-  List<String> _excludedRelations = [];  // Relations to exclude from defaultRelations
-  bool _useOnlyRelations = false;        // If true, ignore defaultRelations
+  List<String> _excludedRelations =
+      []; // Relations to exclude from defaultRelations
+  bool _useOnlyRelations = false; // If true, ignore defaultRelations
   bool _isDistinct = false;
   final List<String> _joins = [];
   final List<String> _unions = [];
@@ -339,7 +340,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     String operator,
     String secondColumn,
   ) {
-    _joins.add('INNER JOIN `$table` ON `$firstColumn` $operator `$secondColumn`');
+    _joins
+        .add('INNER JOIN `$table` ON `$firstColumn` $operator `$secondColumn`');
     return this;
   }
 
@@ -350,7 +352,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     String operator,
     String secondColumn,
   ) {
-    _joins.add('LEFT JOIN `$table` ON `$firstColumn` $operator `$secondColumn`');
+    _joins
+        .add('LEFT JOIN `$table` ON `$firstColumn` $operator `$secondColumn`');
     return this;
   }
 
@@ -361,7 +364,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     String operator,
     String secondColumn,
   ) {
-    _joins.add('RIGHT JOIN `$table` ON `$firstColumn` $operator `$secondColumn`');
+    _joins
+        .add('RIGHT JOIN `$table` ON `$firstColumn` $operator `$secondColumn`');
     return this;
   }
 
@@ -456,13 +460,11 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       );
     }
 
-    final setClause = columns.entries
-        .map((e) => '`${e.key}` = `${e.key}` + ?')
-        .join(', ');
+    final setClause =
+        columns.entries.map((e) => '`${e.key}` = `${e.key}` + ?').join(', ');
     final values = [...columns.values, ..._bindings];
 
-    final sql =
-        'UPDATE `$_table` SET $setClause WHERE ${_where.join(' AND ')}';
+    final sql = 'UPDATE `$_table` SET $setClause WHERE ${_where.join(' AND ')}';
     await _connection.execute(sql, values);
   }
 
@@ -545,10 +547,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   }) async {
     // Get one extra item to check if there are more pages
     final query = clone();
-    final items = await query
-        .offset((page - 1) * perPage)
-        .limit(perPage + 1)
-        .get();
+    final items =
+        await query.offset((page - 1) * perPage).limit(perPage + 1).get();
 
     final hasMorePages = items.length > perPage;
     final data = hasMorePages ? items.sublist(0, perPage) : items;
@@ -633,7 +633,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     String column,
     String Function(QueryBuilderInterface<dynamic> query) callback,
   ) {
-    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, _table);
+    final subquery =
+        MySQLQueryBuilder<Map<String, dynamic>>(_connection, _table);
     final subquerySql = callback(subquery);
     _where.add('`$column` IN ($subquerySql)');
     return this;
@@ -643,7 +644,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   QueryBuilderInterface<T> whereExists(
     String Function(QueryBuilderInterface<dynamic> query) callback,
   ) {
-    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, _table);
+    final subquery =
+        MySQLQueryBuilder<Map<String, dynamic>>(_connection, _table);
     final subquerySql = callback(subquery);
     _where.add('EXISTS ($subquerySql)');
     return this;
@@ -653,7 +655,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   QueryBuilderInterface<T> whereNotExists(
     String Function(QueryBuilderInterface<dynamic> query) callback,
   ) {
-    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, _table);
+    final subquery =
+        MySQLQueryBuilder<Map<String, dynamic>>(_connection, _table);
     final subquerySql = callback(subquery);
     _where.add('NOT EXISTS ($subquerySql)');
     return this;
@@ -847,24 +850,25 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     if (relation.contains('.')) {
       return _whereHasNested(relation, callback, operator, count);
     }
-    
+
     // Build subquery that counts related records
     final relatedTable = _getRelationTable(relation);
     final foreignKey = _getRelationForeignKey(relation);
-    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, relatedTable);
-    
+    final subquery =
+        MySQLQueryBuilder<Map<String, dynamic>>(_connection, relatedTable);
+
     // Apply user constraints
     if (callback != null) {
       callback(subquery);
     }
-    
+
     // Build correlated subquery with proper parent table reference
     // The foreign key in the related table should equal the id in the parent table
     final whereConditions = <String>[];
-    
+
     // Add the correlation condition (link to parent table)
     whereConditions.add('`$relatedTable`.`$foreignKey` = `$_table`.`id`');
-    
+
     // Add user-defined where conditions from the subquery
     if (subquery._where.isNotEmpty) {
       for (var i = 0; i < subquery._where.length; i++) {
@@ -874,16 +878,16 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         whereConditions.add(condition);
       }
     }
-    
+
     final whereClause = whereConditions.isNotEmpty
         ? 'WHERE ${whereConditions.join(' AND ')}'
         : '';
     final countSql = 'SELECT COUNT(*) FROM `$relatedTable` $whereClause';
-    
+
     _where.add('($countSql) $operator ?');
     _bindings.addAll(subquery._bindings);
     _bindings.add(count);
-    
+
     return this;
   }
 
@@ -895,7 +899,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     int count,
   ) {
     final parts = relation.split('.');
-    
+
     // Build the nested subquery manually by traversing the relation chain
     return _buildNestedWhereHas(parts, callback, operator, count, false);
   }
@@ -909,10 +913,10 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     bool isOr,
   ) {
     if (relationParts.isEmpty) return this;
-    
+
     final currentRelation = relationParts[0];
     final remainingParts = relationParts.sublist(1);
-    
+
     if (remainingParts.isEmpty) {
       // This is the last relation, apply the callback here
       if (isOr) {
@@ -924,30 +928,32 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       // More relations to traverse, nest deeper
       // Get the next relation info from the current model
       final relatedModelFactory = _getRelatedModelFactory(currentRelation);
-      
+
       if (isOr) {
         return orWhereHas(currentRelation, (subQuery) {
           if (subQuery is MySQLQueryBuilder && relatedModelFactory != null) {
             // Get the next relation definition
             final nextRelation = remainingParts[0];
-            final nextRelationDef = _getRelationDefinitionFromFactory(relatedModelFactory, nextRelation);
-            
+            final nextRelationDef = _getRelationDefinitionFromFactory(
+                relatedModelFactory, nextRelation,);
+
             if (nextRelationDef == null) {
-              print('Warning: Could not find relation definition for $nextRelation');
+              print(
+                  'Warning: Could not find relation definition for $nextRelation',);
               return;
             }
-            
+
             if (remainingParts.length == 1) {
               // This is the last nested level, apply the callback
               final nestedQuery = MySQLQueryBuilder<Map<String, dynamic>>(
                 subQuery._connection,
                 nextRelationDef.relatedTable,
               );
-              
+
               if (callback != null) {
                 callback(nestedQuery);
               }
-              
+
               // Build the correlation condition based on relation type
               final whereConditions = <String>[];
               final correlationCondition = _buildCorrelationCondition(
@@ -955,32 +961,35 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
                 nextRelationDef,
               );
               whereConditions.add(correlationCondition);
-              
+
               if (nestedQuery._where.isNotEmpty) {
                 for (var i = 0; i < nestedQuery._where.length; i++) {
                   var condition = nestedQuery._where[i];
-                  condition = condition.replaceFirst(RegExp(r'^(AND |OR )'), '');
+                  condition =
+                      condition.replaceFirst(RegExp(r'^(AND |OR )'), '');
                   whereConditions.add(condition);
                 }
               }
-              
+
               final whereClause = whereConditions.isNotEmpty
                   ? 'WHERE ${whereConditions.join(' AND ')}'
                   : '';
-              final countSql = 'SELECT COUNT(*) FROM `${nextRelationDef.relatedTable}` $whereClause';
-              
+              final countSql =
+                  'SELECT COUNT(*) FROM `${nextRelationDef.relatedTable}` $whereClause';
+
               subQuery._where.add('($countSql) $operator ?');
               subQuery._bindings.addAll(nestedQuery._bindings);
               subQuery._bindings.add(count);
             } else {
               // More nesting needed - recursive call with the related model factory
-              final nextRelatedModelFactory = nextRelationDef.factory().newFactory;
+              final nextRelatedModelFactory =
+                  nextRelationDef.factory().newFactory;
               final nestedBuilder = MySQLQueryBuilder(
                 subQuery._connection,
                 nextRelationDef.relatedTable,
                 modelFactory: nextRelatedModelFactory,
               );
-              
+
               nestedBuilder._buildNestedWhereHas(
                 remainingParts,
                 callback,
@@ -988,7 +997,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
                 count,
                 false,
               );
-              
+
               // Copy the conditions
               if (nestedBuilder._where.isNotEmpty) {
                 subQuery._where.addAll(nestedBuilder._where);
@@ -1002,24 +1011,26 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
           if (subQuery is MySQLQueryBuilder && relatedModelFactory != null) {
             // Get the next relation definition
             final nextRelation = remainingParts[0];
-            final nextRelationDef = _getRelationDefinitionFromFactory(relatedModelFactory, nextRelation);
-            
+            final nextRelationDef = _getRelationDefinitionFromFactory(
+                relatedModelFactory, nextRelation,);
+
             if (nextRelationDef == null) {
-              print('Warning: Could not find relation definition for $nextRelation');
+              print(
+                  'Warning: Could not find relation definition for $nextRelation',);
               return;
             }
-            
+
             if (remainingParts.length == 1) {
               // This is the last nested level, apply the callback
               final nestedQuery = MySQLQueryBuilder<Map<String, dynamic>>(
                 subQuery._connection,
                 nextRelationDef.relatedTable,
               );
-              
+
               if (callback != null) {
                 callback(nestedQuery);
               }
-              
+
               // Build the correlation condition based on relation type
               final whereConditions = <String>[];
               final correlationCondition = _buildCorrelationCondition(
@@ -1027,32 +1038,35 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
                 nextRelationDef,
               );
               whereConditions.add(correlationCondition);
-              
+
               if (nestedQuery._where.isNotEmpty) {
                 for (var i = 0; i < nestedQuery._where.length; i++) {
                   var condition = nestedQuery._where[i];
-                  condition = condition.replaceFirst(RegExp(r'^(AND |OR )'), '');
+                  condition =
+                      condition.replaceFirst(RegExp(r'^(AND |OR )'), '');
                   whereConditions.add(condition);
                 }
               }
-              
+
               final whereClause = whereConditions.isNotEmpty
                   ? 'WHERE ${whereConditions.join(' AND ')}'
                   : '';
-              final countSql = 'SELECT COUNT(*) FROM `${nextRelationDef.relatedTable}` $whereClause';
-              
+              final countSql =
+                  'SELECT COUNT(*) FROM `${nextRelationDef.relatedTable}` $whereClause';
+
               subQuery._where.add('($countSql) $operator ?');
               subQuery._bindings.addAll(nestedQuery._bindings);
               subQuery._bindings.add(count);
             } else {
               // More nesting needed - recursive call with the related model factory
-              final nextRelatedModelFactory = nextRelationDef.factory().newFactory;
+              final nextRelatedModelFactory =
+                  nextRelationDef.factory().newFactory;
               final nestedBuilder = MySQLQueryBuilder(
                 subQuery._connection,
                 nextRelationDef.relatedTable,
                 modelFactory: nextRelatedModelFactory,
               );
-              
+
               nestedBuilder._buildNestedWhereHas(
                 remainingParts,
                 callback,
@@ -1060,7 +1074,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
                 count,
                 false,
               );
-              
+
               // Copy the conditions
               if (nestedBuilder._where.isNotEmpty) {
                 subQuery._where.addAll(nestedBuilder._where);
@@ -1090,9 +1104,10 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   /// Get the model factory for a related model
-  dynamic Function(Map<String, dynamic>)? _getRelatedModelFactory(String relation) {
+  dynamic Function(Map<String, dynamic>)? _getRelatedModelFactory(
+      String relation,) {
     if (_modelFactory == null) return null;
-    
+
     try {
       // Create a temporary model instance to access relation definitions
       final tempModel = _modelFactory!({});
@@ -1107,12 +1122,12 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       // Fallback if model creation fails
       print('Error getting related model factory: $e');
     }
-    
+
     return null;
   }
 
   /// Build the correlation condition for a relationship based on its type
-  /// 
+  ///
   /// Examples:
   /// - belongsTo: `parent_table.localKey = related_table.foreignKey`
   ///   (e.g., `chat_room_users.user_id = users.id`)
@@ -1127,22 +1142,24 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         // For belongsTo: parent has the foreign key
         // Example: chat_room_users.user_id = users.id
         return '`$parentTable`.`${relationDef.localKey}` = `${relationDef.relatedTable}`.`${relationDef.foreignKey}`';
-      
+
       case RelationType.hasMany:
       case RelationType.hasOne:
         // For hasMany/hasOne: related table has the foreign key
         // Example: posts.user_id = users.id
         return '`${relationDef.relatedTable}`.`${relationDef.foreignKey}` = `$parentTable`.`${relationDef.localKey}`';
-      
+
       case RelationType.belongsToMany:
         // For belongsToMany: need pivot table logic (not implemented in this basic version)
-        throw UnimplementedError('belongsToMany in whereHas is not yet supported');
-      
+        throw UnimplementedError(
+            'belongsToMany in whereHas is not yet supported',);
+
       case RelationType.morphOne:
       case RelationType.morphMany:
       case RelationType.morphTo:
         // For polymorphic relations: need morph type and ID fields
-        throw UnimplementedError('Polymorphic relations in whereHas are not yet supported');
+        throw UnimplementedError(
+            'Polymorphic relations in whereHas are not yet supported',);
     }
   }
 
@@ -1154,24 +1171,25 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     int count = 1,
   ]) {
     if (_where.isEmpty) return whereHas(relation, callback, operator, count);
-    
+
     // Check if this is a nested relation
     if (relation.contains('.')) {
       return _orWhereHasNested(relation, callback, operator, count);
     }
-    
+
     final relatedTable = _getRelationTable(relation);
     final foreignKey = _getRelationForeignKey(relation);
-    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, relatedTable);
-    
+    final subquery =
+        MySQLQueryBuilder<Map<String, dynamic>>(_connection, relatedTable);
+
     if (callback != null) {
       callback(subquery);
     }
-    
+
     // Build correlated subquery
     final whereConditions = <String>[];
     whereConditions.add('`$relatedTable`.`$foreignKey` = `$_table`.`id`');
-    
+
     if (subquery._where.isNotEmpty) {
       for (var i = 0; i < subquery._where.length; i++) {
         var condition = subquery._where[i];
@@ -1179,16 +1197,16 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         whereConditions.add(condition);
       }
     }
-    
+
     final whereClause = whereConditions.isNotEmpty
         ? 'WHERE ${whereConditions.join(' AND ')}'
         : '';
     final countSql = 'SELECT COUNT(*) FROM `$relatedTable` $whereClause';
-    
+
     _where.add('OR ($countSql) $operator ?');
     _bindings.addAll(subquery._bindings);
     _bindings.add(count);
-    
+
     return this;
   }
 
@@ -1212,19 +1230,20 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     if (relation.contains('.')) {
       return _whereDoesntHaveNested(relation, callback);
     }
-    
+
     final relatedTable = _getRelationTable(relation);
     final foreignKey = _getRelationForeignKey(relation);
-    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, relatedTable);
-    
+    final subquery =
+        MySQLQueryBuilder<Map<String, dynamic>>(_connection, relatedTable);
+
     if (callback != null) {
       callback(subquery);
     }
-    
+
     // Build correlated subquery
     final whereConditions = <String>[];
     whereConditions.add('`$relatedTable`.`$foreignKey` = `$_table`.`id`');
-    
+
     if (subquery._where.isNotEmpty) {
       for (var i = 0; i < subquery._where.length; i++) {
         var condition = subquery._where[i];
@@ -1232,15 +1251,15 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         whereConditions.add(condition);
       }
     }
-    
+
     final whereClause = whereConditions.isNotEmpty
         ? 'WHERE ${whereConditions.join(' AND ')}'
         : '';
     final existsSql = 'SELECT 1 FROM `$relatedTable` $whereClause LIMIT 1';
-    
+
     _where.add('NOT EXISTS ($existsSql)');
     _bindings.addAll(subquery._bindings);
-    
+
     return this;
   }
 
@@ -1259,24 +1278,25 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     void Function(QueryBuilderInterface<dynamic> query)? callback,
   ]) {
     if (_where.isEmpty) return whereDoesntHave(relation, callback);
-    
+
     // Check if this is a nested relation
     if (relation.contains('.')) {
       return _orWhereDoesntHaveNested(relation, callback);
     }
-    
+
     final relatedTable = _getRelationTable(relation);
     final foreignKey = _getRelationForeignKey(relation);
-    final subquery = MySQLQueryBuilder<Map<String, dynamic>>(_connection, relatedTable);
-    
+    final subquery =
+        MySQLQueryBuilder<Map<String, dynamic>>(_connection, relatedTable);
+
     if (callback != null) {
       callback(subquery);
     }
-    
+
     // Build correlated subquery
     final whereConditions = <String>[];
     whereConditions.add('`$relatedTable`.`$foreignKey` = `$_table`.`id`');
-    
+
     if (subquery._where.isNotEmpty) {
       for (var i = 0; i < subquery._where.length; i++) {
         var condition = subquery._where[i];
@@ -1284,15 +1304,15 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         whereConditions.add(condition);
       }
     }
-    
+
     final whereClause = whereConditions.isNotEmpty
         ? 'WHERE ${whereConditions.join(' AND ')}'
         : '';
     final existsSql = 'SELECT 1 FROM `$relatedTable` $whereClause LIMIT 1';
-    
+
     _where.add('OR NOT EXISTS ($existsSql)');
     _bindings.addAll(subquery._bindings);
-    
+
     return this;
   }
 
@@ -1306,7 +1326,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   @override
-  QueryBuilderInterface<T> has(String relation, [String operator = '>=', int count = 1]) {
+  QueryBuilderInterface<T> has(String relation,
+      [String operator = '>=', int count = 1,]) {
     return whereHas(relation, null, operator, count);
   }
 
@@ -1322,7 +1343,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       // Fallback: assume relation name matches table name
       return relation;
     }
-    
+
     try {
       // Create a temporary model instance to access relations
       final tempModel = _modelFactory!({});
@@ -1335,7 +1356,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     } catch (e) {
       // Fallback if model creation fails
     }
-    
+
     // Fallback: assume relation name matches table name
     return relation;
   }
@@ -1344,10 +1365,12 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     // Get the actual foreign key from the model's relation definition
     if (_modelFactory == null) {
       // Fallback: convention tablename_id
-      final singularTable = _table.endsWith('s') ? _table.substring(0, _table.length - 1) : _table;
+      final singularTable = _table.endsWith('s')
+          ? _table.substring(0, _table.length - 1)
+          : _table;
       return '${singularTable}_id';
     }
-    
+
     try {
       // Create a temporary model instance to access relations
       final tempModel = _modelFactory!({});
@@ -1360,9 +1383,10 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     } catch (e) {
       // Fallback if model creation fails
     }
-    
+
     // Fallback: convention tablename_id
-    final singularTable = _table.endsWith('s') ? _table.substring(0, _table.length - 1) : _table;
+    final singularTable =
+        _table.endsWith('s') ? _table.substring(0, _table.length - 1) : _table;
     return '${singularTable}_id';
   }
 
@@ -1439,7 +1463,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   @override
-  QueryBuilderInterface<T> fromRaw(String sql, [List<dynamic> bindings = const []]) {
+  QueryBuilderInterface<T> fromRaw(String sql,
+      [List<dynamic> bindings = const [],]) {
     _fromSubquery = sql;
     _bindings.addAll(bindings);
     return this;
@@ -1466,9 +1491,10 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   QueryBuilderInterface<T> whereNested(
     void Function(QueryBuilderInterface<T> query) callback,
   ) {
-    final nestedQuery = MySQLQueryBuilder<T>(_connection, _table, modelFactory: _modelFactory);
+    final nestedQuery =
+        MySQLQueryBuilder<T>(_connection, _table, modelFactory: _modelFactory);
     callback(nestedQuery);
-    
+
     if (nestedQuery._where.isNotEmpty) {
       // Build the nested conditions properly, handling OR prefixes
       final conditions = <String>[];
@@ -1477,7 +1503,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         if (i == 0) {
           // First condition should not have AND/OR prefix
           condition = condition.replaceFirst(RegExp(r'^(AND |OR )'), '');
-        } else if (!condition.startsWith('OR ') && !condition.startsWith('AND ')) {
+        } else if (!condition.startsWith('OR ') &&
+            !condition.startsWith('AND ')) {
           // If not explicitly OR/AND, default to AND
           condition = 'AND $condition';
         }
@@ -1487,7 +1514,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       _where.add('($nestedConditions)');
       _bindings.addAll(nestedQuery._bindings);
     }
-    
+
     return this;
   }
 
@@ -1496,10 +1523,11 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     void Function(QueryBuilderInterface<T> query) callback,
   ) {
     if (_where.isEmpty) return whereNested(callback);
-    
-    final nestedQuery = MySQLQueryBuilder<T>(_connection, _table, modelFactory: _modelFactory);
+
+    final nestedQuery =
+        MySQLQueryBuilder<T>(_connection, _table, modelFactory: _modelFactory);
     callback(nestedQuery);
-    
+
     if (nestedQuery._where.isNotEmpty) {
       // Build the nested conditions properly, handling OR prefixes
       final conditions = <String>[];
@@ -1508,7 +1536,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         if (i == 0) {
           // First condition should not have AND/OR prefix
           condition = condition.replaceFirst(RegExp(r'^(AND |OR )'), '');
-        } else if (!condition.startsWith('OR ') && !condition.startsWith('AND ')) {
+        } else if (!condition.startsWith('OR ') &&
+            !condition.startsWith('AND ')) {
           // If not explicitly OR/AND, default to AND
           condition = 'AND $condition';
         }
@@ -1518,7 +1547,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       _where.add('OR ($nestedConditions)');
       _bindings.addAll(nestedQuery._bindings);
     }
-    
+
     return this;
   }
 
@@ -1557,10 +1586,10 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
     }
     final models =
         List<T>.from(rawResults.data.map((e) => _modelFactory?.call(e)));
-    
+
     // Merge defaultRelations from model with explicit eager relations
     final relationsToLoad = _getRelationsToLoad(models);
-    
+
     if (relationsToLoad.isNotEmpty) {
       await _eagerLoadRelations(models, relationsToLoad);
     }
@@ -1572,7 +1601,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       for (final countRelation in countsToLoad) {
         // Check if this count is not already in _relationAggregates
         final alreadyAdded = _relationAggregates.any(
-          (agg) => agg['relation'] == countRelation && agg['type'] == 'count'
+          (agg) => agg['relation'] == countRelation && agg['type'] == 'count',
         );
         if (!alreadyAdded) {
           _relationAggregates.add({
@@ -1602,50 +1631,52 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   /// Determines which relations to load based on model defaults and query settings
   List<dynamic> _getRelationsToLoad(List<T> models) {
     if (models.isEmpty) return [];
-    
+
     // If withOnly() was called, ignore defaultRelations and use only explicit relations
     if (_useOnlyRelations) {
       return _eagerRelations;
     }
-    
+
     // Get defaultRelations from the first model (if it's a KhademModel)
     List<dynamic> defaultRelations = [];
     if (models.first is KhademModel) {
       defaultRelations = (models.first as KhademModel).defaultRelations;
     }
-    
+
     // Start with default relations
     final relationsToLoad = <dynamic>[...defaultRelations];
-    
+
     // Remove excluded relations (from without() method)
     if (_excludedRelations.isNotEmpty) {
       relationsToLoad.removeWhere((relation) {
-        final relationName = relation is String ? relation.split('.').first : 
-                           (relation is Map ? relation.keys.first : '');
+        final relationName = relation is String
+            ? relation.split('.').first
+            : (relation is Map ? relation.keys.first : '');
         return _excludedRelations.contains(relationName);
       });
     }
-    
+
     // Add explicit eager relations (from withRelations() method)
     relationsToLoad.addAll(_eagerRelations);
-    
+
     return relationsToLoad;
   }
 
   /// Get the list of relations to automatically count based on model's withCounts property
   List<String> _getCountsToLoad(List<T> models) {
     if (models.isEmpty) return [];
-    
+
     // Get withCounts from the first model (if it's a KhademModel)
     if (models.first is KhademModel) {
       final withCounts = (models.first as KhademModel).withCounts;
       return List<String>.from(withCounts);
     }
-    
+
     return [];
   }
 
-  Future<void> _eagerLoadRelations(List<T> models, List<dynamic> relations) async {
+  Future<void> _eagerLoadRelations(
+      List<T> models, List<dynamic> relations,) async {
     await EagerLoader.loadRelations(
       models.cast<KhademModel>(),
       relations,
@@ -1683,19 +1714,19 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       }
 
       // Extract model IDs
-      final modelIds = models.map((m) => m.id).where((id) => id != null).toList();
+      final modelIds =
+          models.map((m) => m.id).where((id) => id != null).toList();
       if (modelIds.isEmpty) continue;
 
       // Build aggregate query based on relation type
       final Map<int, dynamic> aggregateResults = {};
 
-      if (relationDef.type == RelationType.hasMany || 
+      if (relationDef.type == RelationType.hasMany ||
           relationDef.type == RelationType.hasOne) {
         // For hasMany/hasOne: SELECT foreign_key, COUNT(*) FROM related_table WHERE foreign_key IN (ids) GROUP BY foreign_key
-        final selectClause = relationType == 'count'
-            ? 'COUNT(*)'
-            : '$relationType(`$column`)';
-        
+        final selectClause =
+            relationType == 'count' ? 'COUNT(*)' : '$relationType(`$column`)';
+
         String sql = '''
           SELECT `${relationDef.foreignKey}` as _fk, $selectClause as _aggregate
           FROM `${relationDef.relatedTable}`
@@ -1704,7 +1735,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
 
         // Apply callback constraints if provided
         if (callback != null) {
-          final subQuery = MySQLQueryBuilder(_connection, relationDef.relatedTable);
+          final subQuery =
+              MySQLQueryBuilder(_connection, relationDef.relatedTable);
           callback(subQuery);
           final whereClause = subQuery._where.join(' AND ');
           if (whereClause.isNotEmpty) {
@@ -1718,19 +1750,17 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         for (final row in result.data) {
           aggregateResults[row['_fk'] as int] = row['_aggregate'];
         }
-      } 
-      else if (relationDef.type == RelationType.belongsTo) {
+      } else if (relationDef.type == RelationType.belongsTo) {
         // For belongsTo: SELECT local_key, COUNT(*) FROM related_table WHERE local_key IN (foreign_keys) GROUP BY local_key
         final foreignKeys = models
             .map((m) => m.getField(relationDef.localKey))
             .where((fk) => fk != null)
             .toList();
-        
+
         if (foreignKeys.isEmpty) continue;
 
-        final selectClause = relationType == 'count'
-            ? 'COUNT(*)'
-            : '$relationType(`$column`)';
+        final selectClause =
+            relationType == 'count' ? 'COUNT(*)' : '$relationType(`$column`)';
 
         final String sql = '''
           SELECT `${relationDef.foreignKey}` as _fk, $selectClause as _aggregate
@@ -1743,8 +1773,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         for (final row in result.data) {
           aggregateResults[row['_fk'] as int] = row['_aggregate'];
         }
-      }
-      else if (relationDef.type == RelationType.belongsToMany) {
+      } else if (relationDef.type == RelationType.belongsToMany) {
         // For belongsToMany: Use pivot table
         final pivotTable = relationDef.pivotTable!;
         final foreignPivotKey = relationDef.foreignPivotKey!;
@@ -1771,7 +1800,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
 
       // Set aggregate values on models in their relation storage
       for (final model in models) {
-        final aggregateValue = aggregateResults[model.id] ?? (relationType == 'count' ? 0 : null);
+        final aggregateValue =
+            aggregateResults[model.id] ?? (relationType == 'count' ? 0 : null);
         model.relation.set(attributeName, aggregateValue);
       }
     }
@@ -1917,22 +1947,23 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   /// Builds the SELECT query string based on current state.
   String _buildSelectQuery() {
     final distinct = _isDistinct ? 'DISTINCT ' : '';
-    
+
     // Build SELECT clause with subqueries if any
     final selectColumns = [
       ..._columns,
       ..._selectSubqueries,
     ].join(', ');
-    
+
     // Use subquery as FROM clause if set, otherwise use table
     final fromClause = _fromSubquery != null && _fromAlias != null
-      ? '($_fromSubquery) AS `$_fromAlias`'
-      : (_fromSubquery ?? '`$_table`');
-    
-    final buffer = StringBuffer('SELECT $distinct$selectColumns FROM $fromClause');
+        ? '($_fromSubquery) AS `$_fromAlias`'
+        : (_fromSubquery ?? '`$_table`');
+
+    final buffer =
+        StringBuffer('SELECT $distinct$selectColumns FROM $fromClause');
 
     if (_joins.isNotEmpty) buffer.write(' ${_joins.join(' ')}');
-    
+
     // Build WHERE clause, handling OR prefixes properly
     if (_where.isNotEmpty) {
       final whereConditions = <String>[];
@@ -1941,7 +1972,8 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
         if (i == 0) {
           // First condition should not have AND/OR prefix
           condition = condition.replaceFirst(RegExp(r'^(AND |OR )'), '');
-        } else if (!condition.startsWith('OR ') && !condition.startsWith('AND ')) {
+        } else if (!condition.startsWith('OR ') &&
+            !condition.startsWith('AND ')) {
           // If not explicitly OR/AND, default to AND
           condition = 'AND $condition';
         }
@@ -1949,7 +1981,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
       }
       buffer.write(' WHERE ${whereConditions.join(' ')}');
     }
-    
+
     if (_groupBy != null) buffer.write(' GROUP BY $_groupBy');
     if (_having != null) buffer.write(' HAVING $_having');
     if (_orderBy != null) buffer.write(' ORDER BY $_orderBy');

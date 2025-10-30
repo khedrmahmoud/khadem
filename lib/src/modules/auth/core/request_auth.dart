@@ -371,8 +371,10 @@ extension RequestAuth on Request {
   void requireAdmin([String? message]) {
     requireAuth();
     if (!isAdmin) {
-      throw AuthException(message ?? 'Admin privileges required',
-          statusCode: 403,);
+      throw AuthException(
+        message ?? 'Admin privileges required',
+        statusCode: 403,
+      );
     }
   }
 
@@ -380,8 +382,10 @@ extension RequestAuth on Request {
   void requireSuperAdmin([String? message]) {
     requireAuth();
     if (!isSuperAdmin) {
-      throw AuthException(message ?? 'Super admin privileges required',
-          statusCode: 403,);
+      throw AuthException(
+        message ?? 'Super admin privileges required',
+        statusCode: 403,
+      );
     }
   }
 
@@ -397,8 +401,10 @@ extension RequestAuth on Request {
   void requirePermission(String permission, [String? message]) {
     requireAuth();
     if (!hasPermission(permission)) {
-      throw AuthException(message ?? 'Permission "$permission" required',
-          statusCode: 403,);
+      throw AuthException(
+        message ?? 'Permission "$permission" required',
+        statusCode: 403,
+      );
     }
   }
 
@@ -406,8 +412,10 @@ extension RequestAuth on Request {
   void requireOwnership(dynamic resourceOwnerId, [String? message]) {
     requireAuth();
     if (!ownsResource(resourceOwnerId)) {
-      throw AuthException(message ?? 'Access denied: not the owner',
-          statusCode: 403,);
+      throw AuthException(
+        message ?? 'Access denied: not the owner',
+        statusCode: 403,
+      );
     }
   }
 

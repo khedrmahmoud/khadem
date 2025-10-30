@@ -17,7 +17,8 @@ class RedisSessionDriver implements SessionDriver {
     _initConnection(host, port, password, db);
   }
 
-  Future<void> _initConnection(String host, int port, String? password, int db) async {
+  Future<void> _initConnection(
+      String host, int port, String? password, int db,) async {
     try {
       _command = await _connection.connect(host, port);
       if (password != null) {

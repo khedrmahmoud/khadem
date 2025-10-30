@@ -3,7 +3,6 @@ import 'dart:math';
 
 import '../contracts/token_generator.dart';
 
-
 /// Secure token generator implementation
 ///
 /// This class provides secure token generation using cryptographically

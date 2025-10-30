@@ -49,7 +49,7 @@ void main() {
       test('should use default transport from config', () {
         mockConfig.defaultTransport = 'array';
         final manager = MailManager(mockConfig);
-        
+
         final transport = ArrayTransport();
         manager.registerTransport('array', transport);
 
@@ -151,13 +151,15 @@ void main() {
         mailManager.registerTransport('transport1', transport1);
         mailManager.registerTransport('transport2', transport2);
 
-        await mailManager.mailer('transport1')
+        await mailManager
+            .mailer('transport1')
             .to('user1@example.com')
             .subject('Transport 1')
             .text('Content')
             .send();
 
-        await mailManager.mailer('transport2')
+        await mailManager
+            .mailer('transport2')
             .to('user2@example.com')
             .subject('Transport 2')
             .text('Content')
@@ -226,12 +228,18 @@ class MockConfig implements ConfigInterface {
 /// Simple test logger that extends Logger
 class TestLogger extends Logger {
   @override
-  void info(String message, {String? channel, Map<String, dynamic>? context, StackTrace? stackTrace}) {
+  void info(String message,
+      {String? channel,
+      Map<String, dynamic>? context,
+      StackTrace? stackTrace,}) {
     // Capture message if needed
   }
 
   @override
-  void error(String message, {String? channel, Map<String, dynamic>? context, StackTrace? stackTrace}) {
+  void error(String message,
+      {String? channel,
+      Map<String, dynamic>? context,
+      StackTrace? stackTrace,}) {
     // Capture error if needed
   }
 }

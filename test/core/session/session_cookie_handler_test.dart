@@ -1,6 +1,7 @@
-import 'package:test/test.dart';
 import 'dart:io';
+
 import 'package:khadem/src/core/session/session_cookie_handler.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('SessionCookieHandler', () {
@@ -46,7 +47,8 @@ void main() {
       const sessionId = 'test_session_custom';
       const customMaxAge = Duration(hours: 2);
 
-      cookieHandler.setSessionCookie(mockResponse, sessionId, maxAge: customMaxAge);
+      cookieHandler.setSessionCookie(mockResponse, sessionId,
+          maxAge: customMaxAge,);
 
       final cookies = (mockResponse as _MockHttpResponse).cookies;
       expect(cookies, hasLength(1));

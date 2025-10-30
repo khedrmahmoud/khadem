@@ -4,6 +4,6 @@ dynamic jsonSafe(dynamic value) {
   if (value is List) return value.map(jsonSafe).toList();
   if (value is Set) return value.map(jsonSafe).toSet();
   if (value is Iterable) return value.map(jsonSafe).toList();
-  
+
   return value;
 }

@@ -1,16 +1,16 @@
 import 'package:uuid/uuid.dart';
 
 /// Mixin that adds UUID primary key support to models
-/// 
+///
 /// Automatically generates a UUID when creating a new model.
 /// Use with ModelObserver to auto-generate on creation.
-/// 
+///
 /// Example:
 /// ```dart
 /// class User extends KhademModel<User> with UuidPrimaryKey {
 ///   // The uuid field will be auto-generated
 /// }
-/// 
+///
 /// // With observer for auto-generation:
 /// class UserObserver extends ModelObserver<User> {
 ///   @override
@@ -18,7 +18,7 @@ import 'package:uuid/uuid.dart';
 ///     user.ensureUuidGenerated();
 ///   }
 /// }
-/// 
+///
 /// // Manual generation:
 /// final user = User();
 /// user.generateUuid();
@@ -32,7 +32,7 @@ mixin UuidPrimaryKey {
   static const Uuid _uuidGenerator = Uuid();
 
   /// Generate a new UUID v4
-  /// 
+  ///
   /// Generates a random UUID using the v4 algorithm.
   /// Overwrites any existing UUID.
   void generateUuid() {
@@ -40,7 +40,7 @@ mixin UuidPrimaryKey {
   }
 
   /// Generate UUID only if not already set
-  /// 
+  ///
   /// Useful in observers to ensure UUID exists without overwriting.
   void ensureUuidGenerated() {
     if (!hasUuid) {
@@ -52,7 +52,7 @@ mixin UuidPrimaryKey {
   bool get hasUuid => uuid != null && uuid!.isNotEmpty;
 
   /// Get UUID or generate if missing
-  /// 
+  ///
   /// Convenience method that ensures UUID exists and returns it.
   String getOrGenerateUuid() {
     ensureUuidGenerated();

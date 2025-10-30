@@ -49,10 +49,14 @@ class TestUser extends KhademModel<TestUser> with Timestamps<TestUser> {
         email = value;
         break;
       case 'created_at':
-        createdAt = value is DateTime ? value : (value is String ? DateTime.tryParse(value) : null);
+        createdAt = value is DateTime
+            ? value
+            : (value is String ? DateTime.tryParse(value) : null);
         break;
       case 'updated_at':
-        updatedAt = value is DateTime ? value : (value is String ? DateTime.tryParse(value) : null);
+        updatedAt = value is DateTime
+            ? value
+            : (value is String ? DateTime.tryParse(value) : null);
         break;
     }
   }
@@ -62,7 +66,8 @@ class TestUser extends KhademModel<TestUser> with Timestamps<TestUser> {
 }
 
 // Test model with disabled timestamps
-class TestSession extends KhademModel<TestSession> with Timestamps<TestSession> {
+class TestSession extends KhademModel<TestSession>
+    with Timestamps<TestSession> {
   @override
   int? id;
   String? token;
@@ -148,10 +153,14 @@ class TestPost extends KhademModel<TestPost> with Timestamps<TestPost> {
         title = value;
         break;
       case 'published_at':
-        publishedAt = value is DateTime ? value : (value is String ? DateTime.tryParse(value) : null);
+        publishedAt = value is DateTime
+            ? value
+            : (value is String ? DateTime.tryParse(value) : null);
         break;
       case 'modified_at':
-        modifiedAt = value is DateTime ? value : (value is String ? DateTime.tryParse(value) : null);
+        modifiedAt = value is DateTime
+            ? value
+            : (value is String ? DateTime.tryParse(value) : null);
         break;
     }
   }
@@ -216,7 +225,7 @@ void main() {
     });
 
     test('timestamps handle DateTime values', () {
-      final created = DateTime(2024, 1);
+      final created = DateTime(2024);
       final updated = DateTime(2024, 1, 2);
 
       user.setField('created_at', created);
@@ -237,7 +246,7 @@ void main() {
     });
 
     test('setTimestamps manually sets timestamps', () {
-      final created = DateTime(2024, 1);
+      final created = DateTime(2024);
       final updated = DateTime(2024, 1, 2);
 
       user.setTimestamps(createdAt: created, updatedAt: updated);
@@ -338,7 +347,7 @@ void main() {
         ..id = 1
         ..title = 'Test Post';
 
-      final published = DateTime(2024, 1);
+      final published = DateTime(2024);
       final modified = DateTime(2024, 1, 2);
 
       post.publishedAt = published;
@@ -352,7 +361,7 @@ void main() {
     test('setTimestamps works with custom columns', () {
       final post = TestPost();
 
-      final published = DateTime(2024, 1);
+      final published = DateTime(2024);
       final modified = DateTime(2024, 1, 2);
 
       post.setTimestamps(createdAt: published, updatedAt: modified);

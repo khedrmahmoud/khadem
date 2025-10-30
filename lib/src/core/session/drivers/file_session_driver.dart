@@ -7,8 +7,7 @@ import '../../../contracts/session/session_interfaces.dart';
 class FileSessionDriver implements SessionDriver {
   final Directory _directory;
 
-  FileSessionDriver(String path)
-      : _directory = Directory(path) {
+  FileSessionDriver(String path) : _directory = Directory(path) {
     if (!_directory.existsSync()) {
       _directory.createSync(recursive: true);
     }

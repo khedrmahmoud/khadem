@@ -134,12 +134,14 @@ class SmtpDiagnostics {
     } else if (!report.portOpen) {
       buffer.writeln('• Verify the SMTP port is correct');
       buffer.writeln('  - Common ports: 25 (plain), 587 (TLS), 465 (SSL)');
-      buffer.writeln('• Check firewall settings (allow outbound on port ${report.config.port})');
+      buffer.writeln(
+          '• Check firewall settings (allow outbound on port ${report.config.port})',);
       buffer.writeln('• Verify the SMTP server is running');
       buffer.writeln('• Try increasing the timeout value');
     } else if (report.success) {
       buffer.writeln('• Connection successful! The SMTP server is reachable.');
-      buffer.writeln('• If authentication still fails, check username/password');
+      buffer
+          .writeln('• If authentication still fails, check username/password');
     }
 
     buffer.writeln();

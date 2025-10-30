@@ -160,7 +160,7 @@ class MailMessage implements MailMessageInterface {
   /// Creates a copy of this message.
   MailMessage copy() {
     final message = MailMessage();
-    
+
     for (final address in _to) {
       message.addTo(address.email, address.name);
     }
@@ -170,31 +170,31 @@ class MailMessage implements MailMessageInterface {
     for (final address in _bcc) {
       message.addBcc(address.email, address.name);
     }
-    
+
     if (_from != null) {
       message.setFrom(_from!.email, _from!.name);
     }
     if (_replyTo != null) {
       message.setReplyTo(_replyTo!.email, _replyTo!.name);
     }
-    
+
     if (_subject != null) message.setSubject(_subject!);
     if (_textBody != null) message.setTextBody(_textBody!);
     if (_htmlBody != null) message.setHtmlBody(_htmlBody!);
-    
+
     for (final attachment in _attachments) {
       message.addAttachment(attachment);
     }
     for (final embed in _embedded) {
       message.addEmbedded(embed);
     }
-    
+
     for (final entry in _headers.entries) {
       message.setHeader(entry.key, entry.value);
     }
-    
+
     message.setPriority(_priority);
-    
+
     return message;
   }
 }

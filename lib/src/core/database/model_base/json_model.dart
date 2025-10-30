@@ -13,7 +13,7 @@ class JsonModel<T> {
   Map<String, dynamic> get rawData => _rawData;
 
   /// Check if an attribute is mass assignable
-  /// 
+  ///
   /// An attribute is fillable if:
   /// - `fillable` list is defined and contains the attribute, OR
   /// - `fillable` list is empty AND attribute is not in `guarded` list
@@ -22,33 +22,33 @@ class JsonModel<T> {
     if (model.fillable.isNotEmpty) {
       return model.fillable.contains(key);
     }
-    
+
     // If fillable is empty, everything except guarded is fillable
     return !model.guarded.contains(key);
   }
 
   void fromJson(Map<String, dynamic> json, {bool force = true}) {
     _rawData = Map<String, dynamic>.from(json); // Store raw data
-    
+
     // Handle id separately, respecting fillable/guarded unless force=true
     if (json.containsKey('id')) {
       if (force || isFillable('id')) {
         model.id = model.id ?? json['id'] as int?;
       }
     }
-    
+
     for (final key in json.keys) {
       // Skip id as we already handled it
       if (key == 'id') continue;
-      
+
       // Skip non-fillable attributes unless force is true
       if (!force && !isFillable(key)) {
         continue;
       }
-      
+
       var value = json[key];
       final cast = model.casts[key];
-      
+
       // Handle new AttributeCaster system (dynamic check)
       if (cast is AttributeCaster) {
         value = cast.get(value);
@@ -69,7 +69,7 @@ class JsonModel<T> {
       } else if (value is Blob) {
         value = value.toString();
       }
-      
+
       model.setField(key, value);
     }
   }
@@ -101,7 +101,7 @@ class JsonModel<T> {
   }
 
   /// Async version of toJson() that properly handles async computed properties
-  /// 
+  ///
   /// This method awaits async computed properties before adding them to JSON.
   /// Use this when your model has async functions in the `computed` map.
   Future<Map<String, dynamic>> toJsonAsync() async {
@@ -135,7 +135,7 @@ class JsonModel<T> {
     for (final key in model.fillable) {
       var value = model.getField(key);
       if (value == null) continue;
-      
+
       // Apply caster's set() method if applicable
       final cast = model.casts[key];
       if (cast is AttributeCaster) {
@@ -146,7 +146,7 @@ class JsonModel<T> {
       else if (value is DateTime) {
         value = value.toUtc();
       }
-      
+
       data[key] = value;
     }
     return data;

@@ -2,15 +2,15 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'attribute_caster.dart';
 
-/// Cast attribute to/from JSON (Map<String, dynamic>)
-/// 
+/// Cast attribute to/from JSON (`Map<String, dynamic>`)
+///
 /// Example:
 /// ```dart
 /// Map<String, Type> get casts => {
 ///   'settings': JsonCast,
 ///   'metadata': JsonCast,
 /// };
-/// 
+///
 /// // Usage:
 /// user.settings = {'theme': 'dark', 'lang': 'en'};
 /// print(user.settings['theme']); // 'dark'
@@ -38,15 +38,15 @@ class JsonCast extends AttributeCaster<Map<String, dynamic>> {
   }
 }
 
-/// Cast attribute to/from Array (List<String>)
-/// 
+/// Cast attribute to/from Array (`List<String>`)
+///
 /// Example:
 /// ```dart
 /// Map<String, Type> get casts => {
 ///   'roles': ArrayCast,
 ///   'tags': ArrayCast,
 /// };
-/// 
+///
 /// // Usage:
 /// user.roles = ['admin', 'editor'];
 /// print(user.roles.first); // 'admin'
@@ -77,15 +77,15 @@ class ArrayCast extends AttributeCaster<List<String>> {
   }
 }
 
-/// Cast attribute to/from JSON Array (List<Map<String, dynamic>>)
-/// 
+/// Cast attribute to/from JSON Array (`List<Map<String, dynamic>>`)
+///
 /// Example:
 /// ```dart
 /// Map<String, Type> get casts => {
 ///   'addresses': JsonArrayCast,
 ///   'items': JsonArrayCast,
 /// };
-/// 
+///
 /// // Usage:
 /// user.addresses = [
 ///   {'street': '123 Main', 'city': 'NYC'},
@@ -130,17 +130,17 @@ class JsonArrayCast extends AttributeCaster<List<Map<String, dynamic>>> {
 }
 
 /// Cast attribute to/from encrypted values
-/// 
+///
 /// Uses SHA-256 hashing for one-way encryption (good for passwords).
 /// For two-way encryption, extend this class and implement your own logic.
-/// 
+///
 /// Example:
 /// ```dart
 /// Map<String, Type> get casts => {
 ///   'password': EncryptedCast,
 ///   'api_key': EncryptedCast,
 /// };
-/// 
+///
 /// // Usage:
 /// user.password = 'secret123'; // Auto-hashed on set
 /// // Cannot retrieve original password (one-way hash)
@@ -157,7 +157,7 @@ class EncryptedCast extends AttributeCaster<String> {
   @override
   dynamic set(String? value) {
     if (value == null) return null;
-    
+
     // Hash the value using SHA-256
     final bytes = utf8.encode(value);
     final hash = sha256.convert(bytes);
@@ -166,9 +166,9 @@ class EncryptedCast extends AttributeCaster<String> {
 }
 
 /// Cast attribute to/from integer
-/// 
+///
 /// Handles string to int conversion automatically
-/// 
+///
 /// Example:
 /// ```dart
 /// Map<String, Type> get casts => {
@@ -191,9 +191,9 @@ class IntCast extends AttributeCaster<int> {
 }
 
 /// Cast attribute to/from double
-/// 
+///
 /// Handles string to double conversion automatically
-/// 
+///
 /// Example:
 /// ```dart
 /// Map<String, Type> get casts => {
@@ -216,9 +216,9 @@ class DoubleCast extends AttributeCaster<double> {
 }
 
 /// Cast attribute to/from boolean
-/// 
+///
 /// Handles string and int to bool conversion automatically
-/// 
+///
 /// Example:
 /// ```dart
 /// Map<String, Type> get casts => {
@@ -243,9 +243,9 @@ class BoolCast extends AttributeCaster<bool> {
 }
 
 /// Cast attribute to/from DateTime
-/// 
+///
 /// Handles string to DateTime conversion automatically
-/// 
+///
 /// Example:
 /// ```dart
 /// Map<String, Type> get casts => {

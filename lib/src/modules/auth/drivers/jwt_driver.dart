@@ -19,7 +19,7 @@ import 'auth_driver.dart';
 ///
 /// This driver handles JWT token generation, verification, and refresh
 /// operations. It uses the dart_jsonwebtoken package for JWT operations.
-/// 
+///
 /// Follows SOLID principles with dependency injection and strategy pattern.
 class JWTDriver implements AuthDriver {
   /// JWT secret key
@@ -49,7 +49,9 @@ class JWTDriver implements AuthDriver {
   /// Creates a JWT driver with dependency injection
   JWTDriver({
     required String secret,
-    required AuthConfig config, required String providerKey, Duration accessTokenExpiry = const Duration(hours: 1),
+    required AuthConfig config,
+    required String providerKey,
+    Duration accessTokenExpiry = const Duration(hours: 1),
     Duration refreshTokenExpiry = const Duration(days: 7),
     TokenGenerator? tokenGenerator,
     TokenService? tokenService,
@@ -59,7 +61,7 @@ class JWTDriver implements AuthDriver {
         _refreshTokenExpiry = refreshTokenExpiry,
         _tokenGenerator = tokenGenerator ?? SecureTokenGenerator(),
         _tokenService = tokenService ?? DatabaseTokenService(),
-        _strategyFactory = strategyFactory ?? 
+        _strategyFactory = strategyFactory ??
             TokenInvalidationStrategyFactory(
               tokenService ?? DatabaseTokenService(),
             ),
@@ -68,7 +70,7 @@ class JWTDriver implements AuthDriver {
 
   /// Factory constructor with config and dependency injection
   factory JWTDriver.fromConfig(
-    AuthConfig config, 
+    AuthConfig config,
     String providerKey, {
     TokenGenerator? tokenGenerator,
     TokenService? tokenService,
@@ -106,7 +108,7 @@ class JWTDriver implements AuthDriver {
     // Create strategy factory with the guaranteed non-null service
     late final TokenInvalidationStrategyFactory strategyFactoryInstance;
     try {
-      strategyFactoryInstance = strategyFactory ?? 
+      strategyFactoryInstance = strategyFactory ??
           TokenInvalidationStrategyFactory(tokenServiceInstance);
     } catch (e) {
       throw StateError(
@@ -228,7 +230,7 @@ class JWTDriver implements AuthDriver {
       throw AuthException('Invalid refresh token format');
     }
     final sessionId = parts[0];
-    
+
     // For JWT, verify the refresh token from database
     final tokenRecord = await _tokenService.findToken(refreshToken);
 
@@ -315,14 +317,14 @@ class JWTDriver implements AuthDriver {
   Future<void> invalidateToken(String token) async {
     // Use single device logout strategy by default
     final strategy = _strategyFactory.createStrategy(LogoutType.singleDevice);
-    
+
     // Verify token to get context
     final jwt = JWT.verify(token, SecretKey(_secret));
     final payload = jwt.payload as Map<String, dynamic>;
     final exp = payload['exp'] as int?;
     final userId = payload['sub'];
     final sessionId = payload['jti'] as String?; // Use standard JWT ID claim
-    
+
     if (exp != null && userId != null) {
       // For JWT single device logout, we need to find and invalidate the associated refresh token
       // This creates a true single device logout experience
@@ -334,7 +336,7 @@ class JWTDriver implements AuthDriver {
         tokenPayload: payload,
         metadata: sessionId != null ? {'session_id': sessionId} : null,
       );
-      
+
       await strategy.invalidateTokens(context);
     }
   }
@@ -344,15 +346,16 @@ class JWTDriver implements AuthDriver {
   /// [token] The access token
   /// [logoutType] The type of logout strategy to use
   @override
-  Future<void> invalidateTokenWithStrategy(String token, LogoutType logoutType) async {
+  Future<void> invalidateTokenWithStrategy(
+      String token, LogoutType logoutType,) async {
     final strategy = _strategyFactory.createStrategy(logoutType);
-    
+
     // Verify token to get context
     final jwt = JWT.verify(token, SecretKey(_secret));
     final payload = jwt.payload as Map<String, dynamic>;
     final exp = payload['exp'] as int?;
     final userId = payload['sub'];
-    
+
     if (exp != null && userId != null) {
       final context = TokenInvalidationContext.fromTokens(
         accessToken: token,
@@ -361,13 +364,13 @@ class JWTDriver implements AuthDriver {
         tokenExpiry: exp,
         tokenPayload: payload,
       );
-      
+
       await strategy.invalidateTokens(context);
     }
   }
 
   /// Invalidates all tokens for a user (logout from all devices)
-  /// 
+  ///
   /// This method should be called when a user wants to explicitly logout
   /// from all devices, such as when they change their password or suspect
   /// their account has been compromised.
@@ -375,8 +378,6 @@ class JWTDriver implements AuthDriver {
   Future<void> logoutFromAllDevices(String token) async {
     await invalidateTokenWithStrategy(token, LogoutType.allDevices);
   }
-
-
 
   @override
   bool validateTokenFormat(String token) {

@@ -3,8 +3,8 @@ import 'dart:io';
 import '../../../contracts/queue/queue_job.dart';
 import '../../../core/queue/queue_manager.dart';
 import '../../../core/view/renderer.dart';
-import '../contracts/mailable.dart';
 import '../contracts/mail_message_interface.dart';
+import '../contracts/mailable.dart';
 import '../contracts/mailer_interface.dart';
 import '../contracts/transport_interface.dart';
 import '../exceptions/mail_exception.dart';
@@ -105,11 +105,13 @@ class Mailer implements MailerInterface {
       throw MailException('Attachment file not found: $path');
     }
 
-    _message.addAttachment(MailAttachment(
-      path: path,
-      filename: name ?? file.uri.pathSegments.last,
-      mimeType: mimeType,
-    ),);
+    _message.addAttachment(
+      MailAttachment(
+        path: path,
+        filename: name ?? file.uri.pathSegments.last,
+        mimeType: mimeType,
+      ),
+    );
     return this;
   }
 
@@ -119,11 +121,13 @@ class Mailer implements MailerInterface {
     String name, {
     String? mimeType,
   }) {
-    _message.addAttachment(MailAttachment(
-      data: data,
-      filename: name,
-      mimeType: mimeType ?? 'application/octet-stream',
-    ),);
+    _message.addAttachment(
+      MailAttachment(
+        data: data,
+        filename: name,
+        mimeType: mimeType ?? 'application/octet-stream',
+      ),
+    );
     return this;
   }
 
@@ -134,10 +138,12 @@ class Mailer implements MailerInterface {
       throw MailException('Embed file not found: $path');
     }
 
-    _message.addEmbedded(MailEmbedded(
-      path: path,
-      cid: cid,
-    ),);
+    _message.addEmbedded(
+      MailEmbedded(
+        path: path,
+        cid: cid,
+      ),
+    );
     return this;
   }
 
@@ -250,10 +256,22 @@ class Mailer implements MailerInterface {
   /// Basic HTML tag stripping for text fallback.
   String _stripHtmlTags(String html) {
     return html
-        .replaceAll(RegExp(r'<script[^>]*>.*?</script>',
-            multiLine: true, caseSensitive: false,), '',)
-        .replaceAll(RegExp(r'<style[^>]*>.*?</style>',
-            multiLine: true, caseSensitive: false,), '',)
+        .replaceAll(
+          RegExp(
+            r'<script[^>]*>.*?</script>',
+            multiLine: true,
+            caseSensitive: false,
+          ),
+          '',
+        )
+        .replaceAll(
+          RegExp(
+            r'<style[^>]*>.*?</style>',
+            multiLine: true,
+            caseSensitive: false,
+          ),
+          '',
+        )
         .replaceAll(RegExp(r'<[^>]+>'), '')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
@@ -275,7 +293,8 @@ class _MailJob extends QueueJob {
   @override
   Map<String, dynamic> toJson() => {
         'type': 'mail',
-        'to': message.to.map((a) => {'email': a.email, 'name': a.name}).toList(),
+        'to':
+            message.to.map((a) => {'email': a.email, 'name': a.name}).toList(),
         'subject': message.subject,
       };
 

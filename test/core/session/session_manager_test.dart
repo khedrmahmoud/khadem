@@ -1,8 +1,9 @@
-import 'package:test/test.dart';
 import 'dart:io';
-import 'package:khadem/src/core/session/session_manager.dart';
-import 'package:khadem/src/core/session/drivers/file_session_driver.dart';
+
 import 'package:khadem/src/contracts/session/session_driver_registry.dart';
+import 'package:khadem/src/core/session/drivers/file_session_driver.dart';
+import 'package:khadem/src/core/session/session_manager.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('SessionManager', () {
@@ -18,7 +19,6 @@ void main() {
       sessionManager = SessionManager(
         driverRegistry: registry,
         driverName: 'file',
-        maxAge: const Duration(hours: 24),
       );
     });
 
@@ -64,7 +64,8 @@ void main() {
 
       final updatedData = await sessionManager.getSession(sessionId);
       expect(updatedData, isNotNull);
-      expect(updatedData!['data'], equals({'initial': 'data', 'updated': 'data'}));
+      expect(
+          updatedData!['data'], equals({'initial': 'data', 'updated': 'data'}),);
     });
 
     test('should get and set session values', () async {
@@ -76,14 +77,16 @@ void main() {
 
       // Get values
       final userId = await sessionManager.getSessionValue(sessionId, 'user_id');
-      final username = await sessionManager.getSessionValue(sessionId, 'username');
+      final username =
+          await sessionManager.getSessionValue(sessionId, 'username');
 
       expect(userId, equals(456));
       expect(username, equals('johndoe'));
     });
 
     test('should remove session values', () async {
-      final sessionId = await sessionManager.createSession({'key1': 'value1', 'key2': 'value2'});
+      final sessionId = await sessionManager
+          .createSession({'key1': 'value1', 'key2': 'value2'});
 
       // Remove one value
       await sessionManager.removeSessionValue(sessionId, 'key1');
@@ -162,7 +165,8 @@ void main() {
       expect(error, equals('Something went wrong'));
 
       // Data should be cleared after retrieval
-      final messageAgain = await sessionManager.getFlashed(sessionId, 'message');
+      final messageAgain =
+          await sessionManager.getFlashed(sessionId, 'message');
       expect(messageAgain, isNull);
     });
 
@@ -193,30 +197,38 @@ void main() {
       await sessionManager.destroySession(sessionId);
 
       // Should not be valid anymore
-      final isValidAfterDestroy = await sessionManager.hasValidSession(sessionId);
+      final isValidAfterDestroy =
+          await sessionManager.hasValidSession(sessionId);
       expect(isValidAfterDestroy, isFalse);
     });
 
     test('should cleanup expired sessions', () async {
       // Create sessions with different ages
-      final expiredSessionId = await sessionManager.createSession({'expired': true});
+      final expiredSessionId =
+          await sessionManager.createSession({'expired': true});
 
       // Manually modify the session file to make it old
       final fileDriver = FileSessionDriver(tempDir.path);
       final expiredData = {
-        'created_at': DateTime.now().subtract(const Duration(hours: 25)).toIso8601String(),
-        'last_activity': DateTime.now().subtract(const Duration(hours: 25)).toIso8601String(),
+        'created_at': DateTime.now()
+            .subtract(const Duration(hours: 25))
+            .toIso8601String(),
+        'last_activity': DateTime.now()
+            .subtract(const Duration(hours: 25))
+            .toIso8601String(),
         'data': {'expired': true},
       };
       await fileDriver.write(expiredSessionId, expiredData);
 
-      final validSessionId = await sessionManager.createSession({'valid': true});
+      final validSessionId =
+          await sessionManager.createSession({'valid': true});
 
       // Cleanup expired sessions
       await sessionManager.cleanupExpiredSessions();
 
       // Expired session should be gone
-      final expiredExists = await sessionManager.hasValidSession(expiredSessionId);
+      final expiredExists =
+          await sessionManager.hasValidSession(expiredSessionId);
       expect(expiredExists, isFalse);
 
       // Valid session should still exist
@@ -242,8 +254,10 @@ void main() {
     late SessionDriverRegistry registry;
 
     setUp(() async {
-      tempDir1 = await Directory.systemTemp.createTemp('session_manager_test_1_');
-      tempDir2 = await Directory.systemTemp.createTemp('session_manager_test_2_');
+      tempDir1 =
+          await Directory.systemTemp.createTemp('session_manager_test_1_');
+      tempDir2 =
+          await Directory.systemTemp.createTemp('session_manager_test_2_');
       registry = SessionDriverRegistry();
 
       final fileDriver1 = FileSessionDriver(tempDir1.path);
@@ -255,7 +269,6 @@ void main() {
       sessionManager = SessionManager(
         driverRegistry: registry,
         driverName: 'file1',
-        maxAge: const Duration(hours: 24),
       );
     });
 

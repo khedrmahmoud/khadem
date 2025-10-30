@@ -1,5 +1,4 @@
-import 'package:khadem/khadem.dart'
-    show ModelObserver;
+import 'package:khadem/khadem.dart' show ModelObserver;
 import '../models/user.dart';
 
 /// Observer for User model lifecycle events.
@@ -24,19 +23,19 @@ class UserObserver extends ModelObserver<User> {
   @override
   void creating(User user) {
     print('🔵 [Observer] Creating user: ${user.email}');
-    
+
     // Generate UUID if not set
     if (user.id == null) {
       // In production: user.uuid = Uuid().v4();
       print('   → Generated UUID for user');
     }
-    
+
     // Set default status
     if (user.name == null || user.name!.isEmpty) {
       user.name = 'New User';
       print('   → Set default name');
     }
-    
+
     // Normalize email
     if (user.email != null) {
       user.email = user.email!.toLowerCase().trim();
@@ -56,15 +55,15 @@ class UserObserver extends ModelObserver<User> {
     print('✅ [Observer] User created successfully!');
     print('   → ID: ${user.id}');
     print('   → Email: ${user.email}');
-    
+
     // Send welcome email (in production)
     // EmailService.send(user.email, 'welcome', {'name': user.name});
     print('   → Welcome email queued');
-    
+
     // Create user profile (in production)
     // UserProfile.create({'user_id': user.id});
     print('   → User profile created');
-    
+
     // Log audit trail
     print('   → Audit log: user.created (ID: ${user.id})');
   }
@@ -82,14 +81,14 @@ class UserObserver extends ModelObserver<User> {
   @override
   void updating(User user) {
     print('🔵 [Observer] Updating user: ${user.id}');
-    
+
     // Track who updated (in production)
     // user.updatedBy = getCurrentUserId();
     print('   → Updated by: System');
-    
+
     // Log changes for audit trail
     print('   → Tracking changes...');
-    
+
     // Increment version number (for optimistic locking)
     // user.version = (user.version ?? 0) + 1;
   }
@@ -105,19 +104,19 @@ class UserObserver extends ModelObserver<User> {
   void updated(User user) {
     print('✅ [Observer] User updated successfully!');
     print('   → ID: ${user.id}');
-    
+
     // Clear user cache
     print('   → Cache cleared: user:${user.id}');
-    
+
     // Update search index (in production)
     // SearchService.updateIndex('users', user);
     print('   → Search index updated');
-    
+
     // Send email notification if email changed
     // if (user.wasChanged('email')) {
     //   EmailService.send(user.email, 'email_changed');
     // }
-    
+
     // Log audit trail
     print('   → Audit log: user.updated (ID: ${user.id})');
   }
@@ -135,12 +134,12 @@ class UserObserver extends ModelObserver<User> {
   @override
   void saving(User user) {
     print('💾 [Observer] Saving user...');
-    
+
     // Normalize data
     if (user.email != null) {
       user.email = user.email!.toLowerCase().trim();
     }
-    
+
     // Validate (in production, throw exception if invalid)
     if (user.email == null || !user.email!.contains('@')) {
       print('   ⚠️  Warning: Invalid email format');
@@ -156,10 +155,10 @@ class UserObserver extends ModelObserver<User> {
   @override
   void saved(User user) {
     print('✅ [Observer] User saved successfully!');
-    
+
     // Invalidate all user-related caches
     print('   → All caches invalidated');
-    
+
     // Broadcast user updated event (in production)
     // EventBus.emit('user.updated', user);
     print('   → Event broadcasted: user.updated');
@@ -179,19 +178,19 @@ class UserObserver extends ModelObserver<User> {
   @override
   bool deleting(User user) {
     print('🔴 [Observer] Attempting to delete user: ${user.id}');
-    
+
     // Example 1: Prevent deletion if user has active subscriptions
     // if (user.hasActiveSubscription) {
     //   print('   ❌ Cannot delete user with active subscription');
     //   return false; // Cancel deletion
     // }
-    
+
     // Example 2: Prevent deletion of admin users
     // if (user.role == 'admin') {
     //   print('   ❌ Cannot delete admin users');
     //   return false; // Cancel deletion
     // }
-    
+
     // Example 3: Soft delete instead of hard delete
     // if (!user.forceDelete) {
     //   user.deletedAt = DateTime.now();
@@ -199,7 +198,7 @@ class UserObserver extends ModelObserver<User> {
     //   print('   → Soft deleted instead');
     //   return false; // Cancel hard deletion
     // }
-    
+
     // Allow deletion
     print('   ✓ Deletion allowed');
     return true;
@@ -216,21 +215,21 @@ class UserObserver extends ModelObserver<User> {
   void deleted(User user) {
     print('✅ [Observer] User deleted successfully!');
     print('   → ID: ${user.id}');
-    
+
     // Delete user files (in production)
     // StorageService.deleteDirectory('users/${user.id}');
     print('   → User files deleted');
-    
+
     // Remove from all caches
     print('   → Removed from cache: user:${user.id}');
-    
+
     // Archive user data for GDPR compliance (in production)
     // ArchiveService.archiveUser(user);
     print('   → User data archived');
-    
+
     // Notify admins
     print('   → Admin notification sent: User ${user.email} deleted');
-    
+
     // Log audit trail
     print('   → Audit log: user.deleted (ID: ${user.id})');
   }
@@ -251,16 +250,16 @@ class UserObserver extends ModelObserver<User> {
     print('📥 [Observer] User retrieved from database');
     print('   → ID: ${user.id}');
     print('   → Email: ${user.email}');
-    
+
     // Decrypt sensitive fields (in production)
     // if (user.ssn != null) {
     //   user.ssn = decrypt(user.ssn);
     // }
-    
+
     // Track last accessed timestamp (in production)
     // trackUserAccess(user.id);
     print('   → Access tracked');
-    
+
     // Load additional computed data
     // user.fullName = '${user.firstName} ${user.lastName}';
   }
@@ -279,13 +278,13 @@ class UserObserver extends ModelObserver<User> {
   @override
   bool restoring(User user) {
     print('🔄 [Observer] Attempting to restore user: ${user.id}');
-    
+
     // Example: Check if restoration is allowed
     // if (!canRestoreUser(user.id)) {
     //   print('   ❌ Restoration not allowed');
     //   return false; // Cancel restoration
     // }
-    
+
     print('   ✓ Restoration allowed');
     return true;
   }
@@ -300,14 +299,14 @@ class UserObserver extends ModelObserver<User> {
   void restored(User user) {
     print('✅ [Observer] User restored successfully!');
     print('   → ID: ${user.id}');
-    
+
     // Send account restored email (in production)
     // EmailService.send(user.email, 'account_restored');
     print('   → Restoration email sent');
-    
+
     // Re-enable user services
     print('   → User services re-enabled');
-    
+
     // Log audit trail
     print('   → Audit log: user.restored (ID: ${user.id})');
   }
@@ -322,19 +321,19 @@ class UserObserver extends ModelObserver<User> {
   @override
   bool forceDeleting(User user) {
     print('⚠️  [Observer] Attempting to PERMANENTLY delete user: ${user.id}');
-    
+
     // Example: Require admin approval for permanent deletion
     // if (!isAdmin()) {
     //   print('   ❌ Only admins can permanently delete users');
     //   return false; // Cancel force deletion
     // }
-    
+
     // Example: Require explicit confirmation
     // if (!user.confirmedForceDelete) {
     //   print('   ❌ Force deletion not confirmed');
     //   return false; // Cancel force deletion
     // }
-    
+
     print('   ⚠️  PERMANENT deletion allowed');
     return true;
   }
@@ -349,16 +348,16 @@ class UserObserver extends ModelObserver<User> {
   void forceDeleted(User user) {
     print('✅ [Observer] User PERMANENTLY deleted!');
     print('   → ID: ${user.id}');
-    
+
     // Permanently delete all user files
     print('   → All user files permanently deleted');
-    
+
     // Remove from all systems
     print('   → Removed from all systems');
-    
+
     // Cannot archive (already gone)
     print('   → No archive (permanent deletion)');
-    
+
     // Log audit trail
     print('   → Audit log: user.force_deleted (ID: ${user.id})');
   }

@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:test/test.dart';
+
 import 'package:khadem/src/core/database/orm/casting/built_in_casters.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('JsonCast', () {
@@ -18,7 +19,7 @@ void main() {
     test('converts Map to JSON string', () {
       final data = {'name': 'John', 'age': 30};
       final result = caster.set(data);
-      
+
       expect(result, isA<String>());
       expect(jsonDecode(result), equals(data));
     });
@@ -26,7 +27,7 @@ void main() {
     test('converts JSON string to Map', () {
       const jsonString = '{"name":"John","age":30}';
       final result = caster.get(jsonString);
-      
+
       expect(result, isA<Map<String, dynamic>>());
       expect(result!['name'], equals('John'));
       expect(result['age'], equals(30));
@@ -35,7 +36,7 @@ void main() {
     test('returns Map as-is if already Map', () {
       final data = {'name': 'John'};
       final result = caster.get(data);
-      
+
       expect(result, equals(data));
     });
 
@@ -49,10 +50,10 @@ void main() {
         'user': {'name': 'John', 'age': 30},
         'settings': {'theme': 'dark'},
       };
-      
+
       final encoded = caster.set(data);
       final decoded = caster.get(encoded);
-      
+
       expect(decoded, equals(data));
       expect(decoded!['user']['name'], equals('John'));
     });
@@ -73,7 +74,7 @@ void main() {
     test('converts List<String> to JSON array', () {
       final data = ['admin', 'editor', 'user'];
       final result = caster.set(data);
-      
+
       expect(result, isA<String>());
       expect(jsonDecode(result), equals(data));
     });
@@ -81,7 +82,7 @@ void main() {
     test('converts JSON array to List<String>', () {
       const jsonString = '["admin","editor","user"]';
       final result = caster.get(jsonString);
-      
+
       expect(result, isA<List<String>>());
       expect(result, hasLength(3));
       expect(result![0], equals('admin'));
@@ -90,14 +91,14 @@ void main() {
     test('returns List<String> as-is if already List<String>', () {
       final data = ['tag1', 'tag2'];
       final result = caster.get(data);
-      
+
       expect(result, equals(data));
     });
 
     test('converts mixed List to List<String>', () {
       final data = [1, 'text', true, 3.14];
       final result = caster.get(data);
-      
+
       expect(result, isA<List<String>>());
       expect(result![0], equals('1'));
       expect(result[1], equals('text'));
@@ -113,7 +114,7 @@ void main() {
       final empty = <String>[];
       final encoded = caster.set(empty);
       final decoded = caster.get(encoded);
-      
+
       expect(decoded, isEmpty);
     });
   });
@@ -136,7 +137,7 @@ void main() {
         {'name': 'Jane', 'age': 25},
       ];
       final result = caster.set(data);
-      
+
       expect(result, isA<String>());
       expect(jsonDecode(result), equals(data));
     });
@@ -144,7 +145,7 @@ void main() {
     test('converts JSON to List<Map<String, dynamic>>', () {
       const jsonString = '[{"name":"John","age":30},{"name":"Jane","age":25}]';
       final result = caster.get(jsonString);
-      
+
       expect(result, isA<List<Map<String, dynamic>>>());
       expect(result, hasLength(2));
       expect(result![0]['name'], equals('John'));
@@ -157,7 +158,7 @@ void main() {
         {'id': 2},
       ];
       final result = caster.get(data);
-      
+
       expect(result, equals(data));
     });
 
@@ -167,7 +168,7 @@ void main() {
         {'another': 'map'},
       ];
       final result = caster.get(data);
-      
+
       expect(result, isA<List<Map<String, dynamic>>>());
     });
 
@@ -179,7 +180,7 @@ void main() {
       final empty = <Map<String, dynamic>>[];
       final encoded = caster.set(empty);
       final decoded = caster.get(encoded);
-      
+
       expect(decoded, isEmpty);
     });
 
@@ -190,10 +191,10 @@ void main() {
           'items': [1, 2, 3],
         },
       ];
-      
+
       final encoded = caster.set(data);
       final decoded = caster.get(encoded);
-      
+
       expect(decoded![0]['user']['name'], equals('John'));
       expect(decoded[0]['items'], equals([1, 2, 3]));
     });
@@ -214,7 +215,7 @@ void main() {
     test('hashes string values (one-way)', () {
       const password = 'my_secret_password';
       final hashed = caster.set(password);
-      
+
       expect(hashed, isA<String>());
       expect(hashed, isNot(equals(password)));
       expect(hashed.length, equals(64)); // SHA-256 produces 64 hex characters
@@ -224,27 +225,27 @@ void main() {
       const password = 'test123';
       final hash1 = caster.set(password);
       final hash2 = caster.set(password);
-      
+
       expect(hash1, equals(hash2));
     });
 
     test('produces different hashes for different inputs', () {
       final hash1 = caster.set('password1');
       final hash2 = caster.set('password2');
-      
+
       expect(hash1, isNot(equals(hash2)));
     });
 
     test('get returns hash as-is (one-way encryption)', () {
       const hash = 'abc123';
       final result = caster.get(hash);
-      
+
       expect(result, equals(hash));
     });
 
     test('handles empty strings', () {
       final hashed = caster.set('');
-      
+
       expect(hashed, isA<String>());
       expect(hashed.length, equals(64));
     });
@@ -347,7 +348,7 @@ void main() {
       expect(caster.get('TRUE'), isTrue);
       expect(caster.get('True'), isTrue);
       expect(caster.get('1'), isTrue);
-      
+
       expect(caster.get('false'), isFalse);
       expect(caster.get('0'), isFalse);
       expect(caster.get('anything else'), isFalse);
@@ -375,7 +376,7 @@ void main() {
     test('converts ISO 8601 string to DateTime', () {
       const isoString = '2024-10-09T12:00:00.000Z';
       final result = caster.get(isoString);
-      
+
       expect(result, isA<DateTime>());
       expect(result!.year, equals(2024));
       expect(result.month, equals(10));
@@ -385,7 +386,7 @@ void main() {
     test('converts date string to DateTime', () {
       const dateString = '2024-10-09';
       final result = caster.get(dateString);
-      
+
       expect(result, isA<DateTime>());
       expect(result!.year, equals(2024));
       expect(result.month, equals(10));
@@ -407,7 +408,7 @@ void main() {
     test('JsonCast handles arrays in JSON', () {
       final caster = JsonCast();
       const jsonString = '["not", "a", "map"]';
-      
+
       // Should return null because it's not a Map
       expect(caster.get(jsonString), isNull);
     });
@@ -416,7 +417,7 @@ void main() {
       final caster = ArrayCast();
       const jsonString = '[{"key": "value"}]';
       final result = caster.get(jsonString);
-      
+
       // Should convert objects to strings
       expect(result, isA<List<String>>());
     });
@@ -424,14 +425,14 @@ void main() {
     test('Casters handle very large values', () {
       final jsonCaster = JsonCast();
       final arrayCaster = ArrayCast();
-      
+
       // Large object
       final largeMap = Map.fromIterables(
         List.generate(1000, (i) => 'key$i'),
         List.generate(1000, (i) => 'value$i'),
       );
       expect(jsonCaster.get(jsonCaster.set(largeMap)), equals(largeMap));
-      
+
       // Large array
       final largeArray = List.generate(1000, (i) => 'item$i');
       expect(arrayCaster.get(arrayCaster.set(largeArray)), equals(largeArray));
@@ -440,13 +441,14 @@ void main() {
     test('Casters handle special characters', () {
       final jsonCaster = JsonCast();
       final data = {
-        'text': 'Special chars: "quotes", \'apostrophes\', \n newlines, \t tabs',
+        'text':
+            'Special chars: "quotes", \'apostrophes\', \n newlines, \t tabs',
         'emoji': '🎉🚀💻',
       };
-      
+
       final encoded = jsonCaster.set(data);
       final decoded = jsonCaster.get(encoded);
-      
+
       expect(decoded, equals(data));
     });
 
@@ -454,7 +456,7 @@ void main() {
       final caster = EncryptedCast();
       const text = '🔒 Secure 密码 пароль';
       final hash = caster.set(text);
-      
+
       expect(hash, isA<String>());
       expect(hash.length, equals(64));
     });

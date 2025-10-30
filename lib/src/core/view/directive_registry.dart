@@ -100,16 +100,15 @@ class DirectiveRegistry {
     String content,
     Map<String, dynamic> context,
   ) async {
-   
     for (final directive in _directives) {
-      try{
-      content = await directive.apply(content, context);
-      } catch(e){
+      try {
+        content = await directive.apply(content, context);
+      } catch (e) {
         // Log error but continue processing other directives
-        Khadem.logger.error('Error applying directive ${directive.runtimeType}: $e');
+        Khadem.logger
+            .error('Error applying directive ${directive.runtimeType}: $e');
       }
     }
     return content;
-  
   }
 }

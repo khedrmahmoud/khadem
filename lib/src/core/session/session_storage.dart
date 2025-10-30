@@ -21,8 +21,7 @@ abstract class SessionStorage {
 class FileSessionStorage implements SessionStorage {
   final Directory _directory;
 
-  FileSessionStorage(String path)
-      : _directory = Directory(path) {
+  FileSessionStorage(String path) : _directory = Directory(path) {
     if (!_directory.existsSync()) {
       _directory.createSync(recursive: true);
     }

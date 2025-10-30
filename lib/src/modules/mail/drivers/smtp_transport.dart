@@ -259,7 +259,8 @@ class SmtpTransport implements TransportInterface {
       if (message.htmlBody != null && message.textBody != null) {
         // Multipart alternative
         final boundary = _generateBoundary();
-        buffer.writeln('Content-Type: multipart/alternative; boundary="$boundary"');
+        buffer.writeln(
+            'Content-Type: multipart/alternative; boundary="$boundary"',);
         buffer.writeln();
         buffer.writeln('--$boundary');
         buffer.writeln('Content-Type: text/plain; charset=utf-8');
@@ -297,7 +298,8 @@ class SmtpTransport implements TransportInterface {
       buffer.writeln('--$boundary');
       if (message.htmlBody != null && message.textBody != null) {
         final altBoundary = _generateBoundary();
-        buffer.writeln('Content-Type: multipart/alternative; boundary="$altBoundary"');
+        buffer.writeln(
+            'Content-Type: multipart/alternative; boundary="$altBoundary"',);
         buffer.writeln();
         buffer.writeln('--$altBoundary');
         buffer.writeln('Content-Type: text/plain; charset=utf-8');
@@ -354,7 +356,8 @@ class SmtpTransport implements TransportInterface {
     final mimeType = attachment.mimeType ?? 'application/octet-stream';
     buffer.writeln('Content-Type: $mimeType; name="${attachment.filename}"');
     buffer.writeln('Content-Transfer-Encoding: base64');
-    buffer.writeln('Content-Disposition: attachment; filename="${attachment.filename}"');
+    buffer.writeln(
+        'Content-Disposition: attachment; filename="${attachment.filename}"',);
     buffer.writeln();
 
     List<int> data;
@@ -449,8 +452,18 @@ class SmtpTransport implements TransportInterface {
   String _formatDate(DateTime date) {
     final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
 
     final weekday = weekdays[date.weekday - 1];
@@ -458,7 +471,8 @@ class SmtpTransport implements TransportInterface {
     final offset = date.timeZoneOffset;
     final offsetSign = offset.isNegative ? '-' : '+';
     final offsetHours = offset.abs().inHours.toString().padLeft(2, '0');
-    final offsetMinutes = (offset.abs().inMinutes % 60).toString().padLeft(2, '0');
+    final offsetMinutes =
+        (offset.abs().inMinutes % 60).toString().padLeft(2, '0');
 
     return '$weekday, ${date.day} $month ${date.year} '
         '${date.hour.toString().padLeft(2, '0')}:'
@@ -498,7 +512,8 @@ class SmtpTransport implements TransportInterface {
         lineLength++;
       } else {
         // Encode as =XX
-        buffer.write('=${byte.toRadixString(16).toUpperCase().padLeft(2, '0')}');
+        buffer
+            .write('=${byte.toRadixString(16).toUpperCase().padLeft(2, '0')}');
         lineLength += 3;
       }
 

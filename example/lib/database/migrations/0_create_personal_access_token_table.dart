@@ -12,7 +12,6 @@ class CreatePersonalAccessTokenTable extends MigrationFile {
       table.string('guard', length: 50);
       table.timestamp('created_at').nullable();
       table.timestamp('expires_at').nullable();
-
     });
   }
 

@@ -8,18 +8,18 @@ import 'route_match_result.dart';
 /// - Dynamic routes: O(n) sequential search (but smaller n)
 class RouteMatcher {
   final List<Route> _routes;
-  
-  /// Fast lookup for static routes: Map<Method, Map<Path, Route>>
-  /// Example: {'GET': {'/users': Route1, '/posts': Route2}}
+
+  /// Fast lookup for static routes: `Map<Method, Map<Path, Route>>`
+  /// Example: `{'GET': {'/users': Route1, '/posts': Route2}}`
   final Map<String, Map<String, Route>> _staticRoutes = {};
-  
+
   /// Dynamic routes with parameters (smaller list to iterate)
   final List<Route> _dynamicRoutes = [];
 
   RouteMatcher(this._routes) {
     _categorizeRoutes();
   }
-  
+
   /// Categorizes routes into static and dynamic for optimized lookup
   void _categorizeRoutes() {
     for (final route in _routes) {
@@ -42,7 +42,7 @@ class RouteMatcher {
   RouteMatchResult? match(String method, String path) {
     // Normalize the incoming path for consistent matching
     final normalizedPath = _normalizePath(path);
-    
+
     // Try static routes first (O(1) lookup)
     if (_staticRoutes[method]?.containsKey(normalizedPath) ?? false) {
       final route = _staticRoutes[method]![normalizedPath]!;
@@ -52,7 +52,7 @@ class RouteMatcher {
         middleware: route.middleware,
       );
     }
-    
+
     // Fallback to dynamic routes (O(n) but smaller n)
     for (final route in _dynamicRoutes) {
       if (route.matches(method, path)) {
@@ -63,10 +63,10 @@ class RouteMatcher {
         );
       }
     }
-    
+
     return null;
   }
-  
+
   /// Normalizes a path by removing trailing slashes
   /// Preserves root path '/' as-is
   static String _normalizePath(String path) {
@@ -113,12 +113,12 @@ class RouteMatcher {
   /// Checks if any route matches the given method and path.
   bool hasMatch(String method, String path) {
     final normalizedPath = _normalizePath(path);
-    
+
     // Check static routes first (fast)
     if (_staticRoutes[method]?.containsKey(normalizedPath) ?? false) {
       return true;
     }
-    
+
     // Check dynamic routes
     return _dynamicRoutes.any((route) => route.matches(method, path));
   }

@@ -1,9 +1,9 @@
 /// Represents a job that can be queued and processed asynchronously.
 ///
 /// Just extend QueueJob and implement handle()!
-/// No registration required, just dispatch with Queue.dispatch(job).
 ///
-/// Example:
+/// ## Simple Jobs (Memory/Sync drivers)
+/// For memory and sync drivers, no serialization is needed:
 /// ```dart
 /// class SendEmailJob extends QueueJob {
 ///   final String email;
@@ -17,7 +17,35 @@
 /// }
 ///
 /// // Dispatch it
-/// Queue.dispatch(SendEmailJob('user@example.com'));
+/// queueManager.dispatch(SendEmailJob('user@example.com'));
+/// ```
+///
+/// ## Serializable Jobs (File/Redis/Database drivers)
+/// For persistent drivers, jobs must be serializable and registered:
+/// ```dart
+/// class SendEmailJob extends QueueJob with SerializableJob {
+///   final String email;
+///
+///   SendEmailJob(this.email);
+///
+///   factory SendEmailJob.fromJson(Map<String, dynamic> json) {
+///     return SendEmailJob(json['email'] as String);
+///   }
+///
+///   @override
+///   Map<String, dynamic> toJson() => {'email': email};
+///
+///   @override
+///   Future<void> handle() async {
+///     await sendEmail(email);
+///   }
+/// }
+///
+/// // Register at startup
+/// QueueJobRegistry.register('SendEmailJob', (json) => SendEmailJob.fromJson(json));
+///
+/// // Then dispatch as normal
+/// queueManager.dispatch(SendEmailJob('user@example.com'));
 /// ```
 abstract class QueueJob {
   /// Called when the job is executed.

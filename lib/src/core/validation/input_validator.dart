@@ -7,9 +7,14 @@ import 'rule_registry.dart';
 class InputValidator {
   final Map<String, dynamic> data;
   final Map<String, String> rules;
+  final Map<String, String> customMessages;
   final Map<String, String> errors = {};
 
-  InputValidator(this.data, this.rules);
+  InputValidator(
+    this.data,
+    this.rules, {
+    this.customMessages = const {},
+  });
 
   bool passes() {
     errors.clear();
@@ -56,7 +61,7 @@ class InputValidator {
         final messageKey = rule.validate(field, value, ruleArg, data: data);
         if (messageKey != null) {
           errors[field] =
-              _formatErrorMessage(messageKey, field, ruleArg, value);
+              _formatErrorMessage(messageKey, field, ruleArg, value, ruleName);
           break; // Stop at first error for this field
         }
       }
@@ -159,8 +164,17 @@ class InputValidator {
     String messageKey,
     String field,
     String? arg,
-    dynamic value,
-  ) {
+    dynamic value, [
+    String? ruleName,
+  ]) {
+    // Check if there's a custom message for this field and rule
+    if (ruleName != null) {
+      final customKey = '$field.$ruleName';
+      if (customMessages.containsKey(customKey)) {
+        return customMessages[customKey]!;
+      }
+    }
+
     final parameters = <String, dynamic>{
       'field': Lang.getField(field),
       'arg': arg,

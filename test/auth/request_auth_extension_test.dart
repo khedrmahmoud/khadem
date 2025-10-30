@@ -236,10 +236,12 @@ void main() {
       expect(request.hasPermission('any_permission'), isTrue);
 
       expect(request.hasAnyPermission(['read', 'delete']), isTrue);
-      expect(request.hasAnyPermission(['delete', 'update']), isTrue); // Admin has all permissions
+      expect(request.hasAnyPermission(['delete', 'update']),
+          isTrue,); // Admin has all permissions
 
       expect(request.hasAllPermissions(['read', 'write']), isTrue);
-      expect(request.hasAllPermissions(['read', 'delete']), isTrue); // Admin has all permissions
+      expect(request.hasAllPermissions(['read', 'delete']),
+          isTrue,); // Admin has all permissions
     });
 
     test('should check ownership correctly', () {
@@ -253,19 +255,28 @@ void main() {
 
     test('should check admin privileges correctly', () {
       // Regular user
-      request.setUser({'id': 1, 'roles': ['user']});
+      request.setUser({
+        'id': 1,
+        'roles': ['user'],
+      });
       expect(request.isAdmin, isFalse);
       expect(request.isSuperAdmin, isFalse);
       expect(request.canAccessAdmin(), isFalse);
 
       // Admin user
-      request.setUser({'id': 1, 'roles': ['admin']});
+      request.setUser({
+        'id': 1,
+        'roles': ['admin'],
+      });
       expect(request.isAdmin, isTrue);
       expect(request.isSuperAdmin, isFalse);
       expect(request.canAccessAdmin(), isTrue);
 
       // Super admin user
-      request.setUser({'id': 1, 'roles': ['super_admin']});
+      request.setUser({
+        'id': 1,
+        'roles': ['super_admin'],
+      });
       expect(request.isAdmin, isTrue);
       expect(request.isSuperAdmin, isTrue);
       expect(request.canAccessAdmin(), isTrue);
@@ -331,7 +342,8 @@ void main() {
       expect(() => request.requireAdmin(), throwsA(isA<Exception>()));
       expect(() => request.requireSuperAdmin(), throwsA(isA<Exception>()));
       expect(() => request.requireRole('admin'), throwsA(isA<Exception>()));
-      expect(() => request.requirePermission('read'), throwsA(isA<Exception>()));
+      expect(
+          () => request.requirePermission('read'), throwsA(isA<Exception>()),);
       expect(() => request.requireOwnership(2), throwsA(isA<Exception>()));
     });
 

@@ -39,7 +39,7 @@ abstract class AuthDriver {
   /// Invalidates a token (single device logout)
   ///
   /// [token] The token to invalidate
-  /// 
+  ///
   /// For JWT drivers: Blacklists access token and invalidates associated refresh token
   /// For Token drivers: Deletes the access token
   Future<void> invalidateToken(String token);

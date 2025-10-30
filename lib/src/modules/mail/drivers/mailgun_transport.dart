@@ -39,17 +39,19 @@ class MailgunTransport implements TransportInterface {
       message.validate();
 
       // Build request
-      final url = Uri.parse('${_config.endpoint}/v3/${_config.domain}/messages');
-      
+      final url =
+          Uri.parse('${_config.endpoint}/v3/${_config.domain}/messages');
+
       // Prepare multipart request
       final request = http.MultipartRequest('POST', url);
-      
+
       // Add authentication
       final credentials = base64Encode(utf8.encode('api:${_config.apiKey}'));
       request.headers['Authorization'] = 'Basic $credentials';
 
       // Add basic fields
-      request.fields['from'] = message.from?.toString() ?? 'noreply@${_config.domain}';
+      request.fields['from'] =
+          message.from?.toString() ?? 'noreply@${_config.domain}';
       request.fields['subject'] = message.subject ?? '';
 
       // Add recipients
@@ -157,7 +159,7 @@ class MailgunTransport implements TransportInterface {
     try {
       // Test by validating domain
       final url = Uri.parse('${_config.endpoint}/v3/domains/${_config.domain}');
-      
+
       final credentials = base64Encode(utf8.encode('api:${_config.apiKey}'));
       final response = await _client.get(
         url,

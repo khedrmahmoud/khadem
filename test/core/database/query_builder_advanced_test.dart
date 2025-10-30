@@ -7,7 +7,8 @@ import 'package:test/test.dart';
 // Simple mock connection for testing SQL generation only
 class _MockConnection implements ConnectionInterface {
   @override
-  Future<DatabaseResponse> execute(String query, [List<dynamic> bindings = const []]) async {
+  Future<DatabaseResponse> execute(String query,
+      [List<dynamic> bindings = const [],]) async {
     return DatabaseResponse(data: [], affectedRows: 0);
   }
 
@@ -151,9 +152,7 @@ void main() {
       });
 
       test('chains with other WHERE clauses', () {
-        queryBuilder
-            .where('active', '=', true)
-            .whereBetween('price', 100, 500);
+        queryBuilder.where('active', '=', true).whereBetween('price', 100, 500);
 
         final sql = queryBuilder.toSql();
         expect(sql, contains('`active` = ? AND `price` BETWEEN ? AND ?'));
@@ -185,7 +184,9 @@ void main() {
       });
 
       test('chains multiple LIKE clauses', () {
-        queryBuilder.whereLike('name', '%John%').whereLike('email', '%@gmail.com');
+        queryBuilder
+            .whereLike('name', '%John%')
+            .whereLike('email', '%@gmail.com');
 
         final sql = queryBuilder.toSql();
         expect(sql, contains('`name` LIKE ? AND `email` LIKE ?'));

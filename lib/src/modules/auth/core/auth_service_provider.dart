@@ -79,9 +79,6 @@ class AuthServiceProvider extends ServiceProvider {
     container.singleton<TokenGenerator>((_) => SecureTokenGenerator());
   }
 
- 
- 
-
   /// Registers the main authentication manager
   Future<void> _registerAuthManager(ContainerInterface container) async {
     container.singleton<AuthManager>(

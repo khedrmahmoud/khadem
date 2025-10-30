@@ -178,8 +178,14 @@ class ServeCommand extends KhademCommand {
         _mainIsolate = vm.isolates?.first;
 
         if (_mainIsolate != null) {
-          // Resume the isolate if it's paused (due to --pause-isolates-on-start)
-          await _vmService!.resume(_mainIsolate!.id!);
+          // Try to resume the isolate if it's paused (due to --pause-isolates-on-start)
+          try {
+            await _vmService!.resume(_mainIsolate!.id!);
+          } catch (e) {
+            // Isolate might already be running, which is fine
+            logger.warning(
+                '⚠️ Could not resume isolate (might already be running): $e',);
+          }
           logger.info(
             '✅ Connected to VM Service. Hot reload and restart are active.',
           );
@@ -225,8 +231,8 @@ class ServeCommand extends KhademCommand {
 
   void _setupStdinListener() {
     if (_stdinSubscription != null) return;
-    logger
-        .info('💡 Press "r" for hot reload, "f" for hot restart, "q" to quit.');
+    logger.info(
+        '💡 Press "r" for hot reload, "f" for full restart, "q" to quit.',);
     try {
       stdin.lineMode = false;
       stdin.echoMode = false;
@@ -242,7 +248,7 @@ class ServeCommand extends KhademCommand {
         case 'r':
           _hotReload();
           break;
-        case 'f': // Keep 'f' for hot restart as well
+        case 'f': // Full restart
           _hotRestart();
           break;
         case 'c': // Add 'c' to clear consecutive failures
@@ -279,28 +285,7 @@ class ServeCommand extends KhademCommand {
   }
 
   Future<void> _hotRestart() async {
-    if (_vmService == null || _mainIsolate == null) {
-      logger.warning(
-        '⚠️ VM Service not available, performing full restart instead',
-      );
-      await _fullRestart();
-      return;
-    }
-    logger.info('🔄 Performing hot restart...');
-    try {
-      // Resume the isolate first if it's paused
-      await _vmService!.resume(_mainIsolate!.id!);
-
-      // Then call the hot restart service extension
-      await _vmService!.callServiceExtension(
-        'ext.dart.io.restart',
-        isolateId: _mainIsolate!.id!,
-      );
-      logger.info('✅ Hot restart successful.');
-    } catch (e) {
-      logger.error('❌ Hot restart failed: $e. Falling back to full restart.');
-      await _fullRestart();
-    }
+    await _fullRestart();
   }
 
   Future<void> _fullRestart() async {

@@ -14,11 +14,13 @@ class TestUser extends KhademModel<TestUser> with QueryScopes<TestUser> {
   String? role;
 
   // Define query scopes
-  QueryBuilderInterface<TestUser> scopeActive(QueryBuilderInterface<TestUser> query) {
+  QueryBuilderInterface<TestUser> scopeActive(
+      QueryBuilderInterface<TestUser> query,) {
     return query.where('active', '=', true);
   }
 
-  QueryBuilderInterface<TestUser> scopeVerified(QueryBuilderInterface<TestUser> query) {
+  QueryBuilderInterface<TestUser> scopeVerified(
+      QueryBuilderInterface<TestUser> query,) {
     return query.whereNotNull('email_verified_at');
   }
 
@@ -37,7 +39,8 @@ class TestUser extends KhademModel<TestUser> with QueryScopes<TestUser> {
   }
 
   // Composite scope
-  QueryBuilderInterface<TestUser> scopeTrusted(QueryBuilderInterface<TestUser> query) {
+  QueryBuilderInterface<TestUser> scopeTrusted(
+      QueryBuilderInterface<TestUser> query,) {
     return scopeVerified(scopeActive(query));
   }
 
@@ -91,7 +94,8 @@ class TestUser extends KhademModel<TestUser> with QueryScopes<TestUser> {
   }
 
   @override
-  List<String> get fillable => ['name', 'email', 'active', 'email_verified_at', 'role'];
+  List<String> get fillable =>
+      ['name', 'email', 'active', 'email_verified_at', 'role'];
 }
 
 void main() {

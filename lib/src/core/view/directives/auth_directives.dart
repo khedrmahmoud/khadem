@@ -1,5 +1,6 @@
 import 'package:khadem/src/contracts/views/directive_contract.dart';
 import 'package:khadem/src/core/http/context/request_context.dart';
+
 /// Auth directive
 /// Renders content between @auth and @endauth if user is authenticated
 class AuthDirective implements ViewDirective {

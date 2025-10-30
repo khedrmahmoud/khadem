@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:khadem/khadem.dart';
 
-
 class SocketClient {
   final String id;
   final WebSocket socket;
@@ -30,7 +29,6 @@ class SocketClient {
   }
 
   void send(String event, dynamic data) {
-    
     RequestContext.run(_request, () {
       final payload = jsonEncode({'event': event, 'data': data});
       socket.add(payload);

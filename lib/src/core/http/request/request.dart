@@ -104,8 +104,9 @@ class Request {
 
   /// Validates the request body input against the given rules.
   /// Shortcut for validator.validateBody()
-  Future<Map<String, dynamic>> validate(Map<String, String> rules) =>
-      _validator.validateBody(rules);
+  Future<Map<String, dynamic>> validate(Map<String, String> rules,
+          {Map<String, String>? messages,}) =>
+      _validator.validateBody(rules, messages: messages);
 
   /// Validates specific input data against rules.
   /// Shortcut for validator.validateData()
@@ -158,7 +159,6 @@ class Request {
 
   /// Checks if a specific cookie is present.
   bool hasCookie(String name) => cookieHandler.has(name);
-
 
   /// Gets a header value by name.
   /// Shortcut for headers.header()
@@ -284,6 +284,4 @@ class Request {
   /// Checks if the session is about to expire within the given duration.
   bool isSessionExpiringSoon([Duration within = const Duration(minutes: 5)]) =>
       _session.isExpiringSoon(within);
-
-  
 }

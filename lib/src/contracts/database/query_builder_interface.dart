@@ -383,7 +383,8 @@ abstract class QueryBuilderInterface<T> {
   ]);
 
   /// Query with relationship count
-  QueryBuilderInterface<T> has(String relation, [String operator = '>=', int count = 1]);
+  QueryBuilderInterface<T> has(String relation,
+      [String operator = '>=', int count = 1,]);
 
   /// Query without any of the relationship
   QueryBuilderInterface<T> doesntHave(String relation);
@@ -430,7 +431,8 @@ abstract class QueryBuilderInterface<T> {
   );
 
   /// Set raw SQL as the FROM clause
-  QueryBuilderInterface<T> fromRaw(String sql, [List<dynamic> bindings = const []]);
+  QueryBuilderInterface<T> fromRaw(String sql,
+      [List<dynamic> bindings = const [],]);
 
   /// Add a subquery to the SELECT clause
   QueryBuilderInterface<T> selectSub(

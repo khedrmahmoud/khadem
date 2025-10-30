@@ -71,8 +71,11 @@ class DatabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<int> deleteUserTokens(dynamic userId,
-      {String? guard, Map<String, dynamic>? filter,}) async {
+  Future<int> deleteUserTokens(
+    dynamic userId, {
+    String? guard,
+    Map<String, dynamic>? filter,
+  }) async {
     final query = Khadem.db
         .table('personal_access_tokens')
         .where('tokenable_id', '=', userId);
@@ -120,7 +123,9 @@ class DatabaseAuthRepository implements AuthRepository {
     String? guard,
   }) async {
     final query = Khadem.db.table('personal_access_tokens').whereRaw(
-        'token LIKE ?', ['$prefix%'],); // Use SQL LIKE for prefix search
+      'token LIKE ?',
+      ['$prefix%'],
+    ); // Use SQL LIKE for prefix search
 
     if (type != null) {
       query.where('type', '=', type);
@@ -146,7 +151,8 @@ class DatabaseAuthRepository implements AuthRepository {
   ///
   /// [filters] A map of column names and values to filter by
   Future<List<Map<String, dynamic>>> findTokensByFilter(
-      Map<String, dynamic> filters,) async {
+    Map<String, dynamic> filters,
+  ) async {
     final query = Khadem.db.table('personal_access_tokens');
 
     filters.forEach((key, value) {

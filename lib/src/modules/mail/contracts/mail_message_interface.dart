@@ -24,10 +24,12 @@ class MailAttachment {
   final String? mimeType;
 
   const MailAttachment({
-    required this.filename, this.path,
+    required this.filename,
+    this.path,
     this.data,
     this.mimeType,
-  }) : assert(path != null || data != null, 'Either path or data must be provided');
+  }) : assert(path != null || data != null,
+            'Either path or data must be provided',);
 
   bool get isFilePath => path != null;
   bool get isRawData => data != null;

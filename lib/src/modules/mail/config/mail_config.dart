@@ -22,7 +22,8 @@ class MailConfig {
   final PostmarkConfig? postmark;
 
   const MailConfig({
-    required this.from, this.defaultTransport = 'log',
+    required this.from,
+    this.defaultTransport = 'log',
     this.smtp,
     this.mailgun,
     this.ses,
@@ -34,7 +35,7 @@ class MailConfig {
     return MailConfig(
       defaultTransport: map['default'] as String? ?? 'log',
       from: MailFromConfig.fromMap(map['from'] as Map<String, dynamic>),
-      smtp: map['smtp'] != null 
+      smtp: map['smtp'] != null
           ? SmtpConfig.fromMap(map['smtp'] as Map<String, dynamic>)
           : null,
       mailgun: map['mailgun'] != null

@@ -17,7 +17,9 @@ class PaginatedResult<T> {
 
   Map<String, dynamic> toJson() => {
         'data': data is List<KhademModel>
-            ? (data as List<KhademModel>).map((dynamic e) => e.toJson()).toList()
+            ? (data as List<KhademModel>)
+                .map((dynamic e) => e.toJson())
+                .toList()
             : data,
         'meta': {
           'total': total,
@@ -30,7 +32,8 @@ class PaginatedResult<T> {
   Future<Map<String, dynamic>> toJsonAsync() async => {
         'data': data is List<KhademModel>
             ? await Future.wait(
-                (data as List<KhademModel>).map((dynamic e) => e.toJsonAsync()),)
+                (data as List<KhademModel>).map((dynamic e) => e.toJsonAsync()),
+              )
             : data,
         'meta': {
           'total': total,
