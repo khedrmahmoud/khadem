@@ -13,7 +13,7 @@ class ServeCommand extends KhademCommand {
   StreamSubscription? _watcherSubscription;
   StreamSubscription? _stdinSubscription;
   Timer? _debounceTimer;
-  
+
   bool _isRestarting = false;
   bool _isShuttingDown = false;
   String? _vmServiceUri;
@@ -41,17 +41,17 @@ class ServeCommand extends KhademCommand {
   @override
   Future<void> handle(List<String> args) async {
     logger.info('🚀 Starting Khadem development server...');
-    
+
     await _startServer();
-    
+
     // Set up file watcher for auto-reload
     if (argResults?['watch'] as bool? ?? true) {
       _setupFileWatcher();
     }
-    
+
     // Set up keyboard commands
     _setupStdinListener();
-    
+
     // Keep the command alive
     await Completer<void>().future;
   }
@@ -99,7 +99,7 @@ class ServeCommand extends KhademCommand {
 
   Future<void> _connectToVmService() async {
     _vmServiceUri = 'ws://localhost:$_vmServicePort/ws';
-    
+
     try {
       logger.info('🔗 Connecting to VM Service for hot reload...');
       _vmService = await vmServiceConnectUri(_vmServiceUri!);
@@ -112,7 +112,8 @@ class ServeCommand extends KhademCommand {
         logger.warning('⚠️ Hot reload unavailable (no isolates found)');
       }
     } catch (e) {
-      logger.warning('⚠️ Hot reload unavailable (VM Service connection failed)');
+      logger
+          .warning('⚠️ Hot reload unavailable (VM Service connection failed)');
       _vmService = null;
       _mainIsolate = null;
     }
@@ -142,20 +143,20 @@ class ServeCommand extends KhademCommand {
 
   void _setupStdinListener() {
     if (_stdinSubscription != null) return;
-    
+
     logger.info('💡 Commands: [r] reload | [f] full restart | [q] quit');
-    
+
     // Use line-based input (works everywhere, just press Enter after command)
     stdin.lineMode = true;
     stdin.echoMode = true;
-    
+
     _stdinSubscription = stdin
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) {
       final input = line.trim().toLowerCase();
       if (input.isEmpty) return;
-      
+
       switch (input[0]) {
         case 'r':
           _hotReload();
@@ -169,7 +170,9 @@ class ServeCommand extends KhademCommand {
           _shutdown();
           break;
         default:
-          logger.info('Unknown command. Use: r (reload), f (full restart), q (quit)');
+          logger.info(
+            'Unknown command. Use: r (reload), f (full restart), q (quit)',
+          );
       }
     });
   }
@@ -180,7 +183,7 @@ class ServeCommand extends KhademCommand {
       await _fullRestart();
       return;
     }
-    
+
     logger.info('🔄 Hot reloading...');
     try {
       final result = await _vmService!.reloadSources(_mainIsolate!.id!);
@@ -196,7 +199,7 @@ class ServeCommand extends KhademCommand {
 
   Future<void> _fullRestart() async {
     if (_isRestarting || _isShuttingDown) return;
-    
+
     _isRestarting = true;
     logger.info('🔄 Restarting server...');
 
@@ -232,15 +235,15 @@ class ServeCommand extends KhademCommand {
   void _shutdown() {
     if (_isShuttingDown) return;
     _isShuttingDown = true;
-    
+
     logger.info('👋 Shutting down server...');
-    
+
     _debounceTimer?.cancel();
     _watcherSubscription?.cancel();
     _stdinSubscription?.cancel();
     _vmService?.dispose();
     _serverProcess?.kill();
-    
+
     exit(0);
   }
 }
