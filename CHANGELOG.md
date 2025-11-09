@@ -1,3 +1,24 @@
+## 1.1.1-beta
+
+### Bug Fixes & Improvements
+- **ServeCommand Refactor**: Complete overhaul of the development server command
+  - Fixed PowerShell terminal hang issue (removed raw mode requirement)
+  - Simplified error handling and removed complex retry logic
+  - Improved error messages and user experience
+  - Line-based input (press Enter after command) works on all platforms
+  - Single VM service connection attempt with graceful fallback
+  - Cleaner code structure (reduced from 400+ to ~250 lines)
+  - Interactive commands: `r` (hot reload), `f` (full restart), `q` (quit)
+  - Auto-reload on file changes with debouncing
+  - Better process lifecycle management
+
+### Technical Improvements
+- Removed unnecessary state tracking (consecutive failures, initial start flags)
+- Simplified VM service connection logic
+- Better separation of concerns in server lifecycle
+- Improved shutdown handling
+- Cleaner error reporting
+
 ## 1.1.0-beta
 
 ### Major Features
