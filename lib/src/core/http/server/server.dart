@@ -55,10 +55,6 @@ class Server {
   void injectRoutes(void Function(ServerRouter router) register) =>
       register(_serverRouter);
 
-  /// Register an initializer callback that runs before the server starts.
-  void setInitializer(void Function() initializer) =>
-      _serverLifecycle.setInitializer(initializer);
-
   /// Trigger a lifecycle reload. In development, lightweight endpoints are
   /// injected to allow manual reloads.
   Future<void> reload() async {
