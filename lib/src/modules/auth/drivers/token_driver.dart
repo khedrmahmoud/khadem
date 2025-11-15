@@ -240,8 +240,6 @@ class TokenDriver implements AuthDriver {
       prefix: userId.toString(),
     );
 
-    
-
     // Store new access token
     final accessTokenData = {
       'token': newAccessToken,
@@ -257,7 +255,6 @@ class TokenDriver implements AuthDriver {
     }
 
     await _tokenService.storeToken(accessTokenData);
-
 
     final newRefreshToken = _tokenGenerator.generateToken();
 

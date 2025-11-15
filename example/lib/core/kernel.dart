@@ -19,7 +19,6 @@ import '../app/providers/observer_service_provider.dart';
 import '../app/providers/scheduler_service_provider.dart';
 import '../config/app.dart';
 import '../database/migrations/migrations.dart';
- 
 
 class Kernel {
   Kernel._();

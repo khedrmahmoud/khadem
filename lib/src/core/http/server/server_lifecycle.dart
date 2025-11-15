@@ -10,14 +10,11 @@ class ServerLifecycle {
 
   ServerLifecycle(this._router, this._middleware, this._static);
 
- 
-
   Future<void> reload() async {
     // Fallback to manual reload
-      _router.clear();
-      _middleware.clear();
-      _static.clear();
-   
+    _router.clear();
+    _middleware.clear();
+    _static.clear();
   }
 
   Future<void> start({int port = 8080, String? host}) async {
