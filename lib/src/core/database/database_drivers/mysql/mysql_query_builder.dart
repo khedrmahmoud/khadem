@@ -1911,7 +1911,7 @@ class MySQLQueryBuilder<T> implements QueryBuilderInterface<T> {
   ///
   /// Example:
   /// ```dart
-  /// server.get('/api/export/users', (req, res) async {
+  /// router.get('/api/export/users', (req, res) async {
   ///   res.header('Content-Type', 'application/json');
   ///   final userStream = User.query().asStream()
   ///     .map((user) => jsonEncode(user.toJson()) + '\\n');
