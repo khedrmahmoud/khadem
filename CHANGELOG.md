@@ -1,3 +1,13 @@
+## 1.1.2-beta
+
+### Bug Fixes, Refactors & Improvements
+- **Server & Router**: Move route registration responsibility to the router and remove direct HTTP method helpers from `Server`.
+  - `Server.injectRoutes((router) { ... })` provides an explicit, single-entrypoint for route registration.
+  - Internal server fields renamed for clarity (e.g. `ServerRouter`, `ServerMiddleware`, `ServerLifecycle`).
+  - Development-only endpoints (`/reload`, `/restart`) are injected by the server router only in development mode.
+- **Docs & Cleanups**: Improved server docs, removed unused imports, and minor lint/format fixes.
+
+
 ## 1.1.1-beta
 
 ### Bug Fixes & Improvements
@@ -29,7 +39,7 @@
   - Queue integration for async email sending
   - Comprehensive mail configuration system
 
-- **Enhanced Queue System**: Advanced queue management with new features
+-- **Enhanced Queue System**: Advanced queue management with new features
   - Dead Letter Queue (DLQ) for failed job handling
   - Queue metrics and monitoring
   - Priority queue support
@@ -37,7 +47,7 @@
   - Multiple storage drivers (Redis, File, In-Memory, Synchronous)
   - Job registry for better job management
 
-- **ORM Traits & Features**: Comprehensive ORM enhancements
+-- **ORM Traits & Features**: Comprehensive ORM enhancements
   - ModelObserver with 12 lifecycle hooks (creating, created, updating, updated, saving, saved, deleting, deleted, retrieving, retrieved, restoring, restored, forceDeleting, forceDeleted)
   - Timestamps trait for automatic created_at/updated_at management
   - SoftDeletes trait with restore and force delete capabilities
@@ -46,7 +56,7 @@
   - QueryScopes trait for reusable query constraints
   - HasTranslations trait for multi-language model support
 
-- **Form Request Validation**: Laravel-style form request validation
+-- **Form Request Validation**: Laravel-style form request validation
   - Dedicated request validation classes
   - Authorization logic separation
   - Automatic validation error responses
@@ -96,3 +106,5 @@
 ## 1.0.0-beta
 - Initial beta release
 - Core framework features included
+
+```

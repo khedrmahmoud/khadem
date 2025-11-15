@@ -36,6 +36,9 @@ class TokenDriver implements AuthDriver {
   /// Token expiry duration
   final Duration? _tokenExpiry;
 
+  /// Refresh token expiry duration
+  final Duration? _refreshTokenExpiry;
+
   /// Provider key
   final String _providerKey;
 
@@ -51,6 +54,7 @@ class TokenDriver implements AuthDriver {
     TokenGenerator? tokenGenerator,
     TokenInvalidationStrategyFactory? strategyFactory,
     Duration? tokenExpiry,
+    Duration? refreshTokenExpiry,
   })  : _repository = repository ?? DatabaseAuthRepository(),
         _tokenService = tokenService ?? DatabaseTokenService(),
         _tokenGenerator = tokenGenerator ?? SecureTokenGenerator(),
@@ -59,6 +63,7 @@ class TokenDriver implements AuthDriver {
               tokenService ?? DatabaseTokenService(),
             ),
         _tokenExpiry = tokenExpiry,
+        _refreshTokenExpiry = refreshTokenExpiry,
         _providerKey = providerKey,
         _config = config;
 
@@ -73,8 +78,11 @@ class TokenDriver implements AuthDriver {
   }) {
     final provider = config.getProvider(providerKey);
 
-    final tokenExpiry = provider['token_expiry'] != null
-        ? Duration(seconds: provider['token_expiry'] as int)
+    final tokenExpiry = provider['access_token_expiry'] != null
+        ? Duration(seconds: provider['access_token_expiry'] as int)
+        : null;
+    final refreshTokenExpiry = provider['refresh_token_expiry'] != null
+        ? Duration(seconds: provider['refresh_token_expiry'] as int)
         : null;
 
     final tokenServiceInstance = tokenService ?? DatabaseTokenService();
@@ -87,6 +95,7 @@ class TokenDriver implements AuthDriver {
           TokenInvalidationStrategyFactory(tokenServiceInstance),
       providerKey: providerKey,
       tokenExpiry: tokenExpiry,
+      refreshTokenExpiry: refreshTokenExpiry,
       config: config,
     );
   }
@@ -160,20 +169,22 @@ class TokenDriver implements AuthDriver {
 
     // For Token driver, we can optionally generate refresh tokens too
     // This provides consistency with JWT driver behavior
-    final refreshToken = _tokenGenerator.generateToken();
+    String? refreshToken;
+    if (_refreshTokenExpiry != null) {
+      refreshToken = _tokenGenerator.generateToken();
+      // Store refresh token
+      final refreshTokenData = {
+        'token': refreshToken,
+        'tokenable_id': userId,
+        'guard': _providerKey,
+        'type': 'refresh',
+        'created_at': DateTime.now().toIso8601String(),
+        'expires_at':
+            DateTime.now().add(_refreshTokenExpiry!).toIso8601String(),
+      };
 
-    // Store refresh token
-    final refreshTokenData = {
-      'token': refreshToken,
-      'tokenable_id': userId,
-      'guard': _providerKey,
-      'type': 'refresh',
-      'created_at': DateTime.now().toIso8601String(),
-      'expires_at':
-          DateTime.now().add(const Duration(days: 7)).toIso8601String(),
-    };
-
-    await _tokenService.storeToken(refreshTokenData);
+      await _tokenService.storeToken(refreshTokenData);
+    }
 
     return AuthResponse(
       user: user.toAuthArray(),
@@ -229,8 +240,6 @@ class TokenDriver implements AuthDriver {
       prefix: userId.toString(),
     );
 
-    final newRefreshToken = _tokenGenerator.generateToken();
-
     // Store new access token
     final accessTokenData = {
       'token': newAccessToken,
@@ -247,6 +256,8 @@ class TokenDriver implements AuthDriver {
 
     await _tokenService.storeToken(accessTokenData);
 
+    final newRefreshToken = _tokenGenerator.generateToken();
+
     // Store new refresh token
     final refreshTokenData = {
       'token': newRefreshToken,
@@ -254,8 +265,9 @@ class TokenDriver implements AuthDriver {
       'guard': _providerKey,
       'type': 'refresh',
       'created_at': DateTime.now().toIso8601String(),
-      'expires_at':
-          DateTime.now().add(const Duration(days: 7)).toIso8601String(),
+      'expires_at': DateTime.now()
+          .add(_refreshTokenExpiry ?? const Duration(days: 7))
+          .toIso8601String(),
     };
 
     await _tokenService.storeToken(refreshTokenData);

@@ -7,22 +7,14 @@ class ServerLifecycle {
   final ServerRouter _router;
   final ServerMiddleware _middleware;
   final ServerStatic _static;
-  void Function()? _initializer;
 
   ServerLifecycle(this._router, this._middleware, this._static);
 
-  void setInitializer(void Function() initializer) {
-    _initializer = initializer;
-  }
-
   Future<void> reload() async {
     // Fallback to manual reload
-    if (_initializer != null) {
-      _router.clear();
-      _middleware.clear();
-      _static.clear();
-      _initializer!();
-    }
+    _router.clear();
+    _middleware.clear();
+    _static.clear();
   }
 
   Future<void> start({int port = 8080, String? host}) async {
