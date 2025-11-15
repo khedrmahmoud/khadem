@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:khadem/khadem.dart'
     show Khadem, ContainerInterface, SocketServer, Server, SocketManager;
@@ -8,50 +7,49 @@ import '../core/kernel.dart';
 import '../routes/socket.dart';
 import '../routes/web.dart';
 
+/// Entry point of the Khadem application.
+/// Initializes the application kernel, starts the HTTP and Socket servers.
 Future<void> main(List<String> args) async {
-  if (_isSnapshotBuild()) return;
-
   final container = Khadem.container;
+  // Bootstrap the application kernel
   await Kernel.bootstrap();
 
-  final port =
-      _extractPort(args) ?? Khadem.env.getInt("APP_PORT", defaultValue: 9000);
-
+  // Start both HTTP and Socket servers concurrently
   await Future.wait([
-    _startHttpServer(port, container),
+    _startHttpServer(container),
     _startSocketServer(container, Khadem.socket),
   ]);
 }
 
-bool _isSnapshotBuild() =>
-    Platform.environment.containsKey('KHADIM_JIT_TRAINING');
-
-Future _startHttpServer(int port, ContainerInterface container) async {
+/// Start the HTTP server
+Future _startHttpServer(ContainerInterface container) async {
+  final port = _extractPort("http_port");
   final server = Server();
-  registerRoutes(server);
-  server.setInitializer(() async {
-    registerRoutes(server);
-    await server.start(port: port);
-  });
-  await server.reload();
+
+  // Register global middlewares
+  server.applyMiddlewares(Kernel.middlewares);
+  // Inject web routes
+  server.injectRoutes(registerRoutes);
+  // Serve static files from `public` folder
+  server.serveStatic();
+
+  await server.start(port: port);
 }
 
+/// Start the Socket server
 Future<void> _startSocketServer(
   ContainerInterface container,
   SocketManager manager,
 ) async {
-  final socketPort = Khadem.env.getInt("SOCKET_PORT", defaultValue: 8080);
+  final socketPort = _extractPort("socket_port", defaultValue: 8080);
   final socketServer = SocketServer(socketPort, manager: manager);
-
-  registerSocketRoutes(socketServer); // 👈 Socket routes
+  // Inject socket routes
+  registerSocketRoutes(socketServer);
 
   await socketServer.start();
 }
 
-int? _extractPort(List<String> args) {
-  final portIndex = args.indexOf('--port');
-  if (portIndex != -1 && args.length > portIndex + 1) {
-    return int.tryParse(args[portIndex + 1]);
-  }
-  return null;
+/// Extract port from environment
+int _extractPort(String varName, {int defaultValue = 9000}) {
+  return Khadem.config.get("app.$varName") ?? defaultValue;
 }

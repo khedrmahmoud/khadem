@@ -1,6 +1,5 @@
 import '../../../contracts/scheduler/job_definition.dart';
 import '../../../contracts/scheduler/scheduled_job.dart';
-import '../../../support/scheduled_tasks/ping_job.dart';
 import '../../../support/scheduled_tasks/ttl_file_cleaner_task.dart';
 
 /// Registry for managing scheduled jobs
@@ -17,13 +16,6 @@ class SchedulerJobRegistry {
   /// This method should be called during application bootstrap
   /// to register the default jobs that come with the framework.
   static void registerAll() {
-    register(
-      JobDefinition(
-        name: 'ping',
-        factory: (config) => PingJob(),
-      ),
-    );
-
     register(
       JobDefinition(
         name: 'ttl_cleaner',

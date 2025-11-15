@@ -12,12 +12,12 @@ import 'package:khadem/khadem.dart'
         CoreServiceProvider,
         CacheServiceProvider;
 
-import '../../app/Providers/event_service_provider.dart';
-import '../../app/Providers/scheduler_service_provider.dart';
-import '../../app/providers/observer_service_provider.dart';
-import '../../config/app.dart';
 import '../app/http/middleware/cors_middleware.dart';
 import '../app/providers/app_service_provider.dart';
+import '../app/providers/event_service_provider.dart';
+import '../app/providers/observer_service_provider.dart';
+import '../app/providers/scheduler_service_provider.dart';
+import '../config/app.dart';
 import '../database/migrations/migrations.dart';
 
 class Kernel {

@@ -4,7 +4,6 @@ import '0_create_personal_access_token_table.dart';
 import '0_create_users_table.dart';
 
 // Migration registry - automatically maintained by the migration generator
-// This file is used by the 'khadem migrate' command to discover and run migrations
 List<MigrationFile> migrationsFiles = <MigrationFile>[
   // User-related migrations
   CreateUsersTable(),
