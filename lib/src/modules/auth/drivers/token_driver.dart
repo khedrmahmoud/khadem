@@ -78,8 +78,8 @@ class TokenDriver implements AuthDriver {
   }) {
     final provider = config.getProvider(providerKey);
 
-    final tokenExpiry = provider['token_expiry'] != null
-        ? Duration(seconds: provider['token_expiry'] as int)
+    final tokenExpiry = provider['access_token_expiry'] != null
+        ? Duration(seconds: provider['access_token_expiry'] as int)
         : null;
     final refreshTokenExpiry = provider['refresh_token_expiry'] != null
         ? Duration(seconds: provider['refresh_token_expiry'] as int)

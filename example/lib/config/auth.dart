@@ -32,10 +32,8 @@ class AuthConfig {
             'primary_key': 'id',
             'fields': ['email'],
             'jwt_secret': env.getOrDefault('JWT_SECRET', 'default-secret-key'),
-            // Optional: specify access token expiry if needed
-            'token_expiry': 3600,
-            // Optional: specify refresh token expiry if needed
-            'refresh_token_expiry': 604800,
+             'access_token_expiry': 3600,
+             'refresh_token_expiry': 604800,
           },
         },
       };
