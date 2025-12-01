@@ -204,6 +204,12 @@ export 'logging/logging_configuration.dart';
 // ========================
 export 'logging/logging_writers/console_writer.dart';
 export 'logging/logging_writers/file_writer.dart';
+export 'logging/logging_writers/callback_writer.dart';
+export 'logging/logging_writers/stream_writer.dart';
+// ========================
+// 📦 Log.dart
+// ========================
+export 'logging/log.dart';
 export 'queue/config/queue_config_loader.dart';
 // ========================
 // 📦 Dlq
