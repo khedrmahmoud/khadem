@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:khadem/src/contracts/logging/log_handler.dart';
 import 'package:khadem/src/contracts/logging/log_level.dart';
@@ -25,14 +26,14 @@ class ConsoleLogHandler implements LogHandler {
       logMessage = _colorize ? _colorizeMessage(level, logMessage) : logMessage;
     }
 
-    print(logMessage);
+    stdout.writeln(logMessage);
 
     if (context != null) {
-      print('Context: ${jsonEncode(context)}');
+      stdout.writeln('Context: ${jsonEncode(context)}');
     }
 
     if (stackTrace != null) {
-      print('Stack Trace:\n$stackTrace');
+      stdout.writeln('Stack Trace:\n$stackTrace');
     }
   }
 

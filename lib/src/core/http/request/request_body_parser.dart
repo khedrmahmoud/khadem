@@ -8,19 +8,49 @@ import 'package:mime/mime.dart';
 class UploadedFile {
   final String filename;
   final String? contentType;
-  final List<int> data;
   final String fieldName;
+  final String? _tempFilePath;
+  final List<int>? _memoryData;
 
-  UploadedFile(this.filename, this.contentType, this.data, this.fieldName);
+  UploadedFile({
+    required this.filename,
+    required this.fieldName,
+    this.contentType,
+    String? tempFilePath,
+    List<int>? data,
+  })  : _tempFilePath = tempFilePath,
+        _memoryData = data;
 
   /// Gets the file size in bytes.
-  int get size => data.length;
+  int get size {
+    if (_memoryData != null) return _memoryData!.length;
+    if (_tempFilePath != null) return File(_tempFilePath!).lengthSync();
+    return 0;
+  }
+
+  /// Gets the file content as bytes.
+  /// Warning: This reads the entire file into memory if it's stored on disk.
+  List<int> get data {
+    if (_memoryData != null) return _memoryData!;
+    if (_tempFilePath != null) return File(_tempFilePath!).readAsBytesSync();
+    return [];
+  }
 
   /// Saves the file to the specified path.
+  /// Efficiently moves the temp file if available, otherwise writes bytes.
   Future<String> saveTo(String path) async {
+    if (_tempFilePath != null) {
+      // Move the temp file to the new location
+      final tempFile = File(_tempFilePath!);
+      if (await tempFile.exists()) {
+        await tempFile.rename(path);
+        return path;
+      }
+    }
+    
     final file = File(path);
-    final savedFile = await file.writeAsBytes(data);
-    return savedFile.path;
+    await file.writeAsBytes(data);
+    return file.path;
   }
 
   /// Gets the file content as a string (if it's text).
@@ -28,6 +58,16 @@ class UploadedFile {
 
   /// Gets the file extension.
   String get extension => filename.split('.').last.toLowerCase();
+  
+  /// Deletes the temporary file if it exists.
+  Future<void> deleteTempFile() async {
+    if (_tempFilePath != null) {
+      final file = File(_tempFilePath!);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
+  }
 }
 
 /// Handles parsing of HTTP request bodies.
@@ -166,11 +206,31 @@ class RequestBodyParser {
         if (name == null) continue;
 
         if (filename != null) {
-          // This is a file
-          // TODO: For large files, stream to disk instead of memory
-          final content = await _readPartBytes(part);
+          // Stream file to temporary location
+          final tempDir = Directory.systemTemp.createTempSync('khadem_upload_');
+          final tempFile = File('${tempDir.path}/$filename');
+          final sink = tempFile.openWrite();
+          
+          int totalBytes = 0;
+          await for (final chunk in part) {
+            totalBytes += chunk.length;
+            if (totalBytes > maxBodySize) {
+              await sink.close();
+              await tempFile.delete();
+              await tempDir.delete();
+              throw const FormatException('File upload too large');
+            }
+            sink.add(chunk);
+          }
+          await sink.close();
+
           final contentType = part.headers['content-type'];
-          files[name] = UploadedFile(filename, contentType, content, name);
+          files[name] = UploadedFile(
+            filename: filename,
+            fieldName: name,
+            contentType: contentType,
+            tempFilePath: tempFile.path,
+          );
         } else {
           // This is a form field
           final content = await utf8.decodeStream(part);
@@ -189,20 +249,6 @@ class RequestBodyParser {
         'files': files,
       };
     }
-  }
-
-  Future<List<int>> _readPartBytes(Stream<List<int>> part) async {
-    final bytes = <int>[];
-    int totalBytes = 0;
-    
-    await for (final chunk in part) {
-      totalBytes += chunk.length;
-      if (totalBytes > maxBodySize) {
-        throw const FormatException('File upload too large');
-      }
-      bytes.addAll(chunk);
-    }
-    return bytes;
   }
 
   /// Parses Content-Disposition header

@@ -11,7 +11,6 @@ export 'error_handling_middleware.dart';
 export 'hook_middleware.dart';
 export 'logging_middleware.dart';
 export 'middleware_pipeline.dart';
-export 'rate_limit_middleware.dart';
 export 'retry_middleware.dart';
 export 'timeout_middleware.dart';
 export 'timing_middleware.dart';

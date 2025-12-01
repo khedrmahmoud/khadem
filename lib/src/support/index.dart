@@ -86,6 +86,10 @@ export 'helpers/json_save.dart';
 // ========================
 export 'middlewares/cache_middleware.dart';
 // ========================
+// 📦 Cors_middleware.dart
+// ========================
+export 'middlewares/cors_middleware.dart';
+// ========================
 // 📦 Exception_middleware.dart
 // ========================
 export 'middlewares/exception_middleware.dart';
@@ -93,6 +97,14 @@ export 'middlewares/exception_middleware.dart';
 // 📦 Logging_middleware.dart
 // ========================
 export 'middlewares/logging_middleware.dart';
+// ========================
+// 📦 Rate_limit_middleware.dart
+// ========================
+export 'middlewares/rate_limit_middleware.dart';
+// ========================
+// 📦 Security_headers_middleware.dart
+// ========================
+export 'middlewares/security_headers_middleware.dart';
 // ========================
 // 📦 Session_middleware.dart
 // ========================
@@ -121,7 +133,6 @@ export 'providers/database_service_provider.dart';
 // 📦 Queue_service_provider.dart
 // ========================
 export 'providers/queue_service_provider.dart';
-
 // ========================
 // 📦 Ttl_file_cleaner_task.dart
 // ========================
@@ -195,3 +206,4 @@ export 'validation_rules/rules.dart';
 // 📦 String_rules.dart
 // ========================
 export 'validation_rules/string_rules.dart';
+

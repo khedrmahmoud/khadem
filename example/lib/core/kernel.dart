@@ -10,9 +10,9 @@ import 'package:khadem/khadem.dart'
         QueueServiceProvider,
         AuthServiceProvider,
         CoreServiceProvider,
-        CacheServiceProvider;
+        CacheServiceProvider,
+        CorsMiddleware;
 
-import '../app/http/middleware/cors_middleware.dart';
 import '../app/providers/app_service_provider.dart';
 import '../app/providers/event_service_provider.dart';
 import '../app/providers/observer_service_provider.dart';

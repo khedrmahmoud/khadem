@@ -232,7 +232,6 @@ export 'queue/middleware/hook_middleware.dart';
 export 'queue/middleware/index.dart';
 export 'queue/middleware/logging_middleware.dart';
 export 'queue/middleware/middleware_pipeline.dart';
-export 'queue/middleware/rate_limit_middleware.dart';
 export 'queue/middleware/retry_middleware.dart';
 export 'queue/middleware/timeout_middleware.dart';
 export 'queue/middleware/timing_middleware.dart';
