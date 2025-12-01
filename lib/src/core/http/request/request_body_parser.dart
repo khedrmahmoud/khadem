@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:mime/mime.dart';
+
 /// Represents an uploaded file in a multipart request.
 class UploadedFile {
   final String filename;
@@ -37,7 +39,11 @@ class RequestBodyParser {
   bool _isParsing = false;
   bool _parsingFailed = false;
 
-  RequestBodyParser(this._raw);
+  // Default max body size: 10MB
+  static const int defaultMaxBodySize = 10 * 1024 * 1024;
+  final int maxBodySize;
+
+  RequestBodyParser(this._raw, {this.maxBodySize = defaultMaxBodySize});
 
   /// Parses and returns the request body as a Map.
   /// Supports `application/json`, `application/x-www-form-urlencoded`, and `multipart/form-data`.
@@ -71,8 +77,6 @@ class RequestBodyParser {
       return _parsedBody!;
     } catch (e) {
       _parsingFailed = true;
-      // Log the error but don't crash the server
-      // In a real application, you'd want to use a proper logger
       print('Warning: Failed to parse request body: $e');
       _parsedBody = {};
       _uploadedFiles = {};
@@ -85,8 +89,9 @@ class RequestBodyParser {
   /// Parses JSON body content.
   Future<Map<String, dynamic>> _parseJsonBody() async {
     try {
-      final bodyString = await utf8.decoder.bind(_raw).join();
-      return jsonDecode(bodyString) as Map<String, dynamic>;
+      final content = await _readBodyAsString();
+      if (content.isEmpty) return {};
+      return jsonDecode(content) as Map<String, dynamic>;
     } catch (_) {
       throw const FormatException('Invalid JSON format in request body');
     }
@@ -95,14 +100,46 @@ class RequestBodyParser {
   /// Parses form-encoded body content.
   Future<Map<String, dynamic>> _parseFormBody() async {
     try {
-      final bodyString = await utf8.decoder.bind(_raw).join();
-      return Uri.splitQueryString(bodyString);
+      final content = await _readBodyAsString();
+      return Uri.splitQueryString(content);
     } catch (_) {
       throw const FormatException('Invalid form data in request body');
     }
   }
 
-  /// Parses multipart/form-data body content.
+  /// Reads the body as a string with size limit enforcement.
+  Future<String> _readBodyAsString() async {
+    int bytesRead = 0;
+    final completer = Completer<String>();
+    final buffer = StringBuffer();
+
+    _raw.cast<List<int>>().transform(utf8.decoder).listen(
+      (chunk) {
+        bytesRead += chunk.length;
+        if (bytesRead > maxBodySize) {
+          // We can't easily stop the stream from here without cancelling subscription
+          // But we can throw an error which will trigger onError
+          throw const FormatException('Request body too large');
+        }
+        buffer.write(chunk);
+      },
+      onError: (Object e) {
+        if (!completer.isCompleted) {
+          completer.completeError(e);
+        }
+      },
+      onDone: () {
+        if (!completer.isCompleted) {
+          completer.complete(buffer.toString());
+        }
+      },
+      cancelOnError: true,
+    );
+
+    return completer.future;
+  }
+
+  /// Parses multipart/form-data body content using MimeMultipartTransformer.
   Future<Map<String, dynamic>> _parseMultipartBody() async {
     final fields = <String, dynamic>{};
     final files = <String, UploadedFile>{};
@@ -115,98 +152,30 @@ class RequestBodyParser {
         );
       }
 
-      // Read all bytes from the request with timeout and error handling
-      final bytes = <int>[];
-      try {
-        await _raw.timeout(const Duration(seconds: 30)).forEach((chunk) {
-          bytes.addAll(chunk);
-        });
-      } catch (e) {
-        // Handle connection closed or timeout gracefully
-        if (e is HttpException || e is TimeoutException) {
-          print(
-            'Warning: Connection closed or timed out during multipart upload: $e',
-          );
-          return {'fields': fields, 'files': files};
+      final transformer = MimeMultipartTransformer(boundary);
+      final parts = _raw.cast<List<int>>().transform(transformer);
+
+      await for (final part in parts) {
+        final contentDisposition = part.headers['content-disposition'];
+        if (contentDisposition == null) continue;
+
+        final disposition = _parseContentDisposition(contentDisposition);
+        final name = disposition['name'];
+        final filename = disposition['filename'];
+
+        if (name == null) continue;
+
+        if (filename != null) {
+          // This is a file
+          // TODO: For large files, stream to disk instead of memory
+          final content = await _readPartBytes(part);
+          final contentType = part.headers['content-type'];
+          files[name] = UploadedFile(filename, contentType, content, name);
+        } else {
+          // This is a form field
+          final content = await utf8.decodeStream(part);
+          fields[name] = _parseFieldValue(content);
         }
-        rethrow;
-      }
-
-      // Parse multipart data
-      final boundaryBytes = '--$boundary'.codeUnits;
-      final endBoundaryBytes = '--$boundary--'.codeUnits;
-      final crlf = '\r\n'.codeUnits;
-
-      int position = 0;
-
-      // Skip initial boundary
-      if (!_matchBytes(bytes, position, boundaryBytes)) {
-        throw const FormatException('Invalid multipart format');
-      }
-      position += boundaryBytes.length;
-
-      while (position < bytes.length) {
-        // Skip CRLF after boundary
-        if (_matchBytes(bytes, position, crlf)) {
-          position += crlf.length;
-        }
-
-        // Check for end boundary
-        if (_matchBytes(bytes, position, endBoundaryBytes)) {
-          break;
-        }
-
-        // Parse headers
-        final headers = <String, String>{};
-        while (position < bytes.length) {
-          final lineEnd = _findBytes(bytes, position, crlf);
-          if (lineEnd == -1) break;
-
-          final line = utf8.decode(bytes.sublist(position, lineEnd));
-          position = lineEnd + crlf.length;
-
-          if (line.isEmpty) break; // Empty line indicates end of headers
-
-          final colonIndex = line.indexOf(':');
-          if (colonIndex != -1) {
-            final headerName =
-                line.substring(0, colonIndex).trim().toLowerCase();
-            final headerValue = line.substring(colonIndex + 1).trim();
-            headers[headerName] = headerValue;
-          }
-        }
-
-        // Find content end (next boundary)
-        final contentStart = position;
-        final nextBoundary = _findBytes(bytes, position, boundaryBytes);
-        if (nextBoundary == -1) break;
-
-        final contentEnd = nextBoundary - crlf.length; // Remove trailing CRLF
-        final content = bytes.sublist(contentStart, contentEnd);
-
-        // Process the part based on Content-Disposition
-        final contentDisposition = headers['content-disposition'];
-        if (contentDisposition != null) {
-          final disposition = _parseContentDisposition(contentDisposition);
-          final fieldName = disposition['name'];
-
-          if (fieldName != null) {
-            final filename = disposition['filename'];
-
-            if (filename != null) {
-              // This is a file
-              final contentType = headers['content-type'];
-              files[fieldName] =
-                  UploadedFile(filename, contentType, content, fieldName);
-            } else {
-              // This is a form field
-              final value = utf8.decode(content);
-              fields[fieldName] = _parseFieldValue(value);
-            }
-          }
-        }
-
-        position = nextBoundary + boundaryBytes.length;
       }
 
       return {
@@ -214,13 +183,26 @@ class RequestBodyParser {
         'files': files,
       };
     } catch (e) {
-      // For any other parsing errors, return empty results instead of crashing
       print('Warning: Failed to parse multipart data: $e');
       return {
         'fields': fields,
         'files': files,
       };
     }
+  }
+
+  Future<List<int>> _readPartBytes(Stream<List<int>> part) async {
+    final bytes = <int>[];
+    int totalBytes = 0;
+    
+    await for (final chunk in part) {
+      totalBytes += chunk.length;
+      if (totalBytes > maxBodySize) {
+        throw const FormatException('File upload too large');
+      }
+      bytes.addAll(chunk);
+    }
+    return bytes;
   }
 
   /// Parses Content-Disposition header
@@ -267,27 +249,6 @@ class RequestBodyParser {
     }
 
     return value;
-  }
-
-  /// Checks if bytes match at given position
-  bool _matchBytes(List<int> bytes, int position, List<int> pattern) {
-    if (position + pattern.length > bytes.length) return false;
-
-    for (int i = 0; i < pattern.length; i++) {
-      if (bytes[position + i] != pattern[i]) return false;
-    }
-
-    return true;
-  }
-
-  /// Finds pattern in bytes starting from position
-  int _findBytes(List<int> bytes, int start, List<int> pattern) {
-    for (int i = start; i <= bytes.length - pattern.length; i++) {
-      if (_matchBytes(bytes, i, pattern)) {
-        return i;
-      }
-    }
-    return -1;
   }
 
   /// Gets uploaded files from the request.
