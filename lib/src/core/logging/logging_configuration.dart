@@ -44,6 +44,9 @@ class LoggingConfiguration {
 
   /// Creates a file log handler from configuration.
   FileLogHandler _createFileHandler(Map<String, dynamic> config) {
+    final levelStr = config['level'] as String?;
+    final level = levelStr != null ? LogLevel.fromString(levelStr) : minimumLevel;
+
     return FileLogHandler(
       filePath: config['path']?.toString() ?? 'storage/logs/app.log',
       formatJson: config['format_json'] as bool? ?? true,
@@ -51,13 +54,18 @@ class LoggingConfiguration {
       rotateDaily: config['rotate_daily'] as bool? ?? false,
       maxFileSizeBytes: config['max_size'] as int? ?? 5 * 1024 * 1024,
       maxBackupCount: config['max_backups'] as int? ?? 5,
+      minimumLevel: level,
     );
   }
 
   /// Creates a console log handler from configuration.
   ConsoleLogHandler _createConsoleHandler(Map<String, dynamic> config) {
+    final levelStr = config['level'] as String?;
+    final level = levelStr != null ? LogLevel.fromString(levelStr) : minimumLevel;
+
     return ConsoleLogHandler(
       colorize: config['colorize'] as bool? ?? true,
+      minimumLevel: level,
     );
   }
 

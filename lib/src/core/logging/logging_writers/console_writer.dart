@@ -7,8 +7,16 @@ import 'package:khadem/src/contracts/logging/log_level.dart';
 /// Console-based log handler.
 class ConsoleLogHandler implements LogHandler {
   final bool _colorize;
+  final LogLevel _minimumLevel;
 
-  ConsoleLogHandler({bool colorize = true}) : _colorize = colorize;
+  ConsoleLogHandler({
+    bool colorize = true,
+    LogLevel minimumLevel = LogLevel.debug,
+  })  : _colorize = colorize,
+        _minimumLevel = minimumLevel;
+
+  @override
+  LogLevel get minimumLevel => _minimumLevel;
 
   @override
   void log(
@@ -17,6 +25,8 @@ class ConsoleLogHandler implements LogHandler {
     Map<String, dynamic>? context,
     StackTrace? stackTrace,
   }) {
+    if (!level.isAtLeast(_minimumLevel)) return;
+
     final timestamp = DateTime.now().toIso8601String();
     final levelStr = level.toString().split('.').last.toUpperCase();
 

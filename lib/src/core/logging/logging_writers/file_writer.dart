@@ -1,10 +1,12 @@
+import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:khadem/src/contracts/logging/log_handler.dart';
 import 'package:khadem/src/contracts/logging/log_level.dart';
 
-/// File-based log handler.
+/// File-based log handler with non-blocking I/O and buffering.
 class FileLogHandler implements LogHandler {
   final File _logFile;
   final int _maxFileSizeBytes;
@@ -12,6 +14,13 @@ class FileLogHandler implements LogHandler {
   final bool _rotateOnSize;
   final bool _rotateDaily;
   final bool _formatJson;
+  final LogLevel _minimumLevel;
+
+  IOSink? _sink;
+  int _currentFileSize = 0;
+  DateTime _lastRotationDate;
+  bool _isRotating = false;
+  final Queue<List<int>> _buffer = Queue<List<int>>();
 
   FileLogHandler({
     required String filePath,
@@ -20,21 +29,40 @@ class FileLogHandler implements LogHandler {
     bool rotateOnSize = true,
     bool rotateDaily = false,
     bool formatJson = true,
+    LogLevel minimumLevel = LogLevel.debug,
   })  : _logFile = File(filePath),
         _maxFileSizeBytes = maxFileSizeBytes,
         _maxBackupCount = maxBackupCount,
         _rotateOnSize = rotateOnSize,
         _rotateDaily = rotateDaily,
-        _formatJson = formatJson {
-    final dir = Directory(_logFile.parent.path);
+        _formatJson = formatJson,
+        _minimumLevel = minimumLevel,
+        _lastRotationDate = DateTime.now() {
+    _initialize();
+  }
+
+  void _initialize() {
+    final dir = _logFile.parent;
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
     }
-    if (!_logFile.existsSync()) {
-      _logFile.createSync();
+    
+    if (_logFile.existsSync()) {
+      _currentFileSize = _logFile.lengthSync();
+      _lastRotationDate = _logFile.lastModifiedSync();
+    } else {
+      _currentFileSize = 0;
     }
-    _rotateLogIfNeeded();
+
+    _openSink();
   }
+
+  void _openSink() {
+    _sink = _logFile.openWrite(mode: FileMode.append);
+  }
+
+  @override
+  LogLevel get minimumLevel => _minimumLevel;
 
   @override
   void log(
@@ -43,13 +71,96 @@ class FileLogHandler implements LogHandler {
     Map<String, dynamic>? context,
     StackTrace? stackTrace,
   }) {
-    _rotateLogIfNeeded();
+    if (!level.isAtLeast(_minimumLevel)) return;
 
     final logEntry = _formatJson
         ? _formatJsonLog(level, message, context, stackTrace)
         : _formatTextLog(level, message, context, stackTrace);
 
-    _logFile.writeAsStringSync('$logEntry\n', mode: FileMode.append);
+    final bytes = utf8.encode('$logEntry\n');
+
+    if (_isRotating) {
+      _buffer.add(bytes);
+      return;
+    }
+
+    if (_shouldRotate(bytes.length)) {
+      _rotate(bytes);
+      return;
+    }
+
+    _write(bytes);
+  }
+
+  void _write(List<int> bytes) {
+    _sink?.add(bytes);
+    _currentFileSize += bytes.length;
+  }
+
+  bool _shouldRotate(int newBytesLength) {
+    if (_rotateOnSize && (_currentFileSize + newBytesLength) >= _maxFileSizeBytes) {
+      return true;
+    }
+
+    if (_rotateDaily) {
+      final now = DateTime.now();
+      if (_lastRotationDate.year != now.year ||
+          _lastRotationDate.month != now.month ||
+          _lastRotationDate.day != now.day) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  Future<void> _rotate(List<int> pendingBytes) async {
+    _isRotating = true;
+    _buffer.add(pendingBytes);
+
+    try {
+      await _sink?.flush();
+      await _sink?.close();
+      _sink = null;
+
+      // Perform rotation
+      await _rotateFiles();
+
+      // Reset state
+      _currentFileSize = 0;
+      _lastRotationDate = DateTime.now();
+      _openSink();
+
+      // Flush buffer
+      while (_buffer.isNotEmpty) {
+        final bytes = _buffer.removeFirst();
+        _write(bytes);
+        // Note: We don't check for rotation again during flush to avoid infinite loops
+        // if the buffer is larger than max file size.
+      }
+    } catch (e) {
+      print('Error rotating logs: $e');
+      // Try to recover
+      if (_sink == null) _openSink();
+    } finally {
+      _isRotating = false;
+    }
+  }
+
+  Future<void> _rotateFiles() async {
+    for (var i = _maxBackupCount; i > 0; i--) {
+      final backupFile = File('${_logFile.path}.$i');
+      final previousBackupFile =
+          i > 1 ? File('${_logFile.path}.${i - 1}') : _logFile;
+
+      if (await backupFile.exists()) {
+        await backupFile.delete();
+      }
+
+      if (await previousBackupFile.exists()) {
+        await previousBackupFile.rename(backupFile.path);
+      }
+    }
   }
 
   String _formatJsonLog(
@@ -89,42 +200,9 @@ class FileLogHandler implements LogHandler {
     return log;
   }
 
-  void _rotateLogIfNeeded() {
-    if (_rotateOnSize &&
-        _logFile.existsSync() &&
-        _logFile.lengthSync() >= _maxFileSizeBytes) {
-      _rotateLog();
-    } else if (_rotateDaily && _logFile.existsSync()) {
-      final lastModified = _logFile.lastModifiedSync();
-      final now = DateTime.now();
-      if (lastModified.year != now.year ||
-          lastModified.month != now.month ||
-          lastModified.day != now.day) {
-        _rotateLog();
-      }
-    }
-  }
-
-  void _rotateLog() {
-    for (var i = _maxBackupCount; i > 0; i--) {
-      final backupFile = File('${_logFile.path}.$i');
-      final previousBackupFile =
-          i > 1 ? File('${_logFile.path}.${i - 1}') : _logFile;
-
-      if (backupFile.existsSync()) {
-        backupFile.deleteSync();
-      }
-
-      if (previousBackupFile.existsSync()) {
-        previousBackupFile.copySync(backupFile.path);
-      }
-    }
-
-    _logFile.writeAsStringSync('');
-  }
-
   @override
   void close() {
-    // No resources to close for file handler
+    _sink?.close();
+    _sink = null;
   }
 }

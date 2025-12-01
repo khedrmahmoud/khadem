@@ -1,7 +1,6 @@
 {
   "default": "app",
-  "minimum_level": "debug",
-  "handlers": {
+   "handlers": {
     "file": {
       "enabled": true,
       "path": "storage/logs/app.log",
@@ -9,11 +8,13 @@
       "rotate_on_size": true,
       "rotate_daily": false,
       "max_size": 5242880,
-      "max_backups": 5
+      "max_backups": 5,
+      "level": "info"
     },
     "console": {
       "enabled": true,
-      "colorize": true
+      "colorize": true,
+      "level": "debug"
     }
   }
 }
