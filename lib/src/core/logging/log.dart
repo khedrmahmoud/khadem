@@ -1,3 +1,4 @@
+import 'package:khadem/khadem.dart' show LogLevel;
 import '../../application/khadem.dart';
 
 /// A static facade for the logging system.
@@ -88,6 +89,29 @@ class Log {
   /// Creates a logger proxy for a specific channel.
   static ChannelLogger channel(String name) {
     return ChannelLogger(name);
+  }
+
+  static final Map<String, Stopwatch> _timers = {};
+
+  /// Starts a timer with the given label.
+  static void time(String label) {
+    _timers[label] = Stopwatch()..start();
+  }
+
+  /// Stops the timer with the given label and logs the elapsed time.
+  static void timeEnd(String label, {LogLevel level = LogLevel.debug}) {
+    if (_timers.containsKey(label)) {
+      final stopwatch = _timers[label]!;
+      stopwatch.stop();
+      final elapsed = stopwatch.elapsedMilliseconds;
+      _timers.remove(label);
+      
+      Khadem.logger.log(
+        level,
+        '$label: ${elapsed}ms',
+        context: {'duration_ms': elapsed},
+      );
+    }
   }
 }
 
