@@ -29,7 +29,7 @@ class ServerLifecycle {
       port,
       shared: true,
     );
-    
+
     // Enable compression and set idle timeout
     server.autoCompress = true;
     server.idleTimeout = const Duration(seconds: 120);
@@ -37,34 +37,47 @@ class ServerLifecycle {
     Khadem.logger
         .info('🟢 HTTP Server started on http://${host ?? 'localhost'}:$port');
 
-    await for (final raw in server) {
-      final req = Request(raw);
-      final res = Response(raw);
-
-      Zone.current.fork(
-        zoneValues: {
-          RequestContext.zoneKey: req,
-          ResponseContext.zoneKey: res,
-          ServerContext.zoneKey: ServerContext(
-            request: req,
-            response: res,
-            match: _router.router.match,
-          ),
-        },
-      ).run(() async {
-        try {
-          // Execute global middleware pipeline with the request processor as the final handler
-          // This uses the optimized static execute method to avoid allocations
-          await MiddlewarePipeline.execute(
-            _middleware.pipeline.middleware,
-            req,
-            res,
-            handler.handle,
-          );
-        } catch (e, stackTrace) {
-          ExceptionHandler.handle(res, e, stackTrace);
-        }
+    // Handle graceful shutdown
+    final sub = ProcessSignal.sigint.watch().listen((signal) {
+      Khadem.logger.info('🛑 Received signal $signal. Shutting down...');
+      server.close().then((_) {
+        Khadem.logger.info('👋 Server closed.');
+        exit(0);
       });
+    });
+
+    try {
+      await for (final raw in server) {
+        final req = Request(raw);
+        final res = Response(raw);
+
+        Zone.current.fork(
+          zoneValues: {
+            RequestContext.zoneKey: req,
+            ResponseContext.zoneKey: res,
+            ServerContext.zoneKey: ServerContext(
+              request: req,
+              response: res,
+              match: _router.router.match,
+            ),
+          },
+        ).run(() async {
+          try {
+            // Execute global middleware pipeline with the request processor as the final handler
+            // This uses the optimized static execute method to avoid allocations
+            await MiddlewarePipeline.execute(
+              _middleware.pipeline.middleware,
+              req,
+              res,
+              handler.handle,
+            );
+          } catch (e, stackTrace) {
+            ExceptionHandler.handle(res, e, stackTrace);
+          }
+        });
+      }
+    } finally {
+      await sub.cancel();
     }
   }
 }
