@@ -17,12 +17,21 @@ class Server {
   late final ServerStatic _staticHandler;
   late final ServerLifecycle _serverLifecycle;
 
+  final List<void Function(ServerRouter)> _routeRegistrars = [];
+  final List<Middleware> _registeredMiddlewares = [];
+
   Server() {
     _serverRouter = ServerRouter();
     _serverMiddleware = ServerMiddleware();
     _staticHandler = ServerStatic();
     _serverLifecycle =
         ServerLifecycle(_serverRouter, _serverMiddleware, _staticHandler);
+  }
+
+  /// Configures server settings.
+  void configure({bool? autoCompress, Duration? idleTimeout}) {
+    if (autoCompress != null) _serverLifecycle.autoCompress = autoCompress;
+    if (idleTimeout != null) _serverLifecycle.idleTimeout = idleTimeout;
   }
 
   /// Serve files from [path] (defaults to `public`).
@@ -35,12 +44,16 @@ class Server {
     MiddlewarePriority priority = MiddlewarePriority.global,
     String? name,
   }) {
+    final middleware = Middleware(handler, priority: priority, name: name);
+    _registeredMiddlewares.add(middleware);
     _serverMiddleware.useMiddleware(handler, priority: priority, name: name);
   }
 
   /// Register multiple global middlewares.
-  void applyMiddlewares(List<Middleware> middlewares) =>
-      _serverMiddleware.useMiddlewares(middlewares);
+  void applyMiddlewares(List<Middleware> middlewares) {
+    _registeredMiddlewares.addAll(middlewares);
+    _serverMiddleware.useMiddlewares(middlewares);
+  }
 
   /// Inject route definitions into the server's internal router.
   ///
@@ -52,13 +65,24 @@ class Server {
   ///   });
   /// });
   /// ```
-  void injectRoutes(void Function(ServerRouter router) register) =>
-      register(_serverRouter);
+  void injectRoutes(void Function(ServerRouter router) register) {
+    _routeRegistrars.add(register);
+    register(_serverRouter);
+  }
 
   /// Trigger a lifecycle reload. In development, lightweight endpoints are
   /// injected to allow manual reloads.
   Future<void> reload() async {
     await _serverLifecycle.reload();
+    
+    // Restore middlewares
+    _serverMiddleware.useMiddlewares(_registeredMiddlewares);
+    
+    // Restore routes
+    for (final registrar in _routeRegistrars) {
+      registrar(_serverRouter);
+    }
+
     _injectDevEndpoints();
   }
 

@@ -7,6 +7,10 @@ class ServerLifecycle {
   final ServerRouter _router;
   final ServerMiddleware _middleware;
   final ServerStatic _static;
+  
+  // Configuration
+  bool autoCompress = true;
+  Duration idleTimeout = const Duration(seconds: 120);
 
   ServerLifecycle(this._router, this._middleware, this._static);
 
@@ -31,8 +35,8 @@ class ServerLifecycle {
     );
 
     // Enable compression and set idle timeout
-    server.autoCompress = true;
-    server.idleTimeout = const Duration(seconds: 120);
+    server.autoCompress = autoCompress;
+    server.idleTimeout = idleTimeout;
 
     Khadem.logger
         .info('🟢 HTTP Server started on http://${host ?? 'localhost'}:$port');

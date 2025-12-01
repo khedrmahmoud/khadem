@@ -81,17 +81,11 @@ class ServerRouter {
     required void Function(Router router) routes,
     List<Middleware> middleware = const [],
   }) {
-    final groupRouter = Router();
-    routes(groupRouter);
-
-    for (final route in groupRouter.routes) {
-      _router.register(
-        route.method,
-        '$prefix${route.path}',
-        route.handler,
-        [...middleware, ...route.middleware],
-      );
-    }
+    _router.group(
+      prefix: prefix,
+      routes: routes,
+      middleware: middleware,
+    );
   }
 
   /// Clears all registered routes.
