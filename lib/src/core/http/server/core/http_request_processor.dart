@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:khadem/khadem.dart' show NextFunction;
-
 import '../../../routing/router.dart';
 import '../../middleware/middleware_pipeline.dart';
 import '../../request/request.dart';
@@ -36,22 +34,13 @@ class HttpRequestProcessor {
       req.setParam(key, value);
     });
 
-    final pipeline = MiddlewarePipeline();
-
-    // Inject route-specific middleware
-    pipeline.addAll(
-      match.middleware
-          .map(
-            (m) => (Request req, Response res, NextFunction next) =>
-                m.handler(req, res, next),
-          )
-          .toList(),
+    // Execute route-specific middleware and then the handler
+    // We use the optimized static execute method to avoid allocations
+    await MiddlewarePipeline.execute(
+      match.middleware,
+      req,
+      res,
+      match.handler,
     );
-
-    await pipeline.process(req, res);
-
-    if (!res.sent) {
-      await match.handler(req, res);
-    }
   }
 }

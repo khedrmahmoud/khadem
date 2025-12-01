@@ -15,6 +15,9 @@ class Router {
   late final RouteRegistry _registry;
   late final RouteGroupManager _groupManager;
   late final RouteHandler _handler;
+  
+  // Cache the matcher to avoid rebuilding the routing table on every request
+  RouteMatcher? _matcher;
 
   Router() {
     _registry = RouteRegistry();
@@ -32,6 +35,11 @@ class Router {
   /// Returns the list of registered routes.
   List<Route> get routes => _registry.routes;
 
+  /// Invalidate the matcher cache when routes change
+  void _invalidateCache() {
+    _matcher = null;
+  }
+
   /// Registers a route with the specified [method], [path], [handler], and optional [middleware].
   void register(
     String method,
@@ -41,6 +49,7 @@ class Router {
     String? name,
   }) {
     _registry.register(method, path, handler, middleware, name: name);
+    _invalidateCache();
   }
 
   /// Registers a GET route.
@@ -49,8 +58,10 @@ class Router {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      _registry.get(path, handler, middleware: middleware, name: name);
+  }) {
+    _registry.get(path, handler, middleware: middleware, name: name);
+    _invalidateCache();
+  }
 
   /// Registers a POST route.
   void post(
@@ -58,8 +69,10 @@ class Router {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      _registry.post(path, handler, middleware: middleware, name: name);
+  }) {
+    _registry.post(path, handler, middleware: middleware, name: name);
+    _invalidateCache();
+  }
 
   /// Registers a PUT route.
   void put(
@@ -67,8 +80,10 @@ class Router {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      _registry.put(path, handler, middleware: middleware, name: name);
+  }) {
+    _registry.put(path, handler, middleware: middleware, name: name);
+    _invalidateCache();
+  }
 
   /// Registers a PATCH route.
   void patch(
@@ -76,8 +91,10 @@ class Router {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      _registry.patch(path, handler, middleware: middleware, name: name);
+  }) {
+    _registry.patch(path, handler, middleware: middleware, name: name);
+    _invalidateCache();
+  }
 
   /// Registers a DELETE route.
   void delete(
@@ -85,8 +102,10 @@ class Router {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      _registry.delete(path, handler, middleware: middleware, name: name);
+  }) {
+    _registry.delete(path, handler, middleware: middleware, name: name);
+    _invalidateCache();
+  }
 
   /// Registers a HEAD route.
   void head(
@@ -94,8 +113,10 @@ class Router {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      _registry.head(path, handler, middleware: middleware, name: name);
+  }) {
+    _registry.head(path, handler, middleware: middleware, name: name);
+    _invalidateCache();
+  }
 
   /// Registers an OPTIONS route.
   void options(
@@ -103,8 +124,10 @@ class Router {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      _registry.options(path, handler, middleware: middleware, name: name);
+  }) {
+    _registry.options(path, handler, middleware: middleware, name: name);
+    _invalidateCache();
+  }
 
   /// Registers a route for any method.
   void any(
@@ -113,6 +136,7 @@ class Router {
     List<Middleware> middleware = const [],
   }) {
     _registry.any(path, handler, middleware: middleware);
+    _invalidateCache();
   }
 
   /// Groups a set of routes under a prefix and optional middleware.
@@ -130,13 +154,14 @@ class Router {
       },
       middleware: middleware,
     );
+    _invalidateCache();
   }
 
   /// Matches a route for the given [method] and [path].
   /// Matches the first route that fits the given method and path.
   RouteMatchResult? match(String method, String path) {
-    final matcher = RouteMatcher(_registry.routes);
-    final result = matcher.match(method, path);
+    _matcher ??= RouteMatcher(_registry.routes);
+    final result = _matcher!.match(method, path);
     if (result != null) {
       return RouteMatchResult(
         handler: _handler.wrapWithExceptionHandler(result.handler),
@@ -150,5 +175,6 @@ class Router {
   /// Clears all registered routes.
   void clear() {
     _registry.clear();
+    _invalidateCache();
   }
 }

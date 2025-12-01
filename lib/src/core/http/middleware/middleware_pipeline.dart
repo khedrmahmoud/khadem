@@ -237,4 +237,33 @@ class MiddlewarePipeline {
 
   /// Checks if a named middleware exists.
   bool hasMiddleware(String name) => _namedMiddleware.containsKey(name);
+
+  /// Executes a list of middleware in order, followed by a final handler.
+  ///
+  /// This static method avoids creating a [MiddlewarePipeline] instance and
+  /// copying lists for every request, significantly reducing object allocation.
+  static Future<void> execute(
+    List<Middleware> middlewares,
+    Request request,
+    Response response,
+    FutureOr<void> Function(Request, Response) finalHandler,
+  ) async {
+    var index = 0;
+
+    Future<void> next() async {
+      if (index < middlewares.length) {
+        final middleware = middlewares[index++];
+        try {
+          await middleware.handler(request, response, next);
+        } catch (e) {
+          rethrow;
+        }
+      } else {
+        // End of middleware chain, execute final handler
+        await finalHandler(request, response);
+      }
+    }
+
+    await next();
+  }
 }

@@ -23,6 +23,30 @@ class ServerStaticHandler {
     try {
       final mimeType = lookupMimeType(file.path) ?? 'application/octet-stream';
       res.raw.response.headers.contentType = ContentType.parse(mimeType);
+      
+      // Add caching headers for better performance
+      // Cache for 1 hour by default
+      res.raw.response.headers.add(HttpHeaders.cacheControlHeader, 'public, max-age=3600');
+      
+      // Add Last-Modified header
+      final lastModified = await file.lastModified();
+      res.raw.response.headers.add(HttpHeaders.lastModifiedHeader, HttpDate.format(lastModified));
+
+      // Check If-Modified-Since
+      final ifModifiedSince = req.raw.headers.value(HttpHeaders.ifModifiedSinceHeader);
+      if (ifModifiedSince != null) {
+        try {
+          final ifModifiedDate = HttpDate.parse(ifModifiedSince);
+          if (lastModified.isBefore(ifModifiedDate) || lastModified.isAtSameMomentAs(ifModifiedDate)) {
+            res.raw.response.statusCode = HttpStatus.notModified;
+            await res.raw.response.close();
+            return true;
+          }
+        } catch (_) {
+          // Ignore parsing errors
+        }
+      }
+
       await res.raw.response.addStream(file.openRead());
       await res.raw.response.close();
       return true;

@@ -29,6 +29,11 @@ class ServerLifecycle {
       port,
       shared: true,
     );
+    
+    // Enable compression and set idle timeout
+    server.autoCompress = true;
+    server.idleTimeout = const Duration(seconds: 120);
+
     Khadem.logger
         .info('🟢 HTTP Server started on http://${host ?? 'localhost'}:$port');
 
@@ -48,8 +53,14 @@ class ServerLifecycle {
         },
       ).run(() async {
         try {
-          await _middleware.pipeline.process(req, res);
-          if (!res.sent) await handler.handle(req, res);
+          // Execute global middleware pipeline with the request processor as the final handler
+          // This uses the optimized static execute method to avoid allocations
+          await MiddlewarePipeline.execute(
+            _middleware.pipeline.middleware,
+            req,
+            res,
+            handler.handle,
+          );
         } catch (e, stackTrace) {
           ExceptionHandler.handle(res, e, stackTrace);
         }
