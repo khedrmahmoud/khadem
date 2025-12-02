@@ -76,8 +76,9 @@ class RequestBodyParser {
   final HttpRequest _raw;
   Map<String, dynamic>? _parsedBody;
   Map<String, UploadedFile>? _uploadedFiles;
-  bool _isParsing = false;
-  bool _parsingFailed = false;
+  
+  // Use a future to handle concurrent parsing requests
+  Future<Map<String, dynamic>>? _parsingFuture;
 
   // Default max body size: 10MB
   static const int defaultMaxBodySize = 10 * 1024 * 1024;
@@ -87,18 +88,17 @@ class RequestBodyParser {
 
   /// Parses and returns the request body as a Map.
   /// Supports `application/json`, `application/x-www-form-urlencoded`, and `multipart/form-data`.
-  Future<Map<String, dynamic>> parseBody() async {
-    if (_parsedBody != null) return _parsedBody!;
-    if (_parsingFailed) return {};
-    if (_isParsing) {
-      // Wait for ongoing parsing to complete
-      while (_isParsing) {
-        await Future.delayed(const Duration(milliseconds: 10));
-      }
-      return _parsedBody ?? {};
-    }
+  Future<Map<String, dynamic>> parseBody() {
+    if (_parsedBody != null) return Future.value(_parsedBody!);
+    
+    // If parsing is already in progress, return the existing future
+    if (_parsingFuture != null) return _parsingFuture!;
 
-    _isParsing = true;
+    _parsingFuture = _doParseBody();
+    return _parsingFuture!;
+  }
+
+  Future<Map<String, dynamic>> _doParseBody() async {
     try {
       final contentType = _raw.headers.contentType?.mimeType;
 
@@ -116,13 +116,10 @@ class RequestBodyParser {
 
       return _parsedBody!;
     } catch (e) {
-      _parsingFailed = true;
       print('Warning: Failed to parse request body: $e');
       _parsedBody = {};
       _uploadedFiles = {};
       return _parsedBody!;
-    } finally {
-      _isParsing = false;
     }
   }
 
@@ -342,5 +339,15 @@ class RequestBodyParser {
   void clearCache() {
     _parsedBody = null;
     _uploadedFiles = null;
+    _parsingFuture = null;
+  }
+
+  /// Cleans up any temporary files created during parsing.
+  Future<void> cleanup() async {
+    if (_uploadedFiles != null) {
+      for (final file in _uploadedFiles!.values) {
+        await file.deleteTempFile();
+      }
+    }
   }
 }

@@ -286,4 +286,9 @@ class Request {
   /// Checks if the session is about to expire within the given duration.
   bool isSessionExpiringSoon([Duration within = const Duration(minutes: 5)]) =>
       _session.isExpiringSoon(within);
+
+  /// Cleans up resources associated with the request (e.g., temporary files).
+  Future<void> cleanup() async {
+    await _bodyParser.cleanup();
+  }
 }

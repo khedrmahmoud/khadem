@@ -77,6 +77,9 @@ class ServerLifecycle {
             );
           } catch (e, stackTrace) {
             ExceptionHandler.handle(res, e, stackTrace);
+          } finally {
+            // Clean up request resources (e.g. temporary files)
+            await req.cleanup();
           }
         });
       }
