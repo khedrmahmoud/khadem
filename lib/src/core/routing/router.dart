@@ -15,7 +15,7 @@ class Router {
   late final RouteRegistry _registry;
   late final RouteGroupManager _groupManager;
   late final RouteHandler _handler;
-  
+
   // Cache the matcher to avoid rebuilding the routing table on every request
   RouteMatcher? _matcher;
 

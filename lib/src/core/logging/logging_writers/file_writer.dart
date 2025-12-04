@@ -46,7 +46,7 @@ class FileLogHandler implements LogHandler {
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
     }
-    
+
     if (_logFile.existsSync()) {
       _currentFileSize = _logFile.lengthSync();
       _lastRotationDate = _logFile.lastModifiedSync();
@@ -98,7 +98,8 @@ class FileLogHandler implements LogHandler {
   }
 
   bool _shouldRotate(int newBytesLength) {
-    if (_rotateOnSize && (_currentFileSize + newBytesLength) >= _maxFileSizeBytes) {
+    if (_rotateOnSize &&
+        (_currentFileSize + newBytesLength) >= _maxFileSizeBytes) {
       return true;
     }
 

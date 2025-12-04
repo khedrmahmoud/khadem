@@ -6,7 +6,7 @@ class LoggingMiddleware implements Middleware {
   MiddlewareHandler get handler => (req, res, next) async {
         final stopwatch = Stopwatch()..start();
         Khadem.logger.debug('➡️ Request: ${req.method} ${req.uri}');
-        
+
         try {
           await next();
         } finally {

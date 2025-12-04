@@ -11,7 +11,7 @@ class ServerCluster {
   final int instances;
   final FutureOr<void> Function()? globalBootstrap;
   final void Function(Server server)? onInit;
-  
+
   // Map of worker index to its command port
   final Map<int, SendPort> _workerPorts = {};
 
@@ -85,7 +85,7 @@ class ServerCluster {
     final void Function(Server server)? onInit =
         args['onInit'] as void Function(Server server)?;
     final SendPort handshakePort = args['handshakePort'] as SendPort;
-    
+
     final server = Server();
 
     // Set up receive port for commands (reload, etc.)

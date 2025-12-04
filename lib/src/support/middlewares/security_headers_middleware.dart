@@ -6,17 +6,18 @@ class SecurityHeadersMiddleware implements Middleware {
   MiddlewareHandler get handler => (req, res, next) async {
         // Prevent MIME type sniffing
         res.header('X-Content-Type-Options', 'nosniff');
-        
+
         // Prevent clickjacking
         res.header('X-Frame-Options', 'DENY');
-        
+
         // Enable XSS filtering
         res.header('X-XSS-Protection', '1; mode=block');
-        
+
         // Enforce HTTPS (HSTS) - 1 year
         // Only effective if served over HTTPS, but good practice to include
-        res.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-        
+        res.header(
+            'Strict-Transport-Security', 'max-age=31536000; includeSubDomains',);
+
         // Referrer Policy
         res.header('Referrer-Policy', 'strict-origin-when-cross-origin');
 

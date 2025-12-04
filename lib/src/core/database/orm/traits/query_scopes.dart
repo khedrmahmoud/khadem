@@ -68,11 +68,11 @@ mixin QueryScopes<T> on KhademModel<T> {
   /// // Usage:
   /// final users = await User().activeAdmins().get();
   /// ```
-  QueryBuilderInterface<T> applyScopes<T>(
+  QueryBuilderInterface<T> applyScopes(
     List<QueryBuilderInterface<T> Function(QueryBuilderInterface<T>)>
         scopeFunctions,
   ) {
-    var currentQuery = query as QueryBuilderInterface<T>;
+    var currentQuery = query;
     for (final scopeFunction in scopeFunctions) {
       currentQuery = scopeFunction(currentQuery);
     }
@@ -98,7 +98,7 @@ mixin QueryScopes<T> on KhademModel<T> {
   /// // Usage:
   /// final users = await User().filteredUsers(role: 'admin', active: true).get();
   /// ```
-  QueryBuilderInterface<T> when<T>(
+  QueryBuilderInterface<T> when(
     bool condition,
     QueryBuilderInterface<T> initialQuery,
     QueryBuilderInterface<T> Function(QueryBuilderInterface<T>) scopeFunction,
@@ -122,7 +122,7 @@ mixin QueryScopes<T> on KhademModel<T> {
   ///   return q;
   /// }
   /// ```
-  QueryBuilderInterface<T> whenNotNull<T, V>(
+  QueryBuilderInterface<T> whenNotNull<V>(
     V? value,
     QueryBuilderInterface<T> initialQuery,
     QueryBuilderInterface<T> Function(QueryBuilderInterface<T>, V)
@@ -146,7 +146,7 @@ mixin QueryScopes<T> on KhademModel<T> {
   ///     .tap((q) => print('Current query: $q'))
   ///     .get();
   /// ```
-  QueryBuilderInterface<T> tap<T>(
+  QueryBuilderInterface<T> tap(
     QueryBuilderInterface<T> initialQuery,
     void Function(QueryBuilderInterface<T>) callback,
   ) {
@@ -166,12 +166,12 @@ mixin QueryScopes<T> on KhademModel<T> {
   ///   (q) => q.orderBy('created_at', direction: 'DESC'),
   /// ]).get();
   /// ```
-  QueryBuilderInterface<T> pipe<T>(
+  QueryBuilderInterface<T> pipe(
     List<QueryBuilderInterface<T> Function(QueryBuilderInterface<T>)>
         transformations, [
     QueryBuilderInterface<T>? initialQuery,
   ]) {
-    var currentQuery = initialQuery ?? query as QueryBuilderInterface<T>;
+    var currentQuery = initialQuery ?? query;
     for (final transformation in transformations) {
       currentQuery = transformation(currentQuery);
     }

@@ -7,7 +7,7 @@ class ServerLifecycle {
   final ServerRouter _router;
   final ServerMiddleware _middleware;
   final ServerStatic _static;
-  
+
   // Configuration
   bool autoCompress = true;
   Duration idleTimeout = const Duration(seconds: 120);

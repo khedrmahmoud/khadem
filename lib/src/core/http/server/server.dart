@@ -74,10 +74,10 @@ class Server {
   /// injected to allow manual reloads.
   Future<void> reload() async {
     await _serverLifecycle.reload();
-    
+
     // Restore middlewares
     _serverMiddleware.useMiddlewares(_registeredMiddlewares);
-    
+
     // Restore routes
     for (final registrar in _routeRegistrars) {
       registrar(_serverRouter);

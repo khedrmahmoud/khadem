@@ -4,7 +4,7 @@
 
 <div align="center">
   <img src="https://img.shields.io/badge/status-beta-yellow" alt="Status">
-  <img src="https://img.shields.io/badge/version-1.1.0--beta-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.2.0--beta-blue" alt="Version">
   <img src="https://img.shields.io/badge/dart-%3E%3D3.0.0-blue" alt="Dart">
   <img src="https://img.shields.io/badge/license-Apache--2.0-green" alt="License">
 </div>

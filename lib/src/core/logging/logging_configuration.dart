@@ -45,7 +45,8 @@ class LoggingConfiguration {
   /// Creates a file log handler from configuration.
   FileLogHandler _createFileHandler(Map<String, dynamic> config) {
     final levelStr = config['level'] as String?;
-    final level = levelStr != null ? LogLevel.fromString(levelStr) : minimumLevel;
+    final level =
+        levelStr != null ? LogLevel.fromString(levelStr) : minimumLevel;
 
     return FileLogHandler(
       filePath: config['path']?.toString() ?? 'storage/logs/app.log',
@@ -61,7 +62,8 @@ class LoggingConfiguration {
   /// Creates a console log handler from configuration.
   ConsoleLogHandler _createConsoleHandler(Map<String, dynamic> config) {
     final levelStr = config['level'] as String?;
-    final level = levelStr != null ? LogLevel.fromString(levelStr) : minimumLevel;
+    final level =
+        levelStr != null ? LogLevel.fromString(levelStr) : minimumLevel;
 
     return ConsoleLogHandler(
       colorize: config['colorize'] as bool? ?? true,

@@ -319,12 +319,12 @@ abstract class KhademModel<T> {
   }
 
   /// Get a relation, loading it if it's in defaultRelations and not loaded yet
-  Future<dynamic> getRelationAsync<T>(String relationName) async {
+  Future<dynamic> getRelationAsync<R>(String relationName) async {
     if (!relation.isLoaded(relationName) &&
         defaultRelations.contains(relationName)) {
       await loadRelation(relationName);
     }
-    return relation.get(relationName) as T;
+    return relation.get(relationName) as R;
   }
 
   /// Set a relation value

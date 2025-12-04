@@ -36,7 +36,7 @@ class StreamLogHandler implements LogHandler {
         context: context,
         stackTrace: stackTrace,
         timestamp: DateTime.now(),
-      ));
+      ),);
     }
   }
 
@@ -57,9 +57,8 @@ class LogEntry {
   LogEntry({
     required this.level,
     required this.message,
-    this.context,
+    required this.timestamp, this.context,
     this.stackTrace,
-    required this.timestamp,
   });
 
   Map<String, dynamic> toJson() {

@@ -81,7 +81,7 @@ class Khadem {
   // ========= 🛠️ Miscellaneous Helpers & Utilities ========
 
   /// Framework version.
-  static String get version => '1.0.0';
+  static String get version => '1.2.0-beta';
 
   /// Checks if the framework is fully booted.
   static bool get isBooted => providers.isBooted;

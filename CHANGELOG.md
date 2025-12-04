@@ -1,3 +1,20 @@
+## 1.2.0-beta
+
+### 🚀 Performance & Stability
+- **Zero-Allocation Middleware**: Optimized middleware pipeline execution to reduce memory allocation per request.
+- **Cached Route Matching**: Implemented O(1) lookup for static routes and cached matching for dynamic routes.
+- **Smart Static Serving**: Added support for `If-Modified-Since` headers and `304 Not Modified` responses for static files.
+- **Auto-Healing Cluster**: Added supervisor logic to `ServerCluster` to automatically restart crashed worker isolates.
+- **Concurrent Body Parsing**: Optimized `RequestBodyParser` to handle concurrent parsing requests efficiently using Futures.
+- **Resource Cleanup**: Implemented automatic cleanup of temporary files (uploads) after request completion.
+
+### ✨ New Features
+- **Log Facade**: Added `Log` class for easy static access to logging (e.g., `Log.info()`, `Log.time()`).
+- **Non-Blocking Logging**: `FileLogHandler` now uses `IOSink` for non-blocking asynchronous file writing.
+- **Stream & Callback Logging**: Added `StreamLogHandler` and `CallbackLogHandler` for flexible log processing.
+- **Security Middleware**: Added `SecurityHeadersMiddleware` and `RateLimitMiddleware` for enhanced security.
+- **Streaming Uploads**: Large file uploads are now streamed directly to disk to minimize memory usage.
+
 ## 1.1.2-beta
 
 ### Bug Fixes, Refactors & Improvements

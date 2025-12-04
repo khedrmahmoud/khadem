@@ -3,7 +3,8 @@ import 'package:khadem/khadem.dart' show LogHandler, LogLevel;
 /// A log handler that delegates logging to a callback function.
 /// Useful for integrating with external services or testing.
 class CallbackLogHandler implements LogHandler {
-  final void Function(LogLevel level, String message, Map<String, dynamic>? context, StackTrace? stackTrace) _callback;
+  final void Function(LogLevel level, String message,
+      Map<String, dynamic>? context, StackTrace? stackTrace,) _callback;
   final LogLevel _minimumLevel;
 
   CallbackLogHandler(
@@ -15,7 +16,8 @@ class CallbackLogHandler implements LogHandler {
   LogLevel get minimumLevel => _minimumLevel;
 
   @override
-  void log(LogLevel level, String message, {Map<String, dynamic>? context, StackTrace? stackTrace}) {
+  void log(LogLevel level, String message,
+      {Map<String, dynamic>? context, StackTrace? stackTrace,}) {
     if (!level.isAtLeast(_minimumLevel)) return;
     _callback(level, message, context, stackTrace);
   }

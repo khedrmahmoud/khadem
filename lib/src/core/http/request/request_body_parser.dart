@@ -47,7 +47,7 @@ class UploadedFile {
         return path;
       }
     }
-    
+
     final file = File(path);
     await file.writeAsBytes(data);
     return file.path;
@@ -58,7 +58,7 @@ class UploadedFile {
 
   /// Gets the file extension.
   String get extension => filename.split('.').last.toLowerCase();
-  
+
   /// Deletes the temporary file if it exists.
   Future<void> deleteTempFile() async {
     if (_tempFilePath != null) {
@@ -76,7 +76,7 @@ class RequestBodyParser {
   final HttpRequest _raw;
   Map<String, dynamic>? _parsedBody;
   Map<String, UploadedFile>? _uploadedFiles;
-  
+
   // Use a future to handle concurrent parsing requests
   Future<Map<String, dynamic>>? _parsingFuture;
 
@@ -90,7 +90,7 @@ class RequestBodyParser {
   /// Supports `application/json`, `application/x-www-form-urlencoded`, and `multipart/form-data`.
   Future<Map<String, dynamic>> parseBody() {
     if (_parsedBody != null) return Future.value(_parsedBody!);
-    
+
     // If parsing is already in progress, return the existing future
     if (_parsingFuture != null) return _parsingFuture!;
 
@@ -207,7 +207,7 @@ class RequestBodyParser {
           final tempDir = Directory.systemTemp.createTempSync('khadem_upload_');
           final tempFile = File('${tempDir.path}/$filename');
           final sink = tempFile.openWrite();
-          
+
           int totalBytes = 0;
           await for (final chunk in part) {
             totalBytes += chunk.length;
