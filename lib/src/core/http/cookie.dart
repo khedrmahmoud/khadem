@@ -1,29 +1,68 @@
 import 'dart:convert';
 import 'dart:io';
 
-/// Cookie Manager
+/// Cookies Manager
 ///
 /// A clean and solid cookie management system that provides a unified interface
 /// for handling HTTP cookies in requests and responses.
-class CookieManager {
-  /// Gets a cookie value from the request
-  static String? getCookie(HttpRequest request, String name) {
-    for (final cookie in request.cookies) {
+class Cookies {
+  final HttpRequest? _request;
+  final HttpResponse? _response;
+
+  /// Creates a Cookies instance for a request (read-only).
+  Cookies(this._request) : _response = null;
+
+  /// Creates a Cookies instance for a response (write-only).
+  Cookies.response(this._response) : _request = null;
+
+  /// Creates a Cookies instance for both request and response.
+  Cookies.context(this._request, this._response);
+
+  // ==========================================
+  // Request Methods (Read)
+  // ==========================================
+
+  /// Gets a cookie value from the request.
+  String? get(String name) {
+    if (_request == null) return null;
+    for (final cookie in _request!.cookies) {
       if (cookie.name == name) return cookie.value;
     }
     return null;
   }
 
-  /// Gets all cookies from the request as a map
-  static Map<String, String> getAllCookies(HttpRequest request) {
+  /// Gets a cookie object from the request.
+  Cookie? getCookie(String name) {
+    if (_request == null) return null;
+    for (final cookie in _request!.cookies) {
+      if (cookie.name == name) return cookie;
+    }
+    return null;
+  }
+
+  /// Gets all cookies from the request as a map.
+  Map<String, String> get all {
+    if (_request == null) return {};
     return Map.fromEntries(
-      request.cookies.map((cookie) => MapEntry(cookie.name, cookie.value)),
+      _request!.cookies.map((cookie) => MapEntry(cookie.name, cookie.value)),
     );
   }
 
-  /// Sets a cookie in the response
-  static void setCookie(
-    HttpResponse response,
+  /// Checks if a cookie exists in the request.
+  bool has(String name) {
+    if (_request == null) return false;
+    for (final cookie in _request!.cookies) {
+      if (cookie.name == name) return true;
+    }
+    return false;
+  }
+
+  // ==========================================
+  // Response Methods (Write)
+  // ==========================================
+
+  /// Sets a cookie in the response.
+  void set(
     String name,
     String value, {
     String? domain,
@@ -34,6 +73,8 @@ class CookieManager {
     bool secure = false,
     String? sameSite,
   }) {
+    if (_response == null) return;
+    
     final cookie = Cookie(name, value);
 
     if (domain != null) cookie.domain = domain;
@@ -57,12 +98,11 @@ class CookieManager {
       }
     }
 
-    response.cookies.add(cookie);
+    _response!.cookies.add(cookie);
   }
 
-  /// Sets multiple cookies at once
-  static void setCookies(
-    HttpResponse response,
+  /// Sets multiple cookies at once.
+  void setAll(
     Map<String, String> cookies, {
     String? domain,
     String? path = '/',
@@ -73,8 +113,7 @@ class CookieManager {
     String? sameSite,
   }) {
     for (final entry in cookies.entries) {
-      setCookie(
-        response,
+      set(
         entry.key,
         entry.value,
         domain: domain,
@@ -88,15 +127,13 @@ class CookieManager {
     }
   }
 
-  /// Deletes a cookie by setting it to expire immediately
-  static void deleteCookie(
-    HttpResponse response,
+  /// Deletes a cookie by setting it to expire immediately.
+  void delete(
     String name, {
     String? domain,
     String? path = '/',
   }) {
-    setCookie(
-      response,
+    set(
       name,
       '',
       maxAge: Duration.zero,
@@ -106,28 +143,35 @@ class CookieManager {
     );
   }
 
-  /// Deletes multiple cookies at once
-  static void deleteCookies(
-    HttpResponse response,
+  /// Deletes multiple cookies at once.
+  void deleteAll(
     List<String> names, {
     String? domain,
     String? path = '/',
   }) {
     for (final name in names) {
-      deleteCookie(response, name, domain: domain, path: path);
+      delete(name, domain: domain, path: path);
     }
   }
 
-  /// Creates a remember token cookie (for "remember me" functionality)
-  static void setRememberToken(
-    HttpResponse response,
+  // ==========================================
+  // Special Cookies
+  // ==========================================
+
+  /// Gets the CSRF token cookie.
+  String? get csrfToken => get('csrf_token');
+
+  /// Gets the remember token cookie.
+  String? get rememberToken => get('remember_token');
+
+  /// Sets the remember token cookie.
+  void setRememberToken(
     String token, {
     Duration maxAge = const Duration(days: 30),
     bool secure = false,
     bool httpOnly = true,
   }) {
-    setCookie(
-      response,
+    set(
       'remember_token',
       token,
       maxAge: maxAge,
@@ -137,26 +181,19 @@ class CookieManager {
     );
   }
 
-  /// Gets the remember token from request
-  static String? getRememberToken(HttpRequest request) {
-    return getCookie(request, 'remember_token');
+  /// Clears the remember token cookie.
+  void clearRememberToken() {
+    delete('remember_token');
   }
 
-  /// Clears the remember token cookie
-  static void clearRememberToken(HttpResponse response) {
-    deleteCookie(response, 'remember_token');
-  }
-
-  /// Creates a flash message cookie
-  static void setFlashMessage(
-    HttpResponse response,
+  /// Sets a flash message cookie.
+  void setFlashMessage(
     String type,
     String message, {
     bool secure = false,
   }) {
     final flashData = {'type': type, 'message': message};
-    setCookie(
-      response,
+    set(
       'flash_message',
       jsonEncode(flashData),
       maxAge: const Duration(seconds: 30), // Short-lived
@@ -165,16 +202,15 @@ class CookieManager {
     );
   }
 
-  /// Gets flash message from request and clears it
-  static Map<String, String>? getFlashMessage(
-    HttpRequest request,
-    HttpResponse response,
-  ) {
-    final flashCookie = getCookie(request, 'flash_message');
+  /// Gets flash message from request and clears it (if response is available).
+  Map<String, String>? getFlashMessage() {
+    final flashCookie = get('flash_message');
     if (flashCookie == null) return null;
 
-    // Clear the flash cookie
-    deleteCookie(response, 'flash_message');
+    // Clear the flash cookie if we can write to response
+    if (_response != null) {
+      delete('flash_message');
+    }
 
     try {
       final decoded = jsonDecode(flashCookie) as Map<String, dynamic>;
@@ -183,8 +219,15 @@ class CookieManager {
         'message': decoded['message'] as String,
       };
     } catch (e) {
-      // Invalid flash data
       return null;
     }
   }
+}
+
+/// Static helper for backward compatibility or direct usage
+class CookieManager {
+  static String? getCookie(HttpRequest request, String name) => Cookies(request).get(name);
+  static Map<String, String> getAllCookies(HttpRequest request) => Cookies(request).all;
+  static void setCookie(HttpResponse response, String name, String value, {String? domain, String? path, DateTime? expires, Duration? maxAge, bool httpOnly = false, bool secure = false, String? sameSite}) => Cookies.response(response).set(name, value, domain: domain, path: path, expires: expires, maxAge: maxAge, httpOnly: httpOnly, secure: secure, sameSite: sameSite);
+  static void deleteCookie(HttpResponse response, String name, {String? domain, String? path}) => Cookies.response(response).delete(name, domain: domain, path: path);
 }

@@ -7,9 +7,29 @@ import 'dart:io';
 class RequestSession {
   final HttpRequest _request;
 
-  RequestSession(this._request);
+  RequestSession(this._request) {
+    _rotateFlash();
+  }
 
   HttpSession get _session => _request.session;
+
+  /// Rotates flash data (new -> old).
+  void _rotateFlash() {
+    // If we already rotated in this session (e.g. multiple Request objects), skip?
+    // HttpSession is shared. We need a flag or check if we are the first.
+    // But Request is usually one per request.
+    // However, if we access session, we lock it? No, Dart HttpSession is simple.
+    
+    // We need to be careful not to rotate multiple times if RequestSession is created multiple times.
+    // But Request creates it once.
+    
+    if (_session.containsKey('_flash_new')) {
+      _session['_flash_old'] = _session['_flash_new'];
+    } else {
+      _session['_flash_old'] = <String, dynamic>{};
+    }
+    _session['_flash_new'] = <String, dynamic>{};
+  }
 
   /// Gets the session ID.
   String get sessionId => _session.id;
@@ -29,9 +49,17 @@ class RequestSession {
   }
 
   /// Gets a value from the session by key.
-  dynamic get(String key) {
+  dynamic get(String key, [dynamic defaultValue]) {
     touch();
-    return _session[key];
+    if (_session.containsKey(key)) {
+      return _session[key];
+    }
+    // Check flash old
+    final flashOld = _session['_flash_old'];
+    if (flashOld is Map && flashOld.containsKey(key)) {
+      return flashOld[key];
+    }
+    return defaultValue;
   }
 
   /// Sets a value in the session.
@@ -40,10 +68,16 @@ class RequestSession {
     _session[key] = value;
   }
 
+  /// Alias for set.
+  void put(String key, dynamic value) => set(key, value);
+
   /// Checks if a key exists in the session.
   bool has(String key) {
     touch();
-    return _session.containsKey(key);
+    if (_session.containsKey(key)) return true;
+    final flashOld = _session['_flash_old'];
+    if (flashOld is Map && flashOld.containsKey(key)) return true;
+    return false;
   }
 
   /// Removes a key from the session.
@@ -52,11 +86,17 @@ class RequestSession {
     _session.remove(key);
   }
 
+  /// Alias for remove.
+  void forget(String key) => remove(key);
+
   /// Clears all session data.
   void clear() {
     touch();
     _session.clear();
   }
+
+  /// Alias for clear.
+  void flush() => clear();
 
   /// Sets multiple values in the session at once.
   void setMultiple(Map<String, dynamic> data) {
@@ -66,27 +106,26 @@ class RequestSession {
 
   /// Gets a typed value from the session, with optional default.
   T? getTyped<T>(String key, [T? defaultValue]) {
-    touch();
-    final value = _session[key];
+    final value = get(key);
     return value is T ? value : defaultValue;
   }
 
   /// Flashes a value to the session (temporary, removed after next access).
   void flash(String key, dynamic value) {
     touch();
-    final Map<String, dynamic> flashData =
-        _session['flash'] ?? <String, dynamic>{};
-    flashData[key] = value;
-    _session['flash'] = flashData;
+    final flashNew = _session['_flash_new'];
+    if (flashNew is Map) {
+      flashNew[key] = value;
+    } else {
+      _session['_flash_new'] = {key: value};
+    }
   }
 
-  /// Retrieves and removes a flashed value from the session.
-  dynamic pull(String key) {
+  /// Retrieves and removes a value from the session.
+  dynamic pull(String key, [dynamic defaultValue]) {
     touch();
-    final value = _session[key];
-    if (value != null) {
-      _session.remove(key);
-    }
+    final value = get(key, defaultValue);
+    remove(key);
     return value;
   }
 
@@ -101,11 +140,20 @@ class RequestSession {
 
     // Restore data but update creation time for security
     sessionData.forEach((key, value) {
-      if (key != 'created_at') {
-        // Don't restore old creation time
+      if (key != 'created_at' && !key.toString().startsWith('_flash')) {
+        // Don't restore old creation time or flash data (handled separately?)
+        // Actually we should restore flash data
         _session[key] = value;
       }
     });
+    
+    // Restore flash
+    if (sessionData.containsKey('_flash_new')) {
+        _session['_flash_new'] = sessionData['_flash_new'];
+    }
+    if (sessionData.containsKey('_flash_old')) {
+        _session['_flash_old'] = sessionData['_flash_old'];
+    }
 
     // Set new creation time
     _session['created_at'] = DateTime.now().toIso8601String();
@@ -118,16 +166,18 @@ class RequestSession {
   /// Gets all flashed data and clears them.
   Map<String, dynamic> getFlashedData() {
     touch();
-    final flashData = _session['flash'] as Map<String, dynamic>? ?? {};
-    _session.remove('flash');
-    return flashData;
+    final flashOld = _session['_flash_old'];
+    if (flashOld is Map) {
+        return Map<String, dynamic>.from(flashOld);
+    }
+    return {};
   }
 
   /// Checks if the session has any flashed data.
   bool hasFlashedData() {
     touch();
-    final flashData = _session['flash'] as Map<String, dynamic>?;
-    return flashData != null && flashData.isNotEmpty;
+    final flashOld = _session['_flash_old'];
+    return flashOld is Map && flashOld.isNotEmpty;
   }
 
   /// Sets the session timeout.
@@ -284,16 +334,8 @@ class RequestSession {
 
   /// Cleans up expired flash data and performs maintenance.
   void cleanup() {
-    // Remove old flash data if it exists
-    if (_session.containsKey('flash')) {
-      final flashData = _session['flash'] as Map<String, dynamic>?;
-      if (flashData == null || flashData.isEmpty) {
-        _session.remove('flash');
-      }
-    }
-
-    // Additional cleanup can be added here
-    // e.g., remove temporary data, compress session data, etc.
+    // Remove old flash data
+    _session.remove('_flash_old');
   }
 
   /// Gets all session data as a map (excluding internal metadata).

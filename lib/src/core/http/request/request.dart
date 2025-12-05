@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:khadem/src/support/helpers/cookie.dart';
-
+import '../cookie.dart';
 import 'body_parser.dart';
 import 'request_headers.dart';
 import 'request_input.dart';
@@ -30,6 +29,7 @@ class Request {
   late final RequestSession _session;
   late final RequestMetadata _metadata;
   late final RequestInput _input;
+  late final Cookies _cookies;
 
   Request(this._raw) {
     _bodyParser = BodyParser(_raw);
@@ -39,6 +39,7 @@ class Request {
     _session = RequestSession(_raw);
     _metadata = RequestMetadata(_raw);
     _input = RequestInput(_bodyParser, _raw.uri.queryParameters);
+    _cookies = Cookies(_raw);
   }
 
   // ===== Core Accessors =====
@@ -301,20 +302,23 @@ class Request {
 
   // ===== Cookies =====
 
+  /// Access to cookies manager
+  Cookies get cookieManager => _cookies;
+
   /// Gets all cookies
-  Map<String, String> get cookies => CookieHelper(_raw).all;
+  Map<String, String> get cookies => _cookies.all;
 
   /// Gets a cookie value
-  String? cookie(String name) => CookieHelper(_raw).get(name);
+  String? cookie(String name) => _cookies.get(name);
 
   /// Checks if cookie exists
-  bool hasCookie(String name) => CookieHelper(_raw).has(name);
+  bool hasCookie(String name) => _cookies.has(name);
 
   /// Gets CSRF token cookie
-  String? get csrfToken => cookie('csrf_token');
+  String? get csrfToken => _cookies.csrfToken;
 
   /// Gets remember token cookie
-  String? get rememberToken => cookie('remember_token');
+  String? get rememberToken => _cookies.rememberToken;
 
   // ===== Session =====
 
@@ -341,5 +345,6 @@ class Request {
   /// Cleans up request resources (temp files, etc.)
   Future<void> cleanup() async {
     await _bodyParser.cleanup();
+    _session.cleanup();
   }
 }

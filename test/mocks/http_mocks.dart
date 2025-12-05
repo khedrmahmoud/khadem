@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:khadem/src/core/http/cookie.dart';
 import 'package:khadem/src/core/http/request/request.dart';
 import 'package:khadem/src/core/http/response/index.dart';
 import 'package:khadem/src/core/routing/index.dart' show RouteMatchResult;
-import 'package:khadem/src/support/helpers/cookie.dart';
 
 /// Mock HttpRequest for testing
 class FakeHttpRequest implements HttpRequest {
@@ -241,7 +241,7 @@ class FakeResponse implements Response {
   Response noCache() => this;
 
   @override
-  CookieHelper get cookieHandler => CookieHelper(FakeHttpRequest() as dynamic);
+  Cookies get cookieHandler => Cookies(FakeHttpRequest() as dynamic);
 
   @override
   Response flashInput(Map<String, dynamic> inputData) {

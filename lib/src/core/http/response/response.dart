@@ -1,10 +1,11 @@
 import 'dart:io';
 
-import 'package:khadem/khadem.dart' show CookieHelper, Khadem;
+import 'package:khadem/khadem.dart' show Khadem;
 
 import '../../session/session_manager.dart';
 import '../context/request_context.dart';
 import '../context/response_context.dart';
+import '../cookie.dart';
 import 'response_body.dart';
 import 'response_headers.dart';
 import 'response_renderer.dart';
@@ -59,7 +60,7 @@ class Response {
   ResponseRenderer get renderer => _renderer;
 
   /// Cookie management
-  CookieHelper get cookieHandler => CookieHelper(_raw);
+  Cookies get cookieHandler => Cookies.response(_raw.response);
 
   /// Sets the HTTP status code (legacy method for backward compatibility).
   Response status(int code) {

@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:khadem/khadem.dart'
-    show Middleware, NextFunction, Request, Response, CookieHelper;
+    show Middleware, NextFunction, Request, Response;
+import 'package:khadem/src/core/http/cookie.dart';
 
 import '../../contracts/session/session_driver_registry.dart';
 import '../../core/session/drivers/file_session_driver.dart';
@@ -107,12 +108,12 @@ class CookieMiddleware extends Middleware {
     NextFunction next,
   ) async {
     // Add cookie helper methods to request
-    req.setAttribute('cookies', CookieHelper(req.raw));
+    req.setAttribute('cookies', Cookies(req.raw));
 
     // Add cookie helper methods to request (we'll access response through the helper)
     req.setAttribute(
       'response_cookies',
-      CookieHelper.response(res.raw.response),
+      Cookies.response(res.raw.response),
     );
 
     // Continue to next middleware/route handler

@@ -65,10 +65,7 @@ export 'exceptions/unauthorized_exception.dart';
 // 📦 Validation_exception.dart
 // ========================
 export 'exceptions/validation_exception.dart';
-// ========================
-// 📦 Cookie.dart
-// ========================
-export 'helpers/cookie.dart';
+
 // ========================
 // 📦 Date_helper.dart
 // ========================
