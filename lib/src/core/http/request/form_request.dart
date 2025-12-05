@@ -387,7 +387,7 @@ abstract class FormRequest {
   ///
   /// Parameters:
   /// - [request]: The request instance being validated
-  void prepareForValidation(Request request) {}
+  Future<void> prepareForValidation(Request request) async {}
 
   /// Process data after successful validation.
   ///
@@ -543,7 +543,7 @@ abstract class FormRequest {
     if (!authorize(request)) {
       throw UnauthorizedException('This action is unauthorized.');
     }
-    prepareForValidation(request);
+    await prepareForValidation(request);
     try {
       _validatedData = await request.validate(rules(), messages: messages());
       passedValidation(_validatedData!);
@@ -554,6 +554,27 @@ abstract class FormRequest {
       }
       rethrow;
     }
+  }
+
+  /// Merges values into the request body.
+  ///
+  /// This is useful in [prepareForValidation] to normalize data.
+  void merge(Map<String, dynamic> values) {
+    _request?.merge(values);
+  }
+
+  /// Get all validated data after successful validation.
+  ///
+  /// Returns the complete validated data map that was produced by the
+  /// [validate] method. This includes any modifications made by
+  /// [passedValidation].
+  ///
+  /// Throws [StateError] if validation has not been performed yet.
+  Map<String, dynamic> validated() {
+    if (_validatedData == null) {
+      throw StateError('Validation has not been performed yet.');
+    }
+    return _validatedData!;
   }
 
   /// Get all validated data after successful validation.

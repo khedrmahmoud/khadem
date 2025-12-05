@@ -99,6 +99,15 @@ class Request {
   dynamic get(String key, [dynamic defaultValue]) =>
       _input.get(key, defaultValue);
 
+  /// Adds or updates a value in the request body.
+  void add(String key, dynamic value) => _input.add(key, value);
+
+  /// Removes a value from the request body.
+  void remove(String key) => _input.remove(key);
+
+  /// Merges values into the request body.
+  void merge(Map<String, dynamic> values) => _input.merge(values);
+
   /// Gets typed input value
   T? getTyped<T>(String key, [T? defaultValue]) =>
       _input.typed<T>(key, defaultValue);

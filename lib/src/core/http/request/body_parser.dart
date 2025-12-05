@@ -199,6 +199,23 @@ class BodyParser {
     }
   }
 
+  /// Adds or updates a value in the parsed body.
+  void add(String key, dynamic value) {
+    _parsedBody ??= {};
+    _parsedBody![key] = value;
+  }
+
+  /// Removes a value from the parsed body.
+  void remove(String key) {
+    _parsedBody?.remove(key);
+  }
+
+  /// Merges a map into the parsed body.
+  void merge(Map<String, dynamic> values) {
+    _parsedBody ??= {};
+    _parsedBody!.addAll(values);
+  }
+
   /// Gets parsed body.
   Map<String, dynamic>? get body => _parsedBody;
 

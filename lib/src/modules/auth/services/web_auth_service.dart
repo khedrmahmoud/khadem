@@ -50,9 +50,9 @@ class WebAuthService {
 
   /// Resets login attempts counter on successful login
   void _resetLoginAttempts(Request request) {
-    request.removeSession(_loginAttemptsKey);
-    request.removeSession(_lastLoginAttemptKey);
-    request.removeSession(_lockoutUntilKey);
+    request.session.remove(_loginAttemptsKey);
+    request.session.remove(_lastLoginAttemptKey);
+    request.session.remove(_lockoutUntilKey);
   }
 
   /// Attempts to authenticate a user for web session with enhanced security
@@ -111,12 +111,12 @@ class WebAuthService {
     request.setUser(user);
 
     // Store user ID in session (more secure than cookies)
-    request.setSession(_sessionKey, userId.toString());
+    request.session.set(_sessionKey, userId.toString());
 
     // Generate and set CSRF token in session
     final csrfBytes = List<int>.generate(32, (_) => Random().nextInt(256));
     final csrfToken = base64Url.encode(csrfBytes);
-    request.setSession(_csrfKey, csrfToken);
+    request.session.set(_csrfKey, csrfToken);
     // Also set in cookie for forms
     response.cookieHandler.set(_csrfKey, csrfToken);
 
@@ -246,7 +246,7 @@ class WebAuthService {
 
   /// Attempts to authenticate using remember token
   Future<Map<String, dynamic>?> attemptRememberLogin(Request request) async {
-    final rememberToken = request.cookieHandler.get(_rememberKey);
+    final rememberToken = request.cookie(_rememberKey);
     if (rememberToken == null) return null;
 
     try {
@@ -375,7 +375,7 @@ class WebAuthService {
   static Future<Map<String, dynamic>> verifyToken() async {
     final authManager = Khadem.container.resolve<AuthManager>();
     final token =
-        RequestContext.request.cookieHandler.get('access_token') ?? '';
+        RequestContext.request.cookie('access_token') ?? '';
     final user = await authManager.user(token);
     return user.toAuthArray();
   }

@@ -1,5 +1,5 @@
 import '../../support/exceptions/validation_exception.dart';
-import '../http/request/request_body_parser.dart';
+import '../http/request/uploaded_file.dart';
 import '../lang/lang.dart';
 import 'rule_registry.dart';
 

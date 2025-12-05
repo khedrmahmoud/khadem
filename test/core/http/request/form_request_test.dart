@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:khadem/khadem.dart'
     show
         Request,
-        RequestBodyParser,
+        BodyParser,
         UploadedFile,
         FormRequest,
         ValidationException,
@@ -27,12 +27,12 @@ class FakeHttpRequest implements HttpRequest {
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
-// Fake RequestBodyParser for testing
-class FakeRequestBodyParser implements RequestBodyParser {
+// Fake BodyParser for testing
+class FakeBodyParser implements BodyParser {
   final Map<String, dynamic> _data;
   final Map<String, dynamic>? _files;
 
-  FakeRequestBodyParser(this._data, [this._files]);
+  FakeBodyParser(this._data, [this._files]);
 
   @override
   Map<String, UploadedFile>? get files {
@@ -42,7 +42,7 @@ class FakeRequestBodyParser implements RequestBodyParser {
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
-    if (invocation.memberName == #parseBody) {
+    if (invocation.memberName == #parse) {
       return Future.value(_data);
     }
     return super.noSuchMethod(invocation);
@@ -120,7 +120,7 @@ class TestFormRequestWithHooks extends FormRequest {
   }
 
   @override
-  void prepareForValidation(Request request) {
+  Future<void> prepareForValidation(Request request) async {
     prepareWasCalled = true;
   }
 
@@ -186,7 +186,7 @@ class TestFormRequestWithOrderedHooks extends FormRequest {
   }
 
   @override
-  void prepareForValidation(Request request) {
+  Future<void> prepareForValidation(Request request) async {
     callOrder.add('prepare');
   }
 
@@ -211,7 +211,7 @@ class TestFormRequestWithRequestCheck extends FormRequest {
   }
 
   @override
-  void prepareForValidation(Request request) {
+  Future<void> prepareForValidation(Request request) async {
     receivedRequest = request;
   }
 }

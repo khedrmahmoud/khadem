@@ -106,7 +106,7 @@ class FakeRequest extends Request {
   }
 
   // For backward compatibility in tests, provide access to params as a map
-  Map<String, String> get testParams => params.pathParams;
+  Map<String, String> get testParams => params.all;
   set testParams(Map<String, String> value) {
     // This is for test compatibility - in real usage, use setParam()
   }

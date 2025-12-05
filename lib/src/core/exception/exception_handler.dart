@@ -340,7 +340,7 @@ class ExceptionHandler {
         'method': request.method,
         'url': request.uri.toString(),
         'headers': request.headers,
-        'user_agent': request.headers.header('user-agent'),
+        'user_agent': request.headers.get('user-agent'),
       };
     } catch (e) {
       // Request context not available

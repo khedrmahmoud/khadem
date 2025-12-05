@@ -250,12 +250,11 @@ void main() {
       });
 
       test('should check content type preferences', () {
-        expect(request.acceptsJson(), isTrue);
-        expect(request.acceptsHtml(), isFalse);
+        expect(request.wantsJson, isTrue);
       });
 
       test('should detect AJAX requests', () {
-        expect(request.isAjax(), isFalse);
+        expect(request.isAjax, isFalse);
       });
     });
 
@@ -269,7 +268,7 @@ void main() {
 
     group('Component Access', () {
       test('should provide access to all components', () {
-        expect(request.bodyParser, isA<RequestBodyParser>());
+        expect(request.bodyParser, isA<BodyParser>());
         expect(request.validator, isA<RequestValidator>());
         expect(request.headers, isA<RequestHeaders>());
         expect(request.params, isA<RequestParams>());

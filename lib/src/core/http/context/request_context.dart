@@ -65,7 +65,7 @@ class RequestContext {
     try {
       final req = request;
       // Try X-Forwarded-For header first (for proxies/load balancers)
-      final forwardedFor = req.headers.header('x-forwarded-for');
+      final forwardedFor = req.headers.get('x-forwarded-for');
       if (forwardedFor != null && forwardedFor.isNotEmpty) {
         return forwardedFor.split(',').first.trim();
       }
@@ -77,17 +77,17 @@ class RequestContext {
   }
 
   /// Get the User-Agent string
-  static String? get userAgent => request.headers.header('user-agent');
+  static String? get userAgent => request.headers.get('user-agent');
 
   /// Get the Accept-Language header
   static String? get acceptLanguage =>
-      request.headers.header('accept-language');
+      request.headers.get('accept-language');
 
   /// Get the Content-Type header
-  static String? get contentType => request.headers.header('content-type');
+  static String? get contentType => request.headers.get('content-type');
 
   /// Get the Authorization header
-  static String? get authorization => request.headers.header('authorization');
+  static String? get authorization => request.headers.get('authorization');
 
   /// Run anything inside this request context.
   ///

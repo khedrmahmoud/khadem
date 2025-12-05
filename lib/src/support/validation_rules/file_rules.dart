@@ -1,5 +1,5 @@
 import '../../contracts/validation/rule.dart';
-import '../../core/http/request/request_body_parser.dart';
+import '../../core/http/request/uploaded_file.dart';
 
 class FileRule extends Rule {
   @override

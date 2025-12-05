@@ -109,20 +109,20 @@ void main() {
 
     group('Basic Header Access', () {
       test('should get header value', () {
-        expect(headers.header('content-type'), equals('application/json'));
-        expect(headers.header('user-agent'), equals('TestAgent/1.0'));
-        expect(headers.header('nonexistent'), isNull);
+        expect(headers.get('content-type'), equals('application/json'));
+        expect(headers.get('user-agent'), equals('TestAgent/1.0'));
+        expect(headers.get('nonexistent'), isNull);
       });
 
       test('should get all header values', () {
-        final values = headers.headerValues('accept');
+        final values = headers.getAll('accept');
         expect(values, isNotNull);
         expect(values!.first, equals('application/json, text/plain'));
       });
 
       test('should check if header exists', () {
-        expect(headers.hasHeader('content-type'), isTrue);
-        expect(headers.hasHeader('nonexistent'), isFalse);
+        expect(headers.has('content-type'), isTrue);
+        expect(headers.has('nonexistent'), isFalse);
       });
     });
 
@@ -164,38 +164,17 @@ void main() {
       });
     });
 
-    group('Content Negotiation', () {
-      test('should check if accepts JSON', () {
-        expect(headers.acceptsJson(), isTrue);
-      });
 
-      test('should check if accepts HTML', () {
-        expect(headers.acceptsHtml(), isFalse);
-      });
-    });
-
-    group('AJAX Detection', () {
-      test('should detect AJAX requests', () {
-        expect(headers.isAjax(), isFalse);
-      });
-    });
-
-    group('Raw Headers Access', () {
-      test('should provide access to raw headers', () {
-        expect(headers.headers, isNotNull);
-        expect(headers.headers, equals(fakeHttpHeaders));
-      });
-    });
 
     group('Edge Cases', () {
       test('should handle case insensitive header names', () {
-        expect(headers.header('CONTENT-TYPE'), equals('application/json'));
-        expect(headers.header('Content-Type'), equals('application/json'));
+        expect(headers.get('CONTENT-TYPE'), equals('application/json'));
+        expect(headers.get('Content-Type'), equals('application/json'));
       });
 
       test('should handle missing headers gracefully', () {
-        expect(headers.header('nonexistent'), isNull);
-        expect(headers.hasHeader('nonexistent'), isFalse);
+        expect(headers.get('nonexistent'), isNull);
+        expect(headers.has('nonexistent'), isFalse);
       });
     });
   });

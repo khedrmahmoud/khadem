@@ -8,6 +8,21 @@ class RequestInput {
 
   RequestInput(this._bodyParser, this._queryParams);
 
+  /// Adds or updates a value in the request body.
+  void add(String key, dynamic value) {
+    _bodyParser.add(key, value);
+  }
+
+  /// Removes a value from the request body.
+  void remove(String key) {
+    _bodyParser.remove(key);
+  }
+
+  /// Merges values into the request body.
+  void merge(Map<String, dynamic> values) {
+    _bodyParser.merge(values);
+  }
+
   /// Gets a value from body or query parameters.
   dynamic get(String key, [dynamic defaultValue]) {
     // First try body

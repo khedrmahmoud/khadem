@@ -196,7 +196,7 @@ extension RequestAuth on Request {
     bool hasCredentialsInBody = false;
     try {
       hasCredentialsInBody =
-          input('email') != null || input('username') != null;
+          input.get('email') != null || input.get('username') != null;
     } catch (e) {
       // Body not parsed yet, can't check body parameters
     }
@@ -262,11 +262,11 @@ extension RequestAuth on Request {
       }
 
       // Clear session data
-      clearSession();
+      session.clear();
       clearUser();
     } catch (e) {
       // Even if logout fails, clear local state
-      clearSession();
+      session.clear();
       clearUser();
     }
   }
@@ -283,11 +283,11 @@ extension RequestAuth on Request {
         await authManager.logoutAll(token);
       }
       // Clear session data
-      clearSession();
+      session.clear();
       clearUser();
     } catch (e) {
       // Even if logout fails, clear local state
-      clearSession();
+      session.clear();
       clearUser();
     }
   }

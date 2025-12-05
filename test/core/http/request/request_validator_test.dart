@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:khadem/khadem.dart'
-    show RequestBodyParser, UploadedFile, RequestValidator;
+    show BodyParser, UploadedFile, RequestValidator;
 import 'package:test/test.dart';
 
-class FakeRequestBodyParser implements RequestBodyParser {
+class FakeBodyParser implements BodyParser {
   final Map<String, dynamic> _data;
   final Map<String, dynamic>? _files;
 
-  FakeRequestBodyParser(this._data, [this._files]);
+  FakeBodyParser(this._data, [this._files]);
 
   @override
   Map<String, UploadedFile>? get files {
@@ -18,7 +18,7 @@ class FakeRequestBodyParser implements RequestBodyParser {
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
-    if (invocation.memberName == #parseBody) {
+    if (invocation.memberName == #parse) {
       return Future.value(_data);
     }
     return super.noSuchMethod(invocation);
@@ -28,11 +28,11 @@ class FakeRequestBodyParser implements RequestBodyParser {
 void main() {
   group('RequestValidator', () {
     late RequestValidator validator;
-    late FakeRequestBodyParser fakeBodyParser;
+    late FakeBodyParser fakeBodyParser;
 
     setUp(() {
       fakeBodyParser =
-          FakeRequestBodyParser({'name': 'John', 'email': 'john@example.com'});
+          FakeBodyParser({'name': 'John', 'email': 'john@example.com'});
       validator = RequestValidator(fakeBodyParser as dynamic);
     });
 
@@ -49,7 +49,7 @@ void main() {
 
       test('should throw validation exception for invalid body', () async {
         fakeBodyParser =
-            FakeRequestBodyParser({'name': '', 'email': 'invalid-email'});
+            FakeBodyParser({'name': '', 'email': 'invalid-email'});
         validator = RequestValidator(fakeBodyParser as dynamic);
 
         final rules = {'name': 'required', 'email': 'required|email'};

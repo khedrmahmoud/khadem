@@ -28,11 +28,11 @@ void main() {
 
       test('should get parameter with default value', () {
         expect(
-          params.paramWithDefault('nonexistent', 'default'),
+          params.paramOr('nonexistent', 'default'),
           equals('default'),
         );
         params.setParam('existing', 'value');
-        expect(params.paramWithDefault('existing', 'default'), equals('value'));
+        expect(params.paramOr('existing', 'default'), equals('value'));
       });
 
       test('should get all parameter keys', () {
