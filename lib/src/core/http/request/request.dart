@@ -3,291 +3,333 @@ import 'dart:io';
 
 import 'package:khadem/src/support/helpers/cookie.dart';
 
-import 'request_body_parser.dart';
+import 'body_parser.dart';
 import 'request_headers.dart';
+import 'request_input.dart';
+import 'request_metadata.dart';
 import 'request_params.dart';
 import 'request_session.dart';
 import 'request_validator.dart';
+import 'uploaded_file.dart';
 
 /// Represents an HTTP request within the Khadem framework.
 ///
-/// This class provides a clean, well-organized interface for handling HTTP requests
-/// with proper separation of concerns. It delegates specific functionality to
-/// specialized components for better maintainability and testability.
-///
-/// Key features:
-/// - HTTP method and URI access
-/// - Header management
-/// - Body parsing and validation
-/// - Parameter handling
-/// - Authentication state
-/// - Custom attributes
+/// Provides a clean interface for accessing request data with:
+/// - Single responsibility principle for each component
+/// - Fast, optimized accessors with caching
+/// - Type-safe parameter handling
+/// - Comprehensive metadata access
+/// - Easy-to-use input helpers
 class Request {
   final HttpRequest _raw;
 
-  late final RequestBodyParser _bodyParser;
+  late final BodyParser _bodyParser;
   late final RequestValidator _validator;
   late final RequestHeaders _headers;
   late final RequestParams _params;
   late final RequestSession _session;
+  late final RequestMetadata _metadata;
+  late final RequestInput _input;
 
   Request(this._raw) {
-    _bodyParser = RequestBodyParser(_raw);
+    _bodyParser = BodyParser(_raw);
     _headers = RequestHeaders(_raw.headers);
     _params = RequestParams(<String, String>{}, <String, dynamic>{});
     _validator = RequestValidator(_bodyParser);
     _session = RequestSession(_raw);
+    _metadata = RequestMetadata(_raw);
+    _input = RequestInput(_bodyParser, _raw.uri.queryParameters);
   }
 
-  /// HTTP method (GET, POST, etc.)
-  String get method => _raw.method;
+  // ===== Core Accessors =====
 
-  /// URI path (/api/users)
-  String get path => _raw.uri.path;
+  /// HTTP method (GET, POST, PUT, etc.)
+  String get method => _metadata.method;
+
+  /// Request path (/api/users)
+  String get path => _metadata.path;
 
   /// Full request URI
-  Uri get uri => _raw.uri;
+  Uri get uri => _metadata.uri;
 
   /// Raw HttpRequest from Dart SDK
   HttpRequest get raw => _raw;
 
-  /// Request query parameters
-  Map<String, String> get query => _raw.uri.queryParameters;
+  /// Query parameters
+  Map<String, String> get query => _metadata.query;
 
-  /// Access to body parsing functionality
-  RequestBodyParser get bodyParser => _bodyParser;
+  /// Client IP address (handles proxies)
+  String get ip => _metadata.ip;
 
-  /// Access to validation functionality
+  /// Request port
+  int? get port => _metadata.port;
+
+  // ===== Component Accessors =====
+
+  /// Access to body parsing
+  BodyParser get bodyParser => _bodyParser;
+
+  /// Access to validation
   RequestValidator get validator => _validator;
 
-  /// Access to header functionality
+  /// Access to headers
   RequestHeaders get headers => _headers;
 
-  /// Access to parameter functionality
+  /// Access to parameters
   RequestParams get params => _params;
 
-  /// Client IP address
-  String get ip => _raw.connectionInfo?.remoteAddress.address ?? 'unknown';
+  /// Access to session
+  RequestSession get session => _session;
 
-  /// Parses and returns the request body as a Map.
-  /// Shortcut for bodyParser.parseBody()
-  Future<Map<String, dynamic>> get body => _bodyParser.parseBody();
+  /// Access to metadata
+  RequestMetadata get metadata => _metadata;
 
-  /// Gets a specific input value from the parsed body.
-  dynamic input(String key, [dynamic defaultValue]) =>
-      _bodyParser.input(key, defaultValue);
+  /// Access to input helper
+  RequestInput get input => _input;
 
-  /// check if has field
-  /// Checks if the request body contains the specified field.
-  bool has(String key) => _bodyParser.has(key);
+  // ===== Body & Input Access =====
 
-  /// Gets uploaded files from the request.
-  /// Shortcut for bodyParser.files
-  Map<String, dynamic>? get files => _bodyParser.files;
+  /// Gets parsed body
+  Future<Map<String, dynamic>> get body => _bodyParser.parse();
 
-  /// Gets a specific uploaded file by field name.
-  /// Shortcut for bodyParser.file()
+  /// Gets all input (body + query) - shortcut
+  Map<String, dynamic> get all => _input.all();
+
+  /// Gets input value from body or query
+  dynamic get(String key, [dynamic defaultValue]) =>
+      _input.get(key, defaultValue);
+
+  /// Gets typed input value
+  T? getTyped<T>(String key, [T? defaultValue]) =>
+      _input.typed<T>(key, defaultValue);
+
+  /// Gets string input
+  String? getString(String key, [String? defaultValue]) =>
+      _input.string(key, defaultValue);
+
+  /// Gets integer input
+  int? getInt(String key, [int? defaultValue]) =>
+      _input.integer(key, defaultValue);
+
+  /// Gets double input
+  double? getDouble(String key, [double? defaultValue]) =>
+      _input.doubleValue(key, defaultValue);
+
+  /// Gets boolean input
+  bool getBoolean(String key, [bool defaultValue = false]) =>
+      _input.boolean(key, defaultValue);
+
+  /// Gets list input
+  List<T>? getList<T>(String key) => _input.list<T>(key);
+
+  /// Gets map input
+  Map<String, dynamic>? getMap(String key) => _input.map(key);
+
+  /// Checks if input key exists
+  bool hasInput(String key) => _input.has(key);
+
+  /// Checks if multiple input keys exist
+  bool hasInputAll(List<String> keys) => _input.hasAll(keys);
+
+  /// Checks if any input key exists
+  bool hasInputAny(List<String> keys) => _input.hasAny(keys);
+
+  /// Gets only specified input keys
+  Map<String, dynamic> only(List<String> keys) => _input.only(keys);
+
+  /// Gets all input except specified keys
+  Map<String, dynamic> except(List<String> keys) => _input.except(keys);
+
+  // ===== File Access =====
+
+  /// Gets all uploaded files
+  Map<String, UploadedFile>? get files => _bodyParser.files;
+
+  /// Gets a specific uploaded file
   UploadedFile? file(String fieldName) => _bodyParser.file(fieldName);
 
-  /// Gets all files with a specific field name (for multiple file uploads).
-  /// Shortcut for bodyParser.filesByName()
+  /// Gets all files with a field name
   List<UploadedFile> filesByName(String fieldName) =>
       _bodyParser.filesByName(fieldName);
 
-  /// Checks if a file was uploaded with the given field name.
-  /// Shortcut for bodyParser.hasFile()
+  /// Checks if file was uploaded
   bool hasFile(String fieldName) => _bodyParser.hasFile(fieldName);
 
-  /// Gets the first file from multiple files with the same name.
-  /// Shortcut for bodyParser.firstFile()
+  /// Gets first file by field name
   UploadedFile? firstFile(String fieldName) => _bodyParser.firstFile(fieldName);
 
-  /// Validates the request body input against the given rules.
-  /// Shortcut for validator.validateBody()
+  // ===== Validation =====
+
+  /// Validates request body
   Future<Map<String, dynamic>> validate(
     Map<String, String> rules, {
     Map<String, String>? messages,
   }) =>
       _validator.validateBody(rules, messages: messages);
 
-  /// Validates specific input data against rules.
-  /// Shortcut for validator.validateData()
+  /// Validates specific data
   Map<String, dynamic> validateData(
     Map<String, dynamic> data,
     Map<String, String> rules,
   ) =>
       _validator.validateData(data, rules);
 
-  /// Gets a path parameter by key.
-  /// Shortcut for params.param()
+  // ===== Path Parameters =====
+
+  /// Gets a path parameter
   String? param(String key) => _params.param(key);
 
-  /// Sets a path parameter.
-  /// Shortcut for params.setParam()
+  /// Gets path parameter with default
+  String paramOr(String key, String defaultValue) =>
+      _params.paramOr(key, defaultValue);
+
+  /// Gets typed path parameter
+  T? paramTyped<T>(String key) => _params.paramTyped<T>(key);
+
+  /// Gets path parameter as int
+  int? paramInt(String key) => _params.paramInt(key);
+
+  /// Gets path parameter as double
+  double? paramDouble(String key) => _params.paramDouble(key);
+
+  /// Gets path parameter as bool
+  bool paramBool(String key) => _params.paramBool(key);
+
+  /// Sets a path parameter
   void setParam(String key, String value) => _params.setParam(key, value);
 
-  /// Gets a custom attribute by key.
-  /// Shortcut for params.attribute()
+  /// Checks if path parameter exists
+  bool hasParam(String key) => _params.hasParam(key);
+
+  /// Gets all path parameters
+  Map<String, String> get allParams => _params.all;
+
+  // ===== Custom Attributes =====
+
+  /// Gets a custom attribute
   T? attribute<T>(String key) => _params.attribute<T>(key);
 
-  /// Sets a custom attribute.
-  /// Shortcut for params.setAttribute()
+  /// Gets attribute with default
+  T attributeOr<T>(String key, T defaultValue) =>
+      _params.attributeOr<T>(key, defaultValue);
+
+  /// Sets a custom attribute
   void setAttribute(String key, dynamic value) =>
       _params.setAttribute(key, value);
 
-  /// Cookie management
-  CookieHelper get cookieHandler => CookieHelper(_raw);
+  /// Checks if attribute exists
+  bool hasAttribute(String key) => _params.hasAttribute(key);
 
-  /// Shortcut for accessing cookies from the raw HttpRequest
-  Map<String, String> get cookies => cookieHandler.all;
+  /// Gets all attributes
+  Map<String, dynamic> get allAttributes => _params.attributes;
 
-  /// Gets a specific cookie value by name.
-  String? cookie(String name) => cookieHandler.get(name);
+  // ===== Headers =====
 
-  /// Gets a specific cookie object by name.
-  Cookie? cookieObject(String name) => cookieHandler.getCookie(name);
+  /// Gets a header value
+  String? header(String name) => _headers.get(name);
 
-  /// Gets the remember token cookie value.
-  String? get rememberToken => cookieHandler.get('remember_token');
+  /// Gets all header values
+  List<String>? headerAll(String name) => _headers.getAll(name);
 
-  /// Gets the CSRF token cookie value.
-  String? get csrfToken => cookieHandler.get('csrf_token');
+  /// Checks if header exists
+  bool hasHeader(String name) => _headers.has(name);
 
-  /// Checks if a remember token cookie is present.
-  bool hasRememberToken() => rememberToken != null;
-
-  /// Checks if a CSRF token cookie is present.
-  bool hasCsrfToken() => csrfToken != null;
-
-  /// Checks if a specific cookie is present.
-  bool hasCookie(String name) => cookieHandler.has(name);
-
-  /// Gets a header value by name.
-  /// Shortcut for headers.header()
-  String? header(String name) => _headers.header(name);
-
-  /// Checks if a header exists.
-  /// Shortcut for headers.hasHeader()
-  bool hasHeader(String name) => _headers.hasHeader(name);
-
-  /// Gets the Content-Type header.
-  /// Shortcut for headers.contentType
+  /// Gets Content-Type header
   String? get contentType => _headers.contentType;
 
-  /// Gets the User-Agent header.
-  /// Shortcut for headers.userAgent
+  /// Gets User-Agent header
   String? get userAgent => _headers.userAgent;
 
-  /// Checks if the request accepts JSON responses.
-  /// Shortcut for headers.acceptsJson()
-  bool acceptsJson() => _headers.acceptsJson();
+  /// Gets Accept header
+  String? get accept => _headers.accept;
 
-  /// Checks if the request accepts HTML responses.
-  /// Shortcut for headers.acceptsHtml()
-  bool acceptsHtml() => _headers.acceptsHtml();
+  /// Gets Authorization header
+  String? get authorization => _headers.authorization;
 
-  /// Checks if the request is from XMLHttpRequest (AJAX).
-  /// Shortcut for headers.isAjax()
-  bool isAjax() => _headers.isAjax();
+  /// Gets all headers as map
+  Map<String, String> get allHeaders => _headers.toMap();
 
-  /// Manages HTTP sessions
-  RequestSession get session => _session;
+  // ===== Request Metadata =====
 
-  /// Gets the session ID.
+  /// Checks if request is HTTPS
+  bool get isSecure => _metadata.isSecure;
+
+  /// Checks if request is AJAX/XHR
+  bool get isAjax => _metadata.isAjax;
+
+  /// Checks if request wants JSON
+  bool get wantsJson => _metadata.wantsJson;
+
+  /// Gets protocol version
+  String get protocol => _metadata.protocol;
+
+  /// Gets host name
+  String? get host => _metadata.host;
+
+  /// Gets origin (CORS)
+  String? get origin => _metadata.origin;
+
+  /// Gets referrer
+  String? get referrer => _metadata.referrer;
+
+  /// Checks if method matches
+  bool isMethod(String method) => _metadata.isMethod(method);
+
+  /// Checks if GET
+  bool get isGet => _metadata.isGet;
+
+  /// Checks if POST
+  bool get isPost => _metadata.isPost;
+
+  /// Checks if PUT
+  bool get isPut => _metadata.isPut;
+
+  /// Checks if PATCH
+  bool get isPatch => _metadata.isPatch;
+
+  /// Checks if DELETE
+  bool get isDelete => _metadata.isDelete;
+
+  // ===== Cookies =====
+
+  /// Gets all cookies
+  Map<String, String> get cookies => CookieHelper(_raw).all;
+
+  /// Gets a cookie value
+  String? cookie(String name) => CookieHelper(_raw).get(name);
+
+  /// Checks if cookie exists
+  bool hasCookie(String name) => CookieHelper(_raw).has(name);
+
+  /// Gets CSRF token cookie
+  String? get csrfToken => cookie('csrf_token');
+
+  /// Gets remember token cookie
+  String? get rememberToken => cookie('remember_token');
+
+  // ===== Session =====
+
+  /// Gets session ID
   String get sessionId => _session.sessionId;
 
-  /// Gets all session keys.
-  Iterable<dynamic> get sessionKeys => _session.sessionKeys;
+  /// Gets a session value
+  dynamic getSessionValue(String key) => _session.get(key);
 
-  /// Checks if the session is empty.
-  bool get isSessionEmpty => _session.isSessionEmpty;
+  /// Sets a session value
+  void setSessionValue(String key, dynamic value) => _session.set(key, value);
 
-  /// Gets the number of items in the session.
-  int get sessionLength => _session.sessionLength;
+  /// Checks if session key exists
+  bool hasSessionValue(String key) => _session.has(key);
 
-  /// Destroys the current session.
-  void destroySession() => _session.destroy();
+  /// Removes a session value
+  void removeSessionValue(String key) => _session.remove(key);
 
-  /// Gets a value from the session by key.
-  dynamic getSession(String key) => _session.get(key);
+  /// Gets all session data
+  Map<String, dynamic> get allSession => _session.getAllData();
 
-  /// Sets a value in the session.
-  void setSession(String key, dynamic value) => _session.set(key, value);
+  // ===== Cleanup =====
 
-  /// Checks if a key exists in the session.
-  bool hasSession(String key) => _session.has(key);
-
-  /// Removes a key from the session.
-  void removeSession(String key) => _session.remove(key);
-
-  /// Clears all session data.
-  void clearSession() => _session.clear();
-
-  /// Sets multiple values in the session at once.
-  void setMultipleSessions(Map<String, dynamic> data) =>
-      _session.setMultiple(data);
-
-  /// Gets a typed value from the session, with optional default.
-  T? getSessionTyped<T>(String key, [T? defaultValue]) =>
-      _session.getTyped<T>(key, defaultValue);
-
-  /// Flashes a value to the session (temporary, removed after next access).
-  void flashSession(String key, dynamic value) => _session.flash(key, value);
-
-  /// Retrieves and removes a flashed value from the session.
-  dynamic pullSession(String key) => _session.pull(key);
-
-  /// Regenerates the session ID for security.
-  void regenerateSessionId() => _session.regenerateId();
-
-  /// Gets all flashed data and clears them.
-  Map<String, dynamic> getFlashedSessionData() => _session.getFlashedData();
-
-  /// Checks if the session has any flashed data.
-  bool hasFlashedSessionData() => _session.hasFlashedData();
-
-  /// Sets the session timeout.
-  void setSessionTimeout(Duration timeout) => _session.setTimeout(timeout);
-
-  /// Gets the session timeout if set.
-  Duration? getSessionTimeout() => _session.getTimeout();
-
-  /// Validates the session.
-  bool isSessionValid() => _session.isValid();
-
-  /// Touches the session to update last access time.
-  void touchSession() => _session.touch();
-
-  /// Gets the last access time of the session.
-  DateTime? getSessionLastAccess() => _session.getLastAccess();
-
-  /// Gets the session creation time.
-  DateTime? getSessionCreatedAt() => _session.getCreatedAt();
-
-  /// Checks if the session should be regenerated.
-  bool shouldRegenerateSession({Duration maxAge = const Duration(hours: 1)}) =>
-      _session.shouldRegenerate(maxAge: maxAge);
-
-  /// Forces session invalidation.
-  void invalidateSession() => _session.invalidate();
-
-  /// Checks if the session has been invalidated.
-  bool isSessionInvalidated() => _session.isInvalidated();
-
-  /// Gets session statistics.
-  Map<String, dynamic> getSessionStats() => _session.getStats();
-
-  /// Cleans up expired flash data and performs maintenance.
-  void cleanupSession() => _session.cleanup();
-
-  /// Gets all session data as a map (excluding internal metadata).
-  Map<String, dynamic> getAllSessionData() => _session.getAllData();
-
-  /// Checks if the session is about to expire within the given duration.
-  bool isSessionExpiringSoon([Duration within = const Duration(minutes: 5)]) =>
-      _session.isExpiringSoon(within);
-
-  /// Cleans up resources associated with the request (e.g., temporary files).
+  /// Cleans up request resources (temp files, etc.)
   Future<void> cleanup() async {
     await _bodyParser.cleanup();
   }

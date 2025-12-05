@@ -1,70 +1,109 @@
 import 'dart:io';
 
-/// Handles HTTP header operations for requests.
+/// Provides efficient HTTP header access with caching.
 class RequestHeaders {
   final HttpHeaders _headers;
+  final Map<String, String?> _cache = {};
 
   RequestHeaders(this._headers);
 
-  /// Gets all HTTP headers.
-  HttpHeaders get headers => _headers;
-
   /// Gets a header value by name (case-insensitive).
-  String? header(String name) {
-    return _headers.value(name);
+  String? get(String name) {
+    final cacheKey = name.toLowerCase();
+    if (_cache.containsKey(cacheKey)) {
+      return _cache[cacheKey];
+    }
+
+    final value = _headers.value(name);
+    _cache[cacheKey] = value;
+    return value;
   }
 
   /// Gets all values for a header name.
-  List<String>? headerValues(String name) {
-    return _headers[name];
-  }
+  List<String>? getAll(String name) => _headers[name];
 
   /// Checks if a header exists.
-  bool hasHeader(String name) {
-    return _headers[name] != null;
+  bool has(String name) => _headers[name] != null;
+
+  /// Checks if multiple headers exist.
+  bool hasAll(List<String> names) => names.every(has);
+
+  /// Checks if any header exists.
+  bool hasAny(List<String> names) => names.any(has);
+
+  /// Gets Content-Type header.
+  String? get contentType => get('content-type');
+
+  /// Gets User-Agent header.
+  String? get userAgent => get('user-agent');
+
+  /// Gets Accept header.
+  String? get accept => get('accept');
+
+  /// Gets Accept-Language header.
+  String? get acceptLanguage => get('accept-language');
+
+  /// Gets Authorization header.
+  String? get authorization => get('authorization');
+
+  /// Gets X-Forwarded-For header (proxy support).
+  String? get forwardedFor => get('x-forwarded-for');
+
+  /// Gets X-Real-IP header (proxy support).
+  String? get realIp => get('x-real-ip');
+
+  /// Gets Origin header (CORS).
+  String? get origin => get('origin');
+
+  /// Gets Referer header.
+  String? get referer => get('referer');
+
+  /// Gets Host header.
+  String? get host => get('host');
+
+  /// Gets Cookie header.
+  String? get cookie => get('cookie');
+
+  /// Gets If-None-Match header (ETag).
+  String? get ifNoneMatch => get('if-none-match');
+
+  /// Gets If-Modified-Since header.
+  String? get ifModifiedSince => get('if-modified-since');
+
+  /// Gets Content-Length header as int.
+  int? get contentLength {
+    final value = get('content-length');
+    return value != null ? int.tryParse(value) : null;
   }
 
-  /// Gets the Content-Type header.
-  String? get contentType => header('content-type');
-
-  /// Gets the User-Agent header.
-  String? get userAgent => header('user-agent');
-
-  /// Gets the Accept header.
-  String? get accept => header('accept');
-
-  /// Gets the Authorization header.
-  String? get authorization => header('authorization');
-
-  /// Gets the X-Forwarded-For header (for proxy support).
-  String? get forwardedFor => header('x-forwarded-for');
-
-  /// Gets the X-Real-IP header (for proxy support).
-  String? get realIp => header('x-real-ip');
-
-  /// Gets the Origin header.
-  String? get origin => header('origin');
-
-  /// Gets the Referer header.
-  String? get referer => header('referer');
-
-  /// Checks if the request accepts JSON responses.
-  bool acceptsJson() {
-    final accept = this.accept;
-    return accept != null && accept.contains('application/json');
+  /// Gets all headers as a map.
+  Map<String, String> toMap() {
+    final map = <String, String>{};
+    _headers.forEach((name, values) {
+      if (values.isNotEmpty) {
+        map[name] = values.first;
+      }
+    });
+    return map;
   }
 
-  /// Checks if the request accepts HTML responses.
-  bool acceptsHtml() {
-    final accept = this.accept;
-    return accept != null && accept.contains('text/html');
+  /// Gets all headers as list of key-value pairs.
+  List<MapEntry<String, String>> toList() {
+    final list = <MapEntry<String, String>>[];
+    _headers.forEach((name, values) {
+      for (final value in values) {
+        list.add(MapEntry(name, value));
+      }
+    });
+    return list;
   }
 
-  /// Checks if the request is from XMLHttpRequest (AJAX).
-  bool isAjax() {
-    return header('x-requested-with') == 'XMLHttpRequest';
+  /// Checks if header matches pattern.
+  bool matches(String name, Pattern pattern) {
+    final value = get(name);
+    return value != null && pattern.allMatches(value).isNotEmpty;
   }
 
-  /// Gets the host from the Host header.
-  String? get host => header('host');
+  /// Clears cache.
+  void clearCache() => _cache.clear();
 }

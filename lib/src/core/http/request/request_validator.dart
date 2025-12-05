@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:khadem/src/core/validation/input_validator.dart';
 
 import '../../../support/exceptions/validation_exception.dart';
-import 'request_body_parser.dart';
+import 'body_parser.dart';
 
 /// Handles validation of request data against specified rules.
 class RequestValidator {
-  final RequestBodyParser _bodyParser;
+  final BodyParser _bodyParser;
 
   RequestValidator(this._bodyParser);
 
@@ -19,7 +19,7 @@ class RequestValidator {
     Map<String, String> rules, {
     Map<String, String>? messages,
   }) async {
-    final input = await _bodyParser.parseBody();
+    final input = await _bodyParser.parse();
 
     // Merge uploaded files into the input data for validation
     if (_bodyParser.files != null) {
