@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 /// Represents an uploaded file in a multipart request.
 ///
 /// Handles file metadata, storage location, and efficient
@@ -45,6 +47,26 @@ class UploadedFile {
   /// Checks if file is stored on disk.
   bool get isDiskBased => _tempFilePath != null;
 
+  /// Gets the file extension (including dot).
+  String get extension => path.extension(filename);
+
+  /// Gets the file extension (without dot).
+  String get extensionWithoutDot {
+    final ext = extension;
+    return ext.startsWith('.') ? ext.substring(1) : ext;
+  }
+
+  /// Moves the file to a new directory.
+  ///
+  /// [directory] is the target directory path.
+  /// [name] is the optional new filename (defaults to original filename).
+  /// Returns the full path to the moved file.
+  Future<String> move(String directory, {String? name}) async {
+    final targetName = name ?? filename;
+    final targetPath = path.join(directory, targetName);
+    return saveTo(targetPath);
+  }
+
   /// Saves the file to the specified path.
   /// Efficiently moves the temp file if available, otherwise writes bytes.
   Future<String> saveTo(String path) async {
@@ -64,19 +86,8 @@ class UploadedFile {
   /// Gets the file content as a string (if it's text).
   String asString([Encoding encoding = utf8]) => encoding.decode(data);
 
-  /// Gets the file extension (without dot).
-  String get extension {
-    final parts = filename.split('.');
-    return parts.length > 1 ? parts.last.toLowerCase() : '';
-  }
-
   /// Gets the filename without extension.
-  String get nameWithoutExtension {
-    final parts = filename.split('.');
-    return parts.length > 1
-        ? parts.sublist(0, parts.length - 1).join('.')
-        : filename;
-  }
+  String get nameWithoutExtension => path.basenameWithoutExtension(filename);
 
   /// Gets the MIME type if available.
   String? get mimeType => contentType;

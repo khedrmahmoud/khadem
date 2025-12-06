@@ -127,8 +127,8 @@ class BodyParser {
 
         if (disposition['filename'] != null) {
           final filename = disposition['filename']!;
-          final tempDir = Directory.systemTemp.createTempSync('khadem_upload_');
-          final tempFile = File('${tempDir.path}/$filename');
+          final uniqueId = DateTime.now().microsecondsSinceEpoch;
+          final tempFile = File('${Directory.systemTemp.path}/khadem_upload_${uniqueId}_$filename');
           final sink = tempFile.openWrite();
 
           int totalBytes = 0;
@@ -136,8 +136,9 @@ class BodyParser {
             totalBytes += chunk.length;
             if (totalBytes > maxBodySize) {
               await sink.close();
-              await tempFile.delete();
-              await tempDir.delete();
+              if (await tempFile.exists()) {
+                await tempFile.delete();
+              }
               throw const FormatException('File upload too large');
             }
             sink.add(chunk);
@@ -153,7 +154,7 @@ class BodyParser {
           );
         } else {
           final content = await utf8.decodeStream(part);
-          fields[name] = _parseFieldValue(content);
+          fields[name] = content;
         }
       }
 
@@ -183,20 +184,6 @@ class BodyParser {
     }
 
     return result;
-  }
-
-  dynamic _parseFieldValue(String value) {
-    final numValue = num.tryParse(value);
-    if (numValue != null) return numValue;
-
-    if (value.toLowerCase() == 'true') return true;
-    if (value.toLowerCase() == 'false') return false;
-
-    try {
-      return jsonDecode(value);
-    } catch (_) {
-      return value;
-    }
   }
 
   /// Adds or updates a value in the parsed body.

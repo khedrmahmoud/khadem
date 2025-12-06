@@ -256,6 +256,9 @@ class Request {
   /// Gets Authorization header
   String? get authorization => _headers.authorization;
 
+  /// Gets Bearer token
+  String? get bearerToken => _headers.bearerToken;
+
   /// Gets all headers as map
   Map<String, String> get allHeaders => _headers.toMap();
 
@@ -269,6 +272,12 @@ class Request {
 
   /// Checks if request wants JSON
   bool get wantsJson => _metadata.wantsJson;
+
+  /// Checks if request content type is JSON
+  bool get isJson => contentType?.contains('application/json') ?? false;
+
+  /// Checks if request content type is XML
+  bool get isXml => contentType?.contains('application/xml') ?? false;
 
   /// Gets protocol version
   String get protocol => _metadata.protocol;

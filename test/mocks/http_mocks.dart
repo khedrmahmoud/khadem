@@ -17,6 +17,112 @@ class FakeHttpRequest implements HttpRequest {
   HttpHeaders headers = FakeHttpHeaders();
 
   @override
+  HttpSession session = FakeHttpSession();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class FakeHttpSession implements HttpSession {
+  final Map<dynamic, dynamic> _data = {};
+  bool _isNew = true;
+  String _id = 'test-session-id';
+
+  @override
+  String get id => _id;
+
+  @override
+  bool get isNew => _isNew;
+
+  @override
+  set onTimeout(void Function()? callback) {}
+
+  @override
+  void destroy() {
+    _data.clear();
+  }
+
+  @override
+  void clear() {
+    _data.clear();
+  }
+
+  @override
+  bool get isEmpty => _data.isEmpty;
+
+  @override
+  bool get isNotEmpty => _data.isNotEmpty;
+
+  @override
+  Iterable get keys => _data.keys;
+
+  @override
+  int get length => _data.length;
+
+  @override
+  Iterable get values => _data.values;
+
+  @override
+  bool containsKey(Object? key) => _data.containsKey(key);
+
+  @override
+  bool containsValue(Object? value) => _data.containsValue(value);
+
+  @override
+  void forEach(void Function(dynamic key, dynamic value) action) {
+    _data.forEach(action);
+  }
+
+  @override
+  dynamic operator [](Object? key) => _data[key];
+
+  @override
+  void operator []=(dynamic key, dynamic value) {
+    _data[key] = value;
+  }
+
+  @override
+  dynamic putIfAbsent(dynamic key, dynamic Function() ifAbsent) {
+    return _data.putIfAbsent(key, ifAbsent);
+  }
+
+  @override
+  dynamic remove(Object? key) => _data.remove(key);
+
+  @override
+  void addAll(Map<dynamic, dynamic> other) {
+    _data.addAll(other);
+  }
+
+  @override
+  void addEntries(Iterable<MapEntry<dynamic, dynamic>> newEntries) {
+    _data.addEntries(newEntries);
+  }
+
+  @override
+  Map<K2, V2> map<K2, V2>(MapEntry<K2, V2> Function(dynamic key, dynamic value) convert) {
+    return _data.map(convert);
+  }
+
+  @override
+  Map<RK, RV> cast<RK, RV>() => _data.cast<RK, RV>();
+
+  @override
+  void removeWhere(bool Function(dynamic key, dynamic value) test) {
+    _data.removeWhere(test);
+  }
+
+  @override
+  dynamic update(dynamic key, dynamic Function(dynamic value) update, {dynamic Function()? ifAbsent}) {
+    return _data.update(key, update, ifAbsent: ifAbsent);
+  }
+
+  @override
+  void updateAll(dynamic Function(dynamic key, dynamic value) update) {
+    _data.updateAll(update);
+  }
+  
+  @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 

@@ -46,6 +46,15 @@ class RequestHeaders {
   /// Gets Authorization header.
   String? get authorization => get('authorization');
 
+  /// Gets Bearer token from Authorization header.
+  String? get bearerToken {
+    final auth = authorization;
+    if (auth == null || !auth.toLowerCase().startsWith('bearer ')) {
+      return null;
+    }
+    return auth.substring(7).trim();
+  }
+
   /// Gets X-Forwarded-For header (proxy support).
   String? get forwardedFor => get('x-forwarded-for');
 
