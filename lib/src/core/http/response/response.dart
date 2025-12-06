@@ -4,7 +4,6 @@ import 'package:khadem/khadem.dart' show Khadem;
 
 import '../../session/session_manager.dart';
 import '../context/request_context.dart';
-import '../context/response_context.dart';
 import '../cookie.dart';
 import 'response_body.dart';
 import 'response_headers.dart';
@@ -28,14 +27,14 @@ class Response {
   late final ResponseBody _body;
   late final ResponseStatus _status;
   late final ResponseRenderer _renderer;
+  late final Cookies _cookies;
 
   Response(this._raw) {
-    ResponseContext.run(this, () {
-      _headers = ResponseHeaders(_raw.response);
-      _body = ResponseBody(_raw.response, _headers);
-      _status = ResponseStatus(_raw.response);
-      _renderer = ResponseRenderer(_body, _headers);
-    });
+    _headers = ResponseHeaders(_raw.response);
+    _body = ResponseBody(_raw.response, _headers);
+    _status = ResponseStatus(_raw.response);
+    _renderer = ResponseRenderer(_body, _headers);
+    _cookies = Cookies.response(_raw.response);
   }
 
   /// Raw HttpRequest from Dart SDK
@@ -60,7 +59,7 @@ class Response {
   ResponseRenderer get renderer => _renderer;
 
   /// Cookie management
-  Cookies get cookieHandler => Cookies.response(_raw.response);
+  Cookies get cookieHandler => _cookies;
 
   /// Sets the HTTP status code (legacy method for backward compatibility).
   Response status(int code) {
@@ -87,8 +86,42 @@ class Response {
   }
 
   /// Sends a JSON response (convenience method).
-  void sendJson(Map<String, dynamic> data) {
+  void sendJson(dynamic data) {
     _body.sendJson(data);
+    _sent = true;
+  }
+
+  /// Alias for sendJson.
+  void json(dynamic data) => sendJson(data);
+
+  /// Sends an HTML response (convenience method).
+  void sendHtml(String html) {
+    _body.sendHtml(html);
+    _sent = true;
+  }
+
+  /// Alias for sendHtml.
+  void html(String html) => sendHtml(html);
+
+  /// Sends a file response.
+  Future<void> file(File file, {String? contentType}) async {
+    await _body.sendFile(file, contentType: contentType);
+    _sent = true;
+  }
+
+  /// Sends a file download response.
+  Future<void> download(
+    File file, {
+    String? name,
+    bool inline = false,
+    String? contentType,
+  }) async {
+    await _body.download(
+      file,
+      name: name,
+      inline: inline,
+      contentType: contentType,
+    );
     _sent = true;
   }
 
@@ -116,24 +149,12 @@ class Response {
     _sent = true;
   }
 
-  /// Sends a file response (convenience method).
-  Future<void> file(File file) async {
-    await _body.sendFile(file);
-    _sent = true;
-  }
-
   /// Renders a view template (convenience method).
   Future<void> view(
     String viewName, {
     Map<String, dynamic> data = const {},
   }) async {
     await _renderer.renderView(viewName, data: data);
-    _sent = true;
-  }
-
-  /// Sends an HTML response (convenience method).
-  void html(String html) {
-    _body.sendHtml(html);
     _sent = true;
   }
 
@@ -261,14 +282,8 @@ class Response {
   /// [key] The session attribute key
   /// [value] The value to store
   Response sessionPut(String key, dynamic value) {
-    // Store in request session data for middleware to persist
     try {
-      final req = RequestContext.request;
-      final sessionData = req.attribute<Map<String, dynamic>>('session');
-      if (sessionData != null) {
-        sessionData[key] = value;
-        req.setAttribute('session', sessionData);
-      }
+      RequestContext.request.session.set(key, value);
     } catch (_) {}
     return this;
   }

@@ -77,8 +77,10 @@ class ResponseRenderer {
       }
 
       // Add old input
-      final oldInput = await _request!.body;
-      context['old'] = oldInput;
+      final oldInput = _request!.attribute('old');
+      if (oldInput != null) {
+        context['old'] = oldInput;
+      }
 
       // Add auth data
       final user = _request!.attribute('user');

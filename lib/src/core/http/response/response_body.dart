@@ -89,6 +89,26 @@ class ResponseBody {
     _closeResponse();
   }
 
+  /// Sends a file download response.
+  Future<void> download(
+    File file, {
+    String? name,
+    bool inline = false,
+    String? contentType,
+  }) async {
+    if (_sent) return;
+
+    final filename = name ?? file.uri.pathSegments.last;
+    final disposition = inline ? 'inline' : 'attachment';
+    
+    _headers.setHeader(
+      'Content-Disposition',
+      '$disposition; filename="$filename"',
+    );
+
+    await sendFile(file, contentType: contentType);
+  }
+
   /// Streams data to the client with optional transformation.
   Future<void> stream<T>(
     Stream<T> stream, {
