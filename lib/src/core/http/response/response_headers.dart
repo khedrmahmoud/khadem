@@ -73,7 +73,32 @@ class ResponseHeaders {
 
   /// Sets the Expires header.
   void setExpires(DateTime date) {
-    setHeader('Expires', date.toUtc().toString());
+    _response.headers.expires = date;
+  }
+
+  /// Sets the Last-Modified header.
+  void setLastModified(DateTime date) {
+    setHeader(HttpHeaders.lastModifiedHeader, HttpDate.format(date));
+  }
+
+  /// Sets the ETag header.
+  void setETag(String etag, {bool weak = false}) {
+    setHeader(HttpHeaders.etagHeader, weak ? 'W/"$etag"' : '"$etag"');
+  }
+
+  /// Sets the Date header.
+  void setDate(DateTime date) {
+    _response.headers.date = date;
+  }
+
+  /// Sets the Location header.
+  void setLocation(String location) {
+    setHeader(HttpHeaders.locationHeader, location);
+  }
+
+  /// Sets the Vary header.
+  void setVary(String vary) {
+    addHeader(HttpHeaders.varyHeader, vary);
   }
 
   /// Sets CORS headers.
@@ -105,10 +130,7 @@ class ResponseHeaders {
     }
   }
 
-  /// Sets the Location header for redirects.
-  void setLocation(String url) {
-    setHeader('Location', url);
-  }
+
 
   /// Sets common security headers.
   void setSecurityHeaders({

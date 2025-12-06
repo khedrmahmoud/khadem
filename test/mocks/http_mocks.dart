@@ -228,6 +228,12 @@ class FakeResponse implements Response {
   HttpRequest get raw => FakeHttpRequest() as dynamic;
 
   @override
+  Request? get request => null;
+
+  @override
+  void setRequest(Request request) {}
+
+  @override
   bool sent = false;
 
   @override
@@ -252,10 +258,36 @@ class FakeResponse implements Response {
   Response header(String name, String value) => this;
 
   @override
+  Response withHeaders(Map<String, String> headers) => this;
+
+  @override
+  Response cookie(
+    String name,
+    String value, {
+    String? domain,
+    String? path = '/',
+    DateTime? expires,
+    Duration? maxAge,
+    bool httpOnly = false,
+    bool secure = false,
+    String? sameSite,
+  }) =>
+      this;
+
+  @override
+  Response gzip() => this;
+
+  @override
   void send(String text) {}
 
   @override
-  void sendJson(Map<String, dynamic> data) {}
+  void sendJson(dynamic data) {}
+
+  @override
+  void json(dynamic data) {}
+
+  @override
+  void sendHtml(String html) {}
 
   @override
   Future<void> redirect(String url, {int status = 302}) async {}
@@ -269,7 +301,15 @@ class FakeResponse implements Response {
   }) async {}
 
   @override
-  Future<void> file(File file) async {}
+  Future<void> file(File file, {String? contentType}) async {}
+
+  @override
+  Future<void> download(
+    File file, {
+    String? name,
+    bool inline = false,
+    String? contentType,
+  }) async {}
 
   @override
   Future<void> view(
@@ -348,18 +388,6 @@ class FakeResponse implements Response {
 
   @override
   Cookies get cookieHandler => Cookies(FakeHttpRequest() as dynamic);
-
-  @override
-  Response flashInput(Map<String, dynamic> inputData) {
-    // TODO: implement flashInput
-    throw UnimplementedError();
-  }
-
-  @override
-  Response sessionPut(String key, value) {
-    // TODO: implement sessionPut
-    throw UnimplementedError();
-  }
 
   @override
   // TODO: implement statusCode

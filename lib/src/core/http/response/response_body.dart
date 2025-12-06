@@ -13,18 +13,29 @@ class ResponseBody {
   final HttpResponse _response;
   final ResponseHeaders _headers;
   bool _sent = false;
+  bool _compression = false;
 
   ResponseBody(this._response, this._headers);
 
   /// Whether the response body has already been sent.
   bool get sent => _sent;
 
+  /// Enables response compression (Gzip).
+  void enableCompression() {
+    _compression = true;
+    _headers.setHeader('Content-Encoding', 'gzip');
+  }
+
   /// Sends a plain text response.
   void sendText(String text) {
     if (_sent) return;
 
     _headers.setContentType(ContentType.text);
-    _response.write(text);
+    if (_compression) {
+      _response.add(gzip.encode(utf8.encode(text)));
+    } else {
+      _response.write(text);
+    }
     _closeResponse();
   }
 
@@ -33,7 +44,11 @@ class ResponseBody {
     if (_sent) return;
 
     _headers.setContentType(ContentType.html);
-    _response.write(html);
+    if (_compression) {
+      _response.add(gzip.encode(utf8.encode(html)));
+    } else {
+      _response.write(html);
+    }
     _closeResponse();
   }
 
@@ -43,7 +58,11 @@ class ResponseBody {
 
     _headers.setContentType(ContentType.json);
     final jsonString = data is String ? data : json.encode(data);
-    _response.write(jsonString);
+    if (_compression) {
+      _response.add(gzip.encode(utf8.encode(jsonString)));
+    } else {
+      _response.write(jsonString);
+    }
     _closeResponse();
   }
 
@@ -53,7 +72,12 @@ class ResponseBody {
 
     _headers.setContentType(ContentType.json);
     final encoder = JsonEncoder.withIndent(' ' * indent);
-    _response.write(encoder.convert(data));
+    final jsonString = encoder.convert(data);
+    if (_compression) {
+      _response.add(gzip.encode(utf8.encode(jsonString)));
+    } else {
+      _response.write(jsonString);
+    }
     _closeResponse();
   }
 
@@ -100,7 +124,7 @@ class ResponseBody {
 
     final filename = name ?? file.uri.pathSegments.last;
     final disposition = inline ? 'inline' : 'attachment';
-    
+
     _headers.setHeader(
       'Content-Disposition',
       '$disposition; filename="$filename"',

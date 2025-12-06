@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:khadem/khadem.dart';
 
 class ServerLifecycle {
-  final ServerRouter _router;
+  final Router _router;
   final ServerMiddleware _middleware;
   final ServerStatic _static;
 
@@ -16,14 +16,14 @@ class ServerLifecycle {
 
   Future<void> reload() async {
     // Fallback to manual reload
-    _router.clear();
+    _router.routes.clear();
     _middleware.clear();
     _static.clear();
   }
 
   Future<void> start({int port = 8080, String? host}) async {
     final handler = HttpRequestProcessor(
-      router: _router.router,
+      router: _router,
       globalMiddleware: _middleware.pipeline,
       staticHandler: _static.staticHandler,
     );
@@ -62,7 +62,7 @@ class ServerLifecycle {
             ServerContext.zoneKey: ServerContext(
               request: req,
               response: res,
-              match: _router.router.match,
+              match: _router.match,
             ),
           },
         ).run(() async {

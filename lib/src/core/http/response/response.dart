@@ -1,10 +1,7 @@
 import 'dart:io';
 
-import 'package:khadem/khadem.dart' show Khadem;
-
-import '../../session/session_manager.dart';
-import '../context/request_context.dart';
 import '../cookie.dart';
+import '../request/request.dart';
 import 'response_body.dart';
 import 'response_headers.dart';
 import 'response_renderer.dart';
@@ -22,6 +19,7 @@ import 'response_status.dart';
 class Response {
   final HttpRequest _raw;
   bool _sent = false;
+  Request? _request;
 
   late final ResponseHeaders _headers;
   late final ResponseBody _body;
@@ -39,6 +37,15 @@ class Response {
 
   /// Raw HttpRequest from Dart SDK
   HttpRequest get raw => _raw;
+
+  /// The request object associated with this response.
+  Request? get request => _request;
+
+  /// Sets the request object associated with this response.
+  void setRequest(Request request) {
+    _request = request;
+    _renderer.setRequest(request);
+  }
 
   /// Whether the response has already been sent.
   bool get sent => _sent;
@@ -76,6 +83,40 @@ class Response {
   /// Adds a response header (convenience method).
   Response header(String name, String value) {
     _headers.setHeader(name, value);
+    return this;
+  }
+
+  /// Sets multiple headers (convenience method).
+  Response withHeaders(Map<String, String> headers) {
+    headers.forEach((key, value) {
+      _headers.setHeader(key, value);
+    });
+    return this;
+  }
+
+  /// Sets a cookie (convenience method).
+  Response cookie(
+    String name,
+    String value, {
+    String? domain,
+    String? path = '/',
+    DateTime? expires,
+    Duration? maxAge,
+    bool httpOnly = false,
+    bool secure = false,
+    String? sameSite,
+  }) {
+    _cookies.set(
+      name,
+      value,
+      domain: domain,
+      path: path,
+      expires: expires,
+      maxAge: maxAge,
+      httpOnly: httpOnly,
+      secure: secure,
+      sameSite: sameSite,
+    );
     return this;
   }
 
@@ -278,27 +319,9 @@ class Response {
     return this;
   }
 
-  /// Store a value in the session
-  /// [key] The session attribute key
-  /// [value] The value to store
-  Response sessionPut(String key, dynamic value) {
-    try {
-      RequestContext.request.session.set(key, value);
-    } catch (_) {}
-    return this;
-  }
-
-  /// Flash input data to session for next request
-  /// [inputData] Map of old input values
-  Response flashInput(Map<String, dynamic> inputData) {
-    try {
-      final req = RequestContext.request;
-      final sessionId = req.attribute<String>('session_id');
-      if (sessionId != null) {
-        final manager = Khadem.container.resolve<SessionManager>();
-        manager.flashOldInput(sessionId, inputData);
-      }
-    } catch (_) {}
+  /// Enables Gzip compression for the response.
+  Response gzip() {
+    _body.enableCompression();
     return this;
   }
 }

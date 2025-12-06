@@ -10,11 +10,9 @@ import 'response_headers.dart';
 /// Handles view rendering and template responses.
 ///
 /// This class provides methods for rendering views and sending HTML content
-/// with proper content type handling.
-/// Handles view rendering and template responses with proper context management.
+/// with proper content type handling and context management.
 ///
-/// This class provides methods for rendering views and sending HTML content
-/// while ensuring all necessary context data is available to the view,
+/// It ensures all necessary context data is available to the view,
 /// including:
 /// - Request object
 /// - Session data
@@ -47,7 +45,16 @@ class ResponseRenderer {
     final context = <String, dynamic>{
       ...userData,
     };
-    _request = RequestContext.request;
+
+    // Try to get request from context if not set
+    if (_request == null) {
+      try {
+        _request = RequestContext.request;
+      } catch (_) {
+        // Ignore if request context is not available
+      }
+    }
+
     if (_request != null) {
       // Add request object itself
       context['request'] = _request;

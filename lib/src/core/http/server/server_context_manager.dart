@@ -1,15 +1,16 @@
 import 'dart:async';
 
+import 'package:khadem/khadem.dart' show Router;
+
 import '../context/request_context.dart';
 import '../context/response_context.dart';
 import '../context/server_context.dart';
 import '../request/request.dart';
 import '../response/response.dart';
-import 'server_router.dart';
 
 /// Handles server context and zone management.
 class ServerContextManager {
-  final ServerRouter _router;
+  final Router _router;
 
   ServerContextManager(this._router);
 
@@ -22,7 +23,7 @@ class ServerContextManager {
         ServerContext.zoneKey: ServerContext(
           request: req,
           response: res,
-          match: _router.router.match,
+          match: _router.match,
         ),
       },
     );

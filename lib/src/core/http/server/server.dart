@@ -1,9 +1,9 @@
 import 'package:khadem/src/application/khadem.dart';
 
 import '../../../contracts/http/middleware_contract.dart';
+import '../../routing/router.dart';
 import 'server_lifecycle.dart';
 import 'server_middleware.dart';
-import 'server_router.dart';
 import 'server_static.dart';
 
 /// Core HTTP server for Khadem.
@@ -12,20 +12,20 @@ import 'server_static.dart';
 /// lifecycle operations. Routing configuration should be provided via
 /// `injectRoutes` so route definitions live in a single place.
 class Server {
-  late final ServerRouter _serverRouter;
+  late final Router _router;
   late final ServerMiddleware _serverMiddleware;
   late final ServerStatic _staticHandler;
   late final ServerLifecycle _serverLifecycle;
 
-  final List<void Function(ServerRouter)> _routeRegistrars = [];
+  final List<void Function(Router)> _routeRegistrars = [];
   final List<Middleware> _registeredMiddlewares = [];
 
   Server() {
-    _serverRouter = ServerRouter();
+    _router = Router();
     _serverMiddleware = ServerMiddleware();
     _staticHandler = ServerStatic();
     _serverLifecycle =
-        ServerLifecycle(_serverRouter, _serverMiddleware, _staticHandler);
+        ServerLifecycle(_router, _serverMiddleware, _staticHandler);
   }
 
   /// Configures server settings.
@@ -65,9 +65,9 @@ class Server {
   ///   });
   /// });
   /// ```
-  void injectRoutes(void Function(ServerRouter router) register) {
+  void injectRoutes(void Function(Router router) register) {
     _routeRegistrars.add(register);
-    register(_serverRouter);
+    register(_router);
   }
 
   /// Trigger a lifecycle reload. In development, lightweight endpoints are
@@ -80,7 +80,7 @@ class Server {
 
     // Restore routes
     for (final registrar in _routeRegistrars) {
-      registrar(_serverRouter);
+      registrar(_router);
     }
 
     _injectDevEndpoints();
@@ -89,7 +89,7 @@ class Server {
   /// Inject development-only endpoints (`/reload`).
   void _injectDevEndpoints() {
     if (Khadem.isDevelopment) {
-      _serverRouter.get('/reload', (req, res) async {
+      _router.get('/reload', (req, res) async {
         await _serverLifecycle.reload();
         res.sendJson({'message': 'Server reloaded successfully'});
       });
