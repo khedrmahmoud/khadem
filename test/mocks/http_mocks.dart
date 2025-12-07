@@ -312,6 +312,22 @@ class FakeResponse implements Response {
   }) async {}
 
   @override
+  Future<void> back({String fallback = '/'}) async {}
+
+  @override
+  void problem({
+    required String title,
+    required int status,
+    String? detail,
+    String? type,
+    String? instance,
+    Map<String, dynamic>? extensions,
+  }) {}
+
+  @override
+  Future<void> format(Map<String, Function> formats) async {}
+
+  @override
   Future<void> view(
     String viewName, {
     Map<String, dynamic> data = const {},

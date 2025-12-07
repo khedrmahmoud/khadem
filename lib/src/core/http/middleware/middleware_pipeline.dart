@@ -36,6 +36,7 @@ import '../response/response.dart';
 class MiddlewarePipeline {
   final List<Middleware> _middleware = [];
   final Map<String, Middleware> _namedMiddleware = {};
+  final Map<String, List<Middleware>> _groups = {};
 
   /// Adds a middleware handler function to the pipeline.
   void add(
@@ -71,6 +72,19 @@ class MiddlewarePipeline {
     for (final middleware in middlewares) {
       addMiddleware(middleware);
     }
+  }
+
+  /// Registers a group of middleware.
+  void group(String name, List<Middleware> middlewares) {
+    _groups[name] = middlewares;
+  }
+
+  /// Adds a registered group of middleware to the pipeline.
+  void useGroup(String name) {
+    if (!_groups.containsKey(name)) {
+      throw MiddlewareNotFoundException('Middleware group not found: $name');
+    }
+    addMiddlewares(_groups[name]!);
   }
 
   /// Adds a middleware before a specific named middleware.
@@ -122,63 +136,12 @@ class MiddlewarePipeline {
 
   /// Processes the request through the middleware pipeline.
   Future<void> process(Request request, Response response) async {
-    var index = 0;
-
-    Future<void> next() async {
-      if (index < _middleware.length) {
-        final middleware = _middleware[index++];
-        try {
-          await middleware.handler(request, response, next);
-        } catch (e, stackTrace) {
-          await _handleError(e, stackTrace, request, response);
-        }
-      }
-    }
-
-    await next();
-  }
-
-  /// Handles errors in the middleware pipeline.
-  Future<void> _handleError(
-    dynamic error,
-    StackTrace stackTrace,
-    Request request,
-    Response response,
-  ) async {
-    final errorHandlers = _middleware
-        .where((m) => m.priority == MiddlewarePriority.terminating)
-        .toList();
-
-    if (errorHandlers.isEmpty) {
-      // If no terminating middleware, rethrow the original error
-      throw error;
-    }
-
-    // Store error information in request attributes for terminating middleware
-    request.setAttribute('error', error.toString());
-    request.setAttribute('stackTrace', stackTrace.toString());
-    request.setAttribute('errorType', error.runtimeType.toString());
-
-    var handlerIndex = 0;
-
-    Future<void> nextHandler() async {
-      if (handlerIndex < errorHandlers.length) {
-        final handler = errorHandlers[handlerIndex++];
-        try {
-          await handler.handler(request, response, nextHandler);
-        } catch (handlerError) {
-          // If error handler itself fails, continue to next handler
-          if (handlerIndex < errorHandlers.length) {
-            await nextHandler();
-          } else {
-            // If all error handlers fail, rethrow the original error
-            throw error;
-          }
-        }
-      }
-    }
-
-    await nextHandler();
+    await execute(
+      _middleware,
+      request,
+      response,
+      (req, res) async {}, // No-op final handler
+    );
   }
 
   /// Sorts middleware by priority.

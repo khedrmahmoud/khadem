@@ -246,70 +246,36 @@ void main() {
     });
 
     group('Error Handling', () {
-      test('should handle exceptions in middleware', () async {
-        var errorHandled = false;
-
+      test('should propagate exceptions', () async {
         pipeline.add((req, res, next) async {
           throw Exception('Test error');
         });
 
-        pipeline.add(
-          (req, res, next) async {
-            errorHandled = true;
-            await next();
-          },
-          priority: MiddlewarePriority.terminating,
-        );
-
-        await pipeline.process(request, response);
-
-        expect(errorHandled, isTrue);
         expect(
-          request.attribute<String>('error'),
-          equals('Exception: Test error'),
+          () => pipeline.process(request, response),
+          throwsException,
         );
-        expect(request.attribute<String>('stackTrace'), isNotNull);
+      });
+    });
+
+    group('Middleware Groups', () {
+      test('should register and use middleware group', () {
+        final m1 =
+            Middleware((req, res, next) async => await next(), name: 'm1');
+        final m2 =
+            Middleware((req, res, next) async => await next(), name: 'm2');
+
+        pipeline.group('api', [m1, m2]);
+        pipeline.useGroup('api');
+
+        expect(pipeline.middleware.length, equals(2));
+        expect(pipeline.hasMiddleware('m1'), isTrue);
+        expect(pipeline.hasMiddleware('m2'), isTrue);
       });
 
-      test('should handle multiple terminating middleware', () async {
-        var handler1Called = false;
-        var handler2Called = false;
-
-        pipeline.add((req, res, next) async {
-          throw Exception('Test error');
-        });
-
-        pipeline.add(
-          (req, res, next) async {
-            handler1Called = true;
-            await next();
-          },
-          priority: MiddlewarePriority.terminating,
-          name: 'handler1',
-        );
-
-        pipeline.add(
-          (req, res, next) async {
-            handler2Called = true;
-            await next();
-          },
-          priority: MiddlewarePriority.terminating,
-          name: 'handler2',
-        );
-
-        await pipeline.process(request, response);
-
-        expect(handler1Called, isTrue);
-        expect(handler2Called, isTrue);
-      });
-
-      test('should rethrow MiddlewareNotFoundException', () async {
-        pipeline.add((req, res, next) async {
-          throw MiddlewareNotFoundException('Test middleware not found');
-        });
-
+      test('should throw when using non-existent group', () {
         expect(
-          () async => pipeline.process(request, response),
+          () => pipeline.useGroup('nonexistent'),
           throwsA(isA<MiddlewareNotFoundException>()),
         );
       });
