@@ -25,6 +25,21 @@ class ServerMiddleware {
     _pipeline.addMiddlewares(middlewares);
   }
 
+  /// Registers a group of middleware.
+  void group(String name, List<Middleware> middlewares) {
+    _pipeline.group(name, middlewares);
+  }
+
+  /// Uses a registered group of middleware.
+  void useGroup(String name) {
+    _pipeline.useGroup(name);
+  }
+
+  /// Gets a registered group of middleware.
+  List<Middleware> getGroup(String name) {
+    return _pipeline.getGroup(name);
+  }
+
   /// Clears all registered middleware.
   void clear() {
     _pipeline.clear();

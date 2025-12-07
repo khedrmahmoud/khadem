@@ -87,6 +87,14 @@ class MiddlewarePipeline {
     addMiddlewares(_groups[name]!);
   }
 
+  /// Gets a registered group of middleware.
+  List<Middleware> getGroup(String name) {
+    if (!_groups.containsKey(name)) {
+      throw MiddlewareNotFoundException('Middleware group not found: $name');
+    }
+    return _groups[name]!;
+  }
+
   /// Adds a middleware before a specific named middleware.
   void addBefore(String targetName, MiddlewareHandler handler, {String? name}) {
     if (!_namedMiddleware.containsKey(targetName)) {

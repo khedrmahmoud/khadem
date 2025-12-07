@@ -7,6 +7,9 @@ class ServerLifecycle {
   final Router _router;
   final ServerMiddleware _middleware;
   final ServerStatic _static;
+  
+  HttpServer? _server;
+  StreamSubscription? _signalSubscription;
 
   // Configuration
   bool autoCompress = true;
@@ -20,6 +23,12 @@ class ServerLifecycle {
     _middleware.clear();
     _static.clear();
   }
+  
+  Future<void> stop() async {
+    await _server?.close();
+    await _signalSubscription?.cancel();
+    _server = null;
+  }
 
   Future<void> start({int port = 8080, String? host}) async {
     final handler = HttpRequestProcessor(
@@ -28,11 +37,13 @@ class ServerLifecycle {
       staticHandler: _static.staticHandler,
     );
 
-    final server = await HttpServer.bind(
+    _server = await HttpServer.bind(
       host != null ? InternetAddress(host) : InternetAddress.anyIPv4,
       port,
       shared: true,
     );
+    
+    final server = _server!;
 
     // Enable compression and set idle timeout
     server.autoCompress = autoCompress;
@@ -42,9 +53,9 @@ class ServerLifecycle {
         .info('🟢 HTTP Server started on http://${host ?? 'localhost'}:$port');
 
     // Handle graceful shutdown
-    final sub = ProcessSignal.sigint.watch().listen((signal) {
+    _signalSubscription = ProcessSignal.sigint.watch().listen((signal) {
       Khadem.logger.info('🛑 Received signal $signal. Shutting down...');
-      server.close().then((_) {
+      stop().then((_) {
         Khadem.logger.info('👋 Server closed.');
         exit(0);
       });
@@ -84,7 +95,7 @@ class ServerLifecycle {
         });
       }
     } finally {
-      await sub.cancel();
+      await _signalSubscription?.cancel();
     }
   }
 }

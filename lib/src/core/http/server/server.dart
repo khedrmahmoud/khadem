@@ -19,6 +19,7 @@ class Server {
 
   final List<void Function(Router)> _routeRegistrars = [];
   final List<Middleware> _registeredMiddlewares = [];
+  final List<String> _usedGroups = [];
 
   Server() {
     _router = Router();
@@ -55,6 +56,22 @@ class Server {
     _serverMiddleware.useMiddlewares(middlewares);
   }
 
+  /// Register a middleware group.
+  void middlewareGroup(String name, List<Middleware> middlewares) {
+    _serverMiddleware.group(name, middlewares);
+  }
+
+  /// Use a registered middleware group.
+  void useMiddlewareGroup(String name) {
+    _usedGroups.add(name);
+    _serverMiddleware.useGroup(name);
+  }
+
+  /// Get a registered middleware group.
+  List<Middleware> getMiddlewareGroup(String name) {
+    return _serverMiddleware.getGroup(name);
+  }
+
   /// Inject route definitions into the server's internal router.
   ///
   /// Example:
@@ -77,6 +94,9 @@ class Server {
 
     // Restore middlewares
     _serverMiddleware.useMiddlewares(_registeredMiddlewares);
+    for (final group in _usedGroups) {
+      _serverMiddleware.useGroup(group);
+    }
 
     // Restore routes
     for (final registrar in _routeRegistrars) {
@@ -100,5 +120,10 @@ class Server {
   Future<void> start({int port = 8080, String? host}) async {
     _injectDevEndpoints();
     await _serverLifecycle.start(port: port, host: host);
+  }
+
+  /// Stop the HTTP server.
+  Future<void> stop() async {
+    await _serverLifecycle.stop();
   }
 }
