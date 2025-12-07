@@ -123,6 +123,7 @@ export 'providers/cli_service_provider.dart';
 // 📦 Core_service_provider.dart
 // ========================
 export 'providers/core_service_provider.dart';
+export 'providers/event_service_provider.dart';
 // ========================
 // 📦 Database_service_provider.dart
 // ========================

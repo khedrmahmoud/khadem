@@ -12,6 +12,7 @@ import 'event_registration.dart';
 /// - Subscriber-aware management.
 /// - Optional queued execution.
 /// - Future support for broadcasting events.
+@Deprecated('Use EventDispatcher instead')
 class EventSystem implements EventSystemInterface {
   /// Internal storage for event listeners.
   ///

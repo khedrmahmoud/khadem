@@ -3,6 +3,7 @@ import '../../contracts/events/event_system_interface.dart';
 /// Event registration information with priority and one-time execution flag.
 ///
 /// Used internally by [EventSystem] to store event listeners.
+@Deprecated('Internal use only for deprecated EventSystem')
 class EventRegistration {
   /// The event listener.
   final EventListener listener;

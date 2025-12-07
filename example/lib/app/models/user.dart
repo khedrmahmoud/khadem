@@ -1,6 +1,6 @@
 import 'package:khadem/khadem.dart'
-    show KhademModel, RelationDefinition, HasRelationships, Timestamps;
-
+    show KhademModel, RelationDefinition, HasRelationships, Timestamps, Event;
+ 
 class User extends KhademModel<User> with Timestamps, HasRelationships {
   User({
     this.name,
@@ -14,6 +14,13 @@ class User extends KhademModel<User> with Timestamps, HasRelationships {
   String? name;
   String? email;
   String? password;
+
+  // @override
+  // Map<String, Event Function(User)> get dispatchesEvents => {
+  //       'created': (user) =>null,
+  //       'updated': (user) => null,
+  //       'deleted': (user) => null,
+  //     };
 
   @override
   List<String> get fillable =>

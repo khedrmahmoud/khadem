@@ -1,43 +1,33 @@
-import 'package:khadem/khadem.dart'
-    show Khadem, EventMethod, EventSubscriberInterface;
+import 'package:khadem/khadem.dart';
+ import '../jobs/send_user_notification_job.dart';
+import '../models/user.dart';
 
-import '../jobs/send_user_notification_job.dart';
-
-class UserEventsHandler implements EventSubscriberInterface {
+class UserEventsHandler implements Subscriber {
   @override
-  List<EventMethod> getEventHandlers() => [
-        EventMethod(
-          eventName: 'user.created',
-          handler: (payload) async => onCreated(payload),
-        ),
-        EventMethod(
-          eventName: 'user.updated',
-          handler: (payload) async => onUpdated(payload),
-        ),
-        EventMethod(
-          eventName: 'user.deleted',
-          handler: (payload) async => onDeleted(payload),
-        ),
-      ];
+  void subscribe(Dispatcher dispatcher) {
+    dispatcher.listen<ModelCreated<User>>(onCreated);
+    dispatcher.listen<ModelUpdated<User>>(onUpdated);
+    dispatcher.listen<ModelDeleted<User>>(onDeleted);
+  }
 
-  Future onCreated(dynamic payload) async {
-    print('📥 User created: ${payload.toJson()}');
+  Future<void> onCreated(ModelCreated<User> event) async {
+    print('📥 User created: ${event.model.toJson()}');
     await Khadem.queue.dispatch(
       SendUserNotificationJob('New User Created'),
       delay: const Duration(seconds: 5),
     );
   }
 
-  Future onUpdated(dynamic payload) async {
-    print('✏️ User updated: ${payload.toJson()}');
+  Future<void> onUpdated(ModelUpdated<User> event) async {
+    print('✏️ User updated: ${event.model.toJson()}');
     await Khadem.queue.dispatch(
       SendUserNotificationJob('User Updated'),
       delay: const Duration(seconds: 5),
     );
   }
 
-  Future onDeleted(dynamic payload) async {
-    print('🗑️ User deleted: ${payload.toJson()}');
+  Future<void> onDeleted(ModelDeleted<User> event) async {
+    print('🗑️ User deleted: ${event.model.toJson()}');
     await Khadem.queue.dispatch(
       SendUserNotificationJob('User Deleted'),
       delay: const Duration(seconds: 5),

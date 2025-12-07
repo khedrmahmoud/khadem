@@ -66,6 +66,10 @@ class Khadem {
   static QueueManager get queue => container.resolve<QueueManager>();
   static EventSystemInterface get eventBus =>
       container.resolve<EventSystemInterface>();
+
+  /// Returns the event dispatcher.
+  static Dispatcher get events => container.resolve<Dispatcher>();
+
   static SocketManager get socket => container.resolve<SocketManager>();
   static StorageManager get storage => container.resolve<StorageManager>();
 

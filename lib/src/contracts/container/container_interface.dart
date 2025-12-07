@@ -97,6 +97,18 @@ abstract interface class ContainerInterface {
   /// Throws an exception if no bindings exist for [T] or if resolution fails.
   List<T> resolveAll<T>();
 
+  /// Resolves and returns an instance of the given [type].
+  ///
+  /// This is the dynamic version of [resolve].
+  ///
+  /// - [type]: The type to resolve.
+  /// - [context]: Optional context key for contextual resolution.
+  ///
+  /// Returns the resolved instance.
+  ///
+  /// Throws an exception if no binding exists for [type] or if resolution fails.
+  dynamic resolveType(Type type, [String? context]);
+
   /// Checks if a binding exists for type [T].
   ///
   /// If a [context] is provided, it checks for a contextual binding under that key.

@@ -35,7 +35,7 @@ class Kernel {
   /// Application service providers (user-managed)
   static List<ServiceProvider> get applicationProviders => [
         AppServiceProvider(),
-        EventServiceProvider(),
+        AppEventServiceProvider(),
         SchedulerServiceProvider(),
         ObserverServiceProvider(), // Register model observers
         // Add your application service providers here

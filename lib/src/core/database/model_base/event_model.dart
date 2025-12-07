@@ -1,4 +1,5 @@
 import '../../../application/khadem.dart';
+import '../../../contracts/events/event.dart';
 import '../orm/model_events.dart';
 import '../orm/observers/model_observer.dart';
 import '../orm/observers/observer_registry.dart';
@@ -9,9 +10,8 @@ class EventModel<T> {
 
   EventModel(this.model);
 
-  Future<void> fireEvent(String Function(String) eventBuilder) async {
-    await Khadem.eventBus
-        .emit(eventBuilder(model.modelName.toLowerCase()), model);
+  Future<void> dispatch(Event event) async {
+    await Khadem.events.dispatch(event);
   }
 
   /// Get observers for this model's runtime type
@@ -19,7 +19,8 @@ class EventModel<T> {
     try {
       final modelType = model.runtimeType;
       return ObserverRegistry().getObserversByType(modelType);
-    } catch (e) {
+    } catch (e, stack) {
+      Khadem.logger.error('Failed to get observers for ${model.runtimeType}', context: {'error': e}, stackTrace: stack);
       return [];
     }
   }
@@ -30,9 +31,8 @@ class EventModel<T> {
     for (final observer in observers) {
       try {
         callback(observer);
-      } catch (e) {
-        // Log error but don't break execution
-        print('Observer error: $e');
+      } catch (e, stack) {
+        Khadem.logger.error('Observer error in ${model.runtimeType}', context: {'error': e}, stackTrace: stack);
       }
     }
   }
@@ -46,36 +46,67 @@ class EventModel<T> {
         if (!result) {
           return false; // Operation cancelled
         }
-      } catch (e) {
-        print('Observer error: $e');
+      } catch (e, stack) {
+        Khadem.logger.error('Observer error in ${model.runtimeType}', context: {'error': e}, stackTrace: stack);
         return false; // Cancel on error
       }
     }
     return true; // Allow operation
   }
 
-  Future<void> beforeCreate() async {
-    _callObservers((observer) => observer.creating(model));
-    _callObservers((observer) => observer.saving(model));
-    await fireEvent(ModelEvents.creating);
+  Future<bool> _dispatchCustomEvent(String lifecycle) async {
+    final map = model.dispatchesEvents;
+    if (map.containsKey(lifecycle)) {
+      final eventBuilder = map[lifecycle];
+      if (eventBuilder != null) {
+        final event = eventBuilder(model as T);
+        await dispatch(event);
+        if (event is StoppableEvent && event.isPropagationStopped) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  Future<bool> beforeCreate() async {
+    final allowed = _callCancelableObservers((observer) => observer.creating(model));
+    if (!allowed) return false;
+
+    final event = ModelCreating(model as T);
+    await dispatch(event);
+    
+    if (event.isPropagationStopped) return false;
+
+    return _dispatchCustomEvent('creating');
   }
 
   Future<void> afterCreate() async {
     _callObservers((observer) => observer.created(model));
     _callObservers((observer) => observer.saved(model));
-    await fireEvent(ModelEvents.created);
+    await dispatch(ModelCreated(model as T));
+    await _dispatchCustomEvent('created');
+    await _dispatchCustomEvent('saved');
   }
 
-  Future<void> beforeUpdate() async {
-    _callObservers((observer) => observer.updating(model));
-    _callObservers((observer) => observer.saving(model));
-    await fireEvent(ModelEvents.updating);
+  Future<bool> beforeUpdate() async {
+    final allowed = _callCancelableObservers((observer) => observer.updating(model));
+    if (!allowed) return false;
+
+    final event = ModelUpdating(model as T);
+    await dispatch(event);
+
+    if (event.isPropagationStopped) return false;
+
+    return _dispatchCustomEvent('updating');
   }
 
   Future<void> afterUpdate() async {
     _callObservers((observer) => observer.updated(model));
     _callObservers((observer) => observer.saved(model));
-    await fireEvent(ModelEvents.updated);
+    await dispatch(ModelUpdated(model as T));
+    await _dispatchCustomEvent('updated');
+    await _dispatchCustomEvent('saved');
   }
 
   Future<bool> beforeDelete() async {
@@ -83,37 +114,64 @@ class EventModel<T> {
         _callCancelableObservers((observer) => observer.deleting(model));
     if (!allowed) return false;
 
-    await fireEvent(ModelEvents.deleting);
-    return true;
+    final event = ModelDeleting(model as T);
+    await dispatch(event);
+
+    if (event.isPropagationStopped) return false;
+
+    return _dispatchCustomEvent('deleting');
   }
 
   Future<void> afterDelete() async {
     _callObservers((observer) => observer.deleted(model));
-    await fireEvent(ModelEvents.deleted);
+    await dispatch(ModelDeleted(model as T));
+    await _dispatchCustomEvent('deleted');
   }
 
   /// Observer hook for restoring soft-deleted models
-  bool beforeRestore() {
-    return _callCancelableObservers((observer) => observer.restoring(model));
+  Future<bool> beforeRestore() async {
+    final allowed = _callCancelableObservers((observer) => observer.restoring(model));
+    if (!allowed) return false;
+
+    final event = ModelRestoring(model as T);
+    await dispatch(event);
+
+    if (event.isPropagationStopped) return false;
+
+    return _dispatchCustomEvent('restoring');
   }
 
-  void afterRestore() {
+  Future<void> afterRestore() async {
     _callObservers((observer) => observer.restored(model));
+    await dispatch(ModelRestored(model as T));
+    await _dispatchCustomEvent('restored');
   }
 
   /// Observer hook for force deleting soft-deleted models
-  bool beforeForceDelete() {
-    return _callCancelableObservers(
+  Future<bool> beforeForceDelete() async {
+    final allowed = _callCancelableObservers(
       (observer) => observer.forceDeleting(model),
     );
+    if (!allowed) return false;
+
+    final event = ModelForceDeleting(model as T);
+    await dispatch(event);
+
+    if (event.isPropagationStopped) return false;
+
+    return _dispatchCustomEvent('forceDeleting');
   }
 
-  void afterForceDelete() {
+  Future<void> afterForceDelete() async {
     _callObservers((observer) => observer.forceDeleted(model));
+    await dispatch(ModelForceDeleted(model as T));
+    await _dispatchCustomEvent('forceDeleted');
   }
 
   /// Observer hook for retrieving models
-  void afterRetrieve() {
+  Future<void> afterRetrieve() async {
     _callObservers((observer) => observer.retrieved(model));
+    await dispatch(ModelRetrieved(model as T));
+    await _dispatchCustomEvent('retrieved');
   }
 }

@@ -141,21 +141,15 @@ abstract class BaseModel<T> {
   /// Saves the model to the database.
   Future<void> save() async {
     if (id != null) {
-      await beforeUpdate();
       await query.where('id', '=', id).update(toDatabaseJson());
-      await afterUpdate();
     } else {
-      await beforeCreate();
       await query.insert(toDatabaseJson());
-      await afterCreate();
     }
   }
 
   /// Deletes the model.
   Future<void> delete() async {
-    await beforeDelete();
     await query.where('id', '=', id).delete();
-    await afterDelete();
   }
 
   /// Triggers a model event.
@@ -163,14 +157,5 @@ abstract class BaseModel<T> {
     await Khadem.eventBus.emit(eventNameBuilder(modelName.toLowerCase()), this);
   }
 
-  // 🪝 Lifecycle hooks
 
-  Future<void> beforeCreate() async => fireEvent(ModelEvents.creating);
-  Future<void> afterCreate() async => fireEvent(ModelEvents.created);
-  Future<void> beforeUpdate() async => fireEvent(ModelEvents.updating);
-  Future<void> afterUpdate() async => fireEvent(ModelEvents.updated);
-  Future<void> beforeDelete() async => fireEvent(ModelEvents.deleting);
-  Future<void> afterDelete() async => fireEvent(ModelEvents.deleted);
-  Future<void> beforeRestore() async => fireEvent(ModelEvents.restoring);
-  Future<void> afterRestore() async => fireEvent(ModelEvents.restored);
 }

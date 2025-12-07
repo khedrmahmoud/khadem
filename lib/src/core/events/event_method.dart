@@ -7,6 +7,7 @@ import '../../contracts/events/event_system_interface.dart';
 /// handler, and whether the handler should be called only once.
 ///
 /// [EventMethod] is used by [EventSubscriber] to register events.
+@Deprecated('Use the new Event system with Listener classes instead')
 class EventMethod {
   /// The name of the event this method is listening to.
   final String eventName;

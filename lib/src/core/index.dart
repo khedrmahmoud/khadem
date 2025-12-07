@@ -113,6 +113,7 @@ export 'events/event_registration.dart';
 // 📦 Event_system.dart
 // ========================
 export 'events/event_system.dart';
+export 'events/event_dispatcher.dart';
 // ========================
 // 📦 Subscriber_scanner.dart
 // ========================

@@ -32,6 +32,7 @@ import '../../contracts/events/event_system_interface.dart';
 ///
 /// [subscribers] - A list of event subscriber instances to register
 /// [eventSystem] - Optional event system instance to use (defaults to global Khadem event bus)
+@Deprecated('Use EventServiceProvider to register subscribers instead')
 void registerSubscribers(
   List<EventSubscriberInterface> subscribers, [
   EventSystemInterface? eventSystem,

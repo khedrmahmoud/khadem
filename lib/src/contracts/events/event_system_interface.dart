@@ -41,6 +41,7 @@ enum EventPriority { low, normal, high, critical }
 /// events.on('user.created', (user) => print('User: $user'));
 /// await events.emit('user.created', {'id': 1, 'name': 'Alice'});
 /// ```
+@Deprecated('Use Dispatcher interface instead')
 abstract class EventSystemInterface {
   /// Internal map of event names to their registered listeners.
   final Map<String, List<EventRegistration>> listeners = {};

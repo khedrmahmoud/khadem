@@ -8,6 +8,8 @@ import 'package:khadem/khadem.dart'
         EnvSystem,
         EventSystem,
         EventSystemInterface,
+        Dispatcher,
+        EventDispatcher,
         FileLangProvider,
         Lang,
         LangProvider,
@@ -40,6 +42,8 @@ class CoreServiceProvider extends ServiceProvider {
     container.lazySingleton<Router>((c) => Router());
 
     container.lazySingleton<EventSystemInterface>((c) => EventSystem());
+
+    container.lazySingleton<Dispatcher>((c) => EventDispatcher(c));
 
     container.lazySingleton<EnvInterface>((c) => EnvSystem());
 

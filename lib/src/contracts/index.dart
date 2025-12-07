@@ -74,6 +74,11 @@ export 'database/database_response.dart';
 export 'views/directive_contract.dart';
 
 // ========================
+// 📦 Dispatcher.dart
+// ========================
+export 'events/dispatcher.dart';
+
+// ========================
 // 📦 Dlq
 // ========================
 export 'queue/dlq/dead_letter_queue_contract.dart';
@@ -85,6 +90,11 @@ export 'queue/dlq/index.dart';
 // 📦 Env_interface.dart
 // ========================
 export 'env/env_interface.dart';
+
+// ========================
+// 📦 Event.dart
+// ========================
+export 'events/event.dart';
 
 // ========================
 // 📦 Event_subscriber_interface.dart
@@ -115,6 +125,11 @@ export 'scheduler/job_definition.dart';
 // 📦 Lang_provider.dart
 // ========================
 export 'lang/lang_provider.dart';
+
+// ========================
+// 📦 Listener.dart
+// ========================
+export 'events/listener.dart';
 
 // ========================
 // 📦 Log_handler.dart
@@ -235,6 +250,11 @@ export 'session/session_driver_registry.dart';
 export 'session/session_interfaces.dart';
 
 // ========================
+// 📦 Should_broadcast.dart
+// ========================
+export 'events/should_broadcast.dart';
+
+// ========================
 // 📦 Socket_event_handler.dart
 // ========================
 export 'socket/socket_event_handler.dart';
@@ -248,6 +268,11 @@ export 'socket/socket_middleware.dart';
 // 📦 Storage_disk.dart
 // ========================
 export 'storage/storage_disk.dart';
+
+// ========================
+// 📦 Subscriber.dart
+// ========================
+export 'events/subscriber.dart';
 
 // ========================
 // 📦 Task_stats.dart

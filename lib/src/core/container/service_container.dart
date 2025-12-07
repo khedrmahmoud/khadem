@@ -179,6 +179,42 @@ class ServiceContainer implements ContainerInterface {
     }
   }
 
+  @override
+  dynamic resolveType(Type type, [String? context]) {
+    if (_resolving.contains(type)) {
+      throw CircularDependencyException(
+        'Circular dependency detected while resolving $type',
+      );
+    }
+
+    if (_instances.containsKey(type)) {
+      return _instances[type];
+    }
+
+    _Binding? binding;
+    if (context != null && _contextualBindings.containsKey(context)) {
+      binding = _contextualBindings[context]![type];
+    }
+    binding ??= _bindings[type];
+
+    if (binding == null) {
+      throw ServiceNotFoundException('Service $type not registered');
+    }
+
+    _resolving.add(type);
+    try {
+      final instance = binding.getInstance(this);
+
+      if (binding.singleton && !binding.lazy) {
+        _instances[type] = instance;
+      }
+
+      return instance;
+    } finally {
+      _resolving.remove(type);
+    }
+  }
+
   /// Resolves all registered implementations of a given type.
   ///
   /// Note: This implementation has a bug - it tries to resolve T for all

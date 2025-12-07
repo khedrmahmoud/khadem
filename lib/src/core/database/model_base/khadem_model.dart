@@ -1,5 +1,6 @@
 import 'package:khadem/khadem.dart' show QueryBuilderInterface, Khadem;
 
+import '../../../contracts/events/event.dart';
 import '../orm/observers/model_observer.dart';
 import '../orm/observers/observer_registry.dart';
 import '../orm/relation_definition.dart';
@@ -18,6 +19,12 @@ abstract class KhademModel<T> {
   late final DatabaseModel<T> db = DatabaseModel<T>(this);
 
   Map<String, dynamic> get rawData => json.rawData;
+
+  /// The event map for the model.
+  ///
+  /// Allows mapping lifecycle events to custom Event classes.
+  /// Keys: 'creating', 'created', 'updating', 'updated', 'saving', 'saved', 'deleting', 'deleted'.
+  Map<String, Event Function(T)> get dispatchesEvents => {};
 
   /// Register an observer for this model type.
   ///
