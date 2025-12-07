@@ -12,6 +12,9 @@ class Khadem {
   static ContainerInterface get container =>
       _customContainer ?? ContainerProvider.instance;
 
+  /// Resolves a service from the container.
+  static T make<T>([String? context]) => container.resolve<T>(context);
+
   /// Returns the service provider manager.
   static final ServiceProviderManager _providerManager =
       ServiceProviderManager(container);

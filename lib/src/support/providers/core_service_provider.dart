@@ -20,6 +20,9 @@ import 'package:khadem/khadem.dart'
         Router;
 import 'package:timezone/data/latest.dart' as tz;
 
+import '../../contracts/exceptions/exception_handler_contract.dart';
+import '../../core/exception/exception_handler.dart';
+
 /// Registers all core services of the Khadem framework,
 /// including configuration, environment, logger, router, cache, and events.
 class CoreServiceProvider extends ServiceProvider {
@@ -32,6 +35,8 @@ class CoreServiceProvider extends ServiceProvider {
   /// Registers all core services of the Khadem framework,
   /// including configuration, environment, logger, router, cache, and events.
   void _registerCoreBindings(ContainerInterface container) {
+    container.lazySingleton<ExceptionHandlerContract>((c) => ExceptionHandler());
+
     container.lazySingleton<Router>((c) => Router());
 
     container.lazySingleton<EventSystemInterface>((c) => EventSystem());

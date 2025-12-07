@@ -1,5 +1,6 @@
+import '../../application/khadem.dart';
+import '../../contracts/exceptions/exception_handler_contract.dart';
 import '../../contracts/http/middleware_contract.dart';
-import '../../core/exception/exception_handler.dart';
 
 import '../../core/http/request/request.dart';
 import '../../core/http/response/response.dart';
@@ -11,7 +12,8 @@ class ExceptionMiddleware implements Middleware {
       await next();
     } catch (error, stackTrace) {
       // Handle specific exception types
-      ExceptionHandler.handle(res, error, stackTrace);
+      final handler = Khadem.make<ExceptionHandlerContract>();
+      await handler.handle(res, error, stackTrace);
     }
   }
 

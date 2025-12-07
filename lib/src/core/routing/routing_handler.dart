@@ -1,4 +1,5 @@
-import '../exception/exception_handler.dart';
+import '../../application/khadem.dart';
+import '../../contracts/exceptions/exception_handler_contract.dart';
 import '../http/request/request.dart';
 import '../http/request/request_handler.dart';
 import '../http/response/response.dart';
@@ -11,7 +12,8 @@ class RouteHandler {
       try {
         await handler(req, res);
       } catch (e, stackTrace) {
-        ExceptionHandler.handle(res, e, stackTrace);
+        final exceptionHandler = Khadem.make<ExceptionHandlerContract>();
+        await exceptionHandler.handle(res, e, stackTrace);
       }
     };
   }

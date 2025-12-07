@@ -27,15 +27,15 @@ void main() {
     test('should convert to response map', () {
       final exception = AuthException('Test error');
       final response = exception.toResponse();
-      expect(response['message'], equals('Test error'));
-      expect(response.containsKey('details'), isFalse);
+      expect(response['detail'], equals('Test error'));
+      expect(response.containsKey('extensions'), isFalse);
     });
 
     test('should convert to response map with details', () {
       final exception = AuthException('Test error', stackTrace: 'stack trace');
       final response = exception.toResponse();
-      expect(response['message'], equals('Test error'));
-      expect(response['details'], equals('stack trace'));
+      expect(response['detail'], equals('Test error'));
+      expect(response['extensions'], equals('stack trace'));
     });
 
     test('should handle empty message', () {
