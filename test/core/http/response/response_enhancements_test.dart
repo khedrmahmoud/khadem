@@ -15,12 +15,18 @@ class MockHttpHeaders implements HttpHeaders {
 
   @override
   void set(String name, Object value, {bool preserveHeaderCase = false}) {
-    _headers[name] = [value.toString()];
+    _headers[name.toLowerCase()] = [value.toString()];
   }
 
   @override
   void add(String name, Object value, {bool preserveHeaderCase = false}) {
-    _headers.putIfAbsent(name, () => []).add(value.toString());
+    _headers.putIfAbsent(name.toLowerCase(), () => []).add(value.toString());
+  }
+
+  @override
+  String? value(String name) {
+    final values = _headers[name.toLowerCase()];
+    return values?.isNotEmpty == true ? values!.first : null;
   }
 
   @override
@@ -52,6 +58,13 @@ class MockHttpResponse implements HttpResponse {
   }
 
   @override
+  Future addStream(Stream<List<int>> stream) async {
+    await for (final chunk in stream) {
+      _writes.add(chunk);
+    }
+  }
+
+  @override
   Future close() async {
     return this;
   }
@@ -62,9 +75,13 @@ class MockHttpResponse implements HttpResponse {
 
 class MockHttpRequest implements HttpRequest {
   final MockHttpResponse _response = MockHttpResponse();
+  final MockHttpHeaders _headers = MockHttpHeaders();
 
   @override
   HttpResponse get response => _response;
+
+  @override
+  HttpHeaders get headers => _headers;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
@@ -78,6 +95,64 @@ void main() {
     setUp(() {
       request = MockHttpRequest();
       responseObj = Response(request);
+    });
+
+    test('problem() sends RFC 7807 response', () {
+      responseObj.problem(
+        title: 'Not Found',
+        status: 404,
+        detail: 'User not found',
+        type: 'https://example.com/probs/not-found',
+      );
+
+      final response = request.response as MockHttpResponse;
+      final headers = response.headers as MockHttpHeaders;
+
+      expect(response.statusCode, 404);
+      expect(headers.contentType?.mimeType, 'application/problem+json');
+      expect(response._writes.first, contains('"title":"Not Found"'));
+      expect(response._writes.first, contains('"detail":"User not found"'));
+    });
+
+    test('back() redirects to referer', () async {
+      request.headers.set('referer', '/previous-page');
+
+      await responseObj.back();
+
+      final response = request.response as MockHttpResponse;
+      final headers = response.headers as MockHttpHeaders;
+
+      expect(response.statusCode, 302);
+      expect(headers.value('Location'), '/previous-page');
+    });
+
+    test('back() redirects to fallback if no referer', () async {
+      await responseObj.back(fallback: '/home');
+
+      final response = request.response as MockHttpResponse;
+      final headers = response.headers as MockHttpHeaders;
+
+      expect(response.statusCode, 302);
+      expect(headers.value('Location'), '/home');
+    });
+
+    test('format() negotiates content type', () async {
+      request.headers.set('Accept', 'application/json');
+
+      bool jsonCalled = false;
+      bool htmlCalled = false;
+
+      await responseObj.format({
+        'json': () {
+          jsonCalled = true;
+        },
+        'html': () {
+          htmlCalled = true;
+        },
+      });
+
+      expect(jsonCalled, isTrue);
+      expect(htmlCalled, isFalse);
     });
 
     test('cookie() adds a cookie to the response', () {
@@ -98,15 +173,15 @@ void main() {
       });
 
       final headers = request.response.headers as MockHttpHeaders;
-      expect(headers._headers['X-Test-1'], contains('Value1'));
-      expect(headers._headers['X-Test-2'], contains('Value2'));
+      expect(headers.value('X-Test-1'), 'Value1');
+      expect(headers.value('X-Test-2'), 'Value2');
     });
 
     test('gzip() enables compression', () {
       responseObj.gzip();
 
       final headers = request.response.headers as MockHttpHeaders;
-      expect(headers._headers['Content-Encoding'], contains('gzip'));
+      expect(headers.value('Content-Encoding'), 'gzip');
 
       responseObj.send('Hello');
 
@@ -119,7 +194,7 @@ void main() {
       responseObj.json({'key': 'value'});
 
       final headers = request.response.headers as MockHttpHeaders;
-      expect(headers._headers['Content-Encoding'], contains('gzip'));
+      expect(headers.value('Content-Encoding'), 'gzip');
 
       final response = request.response as MockHttpResponse;
       expect(response._writes.first, isA<List<int>>()); // Should be bytes

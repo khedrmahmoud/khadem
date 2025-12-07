@@ -146,8 +146,69 @@ class Response {
 
   /// Sends a file response.
   Future<void> file(File file, {String? contentType}) async {
-    await _body.sendFile(file, contentType: contentType);
+    await _body.sendFile(
+      file,
+      contentType: contentType,
+      rangeHeader: _raw.headers.value(HttpHeaders.rangeHeader),
+    );
     _sent = true;
+  }
+
+  /// Redirects back to the previous page.
+  Future<void> back({String fallback = '/'}) async {
+    final referer = _raw.headers.value(HttpHeaders.refererHeader);
+    await redirect(referer ?? fallback);
+  }
+
+  /// Sends a Problem Details response (RFC 7807).
+  void problem({
+    required String title,
+    required int status,
+    String? detail,
+    String? type,
+    String? instance,
+    Map<String, dynamic>? extensions,
+  }) {
+    _status.setStatus(status);
+    _headers.setContentTypeString('application/problem+json');
+
+    final problem = {
+      'type': type ?? 'about:blank',
+      'title': title,
+      'status': status,
+      if (detail != null) 'detail': detail,
+      if (instance != null) 'instance': instance,
+      if (extensions != null) ...extensions,
+    };
+
+    _body.sendJson(problem, contentType: 'application/problem+json');
+    _sent = true;
+  }
+
+  /// Content negotiation helper.
+  ///
+  /// Example:
+  /// ```dart
+  /// res.format({
+  ///   'json': () => res.json(data),
+  ///   'html': () => res.view('index', data),
+  /// });
+  /// ```
+  Future<void> format(Map<String, Function> formats) async {
+    final accept = _raw.headers.value(HttpHeaders.acceptHeader) ?? '';
+
+    if (accept.contains('application/json') && formats.containsKey('json')) {
+      await formats['json']!();
+    } else if (accept.contains('text/html') && formats.containsKey('html')) {
+      await formats['html']!();
+    } else {
+      // Default to first format or json
+      if (formats.isNotEmpty) {
+        await formats.values.first();
+      } else {
+        status(406).send('Not Acceptable');
+      }
+    }
   }
 
   /// Sends a file download response.

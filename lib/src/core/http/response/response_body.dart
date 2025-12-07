@@ -53,10 +53,10 @@ class ResponseBody {
   }
 
   /// Sends a JSON response.
-  void sendJson(dynamic data) {
+  void sendJson(dynamic data, {String? contentType}) {
     if (_sent) return;
 
-    _headers.setContentType(ContentType.json);
+    _headers.setContentTypeString(contentType ?? 'application/json');
     final jsonString = data is String ? data : json.encode(data);
     if (_compression) {
       _response.add(gzip.encode(utf8.encode(jsonString)));
@@ -93,22 +93,45 @@ class ResponseBody {
     _closeResponse();
   }
 
-  /// Sends a file response with proper MIME type detection.
-  Future<void> sendFile(File file, {String? contentType}) async {
+  /// Sends a file response with proper MIME type detection and Range support.
+  Future<void> sendFile(
+    File file, {
+    String? contentType,
+    String? rangeHeader,
+  }) async {
     if (_sent) return;
 
     final mimeType =
         contentType ?? lookupMimeType(file.path) ?? 'application/octet-stream';
     _headers.setContentTypeString(mimeType);
 
-    // Set content length if file size is available
-    try {
-      final length = await file.length();
-      _headers.setContentLength(length);
-    } catch (_) {
-      // Ignore if we can't get file length
+    final length = await file.length();
+
+    // Handle Range Request
+    if (rangeHeader != null && rangeHeader.startsWith('bytes=')) {
+      final ranges = rangeHeader.substring(6).split('-');
+      if (ranges.length == 2) {
+        final start = int.tryParse(ranges[0]) ?? 0;
+        final end = int.tryParse(ranges[1]) ?? length - 1;
+
+        if (start >= 0 && end < length && start <= end) {
+          final contentLength = end - start + 1;
+
+          _response.statusCode = HttpStatus.partialContent;
+          _headers.setHeader('Content-Range', 'bytes $start-$end/$length');
+          _headers.setContentLength(contentLength);
+          _headers.setHeader('Accept-Ranges', 'bytes');
+
+          await _response.addStream(file.openRead(start, end + 1));
+          _closeResponse();
+          return;
+        }
+      }
     }
 
+    // Standard file response
+    _headers.setContentLength(length);
+    _headers.setHeader('Accept-Ranges', 'bytes');
     await _response.addStream(file.openRead());
     _closeResponse();
   }
