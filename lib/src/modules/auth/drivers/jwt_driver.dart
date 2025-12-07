@@ -143,37 +143,45 @@ class JWTDriver implements AuthDriver {
       throw AuthException('Token has been invalidated');
     }
 
-    final jwt = JWT.verify(token, SecretKey(_secret));
-    final payload = jwt.payload as Map<String, dynamic>;
+    try {
+      final jwt = JWT.verify(token, SecretKey(_secret));
+      final payload = jwt.payload as Map<String, dynamic>;
 
-    // Extract user data from JWT payload
-    final userId = payload['sub'];
-    final userData = payload['user'] as Map<String, dynamic>?;
+      // Extract user data from JWT payload
+      final userId = payload['sub'];
+      final userData = payload['user'] as Map<String, dynamic>?;
 
-    if (userId == null || userData == null) {
-      throw AuthException('Invalid JWT payload');
+      if (userId == null || userData == null) {
+        throw AuthException('Invalid JWT payload');
+      }
+
+      // SECURITY: Always validate user still exists in database
+      // This prevents access for deleted/deactivated users
+      final provider = _config.getProvider(_providerKey);
+      final table = provider['table'] as String;
+      final primaryKey = provider['primary_key'] as String;
+
+      // For user verification, we still need to access the repository directly
+      // This could be improved by creating a UserService interface
+      final repository = DatabaseAuthRepository();
+      final currentUserData =
+          await repository.findUserById(userId, table, primaryKey);
+      if (currentUserData == null) {
+        throw AuthException('User not found or deactivated');
+      }
+
+      // Create authenticatable from current database data, not JWT payload
+      return DatabaseAuthenticatable.fromProviderConfig(
+        currentUserData,
+        provider,
+      );
+    } on JWTExpiredException {
+      throw AuthException('Token has expired', statusCode: 401);
+    } on JWTException catch (e) {
+      throw AuthException('Invalid token: ${e.message}', statusCode: 401);
+    } catch (e) {
+      throw AuthException('Token verification failed: $e', statusCode: 401);
     }
-
-    // SECURITY: Always validate user still exists in database
-    // This prevents access for deleted/deactivated users
-    final provider = _config.getProvider(_providerKey);
-    final table = provider['table'] as String;
-    final primaryKey = provider['primary_key'] as String;
-
-    // For user verification, we still need to access the repository directly
-    // This could be improved by creating a UserService interface
-    final repository = DatabaseAuthRepository();
-    final currentUserData =
-        await repository.findUserById(userId, table, primaryKey);
-    if (currentUserData == null) {
-      throw AuthException('User not found or deactivated');
-    }
-
-    // Create authenticatable from current database data, not JWT payload
-    return DatabaseAuthenticatable.fromProviderConfig(
-      currentUserData,
-      provider,
-    );
   }
 
   @override

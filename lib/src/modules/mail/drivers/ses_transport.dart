@@ -70,15 +70,15 @@ class SesTransport implements TransportInterface {
         final error = json.decode(response.body);
         throw MailTransportException(
           'SES API error: ${error['message'] ?? response.body}',
-          error,
+          originalError: error,
         );
       }
     } catch (e, stack) {
       if (e is MailTransportException) rethrow;
       throw MailTransportException(
         'Failed to send email via SES: $e',
-        e,
-        stack,
+        originalError: e,
+        stackTrace: stack,
       );
     }
   }

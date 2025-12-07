@@ -8,6 +8,8 @@ class ValidationException extends AppException {
       : super(
           Lang.t('validation_failed'),
           statusCode: 422,
+          title: 'Validation Failed',
+          type: 'validation_error',
           details: additionalDetails ?? errors,
         );
 }

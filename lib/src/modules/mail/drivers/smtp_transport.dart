@@ -79,8 +79,8 @@ class SmtpTransport implements TransportInterface {
       await _disconnect();
       throw MailTransportException(
         'Failed to send email via SMTP: $e',
-        e,
-        stack,
+        originalError: e,
+        stackTrace: stack,
       );
     }
   }

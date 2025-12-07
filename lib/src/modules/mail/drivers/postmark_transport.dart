@@ -61,15 +61,15 @@ class PostmarkTransport implements TransportInterface {
         final error = json.decode(response.body);
         throw MailTransportException(
           'Postmark API error: ${error['Message'] ?? response.body}',
-          error,
+          originalError: error,
         );
       }
     } catch (e, stack) {
       if (e is MailTransportException) rethrow;
       throw MailTransportException(
         'Failed to send email via Postmark: $e',
-        e,
-        stack,
+        originalError: e,
+        stackTrace: stack,
       );
     }
   }

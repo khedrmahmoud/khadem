@@ -20,45 +20,32 @@ class HttpRequestProcessor {
   });
 
   Future<void> handle(Request req, Response res) async {
-    try {
-      final match = router.match(req.method, req.path);
+    final match = router.match(req.method, req.path);
 
-      if (match != null && ServerContext.hasContext) {
-        ServerContext.current.setMatch(match);
-      }
+    if (match != null && ServerContext.hasContext) {
+      ServerContext.current.setMatch(match);
+    }
 
-      if (match == null) {
-        if (staticHandler != null && await staticHandler!.tryServe(req, res)) {
-          return;
-        }
-        res.status(404).send('Not Found');
+    if (match == null) {
+      if (staticHandler != null && await staticHandler!.tryServe(req, res)) {
         return;
       }
-
-      // Set route parameters
-      match.params.forEach((key, value) {
-        req.setParam(key, value);
-      });
-
-      // Execute route-specific middleware and then the handler
-      // We use the optimized static execute method to avoid allocations
-      await MiddlewarePipeline.execute(
-        match.middleware,
-        req,
-        res,
-        match.handler,
-      );
-    } catch (e) {
-      // Ensure unhandled exceptions are caught and logged
-      // This is a safety net in case the global error handler misses something
-      if (!res.sent) {
-        res.status(500).sendJson({
-          'error': 'Internal Server Error',
-          'message': e.toString(),
-        });
-      }
-      // Rethrow to let the global error handler log it
-      rethrow;
+      res.status(404).send('Not Found');
+      return;
     }
+
+    // Set route parameters
+    match.params.forEach((key, value) {
+      req.setParam(key, value);
+    });
+
+    // Execute route-specific middleware and then the handler
+    // We use the optimized static execute method to avoid allocations
+    await MiddlewarePipeline.execute(
+      match.middleware,
+      req,
+      res,
+      match.handler,
+    );
   }
 }

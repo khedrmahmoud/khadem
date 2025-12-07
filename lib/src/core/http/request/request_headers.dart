@@ -96,6 +96,9 @@ class RequestHeaders {
     return map;
   }
 
+  /// Converts headers to a JSON-encodable map.
+  Map<String, dynamic> toJson() => toMap();
+
   /// Gets all headers as list of key-value pairs.
   List<MapEntry<String, String>> toList() {
     final list = <MapEntry<String, String>>[];

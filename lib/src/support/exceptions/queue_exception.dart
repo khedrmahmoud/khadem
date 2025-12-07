@@ -2,8 +2,14 @@ import '../../contracts/exceptions/app_exception.dart';
 
 class QueueException extends AppException {
   QueueException(
-    super.message, {
-    super.statusCode = 500,
-    super.details = const {},
-  });
+    String message, {
+    int statusCode = 500,
+    dynamic details,
+  }) : super(
+          message,
+          statusCode: statusCode,
+          title: 'Queue Error',
+          type: 'queue_error',
+          details: details,
+        );
 }

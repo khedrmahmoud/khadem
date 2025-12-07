@@ -5,6 +5,14 @@ import '../../contracts/exceptions/app_exception.dart';
 /// This exception is typically thrown when a database record, file,
 /// or API endpoint does not exist.
 class NotFoundException extends AppException {
-  NotFoundException([super.message = 'Resource not found'])
-      : super(statusCode: 404);
+  NotFoundException(
+    String message, {
+    dynamic details,
+  }) : super(
+          message,
+          statusCode: 404,
+          title: 'Not Found',
+          type: 'not_found',
+          details: details,
+        );
 }

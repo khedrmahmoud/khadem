@@ -5,6 +5,14 @@ import '../../contracts/exceptions/app_exception.dart';
 /// This exception is typically thrown when input validation fails
 /// or when required parameters are missing.
 class BadRequestException extends AppException {
-  BadRequestException([super.message = 'Bad request', dynamic details])
-      : super(statusCode: 400, details: details);
+  BadRequestException(
+    String message, {
+    dynamic details,
+  }) : super(
+          message,
+          statusCode: 400,
+          title: 'Bad Request',
+          type: 'bad_request',
+          details: details,
+        );
 }

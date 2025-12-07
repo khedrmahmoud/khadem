@@ -21,25 +21,87 @@ class LoggingConfiguration {
     return _config.get<String>('logging.default', 'app') ?? 'app';
   }
 
-  /// Gets the configured log handlers.
+  /// Gets the configured log channels and their handlers.
+  Map<String, List<LogHandler>> get channels {
+    final channels = <String, List<LogHandler>>{};
+    
+    // Try new channels configuration first
+    final channelsConfig = _config.get<Map<String, dynamic>>('logging.channels');
+    
+    if (channelsConfig != null) {
+      // First pass: create non-stack handlers
+      for (final entry in channelsConfig.entries) {
+        final name = entry.key;
+        final config = entry.value as Map<String, dynamic>;
+        final driver = config['driver'] as String?;
+
+        if (driver != 'stack') {
+          final handler = _createHandler(driver, config);
+          if (handler != null) {
+            channels[name] = [handler];
+          }
+        }
+      }
+
+      // Second pass: create stack handlers
+      for (final entry in channelsConfig.entries) {
+        final name = entry.key;
+        final config = entry.value as Map<String, dynamic>;
+        final driver = config['driver'] as String?;
+
+        if (driver == 'stack') {
+          final includedChannels = (config['channels'] as List).cast<String>();
+          final handlers = <LogHandler>[];
+          for (final includedName in includedChannels) {
+             if (channels.containsKey(includedName)) {
+               handlers.addAll(channels[includedName]!);
+             }
+          }
+          channels[name] = handlers;
+        }
+      }
+    } else {
+      // Fallback to legacy handlers configuration
+      final handlersConfig = _config.get<Map<String, dynamic>>('logging.handlers', {});
+      if (handlersConfig != null) {
+        // Configure file handler
+        final fileConfig = handlersConfig['file'] as Map<String, dynamic>?;
+        if (fileConfig != null && fileConfig['enabled'] == true) {
+          channels['file'] = [_createFileHandler(fileConfig)];
+        }
+
+        // Configure console handler
+        final consoleConfig = handlersConfig['console'] as Map<String, dynamic>?;
+        if (consoleConfig != null && consoleConfig['enabled'] == true) {
+          channels['console'] = [_createConsoleHandler(consoleConfig)];
+        }
+        
+        // For legacy config, 'app' channel includes all enabled handlers
+        channels['app'] = [
+          ...?channels['file'],
+          ...?channels['console'],
+        ];
+      }
+    }
+
+    return channels;
+  }
+
+  LogHandler? _createHandler(String? driver, Map<String, dynamic> config) {
+    switch (driver) {
+      case 'single':
+      case 'daily':
+        return _createFileHandler(config);
+      case 'console':
+        return _createConsoleHandler(config);
+      default:
+        return null;
+    }
+  }
+
+  /// Gets the configured log handlers (Legacy support).
   List<LogHandler> get handlers {
-    final handlers = <LogHandler>[];
-    final handlersConfig =
-        _config.get<Map<String, dynamic>>('logging.handlers', {})!;
-
-    // Configure file handler
-    final fileConfig = handlersConfig['file'] as Map<String, dynamic>?;
-    if (fileConfig != null && fileConfig['enabled'] == true) {
-      handlers.add(_createFileHandler(fileConfig));
-    }
-
-    // Configure console handler
-    final consoleConfig = handlersConfig['console'] as Map<String, dynamic>?;
-    if (consoleConfig != null && consoleConfig['enabled'] == true) {
-      handlers.add(_createConsoleHandler(consoleConfig));
-    }
-
-    return handlers;
+    return channels['app'] ?? [];
   }
 
   /// Creates a file log handler from configuration.
@@ -48,11 +110,14 @@ class LoggingConfiguration {
     final level =
         levelStr != null ? LogLevel.fromString(levelStr) : minimumLevel;
 
+    final driver = config['driver'] as String?;
+    final isDaily = driver == 'daily' || (config['rotate_daily'] as bool? ?? false);
+
     return FileLogHandler(
       filePath: config['path']?.toString() ?? 'storage/logs/app.log',
       formatJson: config['format_json'] as bool? ?? true,
       rotateOnSize: config['rotate_on_size'] as bool? ?? true,
-      rotateDaily: config['rotate_daily'] as bool? ?? false,
+      rotateDaily: isDaily,
       maxFileSizeBytes: config['max_size'] as int? ?? 5 * 1024 * 1024,
       maxBackupCount: config['max_backups'] as int? ?? 5,
       minimumLevel: level,
@@ -84,8 +149,8 @@ class LoggingConfiguration {
         throw ArgumentError('Default channel cannot be empty');
       }
 
-      // Test handlers configuration
-      handlers;
+      // Test channels configuration
+      channels;
     } catch (e) {
       throw ArgumentError('Invalid logging configuration: $e');
     }

@@ -5,14 +5,20 @@ import '../../contracts/exceptions/app_exception.dart';
 /// This exception is typically thrown when a client makes too many
 /// requests within a given time period.
 class TooManyRequestsException extends AppException {
-  TooManyRequestsException([
-    super.message = 'Too many requests',
-    dynamic details,
-    this.retryAfter,
-  ]) : super(statusCode: 429, details: details);
-
   /// Number of seconds to wait before retrying
   final int? retryAfter;
+
+  TooManyRequestsException(
+    String message, {
+    this.retryAfter,
+    dynamic details,
+  }) : super(
+          message,
+          statusCode: 429,
+          title: 'Too Many Requests',
+          type: 'too_many_requests',
+          details: details,
+        );
 
   @override
   Map<String, dynamic> toResponse() {

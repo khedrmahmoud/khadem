@@ -165,7 +165,7 @@ class Mailer implements MailerInterface {
       _message.validate();
       return await _transport.send(_message);
     } catch (e, stack) {
-      throw MailException('Failed to send email', e, stack);
+      throw MailException('Failed to send email', originalError: e, stackTrace: stack);
     }
   }
 

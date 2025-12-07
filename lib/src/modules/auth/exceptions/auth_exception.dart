@@ -30,8 +30,14 @@ class AuthException extends AppException {
   /// [statusCode] HTTP status code (defaults to 401 for auth errors)
   /// [stackTrace] Optional stack trace for debugging purposes
   AuthException(
-    super.message, {
-    super.statusCode = 401,
+    String message, {
+    int statusCode = 401,
     String? stackTrace,
-  }) : super(details: stackTrace);
+  }) : super(
+          message,
+          statusCode: statusCode,
+          title: 'Authentication Error',
+          type: 'auth_error',
+          details: stackTrace,
+        );
 }

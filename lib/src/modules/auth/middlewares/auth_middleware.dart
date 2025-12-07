@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:khadem/src/modules/auth/core/request_auth.dart';
 
+import '../../../contracts/exceptions/app_exception.dart';
 import '../../../contracts/http/middleware_contract.dart';
 import '../../../core/http/request/request.dart';
 import '../../../core/http/response/response.dart';
@@ -348,43 +349,16 @@ class AuthMiddleware extends Middleware {
     AuthMiddlewareConfig config,
   ) async {
     if (error is AuthException) {
-      // For API requests, return JSON error
-      if (_isApiRequest(request)) {
-        response.status(error.statusCode).sendJson({
-          'error': 'Authentication failed',
-          'message': error.message,
-          'code': error.statusCode,
-        });
-      } else {
-        // For web requests, redirect or show error
-        response.status(error.statusCode);
-        // Let the error propagate for proper handling
-        throw error;
-      }
+      throw error;
+    } else if (error is AppException) {
+      throw error;
     } else {
       // Wrap unexpected errors
-      final authError = AuthException(
+      throw AuthException(
         'Authentication failed: ${error.toString()}',
-        statusCode: 500,
+        statusCode: 401,
       );
-
-      if (_isApiRequest(request)) {
-        response.status(500).sendJson({
-          'error': 'Internal server error',
-          'message': 'Authentication service unavailable',
-        });
-      } else {
-        throw authError;
-      }
     }
-  }
-
-  /// Determines if this is an API request
-  static bool _isApiRequest(Request request) {
-    final accept = request.header('accept') ?? '';
-    final contentType = request.header('content-type') ?? '';
-    return accept.contains('application/json') ||
-        contentType.contains('application/json');
   }
 
   /// Gets the default AuthManager instance

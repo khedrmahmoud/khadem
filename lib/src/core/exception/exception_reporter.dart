@@ -2,6 +2,7 @@ import 'dart:io';
 
 import '../../application/khadem.dart';
 import '../../contracts/exceptions/app_exception.dart';
+import '../http/context/request_context.dart';
 
 /// Central place to log or report exceptions to a third-party service.
 ///
@@ -186,24 +187,58 @@ class ExceptionReporter {
       };
     }
 
-    // Add user context if enabled
-    if (_includeUserContext) {
-      // This would be populated by your authentication system
-      context['user'] = {
-        'id': null, // Would be set by auth middleware
-        'ip': null, // Would be set by request context
-      };
+    // Add request context if enabled
+    if (_includeRequestContext && !context.containsKey('request')) {
+      // Try to get request context if available
+      try {
+        if (RequestContext.hasRequest) {
+          final request = RequestContext.request;
+          context['request'] = {
+            'method': request.method,
+            'url': request.uri.toString(),
+            'headers': request.headers.toMap(),
+            'user_agent': request.headers.get('user-agent'),
+            'ip': request.ip,
+          };
+        } else {
+          context['request'] = {
+            'method': null,
+            'url': null,
+            'headers': null,
+            'user_agent': null,
+          };
+        }
+      } catch (e) {
+        context['request'] = {
+          'method': null,
+          'url': null,
+          'headers': null,
+          'user_agent': null,
+          'error': 'Failed to retrieve request context: $e',
+        };
+      }
     }
 
-    // Add request context if enabled
-    if (_includeRequestContext) {
-      // This would be populated by your HTTP context
-      context['request'] = {
-        'method': null, // Would be set by request context
-        'url': null, // Would be set by request context
-        'headers': null, // Would be set by request context
-        'user_agent': null, // Would be set by request context
-      };
+    // Add user context if enabled
+    if (_includeUserContext && !context.containsKey('user')) {
+      try {
+        if (RequestContext.hasRequest && RequestContext.isAuthenticated) {
+           context['user'] = {
+            'id': RequestContext.userId,
+            'ip': RequestContext.request.ip,
+          };
+        } else {
+           context['user'] = {
+            'id': null,
+            'ip': null,
+          };
+        }
+      } catch (_) {
+         context['user'] = {
+            'id': null,
+            'ip': null,
+          };
+      }
     }
 
     return context;

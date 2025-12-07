@@ -141,15 +141,15 @@ class MailgunTransport implements TransportInterface {
         final error = json.decode(response.body);
         throw MailTransportException(
           'Mailgun API error: ${error['message'] ?? response.body}',
-          error,
+          originalError: error,
         );
       }
     } catch (e, stack) {
       if (e is MailTransportException) rethrow;
       throw MailTransportException(
         'Failed to send email via Mailgun: $e',
-        e,
-        stack,
+        originalError: e,
+        stackTrace: stack,
       );
     }
   }
