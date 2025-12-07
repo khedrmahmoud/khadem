@@ -2,8 +2,8 @@ import 'dart:async';
 
 import '../../../application/khadem.dart';
 import '../../../modules/auth/auth.dart';
-import '../../../support/exceptions/missing_request_context_exception.dart';
 import '../request/request.dart';
+import 'server_context.dart';
 
 /// Provides access to the current HTTP request within a request processing zone.
 ///
@@ -17,9 +17,6 @@ import '../request/request.dart';
 /// - Request profiling and timing
 /// - Automatic cleanup of request-scoped data
 class RequestContext {
-  static const _zoneKey = #requestContext;
-  static Symbol get zoneKey => _zoneKey;
-
   /// Use this to access the current request in the zone.
   ///
   /// This can be useful when you need to access the request in a service or
@@ -33,22 +30,14 @@ class RequestContext {
   /// called outside of the request scope, you need to provide the request
   /// instance to the service or controller.
   ///
-  /// Throws [MissingRequestContextException] if no request context is available.
+  /// Throws [MissingServerContextException] if no request context is available.
   static Request get request {
-    final req = Zone.current[zoneKey] as Request?;
-    if (req == null) {
-      throw MissingRequestContextException();
-    }
-    return req;
+    return ServerContext.current.request;
   }
 
   /// Check if a request context is currently available
   static bool get hasRequest {
-    try {
-      return Zone.current[zoneKey] != null;
-    } catch (_) {
-      return false;
-    }
+    return ServerContext.hasContext;
   }
 
   /// This is a shorthand for [RequestContext.request.auth].
@@ -109,10 +98,11 @@ class RequestContext {
       return runZoned(
         () {
           final result = body();
-          _customData.remove(request); // Clean up after request finishes
           return result;
         },
-        zoneValues: {zoneKey: request},
+        zoneValues: {
+          ServerContext.zoneKey: ServerContext(request: request),
+        },
       );
     } finally {
       stopwatch.stop();
@@ -125,42 +115,34 @@ class RequestContext {
     }
   }
 
-  /// Add storage for per-request custom data
-  static final _customData = <Request, Map<String, dynamic>>{};
-
   /// Store custom data for the current request
   static void set(String key, dynamic value) {
-    final req = request;
-    _customData.putIfAbsent(req, () => {})[key] = value;
+    ServerContext.current.setData(key, value);
   }
 
   /// Retrieve custom data from the current request
   static T? get<T>(String key) {
-    final req = request;
-    return _customData[req]?[key] as T?;
+    return ServerContext.current.getData<T>(key);
   }
 
   /// Check if custom data exists for the current request
   static bool has(String key) {
-    final req = request;
-    return _customData[req]?.containsKey(key) ?? false;
+    return ServerContext.current.hasData(key);
   }
 
   /// Remove custom data from the current request
   static void remove(String key) {
-    final req = request;
-    _customData[req]?.remove(key);
+    ServerContext.current.removeData(key);
   }
 
   /// Clear all custom data for the current request
   static void clear() {
-    _customData.remove(request);
+    ServerContext.current.clearData();
   }
 
   /// Get all custom data for the current request
   static Map<String, dynamic> get allData {
-    final req = request;
-    return Map.unmodifiable(_customData[req] ?? {});
+    return ServerContext.current.allData;
   }
 
   /// Get the current request ID (useful for logging/tracing)

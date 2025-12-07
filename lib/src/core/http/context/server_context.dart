@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../support/exceptions/missing_server_context_exception.dart';
 import '../../routing/route_match_result.dart';
 
 import '../request/request.dart';
@@ -21,8 +22,9 @@ class ServerContext {
   static Symbol get zoneKey => _zoneKey;
 
   final Request request;
-  final Response response;
-  final RouteMatchResult? Function(String method, String path)? match;
+  final Response? response;
+  
+  RouteMatchResult? _matchedRoute;
 
   /// Timestamp when the request started processing
   final DateTime _startTime = DateTime.now();
@@ -32,17 +34,30 @@ class ServerContext {
 
   ServerContext({
     required this.request,
-    required this.response,
-    required this.match,
+    this.response,
   });
 
+  /// Get the current server context from the zone.
+  static ServerContext get current {
+    final context = Zone.current[_zoneKey] as ServerContext?;
+    if (context == null) {
+      throw MissingServerContextException();
+    }
+    return context;
+  }
+
+  /// Check if a server context is currently available.
+  static bool get hasContext => Zone.current[_zoneKey] != null;
+
   /// Whether a route has been matched for this request
-  bool get hasMatch => match != null;
+  bool get hasMatch => _matchedRoute != null;
 
   /// Get the matched route result for the current request
-  RouteMatchResult? get matchedRoute {
-    if (match == null) return null;
-    return match!(request.method, request.path);
+  RouteMatchResult? get matchedRoute => _matchedRoute;
+
+  /// Set the matched route for this context
+  void setMatch(RouteMatchResult match) {
+    _matchedRoute = match;
   }
 
   /// Duration since the request started processing
@@ -69,23 +84,4 @@ class ServerContext {
 
   /// Get all custom data
   Map<String, dynamic> get allData => Map.unmodifiable(_data);
-
-  /// Execute a function within this server context
-  R run<R>(R Function() body) {
-    return runZoned(
-      () {
-        final result = body();
-        // Log processing time if it took more than 100ms
-        final duration = processingTime;
-        if (duration.inMilliseconds > 100) {
-          // Could integrate with logger here
-          print(
-            '[ServerContext] Request processed in ${duration.inMilliseconds}ms',
-          );
-        }
-        return result;
-      },
-      zoneValues: {zoneKey: this},
-    );
-  }
 }

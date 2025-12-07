@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../../routing/router.dart';
+import '../../context/server_context.dart';
 import '../../middleware/middleware_pipeline.dart';
 import '../../request/request.dart';
 import '../../response/response.dart';
@@ -21,6 +22,10 @@ class HttpRequestProcessor {
   Future<void> handle(Request req, Response res) async {
     try {
       final match = router.match(req.method, req.path);
+
+      if (match != null && ServerContext.hasContext) {
+        ServerContext.current.setMatch(match);
+      }
 
       if (match == null) {
         if (staticHandler != null && await staticHandler!.tryServe(req, res)) {

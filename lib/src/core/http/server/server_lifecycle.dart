@@ -68,12 +68,9 @@ class ServerLifecycle {
 
         Zone.current.fork(
           zoneValues: {
-            RequestContext.zoneKey: req,
-            ResponseContext.zoneKey: res,
             ServerContext.zoneKey: ServerContext(
               request: req,
               response: res,
-              match: _router.match,
             ),
           },
         ).run(() async {

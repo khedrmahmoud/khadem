@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../../../support/exceptions/missing_response_context_exception.dart';
 import '../response/response.dart';
+import 'server_context.dart';
 
 /// Provides access to the current HTTP response within a request processing zone.
 ///
@@ -14,9 +15,6 @@ import '../response/response.dart';
 /// - Content type helpers
 /// - Response timing and profiling
 class ResponseContext {
-  static const _zoneKey = #responseContext;
-  static Symbol get zoneKey => _zoneKey;
-
   /// Use this to access the current response in the zone.
   ///
   /// This can be useful when you need to access the response in a service or
@@ -32,7 +30,10 @@ class ResponseContext {
   ///
   /// Throws [MissingResponseContextException] if no response context is available.
   static Response get response {
-    final res = Zone.current[zoneKey] as Response?;
+    if (!ServerContext.hasContext) {
+      throw MissingResponseContextException();
+    }
+    final res = ServerContext.current.response;
     if (res == null) {
       throw MissingResponseContextException();
     }
@@ -41,11 +42,7 @@ class ResponseContext {
 
   /// Check if a response context is currently available
   static bool get hasResponse {
-    try {
-      return Zone.current[zoneKey] != null;
-    } catch (_) {
-      return false;
-    }
+    return ServerContext.hasContext && ServerContext.current.response != null;
   }
 
   /// Set the response status code
@@ -110,19 +107,4 @@ class ResponseContext {
   /// Check if the response has been sent
   static bool get isSent => response.sent;
 
-  /// Run anything inside this response context.
-  ///
-  /// This establishes a zone where the response is available via [ResponseContext.response].
-  ///
-  /// Example:
-  /// ```dart
-  /// return ResponseContext.run(response, () {
-  ///   // Now ResponseContext.response is available
-  ///   ResponseContext.status(200);
-  ///   ResponseContext.json({'message': 'success'});
-  /// });
-  /// ```
-  static R run<R>(Response response, R Function() body) {
-    return runZoned(body, zoneValues: {zoneKey: response});
-  }
 }
