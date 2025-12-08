@@ -27,6 +27,16 @@ abstract class CacheDriver {
   ///   - [ttl]: The duration for which the item should remain in the cache.
   Future<void> put(String key, dynamic value, Duration ttl);
 
+  /// Stores a value in the cache if the key does not exist.
+  ///
+  /// Returns `true` if the item was actually added, `false` otherwise.
+  ///
+  /// - Parameters:
+  ///   - [key]: A non-null, non-empty string representing the cache key.
+  ///   - [value]: The data to be cached.
+  ///   - [ttl]: The duration for which the item should remain in the cache.
+  Future<bool> add(String key, dynamic value, Duration ttl);
+
   /// Retrieves a value from the cache by its key.
   ///
   /// Returns the cached value associated with the [key] if it exists and has not expired.
@@ -39,6 +49,44 @@ abstract class CacheDriver {
   ///   - [key]: A non-null, non-empty string representing the cache key.
   /// - Returns: The cached value, or `null` if not found or expired.
   Future<dynamic> get(String key);
+
+  /// Retrieves multiple values from the cache by their keys.
+  ///
+  /// Returns a map of key-value pairs. Keys not found in the cache will not be present in the returned map.
+  ///
+  /// - Parameters:
+  ///   - [keys]: A list of keys to retrieve.
+  Future<Map<String, dynamic>> many(List<String> keys);
+
+  /// Stores multiple values in the cache.
+  ///
+  /// - Parameters:
+  ///   - [values]: A map of key-value pairs to store.
+  ///   - [ttl]: The duration for which the items should remain in the cache.
+  Future<void> putMany(Map<String, dynamic> values, Duration ttl);
+
+  /// Increment the value of an item in the cache.
+  ///
+  /// - Parameters:
+  ///   - [key]: The key of the item to increment.
+  ///   - [amount]: The amount to increment by (default is 1).
+  /// - Returns: The new value of the item.
+  Future<int> increment(String key, [int amount = 1]);
+
+  /// Decrement the value of an item in the cache.
+  ///
+  /// - Parameters:
+  ///   - [key]: The key of the item to decrement.
+  ///   - [amount]: The amount to decrement by (default is 1).
+  /// - Returns: The new value of the item.
+  Future<int> decrement(String key, [int amount = 1]);
+
+  /// Retrieve an item from the cache and delete it.
+  ///
+  /// - Parameters:
+  ///   - [key]: The key of the item to retrieve and delete.
+  /// - Returns: The value of the item, or `null` if not found.
+  Future<dynamic> pull(String key);
 
   /// Removes a value from the cache by its key.
   ///

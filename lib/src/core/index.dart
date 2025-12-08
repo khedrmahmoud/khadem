@@ -192,7 +192,7 @@ export 'lang/lang.dart';
 // ========================
 // 📦 Log.dart
 // ========================
-export 'logging/log.dart';
+export '../support/facades/log.dart';
 // ========================
 // 📦 Log_channel_manager.dart
 // ========================

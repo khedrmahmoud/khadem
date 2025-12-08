@@ -214,6 +214,73 @@ class RedisCacheDriver implements CacheDriver {
   }
 
   @override
+  Future<bool> add(String key, dynamic value, Duration ttl) async {
+    if (key.isEmpty) throw ArgumentError('Cache key cannot be empty');
+
+    final serializedValue = jsonEncode(value);
+    final ttlInSeconds = ttl.inSeconds;
+
+    // SET key value NX EX ttl
+    final result = await _executeCommand([
+      'SET',
+      key,
+      serializedValue,
+      'NX',
+      'EX',
+      ttlInSeconds > 0 ? ttlInSeconds : 1
+    ], isWrite: true);
+
+    return result == 'OK';
+  }
+
+  @override
+  Future<Map<String, dynamic>> many(List<String> keys) async {
+    if (keys.isEmpty) return {};
+    final result = await _executeCommand(['MGET', ...keys], isRead: true);
+    final Map<String, dynamic> map = {};
+    if (result is List) {
+      for (int i = 0; i < keys.length; i++) {
+        if (result[i] != null) {
+          try {
+            map[keys[i]] = jsonDecode(result[i]);
+          } catch (_) {
+            map[keys[i]] = result[i];
+          }
+        }
+      }
+    }
+    return map;
+  }
+
+  @override
+  Future<void> putMany(Map<String, dynamic> values, Duration ttl) async {
+    for (final entry in values.entries) {
+      await put(entry.key, entry.value, ttl);
+    }
+  }
+
+  @override
+  Future<int> increment(String key, [int amount = 1]) async {
+    final result = await _executeCommand(['INCRBY', key, amount], isWrite: true);
+    return result as int;
+  }
+
+  @override
+  Future<int> decrement(String key, [int amount = 1]) async {
+    final result = await _executeCommand(['DECRBY', key, amount], isWrite: true);
+    return result as int;
+  }
+
+  @override
+  Future<dynamic> pull(String key) async {
+    final value = await get(key);
+    if (value != null) {
+      await forget(key);
+    }
+    return value;
+  }
+
+  @override
   Future<void> put(String key, dynamic value, Duration ttl) async {
     if (key.isEmpty) {
       throw ArgumentError('Cache key cannot be empty');

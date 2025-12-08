@@ -50,4 +50,25 @@ abstract class ICacheManager {
 
   /// Gets a specific cache driver instance.
   CacheDriver driver([String? name]);
+
+  /// Get a cache store instance by name.
+  CacheDriver store(String name);
+
+  /// Stores a value in the cache if the key does not exist.
+  Future<bool> add(String key, dynamic value, Duration ttl);
+
+  /// Retrieves multiple values from the cache by their keys.
+  Future<Map<String, dynamic>> many(List<String> keys);
+
+  /// Stores multiple values in the cache.
+  Future<void> putMany(Map<String, dynamic> values, Duration ttl);
+
+  /// Increment the value of an item in the cache.
+  Future<int> increment(String key, [int amount = 1]);
+
+  /// Decrement the value of an item in the cache.
+  Future<int> decrement(String key, [int amount = 1]);
+
+  /// Retrieve an item from the cache and delete it.
+  Future<dynamic> pull(String key);
 }

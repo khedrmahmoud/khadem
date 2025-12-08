@@ -122,6 +122,57 @@ class MemoryCacheDriver implements CacheDriver {
   }
 
   @override
+  Future<bool> add(String key, dynamic value, Duration ttl) async {
+    if (await has(key)) {
+      return false;
+    }
+    await put(key, value, ttl);
+    return true;
+  }
+
+  @override
+  Future<Map<String, dynamic>> many(List<String> keys) async {
+    final Map<String, dynamic> results = {};
+    for (final key in keys) {
+      final value = await get(key);
+      if (value != null) {
+        results[key] = value;
+      }
+    }
+    return results;
+  }
+
+  @override
+  Future<void> putMany(Map<String, dynamic> values, Duration ttl) async {
+    for (final entry in values.entries) {
+      await put(entry.key, entry.value, ttl);
+    }
+  }
+
+  @override
+  Future<int> increment(String key, [int amount = 1]) async {
+    final value = await get(key);
+    final int currentValue = (value is int) ? value : int.tryParse(value.toString()) ?? 0;
+    final newValue = currentValue + amount;
+    await put(key, newValue, const Duration(days: 365 * 100)); // Long TTL for counters usually
+    return newValue;
+  }
+
+  @override
+  Future<int> decrement(String key, [int amount = 1]) async {
+    return increment(key, -amount);
+  }
+
+  @override
+  Future<dynamic> pull(String key) async {
+    final value = await get(key);
+    if (value != null) {
+      await forget(key);
+    }
+    return value;
+  }
+
+  @override
   Future<void> put(String key, dynamic value, Duration ttl) async {
     if (key.isEmpty) {
       throw ArgumentError('Cache key cannot be empty');

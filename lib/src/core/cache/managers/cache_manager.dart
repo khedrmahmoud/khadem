@@ -412,4 +412,39 @@ class CacheManager implements ICacheManager {
   /// Gets cache statistics for all drivers.
   @override
   Map<String, CacheStats> get allStats => _statisticsManager.getAllStats();
+
+  @override
+  CacheDriver store(String name) {
+    return driver(name);
+  }
+
+  @override
+  Future<bool> add(String key, dynamic value, Duration ttl) {
+    return driver().add(key, value, ttl);
+  }
+
+  @override
+  Future<Map<String, dynamic>> many(List<String> keys) {
+    return driver().many(keys);
+  }
+
+  @override
+  Future<void> putMany(Map<String, dynamic> values, Duration ttl) {
+    return driver().putMany(values, ttl);
+  }
+
+  @override
+  Future<int> increment(String key, [int amount = 1]) {
+    return driver().increment(key, amount);
+  }
+
+  @override
+  Future<int> decrement(String key, [int amount = 1]) {
+    return driver().decrement(key, amount);
+  }
+
+  @override
+  Future<dynamic> pull(String key) {
+    return driver().pull(key);
+  }
 }
