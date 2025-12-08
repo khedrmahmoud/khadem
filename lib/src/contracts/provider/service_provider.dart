@@ -12,4 +12,9 @@ abstract class ServiceProvider {
 
   /// If true, the provider is deferred and only loaded when its services are requested.
   bool get isDeferred => false;
+
+  /// The services provided by this provider.
+  ///
+  /// Required if [isDeferred] is true.
+  List<Type> get provides => [];
 }

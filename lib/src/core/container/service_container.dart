@@ -60,6 +60,14 @@ class ServiceContainer implements ContainerInterface {
   /// Used to detect circular dependencies during resolution.
   final List<Type> _resolving = [];
 
+  /// Handler for missing bindings.
+  void Function(Type type)? _missingBindingHandler;
+
+  @override
+  void setMissingBindingHandler(void Function(Type type) handler) {
+    _missingBindingHandler = handler;
+  }
+
   /// Binds an implementation to an abstract type.
   ///
   /// Registers a factory function that will be used to create instances
@@ -162,7 +170,15 @@ class ServiceContainer implements ContainerInterface {
     binding ??= _bindings[T];
 
     if (binding == null) {
-      throw ServiceNotFoundException('Service $T not registered');
+      if (_missingBindingHandler != null) {
+        _missingBindingHandler!(T);
+        // Try to find binding again
+        binding = _bindings[T];
+      }
+
+      if (binding == null) {
+        throw ServiceNotFoundException('Service $T not registered');
+      }
     }
 
     _resolving.add(T);
@@ -198,7 +214,15 @@ class ServiceContainer implements ContainerInterface {
     binding ??= _bindings[type];
 
     if (binding == null) {
-      throw ServiceNotFoundException('Service $type not registered');
+      if (_missingBindingHandler != null) {
+        _missingBindingHandler!(type);
+        // Try to find binding again
+        binding = _bindings[type];
+      }
+
+      if (binding == null) {
+        throw ServiceNotFoundException('Service $type not registered');
+      }
     }
 
     _resolving.add(type);

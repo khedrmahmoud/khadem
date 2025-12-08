@@ -9,6 +9,12 @@ import '../../core/database/migration/seeder.dart';
 /// migrations, and seeders.
 class DatabaseServiceProvider extends ServiceProvider {
   @override
+  bool get isDeferred => true;
+
+  @override
+  List<Type> get provides => [DatabaseManager, Migrator, SeederManager];
+
+  @override
   void register(ContainerInterface container) {
     // Register the Database Manager
     container.lazySingleton<DatabaseManager>(

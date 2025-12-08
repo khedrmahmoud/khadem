@@ -37,6 +37,18 @@ import '../services/secure_token_generator.dart';
 /// final jwtService = authManager.driver('jwt');
 /// ```
 class AuthServiceProvider extends ServiceProvider {
+  @override
+  bool get isDeferred => true;
+
+  @override
+  List<Type> get provides => [
+        AuthConfig,
+        AuthRepository,
+        PasswordVerifier,
+        TokenGenerator,
+        AuthManager,
+      ];
+
   /// Registers authentication services in the container
   ///
   /// This method binds all authentication services to the container,
@@ -44,12 +56,12 @@ class AuthServiceProvider extends ServiceProvider {
   ///
   /// [container] The dependency injection container
   @override
-  Future<void> register(ContainerInterface container) async {
+  void register(ContainerInterface container) {
     // Register core contracts
-    await _registerCoreContracts(container);
+    _registerCoreContracts(container);
 
     // Register the main auth manager
-    await _registerAuthManager(container);
+    _registerAuthManager(container);
   }
 
   /// Boots the authentication services
@@ -65,7 +77,7 @@ class AuthServiceProvider extends ServiceProvider {
   }
 
   /// Registers core authentication contracts
-  Future<void> _registerCoreContracts(ContainerInterface container) async {
+  void _registerCoreContracts(ContainerInterface container) {
     // Register AuthConfig as singleton
     container.singleton<AuthConfig>((_) => KhademAuthConfig());
 
@@ -80,7 +92,7 @@ class AuthServiceProvider extends ServiceProvider {
   }
 
   /// Registers the main authentication manager
-  Future<void> _registerAuthManager(ContainerInterface container) async {
+  void _registerAuthManager(ContainerInterface container) {
     container.singleton<AuthManager>(
       (c) => AuthManager(
         authConfig: c.resolve<AuthConfig>(),

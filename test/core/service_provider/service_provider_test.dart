@@ -8,6 +8,7 @@ import 'package:test/test.dart';
 // Mock container for testing
 class MockContainer implements ContainerInterface {
   final Map<Type, dynamic> _bindings = {};
+  void Function(Type type)? _missingBindingHandler;
 
   @override
   void bind<T>(
@@ -43,7 +44,13 @@ class MockContainer implements ContainerInterface {
 
   @override
   T resolve<T>([String? context]) {
-    final binding = _bindings[T];
+    var binding = _bindings[T];
+    
+    if (binding == null && _missingBindingHandler != null) {
+      _missingBindingHandler!(T);
+      binding = _bindings[T];
+    }
+
     if (binding is Function) {
       return binding(this) as T;
     }
@@ -69,6 +76,20 @@ class MockContainer implements ContainerInterface {
   @override
   void flush() {
     _bindings.clear();
+  }
+
+  @override
+  void setMissingBindingHandler(void Function(Type type) handler) {
+    _missingBindingHandler = handler;
+  }
+  
+  @override
+  resolveType(Type type, [String? context]) { 
+    final binding = _bindings[type];
+    if (binding is Function) {
+      return binding(this);
+    }
+    return binding;
   }
 }
 
@@ -106,6 +127,9 @@ class DeferredServiceProvider extends ServiceProvider {
 
   @override
   bool get isDeferred => true;
+
+  @override
+  List<Type> get provides => [int];
 }
 
 class FailingServiceProvider extends ServiceProvider {
@@ -381,9 +405,9 @@ void main() {
 
         manager.registerAll(providers);
 
-        expect(manager.allProviders.length, equals(2));
+        expect(manager.allProviders.length, equals(1));
         expect(provider1.registered, isTrue);
-        expect(provider2.registered, isTrue);
+        expect(provider2.registered, isFalse);
       });
 
       test('should boot all providers', () async {
@@ -396,7 +420,7 @@ void main() {
         await manager.bootAll();
 
         expect(provider1.booted, isTrue);
-        expect(provider2.booted, isTrue);
+        expect(provider2.booted, isFalse);
         expect(manager.isBooted, isTrue);
       });
 
@@ -432,6 +456,20 @@ void main() {
           manager.isBooted,
           isFalse,
         ); // Partial boot doesn't set overall booted state
+      });
+
+      test('should load deferred provider when service is requested', () {
+        final deferredProvider = DeferredServiceProvider();
+        manager.register(deferredProvider);
+
+        expect(deferredProvider.registered, isFalse);
+
+        // Resolve service provided by deferred provider
+        final service = container.resolve<int>();
+
+        expect(service, equals(42));
+        expect(deferredProvider.registered, isTrue);
+        expect(deferredProvider.booted, isTrue);
       });
 
       test('should validate providers', () {

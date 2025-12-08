@@ -92,5 +92,16 @@ class CacheServiceProvider implements ServiceProvider {
   }
 
   @override
-  bool get isDeferred => false;
+  bool get isDeferred => true;
+
+  @override
+  List<Type> get provides => [
+        ICacheDriverRegistry,
+        ICacheStatisticsManager,
+        ICacheTagManager,
+        ICacheValidator,
+        ICacheConfigLoader,
+        CacheManager,
+        ICacheManager,
+      ];
 }

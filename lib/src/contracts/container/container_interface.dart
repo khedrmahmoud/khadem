@@ -132,4 +132,9 @@ abstract interface class ContainerInterface {
   /// This removes all registered factories, instances, and contexts, effectively
   /// clearing the container. Useful for testing or reinitialization.
   void flush();
+
+  /// Sets a handler to be called when a service is not found.
+  ///
+  /// This allows for lazy loading of service providers or dynamic binding.
+  void setMissingBindingHandler(void Function(Type type) handler);
 }

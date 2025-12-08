@@ -15,6 +15,16 @@ class ServiceProviderManager {
     _registry = ServiceProviderRegistry(container);
     _bootloader = ServiceProviderBootloader(container);
     _validator = ServiceProviderValidator();
+
+    container.setMissingBindingHandler((type) {
+      final provider = _registry.loadDeferredProvider(type);
+      if (provider != null) {
+        // We can't await here because resolution is synchronous.
+        // We fire and forget the boot process.
+        // Ideally, boot should be fast or not required for immediate usage.
+        _bootloader.bootProvider(provider);
+      }
+    });
   }
 
   /// Register a single provider and call `register()`.
@@ -34,13 +44,13 @@ class ServiceProviderManager {
 
   /// Boot only non-deferred providers.
   Future<void> bootNonDeferred() async {
-    await _bootloader.bootNonDeferred(_registry.providers);
+    await _bootloader.bootNonDeferred(_registry.getNonDeferredProviders());
     // Note: This doesn't set overall booted state since deferred providers may still need booting
   }
 
   /// Boot only deferred providers.
   Future<void> bootDeferred() async {
-    await _bootloader.bootDeferred(_registry.providers);
+    await _bootloader.bootDeferred(_registry.getDeferredProviders());
     // Note: This doesn't set overall booted state since non-deferred providers may still need booting
   }
 

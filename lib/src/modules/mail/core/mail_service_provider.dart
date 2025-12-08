@@ -7,7 +7,10 @@ import '../config/mail_config.dart';
 /// Registers mail services in the container.
 class MailServiceProvider implements ServiceProvider {
   @override
-  bool get isDeferred => false;
+  bool get isDeferred => true;
+
+  @override
+  List<Type> get provides => [MailManager];
 
   @override
   void register(ContainerInterface container) {

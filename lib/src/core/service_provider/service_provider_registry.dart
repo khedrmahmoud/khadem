@@ -4,6 +4,7 @@ import '../../contracts/provider/service_provider.dart';
 /// Handles registration and management of service providers.
 class ServiceProviderRegistry {
   final List<ServiceProvider> _providers = [];
+  final Map<Type, ServiceProvider> _deferredProviders = {};
   final ContainerInterface _container;
 
   ServiceProviderRegistry(this._container);
@@ -13,8 +14,30 @@ class ServiceProviderRegistry {
 
   /// Registers a single provider.
   void register(ServiceProvider provider) {
-    _providers.add(provider);
-    provider.register(_container);
+    if (provider.isDeferred) {
+      for (final type in provider.provides) {
+        _deferredProviders[type] = provider;
+      }
+    } else {
+      _providers.add(provider);
+      provider.register(_container);
+    }
+  }
+
+  /// Loads a deferred provider for the given type.
+  /// Returns the provider if found and loaded, null otherwise.
+  ServiceProvider? loadDeferredProvider(Type type) {
+    final provider = _deferredProviders[type];
+    if (provider != null) {
+      _deferredProviders.remove(type);
+      // Remove other bindings for the same provider to avoid double loading
+      _deferredProviders.removeWhere((_, p) => p == provider);
+      
+      _providers.add(provider);
+      provider.register(_container);
+      return provider;
+    }
+    return null;
   }
 
   /// Registers multiple providers.
@@ -26,17 +49,18 @@ class ServiceProviderRegistry {
 
   /// Checks if a provider is already registered.
   bool isRegistered(ServiceProvider provider) {
-    return _providers.contains(provider);
+    return _providers.contains(provider) || _deferredProviders.containsValue(provider);
   }
 
   /// Gets providers by type.
   List<T> getProvidersByType<T extends ServiceProvider>() {
-    return _providers.whereType<T>().toList();
+    final all = [..._providers, ..._deferredProviders.values];
+    return all.whereType<T>().toList();
   }
 
   /// Gets deferred providers.
   List<ServiceProvider> getDeferredProviders() {
-    return _providers.where((provider) => provider.isDeferred).toList();
+    return _deferredProviders.values.toSet().toList();
   }
 
   /// Gets non-deferred providers.
@@ -47,8 +71,9 @@ class ServiceProviderRegistry {
   /// Clears all registered providers.
   void clear() {
     _providers.clear();
+    _deferredProviders.clear();
   }
 
   /// Gets the count of registered providers.
-  int get count => _providers.length;
+  int get count => _providers.length + _deferredProviders.values.toSet().length;
 }

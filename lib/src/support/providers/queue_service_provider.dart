@@ -12,6 +12,12 @@ import '../../core/queue/queue_manager.dart';
 /// [ConfigSystem] and is registered as a singleton.
 class QueueServiceProvider extends ServiceProvider {
   @override
+  bool get isDeferred => true;
+
+  @override
+  List<Type> get provides => [QueueManager];
+
+  @override
   void register(ContainerInterface container) {
     container.lazySingleton<QueueManager>(
       (c) => QueueManager(c.resolve<ConfigInterface>()),

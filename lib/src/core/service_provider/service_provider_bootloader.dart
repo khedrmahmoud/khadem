@@ -4,6 +4,7 @@ import '../../contracts/provider/service_provider.dart';
 /// Handles the booting process of service providers.
 class ServiceProviderBootloader {
   final ContainerInterface _container;
+  final Set<ServiceProvider> _bootedProviders = {};
   bool _booted = false;
 
   ServiceProviderBootloader(this._container);
@@ -13,7 +14,10 @@ class ServiceProviderBootloader {
 
   /// Boots a single provider.
   Future<void> bootProvider(ServiceProvider provider) async {
+    if (_bootedProviders.contains(provider)) return;
+    
     await provider.boot(_container);
+    _bootedProviders.add(provider);
   }
 
   /// Boots multiple providers sequentially.
@@ -46,5 +50,6 @@ class ServiceProviderBootloader {
   /// Resets the boot state.
   void reset() {
     _booted = false;
+    _bootedProviders.clear();
   }
 }
