@@ -1,6 +1,10 @@
 import 'package:khadem/src/core/database/model_base/khadem_model.dart';
 import 'package:khadem/src/core/database/orm/traits/soft_deletes.dart';
+import 'package:khadem/src/application/khadem.dart';
+import 'package:khadem/src/core/container/service_container.dart';
+import 'package:khadem/src/core/database/database.dart';
 import 'package:test/test.dart';
+import '../../mocks/database_mocks.dart';
 
 // Test model with soft deletes
 class TestPost extends KhademModel<TestPost> with SoftDeletes<TestPost> {
@@ -111,7 +115,10 @@ void main() {
   group('Soft Deletes', () {
     late TestPost post;
 
-    setUp(() {
+    setUp(() async {
+      final container = ServiceContainer();
+      container.singleton<DatabaseManager>((c) => FakeDatabaseManager());
+      await Khadem.use(container);
       post = TestPost()
         ..id = 1
         ..title = 'Test Post'

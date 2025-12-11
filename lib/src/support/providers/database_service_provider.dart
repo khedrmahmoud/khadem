@@ -1,3 +1,6 @@
+import 'package:khadem/khadem.dart'
+    show Khadem;
+
 import '../../contracts/config/config_contract.dart';
 import '../../contracts/container/container_interface.dart';
 import '../../contracts/provider/service_provider.dart';
@@ -32,7 +35,16 @@ class DatabaseServiceProvider extends ServiceProvider {
   @override
   Future<void> boot(ContainerInterface container) async {
     final database = container.resolve<DatabaseManager>();
+    final config = Khadem.config;
 
     await database.init();
+
+    if (config.get<bool>('database.run_migrations', false)!) {
+      await Khadem.migrator.upAll();
+    }
+
+    if (config.get<bool>('database.run_seeders', false)!) {
+      await Khadem.seeder.runAll();
+    }
   }
 }

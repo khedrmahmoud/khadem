@@ -197,4 +197,20 @@ class MailMessage implements MailMessageInterface {
 
     return message;
   }
+
+  /// Resets the message to its initial state.
+  void reset() {
+    _to.clear();
+    _cc.clear();
+    _bcc.clear();
+    _attachments.clear();
+    _embedded.clear();
+    _headers.clear();
+    _from = null;
+    _replyTo = null;
+    _subject = null;
+    _textBody = null;
+    _htmlBody = null;
+    _priority = 3;
+  }
 }

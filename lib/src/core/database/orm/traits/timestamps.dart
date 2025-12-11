@@ -85,6 +85,14 @@ mixin Timestamps<T> on KhademModel<T> {
   DateTime? get createdAt {
     if (!timestamps) return null;
 
+    try {
+      final value = getField(createdAtColumn);
+      if (value is DateTime) return value;
+      if (value is String) return DateTime.tryParse(value);
+    } on UnimplementedError {
+      // Fallback to rawData
+    }
+
     final value = rawData[createdAtColumn];
     if (value is DateTime) return value;
     if (value is String) return DateTime.tryParse(value);
@@ -94,12 +102,28 @@ mixin Timestamps<T> on KhademModel<T> {
   /// Set the created_at value
   set createdAt(DateTime? value) {
     if (!timestamps) return;
+
+    try {
+      setField(createdAtColumn, value);
+      return;
+    } on UnimplementedError {
+      // Fallback to internal field
+    }
+
     _createdAt = value;
   }
 
   /// Get the updated_at value
   DateTime? get updatedAt {
     if (!timestamps) return null;
+
+    try {
+      final value = getField(updatedAtColumn);
+      if (value is DateTime) return value;
+      if (value is String) return DateTime.tryParse(value);
+    } on UnimplementedError {
+      // Fallback to rawData
+    }
 
     final value = rawData[updatedAtColumn];
     if (value is DateTime) return value;
@@ -110,6 +134,14 @@ mixin Timestamps<T> on KhademModel<T> {
   /// Set the updated_at value
   set updatedAt(DateTime? value) {
     if (!timestamps) return;
+
+    try {
+      setField(updatedAtColumn, value);
+      return;
+    } on UnimplementedError {
+      // Fallback to internal field
+    }
+
     _updatedAt = value;
   }
 

@@ -271,10 +271,19 @@ class EnvSystem implements EnvInterface {
   String getOrDefault(String key, String defaultValue) =>
       _env[key] ?? defaultValue;
 
+  @override
+  String getOrFail(String key) {
+    final value = _env[key];
+    if (value == null) {
+      throw Exception('Environment variable "$key" is not set.');
+    }
+    return value;
+  }
+
   /// Retrieves a boolean value from an environment variable.
   ///
   /// Recognizes the following truthy values (case-insensitive):
-  /// - `true`, `1`, `yes`
+  /// - `true`, `1`, `yes`, `on`
   ///
   /// All other values are considered falsy.
   ///
@@ -286,7 +295,7 @@ class EnvSystem implements EnvInterface {
   bool getBool(String key, {bool defaultValue = false}) {
     final value = _env[key]?.toLowerCase();
     if (value == null) return defaultValue;
-    return value == 'true' || value == '1' || value == 'yes';
+    return ['true', '1', 'yes', 'on'].contains(value);
   }
 
   /// Retrieves an integer value from an environment variable.

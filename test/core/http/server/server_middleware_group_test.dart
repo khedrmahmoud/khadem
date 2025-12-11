@@ -14,6 +14,9 @@ class FakeEnv implements EnvInterface {
   String getOrDefault(String key, String defaultValue) => defaultValue;
 
   @override
+  String getOrFail(String key) => throw Exception('Env key $key not found');
+
+  @override
   bool getBool(String key, {bool defaultValue = false}) => defaultValue;
 
   @override

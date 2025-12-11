@@ -266,7 +266,7 @@ void main() {
   group('Fillable Attributes', () {
     test('only fillable attributes are mass assignable', () {
       final user = TestUserFillable()
-        ..fromJson({
+        ..fill({
           'name': 'John Doe',
           'email': 'john@example.com',
           'password': 'secret123',
@@ -320,7 +320,7 @@ void main() {
   group('Guarded Attributes', () {
     test('guarded attributes cannot be mass assigned', () {
       final user = TestUserGuarded()
-        ..fromJson({
+        ..fill({
           'name': 'John Doe',
           'email': 'john@example.com',
           'password': 'secret123',

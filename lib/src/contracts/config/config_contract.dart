@@ -18,6 +18,9 @@ abstract interface class ConfigInterface {
   /// Returns `null` if the key is missing and no [defaultValue] is provided.
   T? get<T>(String key, [T? defaultValue]);
 
+  /// Returns the value of the [key] or throws an exception if not found.
+  T getOrFail<T>(String key);
+
   /// Sets a configuration [value] for the specified [key].
   ///
   /// This can be used to override existing values or define new ones at runtime.
@@ -27,6 +30,13 @@ abstract interface class ConfigInterface {
   /// config.set('app.debug', true);
   /// ```
   void set(String key, dynamic value);
+
+  /// Temporarily overrides a configuration value.
+  /// Useful for testing.
+  void push(String key, dynamic value);
+
+  /// Restores the previous value of a configuration key.
+  void pop(String key);
 
   /// Checks if a given [key] exists in the configuration.
   ///

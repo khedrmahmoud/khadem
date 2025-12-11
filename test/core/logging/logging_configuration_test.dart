@@ -13,6 +13,12 @@ void main() {
     setUp(() {
       config = MockConfig();
       loggingConfig = LoggingConfiguration(config);
+      
+      // Default stubs
+      when(config.get<String>('logging.minimum_level', 'debug'))
+          .thenReturn('debug');
+      when(config.get<Map<String, dynamic>>('logging.channels'))
+          .thenReturn(null);
     });
 
     test('should get default minimum level', () {

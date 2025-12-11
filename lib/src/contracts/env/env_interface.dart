@@ -22,6 +22,9 @@ abstract interface class EnvInterface {
   /// This avoids needing to manually check for null.
   String getOrDefault(String key, String defaultValue);
 
+  /// Returns the value of the [key] or throws an exception if not found.
+  String getOrFail(String key);
+
   /// Returns the value of the [key] as a boolean.
   ///
   /// Accepts `"true"`, `"1"` (case-insensitive) as `true`.

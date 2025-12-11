@@ -218,11 +218,10 @@ class Logger implements LoggerContract {
     StackTrace? stackTrace,
     String? channel,
   }) {
-    // We no longer check global minimum level here, as each handler
-    // now manages its own minimum level.
-    // if (!level.isAtLeast(_minimumLevel)) {
-    //   return;
-    // }
+    // Check global minimum level
+    if (!level.isAtLeast(_minimumLevel)) {
+      return;
+    }
 
     final targetChannel = channel ?? _defaultChannel;
     _channelManager.logToChannel(

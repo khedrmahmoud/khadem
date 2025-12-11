@@ -1,16 +1,16 @@
-import 'package:test/test.dart';
-import 'package:khadem/src/core/events/event_dispatcher.dart';
-import 'package:khadem/src/core/container/service_container.dart';
+import 'package:khadem/src/contracts/config/config_contract.dart';
+import 'package:khadem/src/contracts/events/dispatcher.dart';
 import 'package:khadem/src/contracts/events/event.dart';
 import 'package:khadem/src/contracts/events/listener.dart';
 import 'package:khadem/src/contracts/events/subscriber.dart';
-import 'package:khadem/src/contracts/events/dispatcher.dart';
-import 'package:khadem/src/core/queue/queue_manager.dart';
 import 'package:khadem/src/contracts/queue/queue_driver.dart';
 import 'package:khadem/src/contracts/queue/queue_job.dart';
-import 'package:khadem/src/contracts/config/config_contract.dart';
+import 'package:khadem/src/core/container/service_container.dart';
 import 'package:khadem/src/core/events/call_queued_listener.dart';
+import 'package:khadem/src/core/events/event_dispatcher.dart';
+import 'package:khadem/src/core/queue/queue_manager.dart';
 import 'package:khadem/src/core/queue/registry/queue_driver_registry.dart';
+import 'package:test/test.dart';
 
 class TestEvent extends Event {}
 
@@ -57,9 +57,15 @@ class MockConfig implements ConfigInterface {
   @override
   T? get<T>(String key, [T? defaultValue]) => defaultValue;
   @override
+  T getOrFail<T>(String key) => throw Exception('Config key $key not found');
+  @override
   bool has(String key) => false;
   @override
   void set(String key, dynamic value) {}
+  @override
+  void push(String key, dynamic value) {}
+  @override
+  void pop(String key) {}
   @override
   Map<String, dynamic> all() => {};
   @override

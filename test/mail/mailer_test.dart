@@ -1,6 +1,7 @@
 import 'package:khadem/src/modules/mail/contracts/mailable.dart';
 import 'package:khadem/src/modules/mail/contracts/mailer_interface.dart';
 import 'package:khadem/src/modules/mail/core/mail_message.dart';
+import 'dart:io';
 import 'package:khadem/src/modules/mail/core/mailer.dart';
 import 'package:khadem/src/modules/mail/drivers/array_transport.dart';
 import 'package:khadem/src/modules/mail/exceptions/mail_exception.dart';
@@ -93,17 +94,24 @@ void main() {
 
     group('Attachments', () {
       test('should attach file by path', () async {
-        await mailer
-            .to('user@example.com')
-            .subject('Test')
-            .text('Content')
-            .attach('/path/to/file.pdf', name: 'document.pdf')
-            .send();
+        final tempDir = Directory.systemTemp.createTempSync('khadem_mail_test');
+        final file = File('${tempDir.path}/test.pdf')..createSync();
 
-        final message = transport.lastSent!;
-        expect(message.attachments.length, equals(1));
-        expect(message.attachments.first.filename, equals('document.pdf'));
-        expect(message.attachments.first.isFilePath, isTrue);
+        try {
+          await mailer
+              .to('user@example.com')
+              .subject('Test')
+              .text('Content')
+              .attach(file.path, name: 'document.pdf')
+              .send();
+
+          final message = transport.lastSent!;
+          expect(message.attachments.length, equals(1));
+          expect(message.attachments.first.filename, equals('document.pdf'));
+          expect(message.attachments.first.isFilePath, isTrue);
+        } finally {
+          tempDir.deleteSync(recursive: true);
+        }
       });
 
       test('should attach data', () async {
@@ -123,16 +131,23 @@ void main() {
       });
 
       test('should embed inline images', () async {
-        await mailer
-            .to('user@example.com')
-            .subject('Test')
-            .html('<img src="cid:logo">')
-            .embed('/path/to/logo.png', 'logo')
-            .send();
+        final tempDir = Directory.systemTemp.createTempSync('khadem_mail_test');
+        final file = File('${tempDir.path}/logo.png')..createSync();
 
-        final message = transport.lastSent!;
-        expect(message.embedded.length, equals(1));
-        expect(message.embedded.first.cid, equals('logo'));
+        try {
+          await mailer
+              .to('user@example.com')
+              .subject('Test')
+              .html('<img src="cid:logo">')
+              .embed(file.path, 'logo')
+              .send();
+
+          final message = transport.lastSent!;
+          expect(message.embedded.length, equals(1));
+          expect(message.embedded.first.cid, equals('logo'));
+        } finally {
+          tempDir.deleteSync(recursive: true);
+        }
       });
     });
 

@@ -76,6 +76,9 @@ class ConfigSystem implements ConfigInterface {
   /// Time-to-live for each cached config file.
   final Duration _cacheTtl;
 
+  /// Internal storage for configuration overrides (stack-based).
+  final Map<String, List<dynamic>> _overrideStack = {};
+
   /// Last loaded timestamps for each config file.
   final Map<String, DateTime> _cacheTimestamps = {};
 
@@ -268,6 +271,34 @@ class ConfigSystem implements ConfigInterface {
     }
 
     return defaultValue;
+  }
+
+  @override
+  T getOrFail<T>(String key) {
+    final value = get<T>(key);
+    if (value == null) {
+      throw ConfigException('Configuration key "$key" not found or is null.');
+    }
+    return value;
+  }
+
+  @override
+  void push(String key, dynamic value) {
+    if (!_overrideStack.containsKey(key)) {
+      _overrideStack[key] = [];
+    }
+    
+    _overrideStack[key]!.add(get(key));
+    
+    set(key, value);
+  }
+
+  @override
+  void pop(String key) {
+    if (_overrideStack.containsKey(key) && _overrideStack[key]!.isNotEmpty) {
+      final previous = _overrideStack[key]!.removeLast();
+      set(key, previous);
+    }
   }
 
   /// Sets a configuration value using dot notation.

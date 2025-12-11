@@ -24,12 +24,25 @@ class MockConfig implements ConfigInterface {
   }
 
   @override
+  T getOrFail<T>(String key) {
+    final value = get<T>(key);
+    if (value == null) throw Exception('Config key $key not found');
+    return value;
+  }
+
+  @override
   Map<String, dynamic>? section(String key) {
     return get<Map<String, dynamic>>(key);
   }
   
   @override
   void set(String key, dynamic value) {}
+
+  @override
+  void push(String key, dynamic value) {}
+
+  @override
+  void pop(String key) {}
 
   @override
   bool has(String key) => get(key) != null;

@@ -2,6 +2,7 @@ import 'package:khadem/src/contracts/config/config_contract.dart';
 import 'package:khadem/src/core/logging/logger.dart';
 import 'package:khadem/src/modules/mail/contracts/mailable.dart';
 import 'package:khadem/src/modules/mail/contracts/mailer_interface.dart';
+import 'dart:io';
 import 'package:khadem/src/modules/mail/core/mail_manager.dart';
 import 'package:khadem/src/modules/mail/drivers/array_transport.dart';
 import 'package:khadem/src/modules/mail/drivers/log_transport.dart';
@@ -94,15 +95,22 @@ void main() {
         final manager = MailManager(mockConfig);
         manager.registerTransport('array', transport);
 
-        await manager
-            .to('user@example.com')
-            .subject('Test')
-            .text('Content')
-            .attach('/path/to/file.pdf')
-            .send();
+        final tempDir = Directory.systemTemp.createTempSync('khadem_mail_test');
+        final file = File('${tempDir.path}/test.pdf')..createSync();
 
-        final message = transport.lastSent!;
-        expect(message.attachments.length, equals(1));
+        try {
+          await manager
+              .to('user@example.com')
+              .subject('Test')
+              .text('Content')
+              .attach(file.path)
+              .send();
+
+          final message = transport.lastSent!;
+          expect(message.attachments.length, equals(1));
+        } finally {
+          tempDir.deleteSync(recursive: true);
+        }
       });
 
       test('should proxy sendMailable', () async {
@@ -191,6 +199,19 @@ class MockConfig implements ConfigInterface {
   String defaultTransport = 'array';
   String fromEmail = 'from@example.com';
   String? fromName = 'Sender';
+
+  @override
+  T getOrFail<T>(String key) {
+    final value = get<T>(key);
+    if (value == null) throw Exception('Config key $key not found');
+    return value;
+  }
+
+  @override
+  void push(String key, dynamic value) {}
+
+  @override
+  void pop(String key) {}
 
   @override
   T? get<T>(String key, [T? defaultValue]) {
