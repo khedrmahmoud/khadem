@@ -1,14 +1,16 @@
-import 'package:khadem/src/contracts/database/connection_interface.dart';
+import 'package:khadem/src/contracts/database/database_connection.dart';
 import 'package:khadem/src/contracts/database/database_response.dart';
 import 'package:khadem/src/contracts/database/query_builder_interface.dart';
-import 'package:khadem/src/core/database/database_drivers/mysql/mysql_query_builder.dart';
+import 'package:khadem/src/contracts/database/schema_builder.dart';
+import 'package:khadem/src/core/database/query/query_builder.dart';
+import 'package:khadem/src/core/database/query/grammars/mysql_grammar.dart';
 import 'package:khadem/src/core/database/model_base/khadem_model.dart';
 import 'package:khadem/src/core/database/orm/relation_definition.dart';
 import 'package:khadem/src/core/database/orm/relation_type.dart';
 import 'package:test/test.dart';
 
 // Simple mock connection for testing
-class _MockConnection implements ConnectionInterface {
+class _MockConnection implements DatabaseConnection {
   @override
   Future<DatabaseResponse> execute(
     String query, [
@@ -24,6 +26,18 @@ class _MockConnection implements ConnectionInterface {
   Future<void> disconnect() async {}
 
   @override
+  Future<void> beginTransaction() async {}
+
+  @override
+  Future<void> commit() async {}
+
+  @override
+  Future<void> rollBack() async {}
+
+  @override
+  Future<void> unprepared(String sql) async {}
+
+  @override
   bool get isConnected => true;
 
   @override
@@ -31,7 +45,12 @@ class _MockConnection implements ConnectionInterface {
     String table, {
     T Function(Map<String, dynamic>)? modelFactory,
   }) {
-    return MySQLQueryBuilder<T>(this, table, modelFactory: modelFactory);
+    return QueryBuilder<T>(this, MySQLGrammar(), table, modelFactory: modelFactory);
+  }
+
+  @override
+  SchemaBuilder getSchemaBuilder() {
+    throw UnimplementedError();
   }
 
   @override
@@ -42,6 +61,7 @@ class _MockConnection implements ConnectionInterface {
     Future<void> Function(T result)? onSuccess,
     Future<void> Function(dynamic error)? onFailure,
     Future<void> Function()? onFinally,
+    String? isolationLevel,
   }) async {
     return callback();
   }
@@ -272,15 +292,16 @@ class TestComment extends KhademModel<TestComment> {
 }
 
 void main() {
-  late ConnectionInterface connection;
-  late MySQLQueryBuilder<TestUser> query;
+  late DatabaseConnection connection;
+  late QueryBuilder<TestUser> query;
 
   setUp(() {
     connection = _MockConnection();
-    query = MySQLQueryBuilder<TestUser>(
+    query = QueryBuilder<TestUser>(
       connection,
+      MySQLGrammar(),
       'users',
-      modelFactory: (data) => TestUser()..fromJson(data),
+      modelFactory: (data) => TestUser()..fill(data),
     );
   });
 

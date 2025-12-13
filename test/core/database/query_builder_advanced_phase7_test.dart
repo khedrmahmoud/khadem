@@ -1,11 +1,13 @@
-import 'package:khadem/src/contracts/database/connection_interface.dart';
+import 'package:khadem/src/contracts/database/database_connection.dart';
 import 'package:khadem/src/contracts/database/database_response.dart';
 import 'package:khadem/src/contracts/database/query_builder_interface.dart';
-import 'package:khadem/src/core/database/database_drivers/mysql/mysql_query_builder.dart';
+import 'package:khadem/src/contracts/database/schema_builder.dart';
+import 'package:khadem/src/core/database/query/query_builder.dart';
+import 'package:khadem/src/core/database/query/grammars/mysql_grammar.dart';
 import 'package:test/test.dart';
 
 // Simple mock connection for testing SQL generation only
-class _MockConnection implements ConnectionInterface {
+class _MockConnection implements DatabaseConnection {
   @override
   Future<DatabaseResponse> execute(
     String query, [
@@ -21,6 +23,18 @@ class _MockConnection implements ConnectionInterface {
   Future<void> disconnect() async {}
 
   @override
+  Future<void> beginTransaction() async {}
+
+  @override
+  Future<void> commit() async {}
+
+  @override
+  Future<void> rollBack() async {}
+
+  @override
+  Future<void> unprepared(String sql) async {}
+
+  @override
   bool get isConnected => true;
 
   @override
@@ -28,7 +42,12 @@ class _MockConnection implements ConnectionInterface {
     String table, {
     T Function(Map<String, dynamic>)? modelFactory,
   }) {
-    return MySQLQueryBuilder<T>(this, table, modelFactory: modelFactory);
+    return QueryBuilder<T>(this, MySQLGrammar(), table, modelFactory: modelFactory);
+  }
+
+  @override
+  SchemaBuilder getSchemaBuilder() {
+    throw UnimplementedError();
   }
 
   @override
@@ -39,6 +58,7 @@ class _MockConnection implements ConnectionInterface {
     Future<void> Function(T result)? onSuccess,
     Future<void> Function(dynamic error)? onFailure,
     Future<void> Function()? onFinally,
+    String? isolationLevel,
   }) async {
     return callback();
   }
@@ -56,12 +76,12 @@ class _MockConnection implements ConnectionInterface {
 /// - Column comparisons and date helpers
 /// - Logical grouping (whereNested)
 void main() {
-  late ConnectionInterface connection;
-  late MySQLQueryBuilder<Map<String, dynamic>> query;
+  late DatabaseConnection connection;
+  late QueryBuilder<Map<String, dynamic>> query;
 
   setUp(() {
     connection = _MockConnection();
-    query = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users');
+    query = QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'users');
   });
 
   group('OR WHERE Variants', () {
@@ -293,7 +313,7 @@ void main() {
 
     test('has is shorthand for whereHas', () {
       final sql1 = query.has('posts').toSql();
-      final sql2 = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
+      final sql2 = QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'users')
           .whereHas('posts')
           .toSql();
 
@@ -302,7 +322,7 @@ void main() {
 
     test('doesntHave is shorthand for whereDoesntHave', () {
       final sql1 = query.doesntHave('posts').toSql();
-      final sql2 = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
+      final sql2 = QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'users')
           .whereDoesntHave('posts')
           .toSql();
 
@@ -394,18 +414,18 @@ void main() {
   group('Subquery Methods', () {
     test('fromSub uses subquery as FROM clause', () {
       final subquery =
-          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
+          QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'users')
               .where('active', '=', true)
               .select(['id', 'name']);
 
-      final sql = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'temp')
+      final sql = QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'temp')
           .fromSub(subquery, 'active_users')
           .select(['name']).toSql();
 
       expect(sql, contains('FROM ('));
-      expect(sql, contains('SELECT id, name FROM `users`'));
+      expect(sql, contains('SELECT `id`, `name` FROM `users`'));
       expect(sql, contains('WHERE `active` = ?'));
-      expect(sql, contains(') AS `active_users`'));
+      expect(sql, contains(') as active_users'));
     });
 
     test('fromRaw uses raw SQL as FROM clause', () {
@@ -421,39 +441,41 @@ void main() {
 
     test('selectSub adds subquery to SELECT clause', () {
       final subquery =
-          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'posts')
+          QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'posts')
               .where('posts.user_id', '=', 'users.id')
               .select(['COUNT(*)']);
 
-      final sql = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
+      final sql = QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'users')
           .select(['id', 'name'])
           .selectSub(subquery, 'posts_count')
           .toSql();
 
-      expect(sql, contains('SELECT id, name, (SELECT COUNT(*) FROM `posts`'));
-      expect(sql, contains(') AS `posts_count`'));
+      expect(sql, contains('SELECT `id`, `name`, (SELECT `COUNT(*)` FROM `posts`'));
+      expect(sql, contains(') as posts_count'));
     });
 
     test('multiple selectSub clauses', () {
       final postsCount =
-          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'posts')
+          QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'posts')
               .select(['COUNT(*)']);
 
       final commentsCount =
-          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'comments')
+          QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'comments')
               .select(['COUNT(*)']);
 
-      final sql = MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
+      final sql = QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'users')
           .select(['id'])
           .selectSub(postsCount, 'posts_count')
           .selectSub(commentsCount, 'comments_count')
           .toSql();
 
-      expect(sql, contains('(SELECT COUNT(*) FROM `posts`) AS `posts_count`'));
+      expect(sql, contains('(SELECT `COUNT(*)` FROM `posts`'));
+      expect(sql, contains(') as posts_count'));
       expect(
         sql,
-        contains('(SELECT COUNT(*) FROM `comments`) AS `comments_count`'),
+        contains('(SELECT `COUNT(*)` FROM `comments`'),
       );
+      expect(sql, contains(') as comments_count'));
     });
   });
 
@@ -556,11 +578,11 @@ void main() {
   group('Clone Preserves New Fields', () {
     test('clone preserves fromSubquery and selectSubqueries', () {
       final subquery =
-          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'active_users')
+          QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'active_users')
               .where('active', '=', true);
 
       final original =
-          MySQLQueryBuilder<Map<String, dynamic>>(connection, 'users')
+          QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'users')
               .fromSub(subquery, 'au')
               .selectSub(subquery, 'count');
 
@@ -570,7 +592,7 @@ void main() {
 
       expect(sql2, equals(sql1));
       expect(sql2, contains('FROM ('));
-      expect(sql2, contains(') AS `au`'));
+      expect(sql2, contains(') as au'));
     });
 
     test('clone with all new features', () {

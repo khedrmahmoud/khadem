@@ -133,14 +133,14 @@ class Migrator {
   Future<void> _executeSchemaQueries() async {
     for (final sql in schemaBuilder.queries) {
       Khadem.logger.info('📥 Executing: $sql');
-      await manager.connection.execute(sql);
+      await manager.connection().execute(sql);
     }
     schemaBuilder.queries.clear();
   }
 
   Future<void> _ensureDatabaseExists() async {
     final dbName = Khadem.config.get('database.database') as String;
-    final dbConnection = manager.connection;
+    final dbConnection = manager.connection();
 
     try {
       await dbConnection.execute('USE $dbName');

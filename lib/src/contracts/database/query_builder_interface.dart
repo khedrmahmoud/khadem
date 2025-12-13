@@ -274,6 +274,16 @@ abstract class QueryBuilderInterface<T> {
     String Function(QueryBuilderInterface<dynamic> query) callback,
   );
 
+  /// OR WHERE EXISTS (subquery)
+  QueryBuilderInterface<T> orWhereExists(
+    String Function(QueryBuilderInterface<dynamic> query) callback,
+  );
+
+  /// OR WHERE NOT EXISTS (subquery)
+  QueryBuilderInterface<T> orWhereNotExists(
+    String Function(QueryBuilderInterface<dynamic> query) callback,
+  );
+
   // ---------------------------- Full-Text Search ----------------------------
 
   /// Full-text search using MySQL MATCH AGAINST
@@ -462,8 +472,14 @@ abstract class QueryBuilderInterface<T> {
   /// Limits the number of results.
   QueryBuilderInterface<T> limit(int number);
 
+  /// Alias for limit.
+  QueryBuilderInterface<T> take(int number);
+
   /// Offsets the results (useful with pagination).
   QueryBuilderInterface<T> offset(int number);
+
+  /// Alias for offset.
+  QueryBuilderInterface<T> skip(int number);
 
   /// Adds ORDER BY clause.
   QueryBuilderInterface<T> orderBy(String column, {String direction = 'ASC'});
@@ -473,6 +489,13 @@ abstract class QueryBuilderInterface<T> {
 
   /// Adds HAVING clause.
   QueryBuilderInterface<T> having(
+    String column,
+    String operator,
+    dynamic value,
+  );
+
+  /// Adds OR HAVING clause.
+  QueryBuilderInterface<T> orHaving(
     String column,
     String operator,
     dynamic value,

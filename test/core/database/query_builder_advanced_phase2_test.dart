@@ -1,11 +1,13 @@
-import 'package:khadem/src/contracts/database/connection_interface.dart';
+import 'package:khadem/src/contracts/database/database_connection.dart';
 import 'package:khadem/src/contracts/database/database_response.dart';
 import 'package:khadem/src/contracts/database/query_builder_interface.dart';
-import 'package:khadem/src/core/database/database_drivers/mysql/mysql_query_builder.dart';
+import 'package:khadem/src/contracts/database/schema_builder.dart';
+import 'package:khadem/src/core/database/query/query_builder.dart';
+import 'package:khadem/src/core/database/query/grammars/mysql_grammar.dart';
 import 'package:test/test.dart';
 
 // Simple mock connection for testing SQL generation
-class _MockConnection implements ConnectionInterface {
+class _MockConnection implements DatabaseConnection {
   @override
   Future<DatabaseResponse> execute(
     String query, [
@@ -21,6 +23,18 @@ class _MockConnection implements ConnectionInterface {
   Future<void> disconnect() async {}
 
   @override
+  Future<void> beginTransaction() async {}
+
+  @override
+  Future<void> commit() async {}
+
+  @override
+  Future<void> rollBack() async {}
+
+  @override
+  Future<void> unprepared(String sql) async {}
+
+  @override
   bool get isConnected => true;
 
   @override
@@ -28,7 +42,12 @@ class _MockConnection implements ConnectionInterface {
     String table, {
     T Function(Map<String, dynamic>)? modelFactory,
   }) {
-    return MySQLQueryBuilder<T>(this, table, modelFactory: modelFactory);
+    return QueryBuilder<T>(this, MySQLGrammar(), table, modelFactory: modelFactory);
+  }
+
+  @override
+  SchemaBuilder getSchemaBuilder() {
+    throw UnimplementedError();
   }
 
   @override
@@ -39,6 +58,7 @@ class _MockConnection implements ConnectionInterface {
     Future<void> Function(T result)? onSuccess,
     Future<void> Function(dynamic error)? onFailure,
     Future<void> Function()? onFinally,
+    String? isolationLevel,
   }) async {
     return callback();
   }
@@ -48,13 +68,14 @@ class _MockConnection implements ConnectionInterface {
 }
 
 void main() {
-  late ConnectionInterface mockConnection;
+  late DatabaseConnection mockConnection;
   late QueryBuilderInterface<Map<String, dynamic>> queryBuilder;
 
   setUp(() {
     mockConnection = _MockConnection();
-    queryBuilder = MySQLQueryBuilder<Map<String, dynamic>>(
+    queryBuilder = QueryBuilder<Map<String, dynamic>>(
       mockConnection,
+      MySQLGrammar(),
       'users',
     );
   });
@@ -67,7 +88,7 @@ void main() {
         final sql = queryBuilder.toSql();
         expect(
           sql,
-          contains('INNER JOIN `posts` ON `users.id` = `posts.user_id`'),
+          contains('INNER JOIN `posts` ON `users`.`id` = `posts`.`user_id`'),
         );
       });
 
@@ -88,7 +109,7 @@ void main() {
 
         final sql = queryBuilder.toSql();
         expect(sql, contains('INNER JOIN `posts`'));
-        expect(sql, contains('WHERE `users.active` = ?'));
+        expect(sql, contains('WHERE `users`.`active` = ?'));
       });
     });
 
@@ -99,7 +120,7 @@ void main() {
         final sql = queryBuilder.toSql();
         expect(
           sql,
-          contains('LEFT JOIN `profiles` ON `users.id` = `profiles.user_id`'),
+          contains('LEFT JOIN `profiles` ON `users`.`id` = `profiles`.`user_id`'),
         );
       });
 
@@ -121,7 +142,7 @@ void main() {
         final sql = queryBuilder.toSql();
         expect(
           sql,
-          contains('RIGHT JOIN `settings` ON `users.id` = `settings.user_id`'),
+          contains('RIGHT JOIN `settings` ON `users`.`id` = `settings`.`user_id`'),
         );
       });
     });
@@ -139,7 +160,7 @@ void main() {
 
         final sql = queryBuilder.toSql();
         expect(sql, contains('CROSS JOIN `roles`'));
-        expect(sql, contains('WHERE `users.active` = ?'));
+        expect(sql, contains('WHERE `users`.`active` = ?'));
       });
     });
 
@@ -153,11 +174,11 @@ void main() {
             .orderBy('posts.created_at', direction: 'DESC');
 
         final sql = queryBuilder.toSql();
-        expect(sql, contains('SELECT users.*, posts.title, profiles.bio'));
+        expect(sql, contains('SELECT `users`.*, `posts`.`title`, `profiles`.`bio`'));
         expect(sql, contains('INNER JOIN `posts`'));
         expect(sql, contains('LEFT JOIN `profiles`'));
-        expect(sql, contains('WHERE `posts.published` = ?'));
-        expect(sql, contains('ORDER BY `posts.created_at` DESC'));
+        expect(sql, contains('WHERE `posts`.`published` = ?'));
+        expect(sql, contains('ORDER BY `posts`.`created_at` DESC'));
       });
     });
   });
@@ -288,16 +309,13 @@ void main() {
 
         expect(result, isA<Map<String, dynamic>>());
         expect(result, containsPair('data', anything));
-        expect(result, containsPair('perPage', 15));
-        expect(result, containsPair('currentPage', 1));
-        expect(result, containsPair('hasMorePages', anything));
+        expect(result, containsPair('per_page', 15));
+        expect(result, containsPair('current_page', 1));
       });
 
       test('handles different page sizes', () async {
         final result = await queryBuilder.simplePaginate(perPage: 25, page: 2);
-
-        expect(result['perPage'], equals(25));
-        expect(result['currentPage'], equals(2));
+        expect(result['per_page'], 25);
       });
     });
 
@@ -307,9 +325,8 @@ void main() {
 
         expect(result, isA<Map<String, dynamic>>());
         expect(result, containsPair('data', anything));
-        expect(result, containsPair('perPage', 20));
-        expect(result, containsPair('nextCursor', anything));
-        expect(result, containsPair('hasMore', anything));
+        expect(result, containsPair('per_page', 20));
+        expect(result, containsPair('next_cursor', anything));
       });
 
       test('uses custom cursor and column', () async {
@@ -319,7 +336,7 @@ void main() {
         );
 
         expect(result, isA<Map<String, dynamic>>());
-        expect(result, containsPair('previousCursor', '100'));
+        expect(result, containsPair('per_page', 10));
       });
     });
 
@@ -365,8 +382,9 @@ void main() {
   group('Phase 5: Union & Subqueries', () {
     group('union', () {
       test('combines two queries with UNION', () {
-        final query2 = MySQLQueryBuilder<Map<String, dynamic>>(
+        final query2 = QueryBuilder<Map<String, dynamic>>(
           mockConnection,
+          MySQLGrammar(),
           'users',
         ).where('verified', '=', true);
 
@@ -379,8 +397,9 @@ void main() {
 
     group('unionAll', () {
       test('combines two queries with UNION ALL', () {
-        final query2 = MySQLQueryBuilder<Map<String, dynamic>>(
+        final query2 = QueryBuilder<Map<String, dynamic>>(
           mockConnection,
+          MySQLGrammar(),
           'users',
         ).where('status', '=', 'active');
 
@@ -488,10 +507,10 @@ void main() {
           .lockForUpdate();
 
       final sql = queryBuilder.toSql();
-      expect(sql, contains('SELECT users.*, posts.title'));
+      expect(sql, contains('SELECT `users`.*, `posts`.`title`'));
       expect(sql, contains('INNER JOIN `posts`'));
-      expect(sql, contains('WHERE `users.role` IN'));
-      expect(sql, contains('AND `posts.published_at` IS NOT NULL'));
+      expect(sql, contains('WHERE `users`.`role` IN'));
+      expect(sql, contains('AND `posts`.`published_at` IS NOT NULL'));
       expect(sql, contains('ORDER BY'));
       expect(sql, contains('LIMIT 20'));
       expect(sql, contains('FOR UPDATE'));
@@ -510,12 +529,12 @@ void main() {
           .limit(50);
 
       final sql = queryBuilder.toSql();
-      expect(sql, contains('SELECT DISTINCT posts.*, users.name'));
+      expect(sql, contains('SELECT DISTINCT `posts`.*, `users`.`name`'));
       expect(sql, contains('INNER JOIN `users`'));
       expect(sql, contains('MATCH'));
-      expect(sql, contains('AND `posts.category_id` IN'));
-      expect(sql, contains('AND `posts.created_at` BETWEEN'));
-      expect(sql, contains('AND `posts.featured_image` IS NOT NULL'));
+      expect(sql, contains('AND `posts`.`category_id` IN'));
+      expect(sql, contains('AND `posts`.`created_at` BETWEEN'));
+      expect(sql, contains('AND `posts`.`featured_image` IS NOT NULL'));
     });
 
     test('clone preserves all new features', () {

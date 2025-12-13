@@ -1,5 +1,10 @@
 import 'package:khadem/khadem.dart';
 
+import '../model_base/khadem_model.dart';
+import 'relation_definition.dart';
+import 'relation_meta.dart';
+import 'relation_type.dart';
+
 /// A utility class for eager loading database relations in the Khadem ORM.
 ///
 /// This class provides functionality to load related models efficiently by parsing
@@ -167,7 +172,7 @@ class EagerLoader {
     List<dynamic> nested = const [],
   }) async {
     final parentIds =
-        parents.map((p) => p.toJson()[def.localKey]).toSet().toList();
+        parents.map((p) => p?.toJson()[def.localKey]).toSet().toList();
     if (parentIds.isEmpty) return;
 
     final placeholders = List.filled(parentIds.length, '?').join(', ');

@@ -1,11 +1,13 @@
-import 'package:khadem/src/contracts/database/connection_interface.dart';
+import 'package:khadem/src/contracts/database/database_connection.dart';
 import 'package:khadem/src/contracts/database/database_response.dart';
 import 'package:khadem/src/contracts/database/query_builder_interface.dart';
-import 'package:khadem/src/core/database/database_drivers/mysql/mysql_query_builder.dart';
+import 'package:khadem/src/contracts/database/schema_builder.dart';
+import 'package:khadem/src/core/database/query/query_builder.dart';
+import 'package:khadem/src/core/database/query/grammars/mysql_grammar.dart';
 import 'package:test/test.dart';
 
 // Simple mock connection for testing SQL generation only
-class _MockConnection implements ConnectionInterface {
+class _MockConnection implements DatabaseConnection {
   @override
   Future<DatabaseResponse> execute(
     String query, [
@@ -21,6 +23,18 @@ class _MockConnection implements ConnectionInterface {
   Future<void> disconnect() async {}
 
   @override
+  Future<void> beginTransaction() async {}
+
+  @override
+  Future<void> commit() async {}
+
+  @override
+  Future<void> rollBack() async {}
+
+  @override
+  Future<void> unprepared(String sql) async {}
+
+  @override
   bool get isConnected => true;
 
   @override
@@ -28,7 +42,12 @@ class _MockConnection implements ConnectionInterface {
     String table, {
     T Function(Map<String, dynamic>)? modelFactory,
   }) {
-    return MySQLQueryBuilder<T>(this, table, modelFactory: modelFactory);
+    return QueryBuilder<T>(this, MySQLGrammar(), table, modelFactory: modelFactory);
+  }
+
+  @override
+  SchemaBuilder getSchemaBuilder() {
+    throw UnimplementedError();
   }
 
   @override
@@ -39,6 +58,7 @@ class _MockConnection implements ConnectionInterface {
     Future<void> Function(T result)? onSuccess,
     Future<void> Function(dynamic error)? onFailure,
     Future<void> Function()? onFinally,
+    String? isolationLevel,
   }) async {
     return callback();
   }
@@ -48,13 +68,14 @@ class _MockConnection implements ConnectionInterface {
 }
 
 void main() {
-  late ConnectionInterface mockConnection;
+  late DatabaseConnection mockConnection;
   late QueryBuilderInterface<Map<String, dynamic>> queryBuilder;
 
   setUp(() {
     mockConnection = _MockConnection();
-    queryBuilder = MySQLQueryBuilder<Map<String, dynamic>>(
+    queryBuilder = QueryBuilder<Map<String, dynamic>>(
       mockConnection,
+      MySQLGrammar(),
       'users',
     );
   });
@@ -501,7 +522,7 @@ void main() {
         queryBuilder.select(['email']).distinct();
 
         final sql = queryBuilder.toSql();
-        expect(sql, contains('SELECT DISTINCT email FROM'));
+        expect(sql, contains('SELECT DISTINCT `email` FROM'));
       });
     });
 
@@ -510,14 +531,14 @@ void main() {
         queryBuilder.select(['id', 'name']).addSelect(['email', 'phone']);
 
         final sql = queryBuilder.toSql();
-        expect(sql, contains('SELECT id, name, email, phone FROM'));
+        expect(sql, contains('SELECT `id`, `name`, `email`, `phone` FROM'));
       });
 
       test('replaces * with columns when adding', () {
         queryBuilder.addSelect(['email']);
 
         final sql = queryBuilder.toSql();
-        expect(sql, contains('SELECT email FROM'));
+        expect(sql, contains('SELECT `email` FROM'));
         expect(sql, isNot(contains('*')));
       });
     });
@@ -668,7 +689,7 @@ void main() {
       final sql = queryBuilder.toSql();
 
       // Verify SQL structure
-      expect(sql, startsWith('SELECT DISTINCT id, name, email, created_at'));
+      expect(sql, startsWith('SELECT DISTINCT `id`, `name`, `email`, `created_at`'));
       expect(sql, contains('FROM `users`'));
       expect(sql, contains('WHERE'));
       expect(sql, contains('ORDER BY `created_at` DESC'));

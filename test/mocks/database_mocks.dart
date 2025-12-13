@@ -1,17 +1,14 @@
 import 'package:khadem/src/core/database/database.dart';
 import 'package:khadem/src/contracts/database/query_builder_interface.dart';
-import 'package:khadem/src/contracts/database/connection_interface.dart';
+import 'package:khadem/src/contracts/database/database_connection.dart';
 import 'package:khadem/src/contracts/database/schema_builder.dart';
 import 'package:khadem/src/contracts/config/config_contract.dart';
 
 class FakeDatabaseManager implements DatabaseManager {
   @override
   late final ConfigInterface _config;
-  @override
-  late final ConnectionInterface _connection;
-  @override
-  late final SchemaBuilder _schemaBuilder;
-
+  late final DatabaseConnection _connection;
+  
   @override
   Future<String> init() async => 'fake';
 
@@ -19,12 +16,15 @@ class FakeDatabaseManager implements DatabaseManager {
   QueryBuilderInterface<T> table<T>(
     String tableName, {
     T Function(Map<String, dynamic>)? modelFactory,
+    String? connectionName,
   }) {
     return FakeQueryBuilder<T>();
   }
 
   @override
-  ConnectionInterface get connection => throw UnimplementedError();
+  DatabaseConnection connection([String? name]) {
+    return _connection;
+  }
 
   @override
   SchemaBuilder get schemaBuilder => throw UnimplementedError();

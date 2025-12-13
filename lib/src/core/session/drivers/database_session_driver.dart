@@ -1,10 +1,10 @@
-import '../../../contracts/database/connection_interface.dart';
+import '../../../contracts/database/database_connection.dart';
 import '../../../contracts/session/session_interfaces.dart';
 
 /// Database-based session storage implementation.
 /// Stores session data in a database table for persistence and scalability.
 class DatabaseSessionDriver implements SessionDriver {
-  final ConnectionInterface _connection;
+  final DatabaseConnection _connection;
   final String _tableName;
 
   DatabaseSessionDriver(
