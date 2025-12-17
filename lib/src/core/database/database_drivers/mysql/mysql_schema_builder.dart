@@ -32,12 +32,13 @@ class MySQLSchemaBuilder implements SchemaBuilder {
 
     // 1. Column Name & Type
     parts.add('`${column.name}`');
-    
+
     if (column.enumValues != null && column.enumValues!.isNotEmpty) {
       final enumValues = column.enumValues!.map((e) => "'$e'").join(', ');
       parts.add('ENUM($enumValues)');
     } else if (column.generatedExpression != null) {
-      parts.add('AS (${column.generatedExpression}) ${column.isStoredGenerated ? 'STORED' : 'VIRTUAL'}');
+      parts.add(
+          'AS (${column.generatedExpression}) ${column.isStoredGenerated ? 'STORED' : 'VIRTUAL'}',);
     } else {
       parts.add(_getTypeWithLength(column));
     }
@@ -84,18 +85,29 @@ class MySQLSchemaBuilder implements SchemaBuilder {
     final type = column.type.toUpperCase();
 
     if (value == null) return 'DEFAULT NULL';
-    
+
     if (type == 'BOOLEAN' || type == 'BOOL' || type == 'TINYINT') {
-       if (value is bool) return 'DEFAULT ${value ? 1 : 0}';
-       return 'DEFAULT $value';
+      if (value is bool) return 'DEFAULT ${value ? 1 : 0}';
+      return 'DEFAULT $value';
     }
-    
-    if (['INT', 'INTEGER', 'BIGINT', 'SMALLINT', 'MEDIUMINT', 'FLOAT', 'DOUBLE', 'DECIMAL'].contains(type)) {
+
+    if ([
+      'INT',
+      'INTEGER',
+      'BIGINT',
+      'SMALLINT',
+      'MEDIUMINT',
+      'FLOAT',
+      'DOUBLE',
+      'DECIMAL',
+    ].contains(type)) {
       return 'DEFAULT $value';
     }
 
     if (value is String) {
-      if (value.toUpperCase() == 'CURRENT_TIMESTAMP') return 'DEFAULT CURRENT_TIMESTAMP';
+      if (value.toUpperCase() == 'CURRENT_TIMESTAMP') {
+        return 'DEFAULT CURRENT_TIMESTAMP';
+      }
       if (value.toUpperCase() == 'NULL') return 'DEFAULT NULL';
       return "DEFAULT '$value'";
     }
@@ -159,7 +171,7 @@ class MySQLSchemaBuilder implements SchemaBuilder {
       case 'DECIMAL':
         // Assuming length stores precision and scale if needed, but usually passed differently.
         // For now, default to DECIMAL(8, 2) if not specified or just DECIMAL.
-        return 'DECIMAL'; 
+        return 'DECIMAL';
       case 'BOOLEAN':
       case 'BOOL':
         return 'TINYINT(1)';

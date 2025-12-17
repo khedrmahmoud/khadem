@@ -1,7 +1,6 @@
 // ========================
 // 📦 Array_rules.dart
 // ========================
-export 'helpers/container_helper.dart';
 // ========================
 // 📦 Bad_request_exception.dart
 // ========================
@@ -66,7 +65,7 @@ export 'exceptions/unauthorized_exception.dart';
 // 📦 Validation_exception.dart
 // ========================
 export 'exceptions/validation_exception.dart';
-
+export 'helpers/container_helper.dart';
 // ========================
 // 📦 Date_helper.dart
 // ========================
@@ -123,11 +122,11 @@ export 'providers/cli_service_provider.dart';
 // 📦 Core_service_provider.dart
 // ========================
 export 'providers/core_service_provider.dart';
-export 'providers/event_service_provider.dart';
 // ========================
 // 📦 Database_service_provider.dart
 // ========================
 export 'providers/database_service_provider.dart';
+export 'providers/event_service_provider.dart';
 // ========================
 // 📦 Queue_service_provider.dart
 // ========================

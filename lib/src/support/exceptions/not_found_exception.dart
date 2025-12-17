@@ -6,13 +6,11 @@ import '../../contracts/exceptions/app_exception.dart';
 /// or API endpoint does not exist.
 class NotFoundException extends AppException {
   NotFoundException(
-    String message, {
-    dynamic details,
+    super.message, {
+    super.details,
   }) : super(
-          message,
           statusCode: 404,
           title: 'Not Found',
           type: 'not_found',
-          details: details,
         );
 }

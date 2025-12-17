@@ -11,7 +11,8 @@ class MailException extends AppException {
     StackTrace? stackTrace,
   }) : super(
           details: {
-            if (originalError != null) 'original_error': originalError.toString(),
+            if (originalError != null)
+              'original_error': originalError.toString(),
             if (stackTrace != null) 'stack_trace': stackTrace.toString(),
           },
         );

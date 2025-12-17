@@ -1,9 +1,7 @@
 import 'dart:async';
+
 import 'package:http/http.dart' as http;
 import 'package:khadem/khadem.dart';
-import 'package:khadem/src/core/http/server/server.dart';
-import 'package:khadem/src/contracts/env/env_interface.dart';
-import 'package:khadem/src/core/logging/logger.dart';
 import 'package:test/test.dart';
 
 class FakeEnv implements EnvInterface {
@@ -26,7 +24,9 @@ class FakeEnv implements EnvInterface {
   double getDouble(String key, {double defaultValue = 0.0}) => defaultValue;
 
   @override
-  List<String> getList(String key, {String separator = ',', List<String> defaultValue = const []}) => defaultValue;
+  List<String> getList(String key,
+          {String separator = ',', List<String> defaultValue = const [],}) =>
+      defaultValue;
 
   @override
   void set(String key, String value) {}
@@ -53,14 +53,14 @@ class FakeEnv implements EnvInterface {
 void main() {
   group('Server Middleware Groups', () {
     late Server server;
-    final int port = 8081;
+    const int port = 8081;
 
     setUp(() {
       // Register mocks
       final container = ContainerProvider.instance;
       container.instance<EnvInterface>(FakeEnv());
       container.instance<Logger>(Logger());
-      
+
       server = Server();
     });
 
@@ -93,9 +93,9 @@ void main() {
 
       // Start server in background
       unawaited(server.start(port: port));
-      
+
       // Wait for server to start
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
 
       try {
         // Request 1
@@ -123,7 +123,7 @@ void main() {
     test('getMiddlewareGroup returns the correct middlewares', () {
       final middleware = Middleware((req, res, next) async {});
       server.middlewareGroup('test', [middleware]);
-      
+
       final group = server.getMiddlewareGroup('test');
       expect(group, hasLength(1));
       expect(group.first, equals(middleware));

@@ -15,7 +15,7 @@ class ServiceProviderBootloader {
   /// Boots a single provider.
   Future<void> bootProvider(ServiceProvider provider) async {
     if (_bootedProviders.contains(provider)) return;
-    
+
     await provider.boot(_container);
     _bootedProviders.add(provider);
   }

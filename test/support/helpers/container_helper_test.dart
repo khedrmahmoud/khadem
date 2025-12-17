@@ -1,5 +1,4 @@
 import 'package:khadem/khadem.dart';
-import 'package:khadem/src/support/helpers/container_helper.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -17,7 +16,7 @@ void main() {
     test('app<T>() resolves service', () {
       final container = app();
       container.instance<String>('test_service');
-      
+
       final result = app<String>();
       expect(result, equals('test_service'));
     });
@@ -25,7 +24,7 @@ void main() {
     test('resolve<T>() resolves service', () {
       final container = app();
       container.instance<int>(123);
-      
+
       final result = resolve<int>();
       expect(result, equals(123));
     });

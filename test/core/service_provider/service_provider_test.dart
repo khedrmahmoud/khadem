@@ -45,7 +45,7 @@ class MockContainer implements ContainerInterface {
   @override
   T resolve<T>([String? context]) {
     var binding = _bindings[T];
-    
+
     if (binding == null && _missingBindingHandler != null) {
       _missingBindingHandler!(T);
       binding = _bindings[T];
@@ -82,9 +82,9 @@ class MockContainer implements ContainerInterface {
   void setMissingBindingHandler(void Function(Type type) handler) {
     _missingBindingHandler = handler;
   }
-  
+
   @override
-  resolveType(Type type, [String? context]) { 
+  dynamic resolveType(Type type, [String? context]) {
     final binding = _bindings[type];
     if (binding is Function) {
       return binding(this);

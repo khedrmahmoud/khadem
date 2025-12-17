@@ -25,8 +25,8 @@ class MySQLConnection implements DatabaseConnection {
           ? null
           : _config['password'],
       useSSL: _config['ssl'] ?? false,
-      timeout: _config['timeout'] != null 
-          ? Duration(milliseconds: _config['timeout']) 
+      timeout: _config['timeout'] != null
+          ? Duration(milliseconds: _config['timeout'])
           : const Duration(seconds: 30),
     );
 
@@ -106,18 +106,19 @@ class MySQLConnection implements DatabaseConnection {
           );
         }
       }
-      
+
       Khadem.logger.info('SQL Error: $e\nQuery: $sql\nBindings: $bindings');
       throw DatabaseException(
-        'SQL Execution Error: $e', 
+        'SQL Execution Error: $e',
         details: e,
-        sql: sql, 
+        sql: sql,
         bindings: bindings,
       );
     }
   }
 
-  Future<DatabaseResponse> _executeInternal(String sql, List<dynamic> bindings) async {
+  Future<DatabaseResponse> _executeInternal(
+      String sql, List<dynamic> bindings,) async {
     final results = await _connection!.query(sql, bindings);
 
     return DatabaseResponse(
@@ -129,11 +130,11 @@ class MySQLConnection implements DatabaseConnection {
 
   bool _isConnectionError(dynamic e) {
     final msg = e.toString().toLowerCase();
-    return msg.contains('socket') || 
-           msg.contains('closed') || 
-           msg.contains('broken pipe') || 
-           msg.contains('connection') ||
-           msg.contains('server has gone away');
+    return msg.contains('socket') ||
+        msg.contains('closed') ||
+        msg.contains('broken pipe') ||
+        msg.contains('connection') ||
+        msg.contains('server has gone away');
   }
 
   @override

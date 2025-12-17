@@ -1,7 +1,6 @@
 import '../../../application/khadem.dart';
 import '../../../contracts/database/query_builder_interface.dart';
 import '../../../support/helpers/date_helper.dart';
-import '../orm/model_events.dart';
 import '../orm/relation_definition.dart';
 
 /// Base model that all application models should extend.
@@ -156,6 +155,4 @@ abstract class BaseModel<T> {
   Future<void> fireEvent(String Function(String) eventNameBuilder) async {
     await Khadem.eventBus.emit(eventNameBuilder(modelName.toLowerCase()), this);
   }
-
-
 }

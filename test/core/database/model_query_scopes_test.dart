@@ -1,10 +1,11 @@
-import 'package:khadem/src/contracts/database/query_builder_interface.dart';
-import 'package:khadem/src/core/database/model_base/khadem_model.dart';
-import 'package:khadem/src/core/database/orm/traits/query_scopes.dart';
 import 'package:khadem/src/application/khadem.dart';
+import 'package:khadem/src/contracts/database/query_builder_interface.dart';
 import 'package:khadem/src/core/container/service_container.dart';
 import 'package:khadem/src/core/database/database.dart';
+import 'package:khadem/src/core/database/model_base/khadem_model.dart';
+import 'package:khadem/src/core/database/orm/traits/query_scopes.dart';
 import 'package:test/test.dart';
+
 import '../../mocks/database_mocks.dart';
 
 // Test model with query scopes

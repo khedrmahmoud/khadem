@@ -46,7 +46,7 @@ abstract class AppException implements Exception {
         if (instance != null) 'instance': instance,
         if (details != null) 'extensions': details,
       };
-  
+
   @override
   String toString() => '$title: $message (Status: $statusCode)';
 }

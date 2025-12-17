@@ -2,8 +2,8 @@ import 'package:khadem/src/contracts/database/database_connection.dart';
 import 'package:khadem/src/contracts/database/database_response.dart';
 import 'package:khadem/src/contracts/database/query_builder_interface.dart';
 import 'package:khadem/src/contracts/database/schema_builder.dart';
-import 'package:khadem/src/core/database/query/query_builder.dart';
 import 'package:khadem/src/core/database/query/grammars/mysql_grammar.dart';
+import 'package:khadem/src/core/database/query/query_builder.dart';
 import 'package:test/test.dart';
 
 // Simple mock connection for testing SQL generation only
@@ -42,7 +42,8 @@ class _MockConnection implements DatabaseConnection {
     String table, {
     T Function(Map<String, dynamic>)? modelFactory,
   }) {
-    return QueryBuilder<T>(this, MySQLGrammar(), table, modelFactory: modelFactory);
+    return QueryBuilder<T>(this, MySQLGrammar(), table,
+        modelFactory: modelFactory,);
   }
 
   @override
@@ -689,7 +690,8 @@ void main() {
       final sql = queryBuilder.toSql();
 
       // Verify SQL structure
-      expect(sql, startsWith('SELECT DISTINCT `id`, `name`, `email`, `created_at`'));
+      expect(sql,
+          startsWith('SELECT DISTINCT `id`, `name`, `email`, `created_at`'),);
       expect(sql, contains('FROM `users`'));
       expect(sql, contains('WHERE'));
       expect(sql, contains('ORDER BY `created_at` DESC'));

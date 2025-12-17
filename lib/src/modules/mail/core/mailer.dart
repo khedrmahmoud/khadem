@@ -164,17 +164,18 @@ class Mailer implements MailerInterface {
     try {
       _message.validate();
       final result = await _transport.send(_message.copy());
-      
+
       // Reset message for next use
       _message.reset();
       // Restore default from address if configured
       if (_defaultFrom != null) {
         _message.setFrom(_defaultFrom!.email, _defaultFrom!.name);
       }
-      
+
       return result;
     } catch (e, stack) {
-      throw MailException('Failed to send email', originalError: e, stackTrace: stack);
+      throw MailException('Failed to send email',
+          originalError: e, stackTrace: stack,);
     }
   }
 

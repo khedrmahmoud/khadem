@@ -1,7 +1,8 @@
+import 'dart:io';
+
 import 'package:khadem/src/core/config/config_system.dart';
 import 'package:khadem/src/core/config/env_system.dart';
 import 'package:test/test.dart';
-import 'dart:io';
 
 void main() {
   group('ConfigSystem Enhancements', () {
@@ -10,8 +11,9 @@ void main() {
 
     setUp(() {
       tempDir = Directory.systemTemp.createTempSync('config_test_');
-      File('${tempDir.path}/app.json').writeAsStringSync('{"name": "TestApp", "debug": true}');
-      
+      File('${tempDir.path}/app.json')
+          .writeAsStringSync('{"name": "TestApp", "debug": true}');
+
       config = ConfigSystem(
         configPath: tempDir.path,
         environment: 'testing',
@@ -47,7 +49,7 @@ void main() {
     test('push/pop should work with nested keys', () {
       config.push('app.nested.key', 'value');
       expect(config.get<String>('app.nested.key'), equals('value'));
-      
+
       config.pop('app.nested.key');
       expect(config.get('app.nested.key'), isNull);
     });

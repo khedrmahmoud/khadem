@@ -15,23 +15,21 @@ class TestUser extends KhademModel<TestUser> {
   List<String> get fillable => ['first_name', 'last_name', 'post_count'];
 
   @override
-  List<String> get appends => ['full_name', 'greeting', 'post_summary'];
-
-  @override
-  Map<String, dynamic> get computed => {
+  Map<String, dynamic> get appends => {
         // Synchronous computed property
-        'full_name': () => '$firstName $lastName',
+        'full_name': () =>
+            '${getAttribute('first_name')} ${getAttribute('last_name')}',
 
         // Async computed property with Future
         'greeting': () async {
           await Future.delayed(const Duration(milliseconds: 10));
-          return 'Hello, $firstName!';
+          return 'Hello, ${getAttribute('first_name')}!';
         },
 
         // Async computed property using relations
         'post_summary': () async {
           // Only try to load if not already loaded
-          if (!isRelationLoaded('posts')) {
+          if (!relationLoaded('posts')) {
             return 'No posts loaded';
           }
           final posts = getRelation('posts') as List<TestPost>? ?? [];
@@ -40,8 +38,9 @@ class TestUser extends KhademModel<TestUser> {
 
         // Mixed - can return sync or async based on condition
         'dynamic_value': () {
-          if (postCount != null && postCount! > 0) {
-            return postCount; // Sync
+          final count = getAttribute('post_count');
+          if (count != null && count > 0) {
+            return count; // Sync
           }
           // Async
           return Future.delayed(
@@ -148,40 +147,39 @@ class TestPost extends KhademModel<TestPost> {
 
 void main() {
   group('Async Computed Properties', () {
-    test('synchronous computed property works with getComputedAttribute', () {
+    test('synchronous computed property works with getAttribute', () {
       final user = TestUser()
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
-      final fullName = user.getComputedAttribute('full_name');
+      final fullName = user.getAttribute('full_name');
 
       expect(fullName, equals('John Doe'));
     });
 
-    test('async computed property returns null with getComputedAttribute', () {
+    test('async computed property returns Future with getAttribute', () {
       final user = TestUser()
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
-      // Sync getter returns null for async properties
-      final greeting = user.getComputedAttribute('greeting');
+      // Sync getter returns Future for async properties
+      final greeting = user.getAttribute('greeting');
 
-      expect(greeting, isNull);
+      expect(greeting, isA<Future>());
     });
 
-    test('async computed property resolves with getComputedAttributeAsync',
-        () async {
+    test('async computed property resolves with await getAttribute', () async {
       final user = TestUser()
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
-      final greeting = await user.getComputedAttributeAsync('greeting');
+      final greeting = await user.getAttribute('greeting');
 
       expect(greeting, equals('Hello, John!'));
     });
 
-    test('getComputedAttributeAsync works with sync properties too', () async {
+    test('await getAttribute works with sync properties too', () async {
       final user = TestUser()
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
-      final fullName = await user.getComputedAttributeAsync('full_name');
+      final fullName = await user.getAttribute('full_name');
 
       expect(fullName, equals('John Doe'));
     });
@@ -195,25 +193,26 @@ void main() {
         TestPost()..fromJson({'id': 1, 'user_id': 1, 'title': 'Post 1'}),
         TestPost()..fromJson({'id': 2, 'user_id': 1, 'title': 'Post 2'}),
       ];
-      user.relation.set('posts', posts);
+      user.setRelation('posts', posts);
 
-      final summary = await user.getComputedAttributeAsync('post_summary');
+      final summary = await user.getAttribute('post_summary');
 
       expect(summary, equals('2 posts'));
     });
 
-    test('toJson uses sync version and returns null for async properties', () {
+    test('toJson uses sync version and returns Future for async properties',
+        () {
       final user = TestUser()
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
       // Set empty relation to avoid database call
-      user.relation.set('posts', <TestPost>[]);
+      user.setRelation('posts', <TestPost>[]);
 
       final json = user.toJson();
 
       expect(json['full_name'], equals('John Doe')); // Sync works
-      expect(json['greeting'], isNull); // Async returns null
-      expect(json['post_summary'], isNull); // Async returns null
+      expect(json['greeting'], isA<Future>()); // Async returns Future
+      expect(json['post_summary'], isA<Future>()); // Async returns Future
     });
 
     test('toJsonAsync properly resolves all async computed properties',
@@ -222,7 +221,7 @@ void main() {
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
       // Manually set relation
-      user.relation.set('posts', <TestPost>[]);
+      user.setRelation('posts', <TestPost>[]);
 
       final json = await user.toJsonAsync();
 
@@ -240,7 +239,7 @@ void main() {
         TestPost()..fromJson({'id': 2, 'user_id': 1, 'title': 'Post 2'}),
         TestPost()..fromJson({'id': 3, 'user_id': 1, 'title': 'Post 3'}),
       ];
-      user.relation.set('posts', posts);
+      user.setRelation('posts', posts);
 
       final json = await user.toJsonAsync();
 
@@ -256,7 +255,7 @@ void main() {
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
       // Non-existent computed property
-      final result = await user.getComputedAttributeAsync('non_existent');
+      final result = await user.getAttribute('non_existent');
 
       expect(result, isNull);
     });
@@ -269,11 +268,11 @@ void main() {
         ..fromJson({'id': 2, 'first_name': 'Jane', 'post_count': null});
 
       // User1 has post_count, should return sync
-      final value1 = await user1.getComputedAttributeAsync('dynamic_value');
+      final value1 = await user1.getAttribute('dynamic_value');
       expect(value1, equals(5));
 
       // User2 has no post_count, should return async (0 after delay)
-      final value2 = await user2.getComputedAttributeAsync('dynamic_value');
+      final value2 = await user2.getAttribute('dynamic_value');
       expect(value2, equals(0));
     });
 
@@ -281,12 +280,12 @@ void main() {
       final user = TestUser()
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
-      user.relation.set('posts', <TestPost>[]);
+      user.setRelation('posts', <TestPost>[]);
 
-      // Regular toJson() returns nulls for async
+      // Regular toJson() returns Futures for async
       final syncJson = user.toJson();
-      expect(syncJson['greeting'], isNull);
-      expect(syncJson['post_summary'], isNull);
+      expect(syncJson['greeting'], isA<Future>());
+      expect(syncJson['post_summary'], isA<Future>());
 
       // toJsonAsync() resolves them
       final asyncJson = await user.toJsonAsync();
@@ -299,7 +298,7 @@ void main() {
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
       // This should work even with non-function values
-      final result = await user.getComputedAttributeAsync('full_name');
+      final result = await user.getAttribute('full_name');
       expect(result, equals('John Doe'));
     });
   });
@@ -330,10 +329,10 @@ void main() {
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
       // Set empty relation to avoid database call
-      user.relation.set('posts', <TestPost>[]);
+      user.setRelation('posts', <TestPost>[]);
 
       // Old way still works
-      final fullName = user.getComputedAttribute('full_name');
+      final fullName = user.getAttribute('full_name');
       expect(fullName, equals('John Doe'));
 
       // JSON serialization still works

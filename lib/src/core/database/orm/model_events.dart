@@ -7,7 +7,8 @@ abstract class ModelLifecycleEvent<T> extends Event {
 }
 
 /// Event fired before a model is created.
-class ModelCreating<T> extends ModelLifecycleEvent<T> implements StoppableEvent {
+class ModelCreating<T> extends ModelLifecycleEvent<T>
+    implements StoppableEvent {
   ModelCreating(super.model);
 
   bool _isPropagationStopped = false;
@@ -27,7 +28,8 @@ class ModelCreated<T> extends ModelLifecycleEvent<T> {
 }
 
 /// Event fired before a model is updated.
-class ModelUpdating<T> extends ModelLifecycleEvent<T> implements StoppableEvent {
+class ModelUpdating<T> extends ModelLifecycleEvent<T>
+    implements StoppableEvent {
   ModelUpdating(super.model);
 
   bool _isPropagationStopped = false;
@@ -47,7 +49,8 @@ class ModelUpdated<T> extends ModelLifecycleEvent<T> {
 }
 
 /// Event fired before a model is deleted.
-class ModelDeleting<T> extends ModelLifecycleEvent<T> implements StoppableEvent {
+class ModelDeleting<T> extends ModelLifecycleEvent<T>
+    implements StoppableEvent {
   ModelDeleting(super.model);
 
   bool _isPropagationStopped = false;
@@ -67,7 +70,8 @@ class ModelDeleted<T> extends ModelLifecycleEvent<T> {
 }
 
 /// Event fired before a model is restored.
-class ModelRestoring<T> extends ModelLifecycleEvent<T> implements StoppableEvent {
+class ModelRestoring<T> extends ModelLifecycleEvent<T>
+    implements StoppableEvent {
   ModelRestoring(super.model);
 
   bool _isPropagationStopped = false;
@@ -87,7 +91,8 @@ class ModelRestored<T> extends ModelLifecycleEvent<T> {
 }
 
 /// Event fired before a model is force deleted.
-class ModelForceDeleting<T> extends ModelLifecycleEvent<T> implements StoppableEvent {
+class ModelForceDeleting<T> extends ModelLifecycleEvent<T>
+    implements StoppableEvent {
   ModelForceDeleting(super.model);
 
   bool _isPropagationStopped = false;
@@ -110,4 +115,3 @@ class ModelForceDeleted<T> extends ModelLifecycleEvent<T> {
 class ModelRetrieved<T> extends ModelLifecycleEvent<T> {
   ModelRetrieved(super.model);
 }
-

@@ -48,8 +48,7 @@ void main() {
       });
 
       test('should throw validation exception for invalid body', () async {
-        fakeBodyParser =
-            FakeBodyParser({'name': '', 'email': 'invalid-email'});
+        fakeBodyParser = FakeBodyParser({'name': '', 'email': 'invalid-email'});
         validator = RequestValidator(fakeBodyParser as dynamic);
 
         final rules = {'name': 'required', 'email': 'required|email'};

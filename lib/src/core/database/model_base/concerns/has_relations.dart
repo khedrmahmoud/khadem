@@ -2,17 +2,30 @@ import '../../../../contracts/database/query_builder_interface.dart';
 import '../../orm/eager_loader.dart';
 import '../../orm/relation_definition.dart';
 import '../../orm/relation_type.dart';
+import '../../orm/relations/relation.dart';
 import '../khadem_model.dart';
 
-mixin HasRelations<T> on KhademModel<T> {
+mixin HasRelations<T> {
   /// The loaded relationships for the model.
   final Map<String, dynamic> _relations = {};
+
+  /// Get a relation instance.
+  Relation<dynamic, dynamic> relation(String name) {
+    if (!definedRelations.containsKey(name)) {
+      throw Exception('Relation $name not defined');
+    }
+    return definedRelations[name]!.toRelation(this as KhademModel, name);
+  }
 
   /// The relationships that should be eager loaded on every query.
   List<dynamic> get withRelations => [];
 
   /// The relationship counts that should be eager loaded on every query.
   List<String> get withCount => [];
+
+  /// The defined relationships for the model.
+  /// Override this to define relations.
+  Map<String, RelationDefinition> get definedRelations => {};
 
   /// Get all the loaded relations.
   Map<String, dynamic> get relations => _relations;
@@ -38,7 +51,8 @@ mixin HasRelations<T> on KhademModel<T> {
 
   /// Load the given relations if they are not already loaded.
   Future<T> loadMissing(List<String> relations) async {
-    final relationsToLoad = relations.where((name) => !relationLoaded(name)).toList();
+    final relationsToLoad =
+        relations.where((name) => !relationLoaded(name)).toList();
     if (relationsToLoad.isNotEmpty) {
       await load(relationsToLoad);
     }
@@ -118,6 +132,44 @@ mixin HasRelations<T> on KhademModel<T> {
       pivotTable: pivotTable,
       foreignPivotKey: foreignPivotKey,
       relatedPivotKey: relatedPivotKey,
+      query: query,
+    );
+  }
+
+  RelationDefinition morphOne<R extends KhademModel<R>>({
+    required String morphName,
+    required String relatedTable,
+    required R Function() factory,
+    String localKey = 'id',
+    Function(QueryBuilderInterface)? query,
+  }) {
+    return RelationDefinition<R>(
+      type: RelationType.morphOne,
+      localKey: localKey,
+      foreignKey: '${morphName}_id',
+      relatedTable: relatedTable,
+      factory: factory,
+      morphIdField: '${morphName}_id',
+      morphTypeField: '${morphName}_type',
+      query: query,
+    );
+  }
+
+  RelationDefinition morphMany<R extends KhademModel<R>>({
+    required String morphName,
+    required String relatedTable,
+    required R Function() factory,
+    String localKey = 'id',
+    Function(QueryBuilderInterface)? query,
+  }) {
+    return RelationDefinition<R>(
+      type: RelationType.morphMany,
+      localKey: localKey,
+      foreignKey: '${morphName}_id',
+      relatedTable: relatedTable,
+      factory: factory,
+      morphIdField: '${morphName}_id',
+      morphTypeField: '${morphName}_type',
       query: query,
     );
   }

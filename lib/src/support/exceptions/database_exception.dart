@@ -6,12 +6,11 @@ class DatabaseException extends AppException {
   final List<dynamic>? bindings;
 
   DatabaseException(
-    String message, {
+    super.message, {
     dynamic details,
     this.sql,
     this.bindings,
   }) : super(
-          message,
           statusCode: 500,
           title: 'Database Error',
           type: 'database_error',

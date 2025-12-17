@@ -23,11 +23,16 @@ abstract class QueryBuilderInterface<T> {
   /// Ensures the type is either Map&lt;String, dynamic&gt; or a BaseModel subclass.
   void _validateGenericType() {
     if (!(T is Map || T is Map<String, dynamic> || T is KhademModel)) {
-      throw UnsupportedError(
-        'QueryBuilderInterface only supports Map<String, dynamic> or KhademModel subclasses',
-      );
+      // throw UnsupportedError(
+      //   'QueryBuilderInterface only supports Map<String, dynamic> or KhademModel subclasses',
+      // );
     }
   }
+
+  String get table;
+  List<dynamic> get bindings;
+  List<dynamic> get columns;
+  QueryBuilderInterface<T> selectRaw(String sql, [List bindings = const []]);
   // ---------------------------- Basic Clauses ----------------------------
 
   /// Selects specific columns (defaults to *).
@@ -40,6 +45,7 @@ abstract class QueryBuilderInterface<T> {
   QueryBuilderInterface<T> whereRaw(
     String sql, [
     List<dynamic> bindings = const [],
+    String boolean = 'AND',
   ]);
 
   /// Adds an OR WHERE clause.
@@ -509,6 +515,12 @@ abstract class QueryBuilderInterface<T> {
   /// Returns the first row only.
   Future<T?> first();
 
+  /// Find a record by its primary key.
+  Future<T?> find(dynamic id, [String column = 'id']);
+
+  /// Find a record by its primary key or throw an exception.
+  Future<T> findOrFail(dynamic id, [String column = 'id']);
+
   /// Returns a stream of results for memory-efficient processing.
   Stream<T> asStream();
 
@@ -668,7 +680,6 @@ abstract class QueryBuilderInterface<T> {
   /// print(users.first.postsViewsMin); // 10
   /// ```
   QueryBuilderInterface<T> withMin(String relation, String column);
-
 
   /// Clones the current query builder instance.
   QueryBuilderInterface<T> clone();

@@ -128,7 +128,8 @@ class BodyParser {
         if (disposition['filename'] != null) {
           final filename = disposition['filename']!;
           final uniqueId = DateTime.now().microsecondsSinceEpoch;
-          final tempFile = File('${Directory.systemTemp.path}/khadem_upload_${uniqueId}_$filename');
+          final tempFile = File(
+              '${Directory.systemTemp.path}/khadem_upload_${uniqueId}_$filename',);
           final sink = tempFile.openWrite();
 
           int totalBytes = 0;

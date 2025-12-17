@@ -29,18 +29,6 @@ class UserObserver extends ModelObserver<User> {
       // In production: user.uuid = Uuid().v4();
       print('   → Generated UUID for user');
     }
-
-    // Set default status
-    if (user.name == null || user.name!.isEmpty) {
-      user.name = 'New User';
-      print('   → Set default name');
-    }
-
-    // Normalize email
-    if (user.email != null) {
-      user.email = user.email!.toLowerCase().trim();
-      print('   → Normalized email: ${user.email}');
-    }
   }
 
   /// Called after a new user has been inserted into the database.
@@ -134,11 +122,6 @@ class UserObserver extends ModelObserver<User> {
   @override
   void saving(User user) {
     print('💾 [Observer] Saving user...');
-
-    // Normalize data
-    if (user.email != null) {
-      user.email = user.email!.toLowerCase().trim();
-    }
 
     // Validate (in production, throw exception if invalid)
     if (user.email == null || !user.email!.contains('@')) {

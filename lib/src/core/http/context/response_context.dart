@@ -106,5 +106,4 @@ class ResponseContext {
 
   /// Check if the response has been sent
   static bool get isSent => response.sent;
-
 }

@@ -1,5 +1,5 @@
 import 'package:khadem/khadem.dart';
- import '../jobs/send_user_notification_job.dart';
+import '../jobs/send_user_notification_job.dart';
 import '../models/user.dart';
 
 class UserEventsHandler implements Subscriber {

@@ -64,12 +64,12 @@ class Logger implements LoggerContract {
 
     // Clear existing handlers and add new ones
     _channelManager.clearAll();
-    
+
     final channels = loggingConfig.channels;
     for (final entry in channels.entries) {
       final channelName = entry.key;
       final handlers = entry.value;
-      
+
       for (final handler in handlers) {
         _channelManager.addHandler(handler, channel: channelName);
       }

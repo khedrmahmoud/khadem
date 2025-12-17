@@ -23,7 +23,7 @@ class ServerContext {
 
   final Request request;
   final Response? response;
-  
+
   RouteMatchResult? _matchedRoute;
 
   /// Timestamp when the request started processing

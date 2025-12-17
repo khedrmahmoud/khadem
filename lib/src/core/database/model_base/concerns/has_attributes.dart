@@ -1,17 +1,39 @@
-import '../../../../contracts/database/query_builder_interface.dart';
-import '../../orm/casting/attribute_caster.dart';
-import '../../support/helpers/date_helper.dart';
-import '../khadem_model.dart';
+import 'dart:convert';
+import 'package:mysql1/mysql1.dart';
 
-mixin HasAttributes<T> on KhademModel<T> {
+import '../../orm/casting/attribute_caster.dart';
+import 'has_relations.dart';
+
+mixin HasAttributes<T> {
   /// The model's attributes.
   final Map<String, dynamic> _attributes = {};
 
   /// The model's original attributes.
   final Map<String, dynamic> _original = {};
 
-  /// The attributes that have been changed.
-  final Map<String, dynamic> _changes = {};
+  /// Cache for computed properties.
+  final Map<String, dynamic> _computedCache = {};
+
+  final Set<String> _runtimeHidden = {};
+  final Set<String> _runtimeVisible = {};
+  final Set<String> _runtimeAppends = {};
+
+  /// Make attributes hidden.
+  void makeHidden(List<String> attributes) {
+    _runtimeHidden.addAll(attributes);
+    _runtimeVisible.removeAll(attributes);
+  }
+
+  /// Make attributes visible.
+  void makeVisible(List<String> attributes) {
+    _runtimeVisible.addAll(attributes);
+    _runtimeHidden.removeAll(attributes);
+  }
+
+  /// Append attributes.
+  void append(List<String> attributes) {
+    _runtimeAppends.addAll(attributes);
+  }
 
   /// The attributes that should be cast to native types.
   Map<String, dynamic> get casts => {};
@@ -29,7 +51,7 @@ mixin HasAttributes<T> on KhademModel<T> {
   List<String> get visible => [];
 
   /// The accessors to append to the model's array form.
-  List<String> get appends => [];
+  Map<String, dynamic> get appends => {};
 
   /// Get all of the current attributes on the model.
   Map<String, dynamic> get attributes => _attributes;
@@ -43,10 +65,19 @@ mixin HasAttributes<T> on KhademModel<T> {
       return _getAttributeValue(key, _attributes[key]);
     }
 
-    // Check for accessor (e.g., getFirstNameAttribute)
-    // Dart doesn't support dynamic method dispatch by name easily without reflection.
-    // We'll rely on the `computed` map or explicit getters in the concrete class.
-    
+    if (appends.containsKey(key)) {
+      if (_computedCache.containsKey(key)) {
+        return _computedCache[key];
+      }
+      final value = appends[key];
+      if (value is Function) {
+        final result = value();
+        _computedCache[key] = result;
+        return result;
+      }
+      return value;
+    }
+
     return null;
   }
 
@@ -55,14 +86,14 @@ mixin HasAttributes<T> on KhademModel<T> {
     if (hasCast(key)) {
       return castAttribute(key, value);
     }
+    if (value is Blob) {
+      return value.toString();
+    }
     return value;
   }
 
   /// Set a given attribute on the model.
   void setAttribute(String key, dynamic value) {
-    // Check for mutator (e.g., setFirstNameAttribute) - skipped for now due to reflection limits
-    
-    // Handle casting for setting
     if (hasCast(key)) {
       final caster = casts[key];
       if (caster is AttributeCaster) {
@@ -71,7 +102,50 @@ mixin HasAttributes<T> on KhademModel<T> {
     }
 
     _attributes[key] = value;
+    _computedCache.clear();
   }
+
+  /// Get a raw attribute without casting.
+  dynamic getRawAttribute(String key, [dynamic defaultValue]) {
+    return _attributes[key] ?? defaultValue;
+  }
+
+  /// Set a raw attribute without casting.
+  void setRawAttribute(String key, dynamic value) {
+    _attributes[key] = value;
+  }
+
+  /// Get an original attribute value.
+  dynamic getOriginal(String key, [dynamic defaultValue]) {
+    return _original[key] ?? defaultValue;
+  }
+
+  /// Check if the model or specific attribute is dirty.
+  bool isDirty([dynamic attributes]) {
+    final dirty = getDirty();
+    if (attributes == null) return dirty.isNotEmpty;
+
+    if (attributes is String) {
+      return dirty.containsKey(attributes);
+    }
+
+    if (attributes is List<String>) {
+      for (final key in attributes) {
+        if (dirty.containsKey(key)) return true;
+      }
+    }
+
+    return false;
+  }
+
+  /// Check if the model or specific attribute is clean.
+  bool isClean([dynamic attributes]) => !isDirty(attributes);
+
+  /// Check if the model has a specific attribute.
+  bool hasAttribute(String key) => _attributes.containsKey(key);
+
+  /// Check if the model has a specific original attribute.
+  bool hasOriginal(String key) => _original.containsKey(key);
 
   /// Determine if an attribute has a cast.
   bool hasCast(String key) => casts.containsKey(key);
@@ -101,10 +175,38 @@ mixin HasAttributes<T> on KhademModel<T> {
         if (value is DateTime) return value;
         return DateTime.tryParse(value.toString());
       case const (List<String>):
+        if (value is List) return value.map((e) => e.toString()).toList();
+        if (value is String) {
+          try {
+            return (jsonDecode(value) as List)
+                .map((e) => e.toString())
+                .toList();
+          } catch (_) {
+            return <String>[];
+          }
+        }
+        return <String>[];
       case const (List<dynamic>):
+        if (value is List) return value;
+        if (value is String) {
+          try {
+            return jsonDecode(value) as List;
+          } catch (_) {
+            return [];
+          }
+        }
+        return [];
       case const (Map<String, dynamic>):
-        // JSON casting would go here if not using AttributeCaster
-        return value;
+      case Map:
+        if (value is Map) return value;
+        if (value is String) {
+          try {
+            return jsonDecode(value) as Map<String, dynamic>;
+          } catch (_) {
+            return {};
+          }
+        }
+        return {};
       default:
         return value;
     }
@@ -155,28 +257,64 @@ mixin HasAttributes<T> on KhademModel<T> {
     return guarded.isEmpty || !guarded.contains(key);
   }
 
+  /// Get a subset of attributes.
+  Map<String, dynamic> only(List<String> keys) {
+    final result = <String, dynamic>{};
+    for (final key in keys) {
+      result[key] = getAttribute(key);
+    }
+    return result;
+  }
+
+  /// Get all attributes except the given keys.
+  Map<String, dynamic> except(List<String> keys) {
+    final result = <String, dynamic>{};
+    final all = toMap();
+    for (final key in all.keys) {
+      if (!keys.contains(key)) {
+        result[key] = all[key];
+      }
+    }
+    return result;
+  }
+
+  /// Merge new attributes into the model.
+  void mergeAttributes(Map<String, dynamic> attributes) {
+    for (final key in attributes.keys) {
+      setAttribute(key, attributes[key]);
+    }
+  }
+
+  /// Determine if the given attribute is hidden.
+  bool _isHidden(String key) {
+    if (_runtimeVisible.contains(key)) return false;
+    if (_runtimeHidden.contains(key)) return true;
+    if (visible.isNotEmpty) return !visible.contains(key);
+    return hidden.contains(key);
+  }
+
   /// Convert the model instance to a map.
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{};
-    
+
     // Add attributes
     for (final key in _attributes.keys) {
-      if (!hidden.contains(key)) {
+      if (!_isHidden(key)) {
         map[key] = getAttribute(key);
       }
     }
 
     // Add appends
-    for (final key in appends) {
+    final allAppendKeys = {...appends.keys, ..._runtimeAppends};
+    for (final key in allAppendKeys) {
       map[key] = getAttribute(key);
     }
 
     // Add relations (if loaded)
-    // This requires HasRelations mixin
     if (this is HasRelations) {
       final relations = (this as HasRelations).relations;
       for (final key in relations.keys) {
-        if ((this as HasRelations).relationLoaded(key) && !hidden.contains(key)) {
+        if ((this as HasRelations).relationLoaded(key) && !_isHidden(key)) {
           map[key] = (this as HasRelations).getRelation(key);
         }
       }
@@ -188,16 +326,28 @@ mixin HasAttributes<T> on KhademModel<T> {
   /// Convert the model instance to JSON.
   Map<String, dynamic> toJson() => toMap();
 
+  /// Convert the model instance to a map, resolving any Future values.
+  Future<Map<String, dynamic>> toMapAsync() async {
+    final map = toMap();
+
+    for (final key in map.keys) {
+      if (map[key] is Future) {
+        map[key] = await map[key];
+      }
+    }
+
+    return map;
+  }
+
+  Future<Map<String, dynamic>> toJsonAsync() => toMapAsync();
+
   /// Prepare the model for database insertion/update.
   Map<String, dynamic> toDatabaseMap() {
     final map = <String, dynamic>{};
-    
+
     for (final key in _attributes.keys) {
-      // Skip appends or computed values that aren't in the database
-      // This is a simplified check; ideally we check against schema or assume attributes set via setAttribute are columns
-      
       var value = _attributes[key];
-      
+
       // Handle casting for database
       if (hasCast(key)) {
         final caster = casts[key];
@@ -207,26 +357,29 @@ mixin HasAttributes<T> on KhademModel<T> {
           value = value.toUtc().toIso8601String();
         } else if (value is bool) {
           value = value ? 1 : 0;
+        } else if (value is Map || value is List) {
+          if (caster.toString().contains('Map') ||
+              caster.toString().contains('List') ||
+              caster == Map ||
+              caster == List) {
+            if (value != null) {
+              value = jsonEncode(value);
+            }
+          }
         }
       }
-      
+
       map[key] = value;
     }
-    
+
     return map;
   }
-  
+
   /// Initialize from database record
   void fromJson(Map<String, dynamic> json) {
     _attributes.clear();
     _attributes.addAll(json);
+    _computedCache.clear();
     syncOriginal();
   }
-}
-
-// Forward declaration for HasRelations check
-mixin HasRelations<T> on KhademModel<T> {
-  Map<String, dynamic> get relations;
-  bool relationLoaded(String key);
-  dynamic getRelation(String key);
 }

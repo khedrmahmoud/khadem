@@ -1,9 +1,4 @@
 import 'package:khadem/khadem.dart';
-import 'package:khadem/src/contracts/exceptions/app_exception.dart';
-import 'package:khadem/src/contracts/exceptions/exception_handler_contract.dart';
-import 'package:khadem/src/core/exception/exception_handler.dart';
-import 'package:khadem/src/core/http/response/response.dart';
-import 'package:khadem/src/core/logging/logger.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -25,12 +20,18 @@ void main() {
       // Register mock logger
       final container = ContainerProvider.instance;
       container.instance<Logger>(mockLogger);
-      
+
       // Mock logger methods
-      when(mockLogger.error(any, context: anyNamed('context'), stackTrace: anyNamed('stackTrace'))).thenReturn(null);
-      when(mockLogger.warning(any, context: anyNamed('context'), stackTrace: anyNamed('stackTrace'))).thenReturn(null);
-      when(mockLogger.critical(any, context: anyNamed('context'), stackTrace: anyNamed('stackTrace'))).thenReturn(null);
-      
+      when(mockLogger.error(any,
+              context: anyNamed('context'), stackTrace: anyNamed('stackTrace'),),)
+          .thenReturn(null);
+      when(mockLogger.warning(any,
+              context: anyNamed('context'), stackTrace: anyNamed('stackTrace'),),)
+          .thenReturn(null);
+      when(mockLogger.critical(any,
+              context: anyNamed('context'), stackTrace: anyNamed('stackTrace'),),)
+          .thenReturn(null);
+
       // Default behavior for mock response
       when(mockResponse.status(any)).thenReturn(mockResponse);
       when(mockResponse.header(any, any)).thenReturn(mockResponse);
@@ -43,7 +44,7 @@ void main() {
 
     test('should handle AppException with RFC 7807 JSON response', () async {
       final exception = AppExceptionTest('Test Error', statusCode: 400);
-      
+
       await handler.handle(mockResponse, exception);
 
       verify(mockResponse.status(400)).called(1);
@@ -52,14 +53,13 @@ void main() {
         title: 'Application Error',
         status: 400,
         detail: 'Test Error',
-        instance: null,
         extensions: anyNamed('extensions'),
-      )).called(1);
+      ),).called(1);
     });
 
     test('should handle generic Exception with 500 status', () async {
       final exception = Exception('Generic Error');
-      
+
       await handler.handle(mockResponse, exception);
 
       verify(mockResponse.status(500)).called(1);
@@ -69,7 +69,7 @@ void main() {
         status: 500,
         detail: anyNamed('detail'),
         extensions: anyNamed('extensions'),
-      )).called(1);
+      ),).called(1);
     });
 
     test('should use custom handler if registered', () async {
@@ -84,14 +84,13 @@ void main() {
       verifyNever(mockResponse.problem(
         title: anyNamed('title'),
         status: anyNamed('status'),
-      ));
+      ),);
     });
   });
 }
 
 class AppExceptionTest extends AppException {
-  AppExceptionTest(String message, {int statusCode = 500})
-      : super(message, statusCode: statusCode);
+  AppExceptionTest(super.message, {super.statusCode});
 }
 
 class CustomException implements Exception {}

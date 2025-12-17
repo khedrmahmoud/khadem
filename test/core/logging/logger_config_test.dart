@@ -1,5 +1,4 @@
 import 'package:khadem/khadem.dart';
-import 'package:khadem/src/core/logging/logger.dart';
 import 'package:test/test.dart';
 
 class MockConfig implements ConfigInterface {
@@ -11,7 +10,7 @@ class MockConfig implements ConfigInterface {
   T? get<T>(String key, [T? defaultValue]) {
     final parts = key.split('.');
     dynamic current = _config;
-    
+
     for (final part in parts) {
       if (current is Map<String, dynamic> && current.containsKey(part)) {
         current = current[part];
@@ -19,7 +18,7 @@ class MockConfig implements ConfigInterface {
         return defaultValue;
       }
     }
-    
+
     return current as T? ?? defaultValue;
   }
 
@@ -34,7 +33,7 @@ class MockConfig implements ConfigInterface {
   Map<String, dynamic>? section(String key) {
     return get<Map<String, dynamic>>(key);
   }
-  
+
   @override
   void set(String key, dynamic value) {}
 
@@ -46,7 +45,7 @@ class MockConfig implements ConfigInterface {
 
   @override
   bool has(String key) => get(key) != null;
-  
+
   @override
   Map<String, dynamic> all() => _config;
 
@@ -66,21 +65,17 @@ void main() {
           'channels': {
             'stack': {
               'driver': 'stack',
-              'channels': ['daily', 'console']
+              'channels': ['daily', 'console'],
             },
             'daily': {
               'driver': 'daily',
               'path': 'storage/logs/khadem.log',
               'level': 'debug',
-              'days': 14
+              'days': 14,
             },
-            'console': {
-              'driver': 'console',
-              'level': 'debug',
-              'colorize': true
-            }
-          }
-        }
+            'console': {'driver': 'console', 'level': 'debug', 'colorize': true},
+          },
+        },
       };
 
       final config = MockConfig(configMap);
@@ -98,14 +93,11 @@ void main() {
             'file': {
               'enabled': true,
               'path': 'storage/logs/app.log',
-              'level': 'info'
+              'level': 'info',
             },
-            'console': {
-              'enabled': true,
-              'level': 'debug'
-            }
-          }
-        }
+            'console': {'enabled': true, 'level': 'debug'},
+          },
+        },
       };
 
       final config = MockConfig(configMap);

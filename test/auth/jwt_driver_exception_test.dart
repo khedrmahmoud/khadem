@@ -15,7 +15,7 @@ void main() {
     late JWTDriver driver;
     late MockAuthConfig mockConfig;
     late MockTokenService mockTokenService;
-    final secret = 'test-secret-key-must-be-long-enough';
+    const secret = 'test-secret-key-must-be-long-enough';
 
     setUp(() {
       mockConfig = MockAuthConfig();
@@ -36,7 +36,8 @@ void main() {
       );
     });
 
-    test('verifyToken throws AuthException(401) when token is expired', () async {
+    test('verifyToken throws AuthException(401) when token is expired',
+        () async {
       // Create an expired token
       final jwt = JWT(
         {'sub': 1},
@@ -45,7 +46,7 @@ void main() {
       // Sign with past expiration
       final token = jwt.sign(
         SecretKey(secret),
-        expiresIn: Duration(seconds: -1),
+        expiresIn: const Duration(seconds: -1),
       );
 
       when(mockTokenService.isTokenBlacklisted(any))
@@ -53,19 +54,22 @@ void main() {
 
       expect(
         () => driver.verifyToken(token),
-        throwsA(isA<AuthException>().having(
-          (e) => e.statusCode,
-          'statusCode',
-          401,
-        ).having(
-          (e) => e.message,
-          'message',
-          contains('expired'),
-        )),
+        throwsA(isA<AuthException>()
+            .having(
+              (e) => e.statusCode,
+              'statusCode',
+              401,
+            )
+            .having(
+              (e) => e.message,
+              'message',
+              contains('expired'),
+            ),),
       );
     });
 
-    test('verifyToken throws AuthException(401) when signature is invalid', () async {
+    test('verifyToken throws AuthException(401) when signature is invalid',
+        () async {
       // Create a token signed with different secret
       final jwt = JWT({'sub': 1});
       final token = jwt.sign(SecretKey('wrong-secret'));
@@ -75,19 +79,22 @@ void main() {
 
       expect(
         () => driver.verifyToken(token),
-        throwsA(isA<AuthException>().having(
-          (e) => e.statusCode,
-          'statusCode',
-          401,
-        ).having(
-          (e) => e.message,
-          'message',
-          contains('Invalid token'),
-        )),
+        throwsA(isA<AuthException>()
+            .having(
+              (e) => e.statusCode,
+              'statusCode',
+              401,
+            )
+            .having(
+              (e) => e.message,
+              'message',
+              contains('Invalid token'),
+            ),),
       );
     });
 
-    test('verifyToken throws AuthException(401) when token is malformed', () async {
+    test('verifyToken throws AuthException(401) when token is malformed',
+        () async {
       when(mockTokenService.isTokenBlacklisted(any))
           .thenAnswer((_) async => false);
 
@@ -97,7 +104,7 @@ void main() {
           (e) => e.statusCode,
           'statusCode',
           401,
-        )),
+        ),),
       );
     });
   });

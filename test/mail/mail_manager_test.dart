@@ -1,8 +1,9 @@
+import 'dart:io';
+
 import 'package:khadem/src/contracts/config/config_contract.dart';
 import 'package:khadem/src/core/logging/logger.dart';
 import 'package:khadem/src/modules/mail/contracts/mailable.dart';
 import 'package:khadem/src/modules/mail/contracts/mailer_interface.dart';
-import 'dart:io';
 import 'package:khadem/src/modules/mail/core/mail_manager.dart';
 import 'package:khadem/src/modules/mail/drivers/array_transport.dart';
 import 'package:khadem/src/modules/mail/drivers/log_transport.dart';

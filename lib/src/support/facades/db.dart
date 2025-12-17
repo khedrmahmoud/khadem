@@ -20,27 +20,32 @@ class DB {
   }
 
   /// Executes a raw SQL query.
-  static Future<dynamic> select(String query, [List<dynamic> bindings = const []]) {
+  static Future<dynamic> select(String query,
+      [List<dynamic> bindings = const [],]) {
     return connection().execute(query, bindings);
   }
 
   /// Executes an insert statement.
-  static Future<dynamic> insert(String query, [List<dynamic> bindings = const []]) {
+  static Future<dynamic> insert(String query,
+      [List<dynamic> bindings = const [],]) {
     return connection().execute(query, bindings);
   }
 
   /// Executes an update statement.
-  static Future<dynamic> update(String query, [List<dynamic> bindings = const []]) {
+  static Future<dynamic> update(String query,
+      [List<dynamic> bindings = const [],]) {
     return connection().execute(query, bindings);
   }
 
   /// Executes a delete statement.
-  static Future<dynamic> delete(String query, [List<dynamic> bindings = const []]) {
+  static Future<dynamic> delete(String query,
+      [List<dynamic> bindings = const [],]) {
     return connection().execute(query, bindings);
   }
 
   /// Executes a general statement.
-  static Future<dynamic> statement(String query, [List<dynamic> bindings = const []]) {
+  static Future<dynamic> statement(String query,
+      [List<dynamic> bindings = const [],]) {
     return connection().execute(query, bindings);
   }
 

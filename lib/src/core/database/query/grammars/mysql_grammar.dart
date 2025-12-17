@@ -25,7 +25,7 @@ class MySQLGrammar extends Grammar {
     final columns = query['columns'] as List<dynamic>?;
     final distinct = query['distinct'] as bool? ?? false;
     final select = distinct ? 'SELECT DISTINCT' : 'SELECT';
-    
+
     if (columns == null || columns.isEmpty) {
       components.add('$select *');
     } else {
@@ -59,7 +59,7 @@ class MySQLGrammar extends Grammar {
       final groups = compileGroups(query['groups']);
       if (groups.isNotEmpty) components.add(groups);
     }
-    
+
     // Havings
     if (query['havings'] != null) {
       final havings = compileHavings(query['havings']);
@@ -109,7 +109,8 @@ class MySQLGrammar extends Grammar {
   }
 
   @override
-  String compileInsert(Map<String, dynamic> query, Map<String, dynamic> values) {
+  String compileInsert(
+      Map<String, dynamic> query, Map<String, dynamic> values,) {
     final table = wrapTable(query['table']);
     final columns = values.keys.map(wrap).join(', ');
     final placeholders = List.filled(values.length, '?').join(', ');
@@ -118,10 +119,12 @@ class MySQLGrammar extends Grammar {
   }
 
   @override
-  String compileUpdate(Map<String, dynamic> query, Map<String, dynamic> values) {
+  String compileUpdate(
+      Map<String, dynamic> query, Map<String, dynamic> values,) {
     final table = wrapTable(query['table']);
     final columns = values.keys.map((key) => '${wrap(key)} = ?').join(', ');
-    final wheres = query['wheres'] != null ? compileWheres(query['wheres']) : '';
+    final wheres =
+        query['wheres'] != null ? compileWheres(query['wheres']) : '';
 
     return 'UPDATE $table SET $columns $wheres'.trim();
   }
@@ -129,28 +132,33 @@ class MySQLGrammar extends Grammar {
   @override
   String compileDelete(Map<String, dynamic> query) {
     final table = wrapTable(query['table']);
-    final wheres = query['wheres'] != null ? compileWheres(query['wheres']) : '';
+    final wheres =
+        query['wheres'] != null ? compileWheres(query['wheres']) : '';
 
     return 'DELETE FROM $table $wheres'.trim();
   }
 
   @override
-  String compileIncrement(Map<String, dynamic> query, String column, int amount) {
+  String compileIncrement(
+      Map<String, dynamic> query, String column, int amount,) {
     final table = wrapTable(query['table']);
-    final wheres = query['wheres'] != null ? compileWheres(query['wheres']) : '';
+    final wheres =
+        query['wheres'] != null ? compileWheres(query['wheres']) : '';
     final wrappedColumn = wrap(column);
     final operator = amount >= 0 ? '+' : '-';
     final absAmount = amount.abs();
 
-    return 'UPDATE $table SET $wrappedColumn = $wrappedColumn $operator $absAmount $wheres'.trim();
+    return 'UPDATE $table SET $wrappedColumn = $wrappedColumn $operator $absAmount $wheres'
+        .trim();
   }
 
   @override
-  String compileInsertMany(Map<String, dynamic> query, List<Map<String, dynamic>> values) {
+  String compileInsertMany(
+      Map<String, dynamic> query, List<Map<String, dynamic>> values,) {
     final table = wrapTable(query['table']);
     final first = values.first;
     final columns = first.keys.map(wrap).join(', ');
-    
+
     final placeholders = values.map((row) {
       return '(${List.filled(row.length, '?').join(', ')})';
     }).join(', ');
@@ -159,34 +167,39 @@ class MySQLGrammar extends Grammar {
   }
 
   @override
-  String compileUpsert(Map<String, dynamic> query, List<Map<String, dynamic>> values, List<String> uniqueBy, [List<String>? update]) {
+  String compileUpsert(Map<String, dynamic> query,
+      List<Map<String, dynamic>> values, List<String> uniqueBy,
+      [List<String>? update,]) {
     final sql = compileInsertMany(query, values);
-    
-    final updateColumns = update ?? values.first.keys.where((k) => !uniqueBy.contains(k)).toList();
-    
+
+    final updateColumns = update ??
+        values.first.keys.where((k) => !uniqueBy.contains(k)).toList();
+
     final updates = updateColumns.map((col) {
       final wrapped = wrap(col);
       return '$wrapped = VALUES($wrapped)';
     }).join(', ');
-    
+
     return '$sql ON DUPLICATE KEY UPDATE $updates';
   }
 
   @override
-  String compileIncrementEach(Map<String, dynamic> query, Map<String, int> columns, Map<String, dynamic> extras) {
+  String compileIncrementEach(Map<String, dynamic> query,
+      Map<String, int> columns, Map<String, dynamic> extras,) {
     final table = wrapTable(query['table']);
-    final wheres = query['wheres'] != null ? compileWheres(query['wheres']) : '';
-    
+    final wheres =
+        query['wheres'] != null ? compileWheres(query['wheres']) : '';
+
     final columnUpdates = columns.entries.map((e) {
       final wrapped = wrap(e.key);
       final operator = e.value >= 0 ? '+' : '-';
       return '$wrapped = $wrapped $operator ${e.value.abs()}';
     }).toList();
-    
+
     final extraUpdates = extras.keys.map((key) {
       return '${wrap(key)} = ?';
     }).toList();
-    
+
     final allUpdates = [...columnUpdates, ...extraUpdates].join(', ');
 
     return 'UPDATE $table SET $allUpdates $wheres'.trim();

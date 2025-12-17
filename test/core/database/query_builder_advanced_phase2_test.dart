@@ -2,8 +2,8 @@ import 'package:khadem/src/contracts/database/database_connection.dart';
 import 'package:khadem/src/contracts/database/database_response.dart';
 import 'package:khadem/src/contracts/database/query_builder_interface.dart';
 import 'package:khadem/src/contracts/database/schema_builder.dart';
-import 'package:khadem/src/core/database/query/query_builder.dart';
 import 'package:khadem/src/core/database/query/grammars/mysql_grammar.dart';
+import 'package:khadem/src/core/database/query/query_builder.dart';
 import 'package:test/test.dart';
 
 // Simple mock connection for testing SQL generation
@@ -42,7 +42,8 @@ class _MockConnection implements DatabaseConnection {
     String table, {
     T Function(Map<String, dynamic>)? modelFactory,
   }) {
-    return QueryBuilder<T>(this, MySQLGrammar(), table, modelFactory: modelFactory);
+    return QueryBuilder<T>(this, MySQLGrammar(), table,
+        modelFactory: modelFactory,);
   }
 
   @override
@@ -120,7 +121,8 @@ void main() {
         final sql = queryBuilder.toSql();
         expect(
           sql,
-          contains('LEFT JOIN `profiles` ON `users`.`id` = `profiles`.`user_id`'),
+          contains(
+              'LEFT JOIN `profiles` ON `users`.`id` = `profiles`.`user_id`',),
         );
       });
 
@@ -142,7 +144,8 @@ void main() {
         final sql = queryBuilder.toSql();
         expect(
           sql,
-          contains('RIGHT JOIN `settings` ON `users`.`id` = `settings`.`user_id`'),
+          contains(
+              'RIGHT JOIN `settings` ON `users`.`id` = `settings`.`user_id`',),
         );
       });
     });
@@ -174,7 +177,8 @@ void main() {
             .orderBy('posts.created_at', direction: 'DESC');
 
         final sql = queryBuilder.toSql();
-        expect(sql, contains('SELECT `users`.*, `posts`.`title`, `profiles`.`bio`'));
+        expect(sql,
+            contains('SELECT `users`.*, `posts`.`title`, `profiles`.`bio`'),);
         expect(sql, contains('INNER JOIN `posts`'));
         expect(sql, contains('LEFT JOIN `profiles`'));
         expect(sql, contains('WHERE `posts`.`published` = ?'));

@@ -276,7 +276,8 @@ class FileCacheDriver implements CacheDriver {
   @override
   Future<int> increment(String key, [int amount = 1]) async {
     final value = await get(key);
-    final int currentValue = (value is int) ? value : int.tryParse(value.toString()) ?? 0;
+    final int currentValue =
+        (value is int) ? value : int.tryParse(value.toString()) ?? 0;
     final newValue = currentValue + amount;
     await put(key, newValue, const Duration(days: 365 * 100));
     return newValue;

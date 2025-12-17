@@ -1,7 +1,8 @@
+import 'dart:io';
+
 import 'package:khadem/src/modules/mail/contracts/mailable.dart';
 import 'package:khadem/src/modules/mail/contracts/mailer_interface.dart';
 import 'package:khadem/src/modules/mail/core/mail_message.dart';
-import 'dart:io';
 import 'package:khadem/src/modules/mail/core/mailer.dart';
 import 'package:khadem/src/modules/mail/drivers/array_transport.dart';
 import 'package:khadem/src/modules/mail/exceptions/mail_exception.dart';

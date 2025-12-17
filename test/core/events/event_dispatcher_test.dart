@@ -93,19 +93,17 @@ void main() {
   setUp(() {
     container = ServiceContainer();
     queueDriver = MockQueueDriver();
-    
+
     container.singleton<ConfigInterface>((c) => MockConfig());
-    
+
     final registry = QueueDriverRegistry();
     registry.registerDriver('mock', queueDriver);
     registry.setDefaultDriver('mock');
 
-    final queueManager = QueueManager(
-      container.resolve<ConfigInterface>(), 
-      registry: registry
-    );
+    final queueManager =
+        QueueManager(container.resolve<ConfigInterface>(), registry: registry);
     container.instance<QueueManager>(queueManager);
-    
+
     dispatcher = EventDispatcher(container);
   });
 
@@ -126,7 +124,7 @@ void main() {
   test('dispatches to listener type', () async {
     final listener = TestListener();
     container.instance<TestListener>(listener);
-    
+
     dispatcher.listen<TestEvent>(TestListener);
     await dispatcher.dispatch(TestEvent());
     expect(listener.handled, isTrue);
@@ -153,10 +151,10 @@ void main() {
   test('dispatches to queue', () async {
     final listener = QueueableTestListener();
     container.instance<QueueableTestListener>(listener);
-    
+
     dispatcher.listen<TestEvent>(QueueableTestListener);
     await dispatcher.dispatch(TestEvent());
-    
+
     expect(queueDriver.pushedJobs, hasLength(1));
     expect(queueDriver.pushedJobs.first, isA<CallQueuedListener>());
   });

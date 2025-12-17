@@ -19,10 +19,10 @@ class RequestSession {
     // HttpSession is shared. We need a flag or check if we are the first.
     // But Request is usually one per request.
     // However, if we access session, we lock it? No, Dart HttpSession is simple.
-    
+
     // We need to be careful not to rotate multiple times if RequestSession is created multiple times.
     // But Request creates it once.
-    
+
     if (_session.containsKey('_flash_new')) {
       _session['_flash_old'] = _session['_flash_new'];
     } else {
@@ -146,13 +146,13 @@ class RequestSession {
         _session[key] = value;
       }
     });
-    
+
     // Restore flash
     if (sessionData.containsKey('_flash_new')) {
-        _session['_flash_new'] = sessionData['_flash_new'];
+      _session['_flash_new'] = sessionData['_flash_new'];
     }
     if (sessionData.containsKey('_flash_old')) {
-        _session['_flash_old'] = sessionData['_flash_old'];
+      _session['_flash_old'] = sessionData['_flash_old'];
     }
 
     // Set new creation time
@@ -168,7 +168,7 @@ class RequestSession {
     touch();
     final flashOld = _session['_flash_old'];
     if (flashOld is Map) {
-        return Map<String, dynamic>.from(flashOld);
+      return Map<String, dynamic>.from(flashOld);
     }
     return {};
   }

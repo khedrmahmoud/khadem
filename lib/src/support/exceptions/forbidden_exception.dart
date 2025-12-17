@@ -6,13 +6,11 @@ import '../../contracts/exceptions/app_exception.dart';
 /// but does not have the required permissions to access a resource.
 class ForbiddenException extends AppException {
   ForbiddenException(
-    String message, {
-    dynamic details,
+    super.message, {
+    super.details,
   }) : super(
-          message,
           statusCode: 403,
           title: 'Forbidden',
           type: 'forbidden',
-          details: details,
         );
 }

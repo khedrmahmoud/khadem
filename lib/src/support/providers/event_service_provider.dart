@@ -37,7 +37,7 @@ abstract class EventServiceProvider extends ServiceProvider {
   @override
   Future<void> boot(ContainerInterface container) async {
     final dispatcher = container.resolve<Dispatcher>();
-    
+
     // Register mapped listeners
     listen.forEach((event, listeners) {
       for (final listener in listeners) {

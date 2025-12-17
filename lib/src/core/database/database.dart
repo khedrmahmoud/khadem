@@ -26,58 +26,62 @@ class DatabaseManager {
     T Function(Map<String, dynamic>)? modelFactory,
     String? connectionName,
   }) {
-    return connection(connectionName).queryBuilder<T>(tableName, modelFactory: modelFactory);
+    return connection(connectionName)
+        .queryBuilder<T>(tableName, modelFactory: modelFactory);
   }
 
   /// Gets the current connection.
   DatabaseConnection connection([String? name]) {
     name ??= _config.get('database.default', 'mysql');
-    
+
     if (!_connections.containsKey(name)) {
-        _connections[name!] = _resolveConnection(name);
+      _connections[name!] = _resolveConnection(name);
     }
-    
+
     return _connections[name]!;
   }
-  
+
   DatabaseConnection _resolveConnection(String name) {
-      var config = _config.get<Map<String, dynamic>>('database.connections.' + name);
-      
-      // Fallback for legacy single-connection config
-      if (config == null && name == _config.get('database.default', 'mysql')) {
-          config = _config.section('database');
-          if (config != null && config.containsKey('connections')) {
-              config = null;
-          }
+    var config =
+        _config.get<Map<String, dynamic>>('database.connections.' + name);
+
+    // Fallback for legacy single-connection config
+    if (config == null && name == _config.get('database.default', 'mysql')) {
+      config = _config.section('database');
+      if (config != null && config.containsKey('connections')) {
+        config = null;
       }
-      
-      if (config == null) {
-          throw DatabaseException('Database connection [' + name + '] not configured');
-      }
-      
-      final driver = config['driver'] as String?;
-      if (driver == null) {
-           throw DatabaseException('Driver not specified for connection [' + name + ']');
-      }
-      
-      switch (driver) {
-        case 'mysql':
-          return MySQLConnection(config);
-        default:
-          throw DatabaseException('Unsupported database driver: $driver');
-      }
+    }
+
+    if (config == null) {
+      throw DatabaseException(
+          'Database connection [' + name + '] not configured',);
+    }
+
+    final driver = config['driver'] as String?;
+    if (driver == null) {
+      throw DatabaseException(
+          'Driver not specified for connection [' + name + ']',);
+    }
+
+    switch (driver) {
+      case 'mysql':
+        return MySQLConnection(config);
+      default:
+        throw DatabaseException('Unsupported database driver: $driver');
+    }
   }
 
   /// Gets the current schema builder (for default connection).
   SchemaBuilder get schemaBuilder {
-      return connection().getSchemaBuilder();
+    return connection().getSchemaBuilder();
   }
 
   /// Closes all active connections.
   Future<void> close() async {
-      for (final conn in _connections.values) {
-          await conn.disconnect();
-      }
-      _connections.clear();
+    for (final conn in _connections.values) {
+      await conn.disconnect();
+    }
+    _connections.clear();
   }
 }

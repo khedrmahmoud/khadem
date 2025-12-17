@@ -18,7 +18,8 @@ class CallQueuedListener extends QueueJob {
   final String? _queue;
 
   /// Create a new queued listener job.
-  CallQueuedListener(this.listenerType, this.event, {String? queue}) : _queue = queue;
+  CallQueuedListener(this.listenerType, this.event, {String? queue})
+      : _queue = queue;
 
   @override
   String get queue => _queue ?? super.queue;

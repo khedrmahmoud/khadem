@@ -69,8 +69,7 @@ class RequestContext {
   static String? get userAgent => request.headers.get('user-agent');
 
   /// Get the Accept-Language header
-  static String? get acceptLanguage =>
-      request.headers.get('accept-language');
+  static String? get acceptLanguage => request.headers.get('accept-language');
 
   /// Get the Content-Type header
   static String? get contentType => request.headers.get('content-type');

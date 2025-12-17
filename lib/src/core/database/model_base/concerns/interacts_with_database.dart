@@ -1,10 +1,28 @@
 import '../../../../application/khadem.dart';
 import '../../../../contracts/database/query_builder_interface.dart';
-import '../khadem_model.dart';
+import '../../orm/model_lifecycle.dart';
 import 'has_attributes.dart';
 import 'has_events.dart';
 
-mixin InteractsWithDatabase<T> on KhademModel<T> {
+mixin InteractsWithDatabase<T> {
+  // Abstract requirements
+  String get table;
+  String get tableName;
+  String get primaryKey;
+  int? get id;
+  set id(int? value);
+  bool exists = false;
+
+  T newFactory(Map<String, dynamic> data);
+
+  // Helper to get key value
+  dynamic getKey() {
+    if (this is HasAttributes) {
+      return (this as HasAttributes).getAttribute(primaryKey);
+    }
+    return id;
+  }
+
   /// Get a new query builder for the model's table.
   QueryBuilderInterface<T> get query =>
       Khadem.db.table(tableName, modelFactory: (data) => newFactory(data));
@@ -22,79 +40,80 @@ mixin InteractsWithDatabase<T> on KhademModel<T> {
       }
 
       if (this is HasEvents) {
-        if (await (this as HasEvents).fireModelEvent('updating') == false) return false;
-        if (await (this as HasEvents).fireModelEvent('saving') == false) return false;
+        if (await (this as HasEvents).fireModelEvent(ModelLifecycle.updating) ==
+            false) {
+          return false;
+        }
+        if (await (this as HasEvents).fireModelEvent(ModelLifecycle.saving) ==
+            false) {
+          return false;
+        }
       }
 
       // Perform Update
       if (this is HasAttributes) {
-        final data = (this as HasAttributes).toDatabaseMap();
-        // Remove ID from update data usually, but toDatabaseMap might include it.
-        // We should only update dirty fields ideally.
-        // Let's use getDirty() logic if available.
-        
-        // Re-implementing smart update logic
         final dirty = (this as HasAttributes).getDirty();
         final updateData = <String, dynamic>{};
-        
-        // We need to process dirty data for DB (casting)
-        // This logic should probably be in HasAttributes, but we can do it here
-        for(var key in dirty.keys) {
-           // We need to access the raw value or cast it. 
-           // HasAttributes.toDatabaseMap does it for all.
-           // Let's assume we update all dirty fields.
-           // We need a way to get DB-ready value for a specific key.
-           // For now, let's just use toDatabaseMap() and filter by dirty keys.
-           final dbMap = (this as HasAttributes).toDatabaseMap();
-           if (dbMap.containsKey(key)) {
-             updateData[key] = dbMap[key];
-           }
+
+        final dbMap = (this as HasAttributes).toDatabaseMap();
+        for (var key in dirty.keys) {
+          if (dbMap.containsKey(key)) {
+            updateData[key] = dbMap[key];
+          }
         }
-        
+
         if (updateData.isNotEmpty) {
-           await query.where(primaryKey, '=', getKey()).update(updateData);
+          await query.where(primaryKey, '=', getKey()).update(updateData);
         }
       }
 
       if (this is HasEvents) {
-        await (this as HasEvents).fireModelEvent('updated', halt: false);
-        await (this as HasEvents).fireModelEvent('saved', halt: false);
+        await (this as HasEvents)
+            .fireModelEvent(ModelLifecycle.updated, halt: false);
+        await (this as HasEvents)
+            .fireModelEvent(ModelLifecycle.saved, halt: false);
       }
-      
+
       if (this is HasAttributes) {
         (this as HasAttributes).syncOriginal();
       }
-    } 
+    }
     // If the model is new
     else {
       if (this is HasEvents) {
-        if (await (this as HasEvents).fireModelEvent('creating') == false) return false;
-        if (await (this as HasEvents).fireModelEvent('saving') == false) return false;
+        if (await (this as HasEvents).fireModelEvent(ModelLifecycle.creating) ==
+            false) {
+          return false;
+        }
+        if (await (this as HasEvents).fireModelEvent(ModelLifecycle.saving) ==
+            false) {
+          return false;
+        }
       }
 
       // Perform Insert
       if (this is HasAttributes) {
         final data = (this as HasAttributes).toDatabaseMap();
-        final id = await query.insert(data);
-        
+        final insertId = await query.insert(data);
+
         // Set ID
         if (primaryKey == 'id') {
-           // We need a way to set ID. KhademModel has id field?
-           // KhademModel has int? id.
-           (this as KhademModel).id = id;
-           (this as HasAttributes).setAttribute('id', id);
+          this.id = insertId;
+          (this as HasAttributes).setAttribute('id', insertId);
         }
       }
 
       if (this is HasEvents) {
-        await (this as HasEvents).fireModelEvent('created', halt: false);
-        await (this as HasEvents).fireModelEvent('saved', halt: false);
+        await (this as HasEvents)
+            .fireModelEvent(ModelLifecycle.created, halt: false);
+        await (this as HasEvents)
+            .fireModelEvent(ModelLifecycle.saved, halt: false);
       }
 
       if (this is HasAttributes) {
         (this as HasAttributes).syncOriginal();
       }
-      
+
       exists = true;
     }
 
@@ -106,39 +125,106 @@ mixin InteractsWithDatabase<T> on KhademModel<T> {
     if (!exists) return false;
 
     if (this is HasEvents) {
-      if (await (this as HasEvents).fireModelEvent('deleting') == false) return false;
+      if (await (this as HasEvents).fireModelEvent(ModelLifecycle.deleting) ==
+          false) {
+        return false;
+      }
     }
 
     await query.where(primaryKey, '=', getKey()).delete();
 
     if (this is HasEvents) {
-      await (this as HasEvents).fireModelEvent('deleted', halt: false);
+      await (this as HasEvents)
+          .fireModelEvent(ModelLifecycle.deleted, halt: false);
     }
 
     exists = false;
-
     return true;
   }
 
-  /// Reload the current model instance with fresh attributes from the database.
-  Future<T> refresh() async {
-    if (!exists) return this as T;
+  /// Refresh the model from the database.
+  Future<void> refresh() async {
+    if (!exists) return;
 
     final fresh = await query.where(primaryKey, '=', getKey()).first();
-
-    if (fresh != null && this is HasAttributes) {
-      (this as HasAttributes).fromJson((fresh as HasAttributes).attributes);
-      (this as HasAttributes).syncOriginal();
+    if (fresh != null) {
+      if (this is HasAttributes) {
+        if (fresh is HasAttributes) {
+          (this as HasAttributes).fromJson((fresh as HasAttributes).attributes);
+        }
+      }
     }
-
-    return this as T;
   }
 
-  /// Get the primary key value for a save query.
-  dynamic getKey() {
-    if (this is HasAttributes) {
-      return (this as HasAttributes).getAttribute(primaryKey);
+  /// Get a fresh instance of the model from the database.
+  Future<T?> fresh([List<String> withRelations = const []]) async {
+    if (!exists) return null;
+
+    var q = query.where(primaryKey, '=', getKey());
+    if (withRelations.isNotEmpty) {
+      q = q.withRelations(withRelations);
     }
-    return (this as KhademModel).id;
+
+    return q.first();
+  }
+
+  /// Update the model in the database.
+  Future<bool> update(Map<String, dynamic> attributes) async {
+    if (!exists) return false;
+
+    if (this is HasAttributes) {
+      (this as HasAttributes).fill(attributes);
+    }
+
+    return save();
+  }
+
+  /// Find a model by its primary key.
+  Future<T?> find(dynamic id) async {
+    return query.where(primaryKey, '=', id).first();
+  }
+
+  /// Find a model by its primary key or throw an exception.
+  Future<T> findOrFail(dynamic id) async {
+    final result = await find(id);
+    if (result == null) {
+      throw Exception('Model not found');
+    }
+    return result;
+  }
+
+  /// Get all models.
+  Future<List<T>> all() async {
+    return query.get();
+  }
+
+  /// Increment a column's value.
+  Future<void> increment(String column, [int amount = 1]) async {
+    if (!exists) return;
+
+    await query.where(primaryKey, '=', getKey()).increment(column, amount);
+
+    if (this is HasAttributes) {
+      final current = (this as HasAttributes).getAttribute(column);
+      if (current is num) {
+        (this as HasAttributes).setAttribute(column, current + amount);
+        (this as HasAttributes).syncOriginal();
+      }
+    }
+  }
+
+  /// Decrement a column's value.
+  Future<void> decrement(String column, [int amount = 1]) async {
+    if (!exists) return;
+
+    await query.where(primaryKey, '=', getKey()).decrement(column, amount);
+
+    if (this is HasAttributes) {
+      final current = (this as HasAttributes).getAttribute(column);
+      if (current is num) {
+        (this as HasAttributes).setAttribute(column, current - amount);
+        (this as HasAttributes).syncOriginal();
+      }
+    }
   }
 }

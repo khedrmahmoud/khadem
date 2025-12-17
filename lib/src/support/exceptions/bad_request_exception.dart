@@ -6,13 +6,11 @@ import '../../contracts/exceptions/app_exception.dart';
 /// or when required parameters are missing.
 class BadRequestException extends AppException {
   BadRequestException(
-    String message, {
-    dynamic details,
+    super.message, {
+    super.details,
   }) : super(
-          message,
           statusCode: 400,
           title: 'Bad Request',
           type: 'bad_request',
-          details: details,
         );
 }

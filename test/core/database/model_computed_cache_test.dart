@@ -36,16 +36,14 @@ class TestModel extends KhademModel<TestModel> {
   List<String> get fillable => ['name'];
 
   @override
-  List<String> get appends => ['computed_name'];
-
-  @override
-  Map<String, dynamic> get computed => {
+  Map<String, dynamic> get appends => {
         'computed_name': _getComputedName,
       };
 
   String _getComputedName() {
     _evaluationCount++;
-    return 'Computed: ${name ?? 'Unknown'}';
+    final n = getAttribute('name');
+    return 'Computed: ${n ?? 'Unknown'}';
   }
 
   static void resetCounter() {
@@ -67,15 +65,15 @@ void main() {
       final model = TestModel()..fromJson({'name': 'Test'});
 
       // First access - should evaluate
-      expect(model.getComputedAttribute('computed_name'), 'Computed: Test');
+      expect(model.getAttribute('computed_name'), 'Computed: Test');
       expect(TestModel.getEvaluationCount(), 1);
 
       // Second access - should use cache
-      expect(model.getComputedAttribute('computed_name'), 'Computed: Test');
+      expect(model.getAttribute('computed_name'), 'Computed: Test');
       expect(TestModel.getEvaluationCount(), 1); // Should still be 1
 
       // Third access - should still use cache
-      expect(model.getComputedAttribute('computed_name'), 'Computed: Test');
+      expect(model.getAttribute('computed_name'), 'Computed: Test');
       expect(TestModel.getEvaluationCount(), 1); // Should still be 1
     });
 
@@ -83,14 +81,14 @@ void main() {
       final model = TestModel()..fromJson({'name': 'Test'});
 
       // First access
-      expect(model.getComputedAttribute('computed_name'), 'Computed: Test');
+      expect(model.getAttribute('computed_name'), 'Computed: Test');
       expect(TestModel.getEvaluationCount(), 1);
 
       // Change model data
       model.fromJson({'name': 'Updated'});
 
       // Access again - should re-evaluate
-      expect(model.getComputedAttribute('computed_name'), 'Computed: Updated');
+      expect(model.getAttribute('computed_name'), 'Computed: Updated');
       expect(TestModel.getEvaluationCount(), 2); // Should be 2 now
     });
 

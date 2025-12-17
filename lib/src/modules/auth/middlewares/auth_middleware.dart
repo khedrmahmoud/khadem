@@ -356,7 +356,6 @@ class AuthMiddleware extends Middleware {
       // Wrap unexpected errors
       throw AuthException(
         'Authentication failed: ${error.toString()}',
-        statusCode: 401,
       );
     }
   }

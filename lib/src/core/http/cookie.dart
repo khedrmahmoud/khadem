@@ -74,7 +74,7 @@ class Cookies {
     String? sameSite,
   }) {
     if (_response == null) return;
-    
+
     final cookie = Cookie(name, value);
 
     if (domain != null) cookie.domain = domain;
@@ -226,8 +226,27 @@ class Cookies {
 
 /// Static helper for backward compatibility or direct usage
 class CookieManager {
-  static String? getCookie(HttpRequest request, String name) => Cookies(request).get(name);
-  static Map<String, String> getAllCookies(HttpRequest request) => Cookies(request).all;
-  static void setCookie(HttpResponse response, String name, String value, {String? domain, String? path, DateTime? expires, Duration? maxAge, bool httpOnly = false, bool secure = false, String? sameSite}) => Cookies.response(response).set(name, value, domain: domain, path: path, expires: expires, maxAge: maxAge, httpOnly: httpOnly, secure: secure, sameSite: sameSite);
-  static void deleteCookie(HttpResponse response, String name, {String? domain, String? path}) => Cookies.response(response).delete(name, domain: domain, path: path);
+  static String? getCookie(HttpRequest request, String name) =>
+      Cookies(request).get(name);
+  static Map<String, String> getAllCookies(HttpRequest request) =>
+      Cookies(request).all;
+  static void setCookie(HttpResponse response, String name, String value,
+          {String? domain,
+          String? path,
+          DateTime? expires,
+          Duration? maxAge,
+          bool httpOnly = false,
+          bool secure = false,
+          String? sameSite,}) =>
+      Cookies.response(response).set(name, value,
+          domain: domain,
+          path: path,
+          expires: expires,
+          maxAge: maxAge,
+          httpOnly: httpOnly,
+          secure: secure,
+          sameSite: sameSite,);
+  static void deleteCookie(HttpResponse response, String name,
+          {String? domain, String? path,}) =>
+      Cookies.response(response).delete(name, domain: domain, path: path);
 }

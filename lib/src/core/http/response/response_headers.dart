@@ -130,8 +130,6 @@ class ResponseHeaders {
     }
   }
 
-
-
   /// Sets common security headers.
   void setSecurityHeaders({
     bool enableHsts = false,

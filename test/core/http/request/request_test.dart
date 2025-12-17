@@ -42,8 +42,8 @@ class FakeHttpRequest extends Stream<Uint8List> implements HttpRequest {
 
 class FakeHttpSession implements HttpSession {
   final Map<dynamic, dynamic> _data = {};
-  bool _isNew = true;
-  String _id = 'test-session-id';
+  final bool _isNew = true;
+  final String _id = 'test-session-id';
 
   @override
   String get id => _id;
@@ -117,7 +117,8 @@ class FakeHttpSession implements HttpSession {
   }
 
   @override
-  Map<K2, V2> map<K2, V2>(MapEntry<K2, V2> Function(dynamic key, dynamic value) convert) {
+  Map<K2, V2> map<K2, V2>(
+      MapEntry<K2, V2> Function(dynamic key, dynamic value) convert,) {
     return _data.map(convert);
   }
 
@@ -130,7 +131,8 @@ class FakeHttpSession implements HttpSession {
   }
 
   @override
-  dynamic update(dynamic key, dynamic Function(dynamic value) update, {dynamic Function()? ifAbsent}) {
+  dynamic update(dynamic key, dynamic Function(dynamic value) update,
+      {dynamic Function()? ifAbsent,}) {
     return _data.update(key, update, ifAbsent: ifAbsent);
   }
 
@@ -138,7 +140,7 @@ class FakeHttpSession implements HttpSession {
   void updateAll(dynamic Function(dynamic key, dynamic value) update) {
     _data.updateAll(update);
   }
-  
+
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }

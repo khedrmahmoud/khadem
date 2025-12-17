@@ -121,33 +121,68 @@ class ChannelLogger {
 
   ChannelLogger(this._channel);
 
-  void debug(String message,
-      {Map<String, dynamic>? context, StackTrace? stackTrace,}) {
-    Khadem.logger.debug(message,
-        context: context, stackTrace: stackTrace, channel: _channel,);
+  void debug(
+    String message, {
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+  }) {
+    Khadem.logger.debug(
+      message,
+      context: context,
+      stackTrace: stackTrace,
+      channel: _channel,
+    );
   }
 
-  void info(String message,
-      {Map<String, dynamic>? context, StackTrace? stackTrace,}) {
-    Khadem.logger.info(message,
-        context: context, stackTrace: stackTrace, channel: _channel,);
+  void info(
+    String message, {
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+  }) {
+    Khadem.logger.info(
+      message,
+      context: context,
+      stackTrace: stackTrace,
+      channel: _channel,
+    );
   }
 
-  void warning(String message,
-      {Map<String, dynamic>? context, StackTrace? stackTrace,}) {
-    Khadem.logger.warning(message,
-        context: context, stackTrace: stackTrace, channel: _channel,);
+  void warning(
+    String message, {
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+  }) {
+    Khadem.logger.warning(
+      message,
+      context: context,
+      stackTrace: stackTrace,
+      channel: _channel,
+    );
   }
 
-  void error(String message,
-      {Map<String, dynamic>? context, StackTrace? stackTrace,}) {
-    Khadem.logger.error(message,
-        context: context, stackTrace: stackTrace, channel: _channel,);
+  void error(
+    String message, {
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+  }) {
+    Khadem.logger.error(
+      message,
+      context: context,
+      stackTrace: stackTrace,
+      channel: _channel,
+    );
   }
 
-  void critical(String message,
-      {Map<String, dynamic>? context, StackTrace? stackTrace,}) {
-    Khadem.logger.critical(message,
-        context: context, stackTrace: stackTrace, channel: _channel,);
+  void critical(
+    String message, {
+    Map<String, dynamic>? context,
+    StackTrace? stackTrace,
+  }) {
+    Khadem.logger.critical(
+      message,
+      context: context,
+      stackTrace: stackTrace,
+      channel: _channel,
+    );
   }
 }

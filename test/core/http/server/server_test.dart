@@ -22,7 +22,7 @@ void main() {
     });
 
     test('configure updates settings', () {
-      server.configure(autoCompress: false, idleTimeout: Duration(seconds: 60));
+      server.configure(autoCompress: false, idleTimeout: const Duration(seconds: 60));
       // Verification would require inspecting private lifecycle or starting server
     });
   });

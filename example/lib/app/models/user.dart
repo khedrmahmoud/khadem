@@ -1,25 +1,24 @@
 import 'package:khadem/khadem.dart'
-    show KhademModel, RelationDefinition, HasRelationships, Timestamps, Event;
- 
-class User extends KhademModel<User> with Timestamps, HasRelationships {
-  User({
-    this.name,
-    this.email,
-    this.password,
-    int? id,
-  }) {
-    this.id = id;
-  }
+    show KhademModel, RelationDefinition, Timestamps, ModelLifecycle;
 
-  String? name;
-  String? email;
-  String? password;
+class User extends KhademModel<User> with Timestamps {
+  String? get name => getAttribute('name');
+
+  String? get email => getAttribute('email');
+
+  String? get password => getAttribute('password');
+
+  @override
+  Map<String, dynamic> get casts => {
+        'created_at': DateTime,
+        'updated_at': DateTime,
+      };
 
   // @override
-  // Map<String, Event Function(User)> get dispatchesEvents => {
-  //       'created': (user) =>null,
-  //       'updated': (user) => null,
-  //       'deleted': (user) => null,
+  // Map<ModelLifecycle, Event Function(User)> get dispatchesEvents => {
+  //       ModelLifecycle.created: (user) => null,
+  //       ModelLifecycle.updated: (user) => null,
+  //       ModelLifecycle.deleted: (user) => null,
   //     };
 
   @override
@@ -27,54 +26,15 @@ class User extends KhademModel<User> with Timestamps, HasRelationships {
       ['name', 'email', 'password', 'created_at', 'updated_at'];
 
   @override
-  List<String> get initialHidden => ['password'];
+  List<String> get hidden => ['password'];
 
   @override
-  List<String> get initialAppends => [];
+  Map<String, dynamic> get appends => {
+        'name_upper': () => (getAttribute('name') as String?)?.toUpperCase(),
+      };
 
   @override
-  Map<String, dynamic> get computed => {};
-  @override
-  Object? getField(String key) {
-    return switch (key) {
-      'id' => id,
-      'name' => name,
-      'email' => email,
-      'password' => password,
-      'created_at' => createdAt,
-      'updated_at' => updatedAt,
-      _ => null
-    };
-  }
-
-  @override
-  void setField(String key, dynamic value) {
-    switch (key) {
-      case 'id':
-        id = value;
-        break;
-      case 'name':
-        name = value;
-        break;
-      case 'email':
-        email = value;
-        break;
-      case 'password':
-        password = value;
-        break;
-      case 'created_at':
-        createdAt = value;
-        break;
-      case 'updated_at':
-        updatedAt = value;
-        break;
-      default:
-        break;
-    }
-  }
-
-  @override
-  Map<String, RelationDefinition> get relations => {
+  Map<String, RelationDefinition> get definedRelations => {
         // 'posts': hasMany<Post>(
         //   foreignKey: 'user_id',
         //   relatedTable: 'posts',

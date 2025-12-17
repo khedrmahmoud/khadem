@@ -32,7 +32,7 @@ class ServiceProviderRegistry {
       _deferredProviders.remove(type);
       // Remove other bindings for the same provider to avoid double loading
       _deferredProviders.removeWhere((_, p) => p == provider);
-      
+
       _providers.add(provider);
       provider.register(_container);
       return provider;
@@ -49,7 +49,8 @@ class ServiceProviderRegistry {
 
   /// Checks if a provider is already registered.
   bool isRegistered(ServiceProvider provider) {
-    return _providers.contains(provider) || _deferredProviders.containsValue(provider);
+    return _providers.contains(provider) ||
+        _deferredProviders.containsValue(provider);
   }
 
   /// Gets providers by type.

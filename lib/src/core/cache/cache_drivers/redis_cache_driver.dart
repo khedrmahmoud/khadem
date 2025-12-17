@@ -227,8 +227,8 @@ class RedisCacheDriver implements CacheDriver {
       serializedValue,
       'NX',
       'EX',
-      ttlInSeconds > 0 ? ttlInSeconds : 1
-    ], isWrite: true);
+      ttlInSeconds > 0 ? ttlInSeconds : 1,
+    ], isWrite: true,);
 
     return result == 'OK';
   }
@@ -261,13 +261,15 @@ class RedisCacheDriver implements CacheDriver {
 
   @override
   Future<int> increment(String key, [int amount = 1]) async {
-    final result = await _executeCommand(['INCRBY', key, amount], isWrite: true);
+    final result =
+        await _executeCommand(['INCRBY', key, amount], isWrite: true);
     return result as int;
   }
 
   @override
   Future<int> decrement(String key, [int amount = 1]) async {
-    final result = await _executeCommand(['DECRBY', key, amount], isWrite: true);
+    final result =
+        await _executeCommand(['DECRBY', key, amount], isWrite: true);
     return result as int;
   }
 

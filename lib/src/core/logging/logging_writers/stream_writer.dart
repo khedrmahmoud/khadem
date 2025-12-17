@@ -30,13 +30,15 @@ class StreamLogHandler implements LogHandler {
     if (!level.isAtLeast(_minimumLevel)) return;
 
     if (!_controller.isClosed) {
-      _controller.add(LogEntry(
-        level: level,
-        message: message,
-        context: context,
-        stackTrace: stackTrace,
-        timestamp: DateTime.now(),
-      ),);
+      _controller.add(
+        LogEntry(
+          level: level,
+          message: message,
+          context: context,
+          stackTrace: stackTrace,
+          timestamp: DateTime.now(),
+        ),
+      );
     }
   }
 
@@ -57,7 +59,8 @@ class LogEntry {
   LogEntry({
     required this.level,
     required this.message,
-    required this.timestamp, this.context,
+    required this.timestamp,
+    this.context,
     this.stackTrace,
   });
 

@@ -374,8 +374,7 @@ class WebAuthService {
   /// Verifies the authentication token (static method for convenience)
   static Future<Map<String, dynamic>> verifyToken() async {
     final authManager = Khadem.container.resolve<AuthManager>();
-    final token =
-        RequestContext.request.cookie('access_token') ?? '';
+    final token = RequestContext.request.cookie('access_token') ?? '';
     final user = await authManager.user(token);
     return user.toAuthArray();
   }

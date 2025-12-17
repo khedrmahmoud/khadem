@@ -4,8 +4,8 @@ import '../../contracts/container/container_interface.dart';
 import '../../contracts/events/dispatcher.dart';
 import '../../contracts/events/event.dart';
 import '../../contracts/events/listener.dart';
-import '../../contracts/events/subscriber.dart';
 import '../../contracts/events/should_broadcast.dart';
+import '../../contracts/events/subscriber.dart';
 import '../../core/queue/queue_manager.dart';
 import '../../core/socket/socket_manager.dart';
 import 'call_queued_listener.dart';
@@ -70,7 +70,8 @@ class EventDispatcher implements Dispatcher {
   }
 
   /// Dispatches the event to a specific listener definition.
-  Future<void> _dispatchToListener(Event event, dynamic listenerDefinition) async {
+  Future<void> _dispatchToListener(
+      Event event, dynamic listenerDefinition,) async {
     dynamic listener;
 
     if (listenerDefinition is Function) {

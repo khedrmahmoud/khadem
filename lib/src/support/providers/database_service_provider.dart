@@ -1,5 +1,4 @@
-import 'package:khadem/khadem.dart'
-    show Khadem;
+import 'package:khadem/khadem.dart' show Khadem;
 
 import '../../contracts/config/config_contract.dart';
 import '../../contracts/container/container_interface.dart';

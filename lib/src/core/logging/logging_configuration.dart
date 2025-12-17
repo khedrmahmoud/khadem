@@ -24,10 +24,11 @@ class LoggingConfiguration {
   /// Gets the configured log channels and their handlers.
   Map<String, List<LogHandler>> get channels {
     final channels = <String, List<LogHandler>>{};
-    
+
     // Try new channels configuration first
-    final channelsConfig = _config.get<Map<String, dynamic>>('logging.channels');
-    
+    final channelsConfig =
+        _config.get<Map<String, dynamic>>('logging.channels');
+
     if (channelsConfig != null) {
       // First pass: create non-stack handlers
       for (final entry in channelsConfig.entries) {
@@ -53,16 +54,17 @@ class LoggingConfiguration {
           final includedChannels = (config['channels'] as List).cast<String>();
           final handlers = <LogHandler>[];
           for (final includedName in includedChannels) {
-             if (channels.containsKey(includedName)) {
-               handlers.addAll(channels[includedName]!);
-             }
+            if (channels.containsKey(includedName)) {
+              handlers.addAll(channels[includedName]!);
+            }
           }
           channels[name] = handlers;
         }
       }
     } else {
       // Fallback to legacy handlers configuration
-      final handlersConfig = _config.get<Map<String, dynamic>>('logging.handlers', {});
+      final handlersConfig =
+          _config.get<Map<String, dynamic>>('logging.handlers', {});
       if (handlersConfig != null) {
         // Configure file handler
         final fileConfig = handlersConfig['file'] as Map<String, dynamic>?;
@@ -71,11 +73,12 @@ class LoggingConfiguration {
         }
 
         // Configure console handler
-        final consoleConfig = handlersConfig['console'] as Map<String, dynamic>?;
+        final consoleConfig =
+            handlersConfig['console'] as Map<String, dynamic>?;
         if (consoleConfig != null && consoleConfig['enabled'] == true) {
           channels['console'] = [_createConsoleHandler(consoleConfig)];
         }
-        
+
         // For legacy config, 'app' channel includes all enabled handlers
         channels['app'] = [
           ...?channels['file'],
@@ -111,7 +114,8 @@ class LoggingConfiguration {
         levelStr != null ? LogLevel.fromString(levelStr) : minimumLevel;
 
     final driver = config['driver'] as String?;
-    final isDaily = driver == 'daily' || (config['rotate_daily'] as bool? ?? false);
+    final isDaily =
+        driver == 'daily' || (config['rotate_daily'] as bool? ?? false);
 
     return FileLogHandler(
       filePath: config['path']?.toString() ?? 'storage/logs/app.log',

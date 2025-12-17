@@ -223,21 +223,21 @@ class ExceptionReporter {
     if (_includeUserContext && !context.containsKey('user')) {
       try {
         if (RequestContext.hasRequest && RequestContext.isAuthenticated) {
-           context['user'] = {
+          context['user'] = {
             'id': RequestContext.userId,
             'ip': RequestContext.request.ip,
           };
         } else {
-           context['user'] = {
+          context['user'] = {
             'id': null,
             'ip': null,
           };
         }
       } catch (_) {
-         context['user'] = {
-            'id': null,
-            'ip': null,
-          };
+        context['user'] = {
+          'id': null,
+          'ip': null,
+        };
       }
     }
 

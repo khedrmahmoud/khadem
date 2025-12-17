@@ -7,7 +7,7 @@ class ServerLifecycle {
   final Router _router;
   final ServerMiddleware _middleware;
   final ServerStatic _static;
-  
+
   HttpServer? _server;
   StreamSubscription? _signalSubscription;
 
@@ -23,7 +23,7 @@ class ServerLifecycle {
     _middleware.clear();
     _static.clear();
   }
-  
+
   Future<void> stop() async {
     await _server?.close();
     await _signalSubscription?.cancel();
@@ -42,7 +42,7 @@ class ServerLifecycle {
       port,
       shared: true,
     );
-    
+
     final server = _server!;
 
     // Enable compression and set idle timeout

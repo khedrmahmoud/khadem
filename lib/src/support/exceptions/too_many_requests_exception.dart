@@ -9,15 +9,13 @@ class TooManyRequestsException extends AppException {
   final int? retryAfter;
 
   TooManyRequestsException(
-    String message, {
+    super.message, {
     this.retryAfter,
-    dynamic details,
+    super.details,
   }) : super(
-          message,
           statusCode: 429,
           title: 'Too Many Requests',
           type: 'too_many_requests',
-          details: details,
         );
 
   @override

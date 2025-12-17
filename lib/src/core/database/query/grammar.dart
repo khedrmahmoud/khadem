@@ -41,16 +41,21 @@ abstract class Grammar {
   String compileDelete(Map<String, dynamic> query);
 
   /// Compile an increment statement into SQL.
-  String compileIncrement(Map<String, dynamic> query, String column, int amount);
+  String compileIncrement(
+      Map<String, dynamic> query, String column, int amount,);
 
   /// Compile an insert statement with multiple rows.
-  String compileInsertMany(Map<String, dynamic> query, List<Map<String, dynamic>> values);
+  String compileInsertMany(
+      Map<String, dynamic> query, List<Map<String, dynamic>> values,);
 
   /// Compile an upsert statement.
-  String compileUpsert(Map<String, dynamic> query, List<Map<String, dynamic>> values, List<String> uniqueBy, [List<String>? update]);
-  
+  String compileUpsert(Map<String, dynamic> query,
+      List<Map<String, dynamic>> values, List<String> uniqueBy,
+      [List<String>? update,]);
+
   /// Compile an increment each statement.
-  String compileIncrementEach(Map<String, dynamic> query, Map<String, int> columns, Map<String, dynamic> extras);
+  String compileIncrementEach(Map<String, dynamic> query,
+      Map<String, int> columns, Map<String, dynamic> extras,);
 
   /// Compile the "from" portion of the query.
   String compileFrom(String table) {
@@ -65,7 +70,7 @@ abstract class Grammar {
     for (final where in wheres) {
       final type = where['type'] as String;
       final boolean = where['boolean'] as String;
-      
+
       String sql;
       switch (type) {
         case 'Raw':
@@ -120,12 +125,14 @@ abstract class Grammar {
           sql = 'DAY(${wrap(where['column'])}) ${where['operator']} ?';
           break;
         case 'Column':
-          sql = '${wrap(where['first'])} ${where['operator']} ${wrap(where['second'])}';
+          sql =
+              '${wrap(where['first'])} ${where['operator']} ${wrap(where['second'])}';
           break;
         case 'Nested':
           final nestedQuery = where['query'];
-          final nestedWheres = (nestedQuery as dynamic).wheres as List<Map<String, dynamic>>;
-          
+          final nestedWheres =
+              (nestedQuery as dynamic).wheres as List<Map<String, dynamic>>;
+
           final nestedSql = compileWheres(nestedWheres);
           if (nestedSql.isEmpty) continue;
 
@@ -147,17 +154,23 @@ abstract class Grammar {
           sql = 'NOT EXISTS ($subquery)';
           break;
         case 'FullText':
-          final columns = (where['columns'] as List<String>).map(wrap).join(', ');
-          final mode = where['mode'] == 'boolean' ? 'IN BOOLEAN MODE' : 
-                       where['mode'] == 'query_expansion' || where['mode'] == 'expansion' ? 'WITH QUERY EXPANSION' : 
-                       'IN NATURAL LANGUAGE MODE';
+          final columns =
+              (where['columns'] as List<String>).map(wrap).join(', ');
+          final mode = where['mode'] == 'boolean'
+              ? 'IN BOOLEAN MODE'
+              : where['mode'] == 'query_expansion' ||
+                      where['mode'] == 'expansion'
+                  ? 'WITH QUERY EXPANSION'
+                  : 'IN NATURAL LANGUAGE MODE';
           sql = 'MATCH ($columns) AGAINST (? $mode)';
           break;
         case 'BetweenColumns':
-          sql = '${wrap(where['column'])} BETWEEN ${wrap(where['start'])} AND ${wrap(where['end'])}';
+          sql =
+              '${wrap(where['column'])} BETWEEN ${wrap(where['start'])} AND ${wrap(where['end'])}';
           break;
         case 'NotBetweenColumns':
-          sql = '${wrap(where['column'])} NOT BETWEEN ${wrap(where['start'])} AND ${wrap(where['end'])}';
+          sql =
+              '${wrap(where['column'])} NOT BETWEEN ${wrap(where['start'])} AND ${wrap(where['end'])}';
           break;
         case 'JsonContains':
           final path = where['path'] != null ? ', ?' : '';
@@ -172,7 +185,8 @@ abstract class Grammar {
           break;
         case 'JsonLength':
           final path = where['path'] != null ? ', ?' : '';
-          sql = 'JSON_LENGTH(${wrap(where['column'])}$path) ${where['operator']} ?';
+          sql =
+              'JSON_LENGTH(${wrap(where['column'])}$path) ${where['operator']} ?';
           break;
         default:
           continue;
@@ -228,7 +242,7 @@ abstract class Grammar {
   String compileOffset(int offset) {
     return 'OFFSET $offset';
   }
-  
+
   /// Compile the "order by" portion of the query.
   String compileOrders(List<Map<String, dynamic>> orders) {
     if (orders.isEmpty) return '';
@@ -242,16 +256,19 @@ abstract class Grammar {
   }
 
   /// Compile an aggregate query (count, max, min, etc.).
-  String compileAggregate(Map<String, dynamic> query, Map<String, dynamic> aggregate) {
-      // Temporarily replace columns with aggregate
-      final originalColumns = query['columns'];
-      query['columns'] = ['${aggregate['function']}(${aggregate['column']}) as aggregate'];
-      
-      final sql = compileSelect(query);
-      
-      // Restore
-      query['columns'] = originalColumns;
-      
-      return sql;
+  String compileAggregate(
+      Map<String, dynamic> query, Map<String, dynamic> aggregate,) {
+    // Temporarily replace columns with aggregate
+    final originalColumns = query['columns'];
+    query['columns'] = [
+      '${aggregate['function']}(${aggregate['column']}) as aggregate',
+    ];
+
+    final sql = compileSelect(query);
+
+    // Restore
+    query['columns'] = originalColumns;
+
+    return sql;
   }
 }

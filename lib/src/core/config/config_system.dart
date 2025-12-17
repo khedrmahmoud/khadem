@@ -287,9 +287,9 @@ class ConfigSystem implements ConfigInterface {
     if (!_overrideStack.containsKey(key)) {
       _overrideStack[key] = [];
     }
-    
+
     _overrideStack[key]!.add(get(key));
-    
+
     set(key, value);
   }
 

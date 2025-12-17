@@ -37,7 +37,8 @@ class CoreServiceProvider extends ServiceProvider {
   /// Registers all core services of the Khadem framework,
   /// including configuration, environment, logger, router, cache, and events.
   void _registerCoreBindings(ContainerInterface container) {
-    container.lazySingleton<ExceptionHandlerContract>((c) => ExceptionHandler());
+    container
+        .lazySingleton<ExceptionHandlerContract>((c) => ExceptionHandler());
 
     container.lazySingleton<Router>((c) => Router());
 

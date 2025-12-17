@@ -13,7 +13,7 @@ void main() {
     setUp(() {
       config = MockConfig();
       loggingConfig = LoggingConfiguration(config);
-      
+
       // Default stubs
       when(config.get<String>('logging.minimum_level', 'debug'))
           .thenReturn('debug');

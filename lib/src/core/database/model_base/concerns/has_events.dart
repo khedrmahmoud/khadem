@@ -1,13 +1,13 @@
+import '../../../../application/khadem.dart';
 import '../../../../contracts/events/event.dart';
 import '../../orm/model_events.dart';
 import '../../orm/observers/model_observer.dart';
 import '../../orm/observers/observer_registry.dart';
-import '../../../../application/khadem.dart';
 import '../khadem_model.dart';
 
-mixin HasEvents<T> on KhademModel<T> {
+mixin HasEvents<T> {
   /// The event map for the model.
-  Map<String, Event Function(T)> get dispatchesEvents => {};
+  Map<ModelLifecycle, Event Function(T)> get dispatchesEvents => {};
 
   /// Register an observer for this model type.
   static void observe<T extends KhademModel<T>>(ModelObserver<T> observer) {
@@ -15,56 +15,112 @@ mixin HasEvents<T> on KhademModel<T> {
   }
 
   /// Dispatch a custom event.
-  Future<void> _dispatchCustomEvent(String lifecycle) async {
+  Future<void> _dispatchCustomEvent(ModelLifecycle lifecycle) async {
     if (dispatchesEvents.containsKey(lifecycle)) {
       final eventBuilder = dispatchesEvents[lifecycle];
       if (eventBuilder != null) {
-        final event = eventBuilder(this as T);
+        final event = eventBuilder(this as dynamic);
         await Khadem.events.dispatch(event);
       }
     }
   }
 
   /// Fire a model lifecycle event.
-  Future<bool> fireModelEvent(String event, {bool halt = true}) async {
+  Future<bool> fireModelEvent(ModelLifecycle event, {bool halt = true}) async {
     // 1. Call Observers
     final observers = ObserverRegistry().getObserversByType(runtimeType);
     for (final observer in observers) {
       bool? result;
       switch (event) {
-        case 'creating': result = observer.creating(this); break;
-        case 'created': observer.created(this); break;
-        case 'updating': result = observer.updating(this); break;
-        case 'updated': observer.updated(this); break;
-        case 'saving': result = observer.saving(this); break;
-        case 'saved': observer.saved(this); break;
-        case 'deleting': result = observer.deleting(this); break;
-        case 'deleted': observer.deleted(this); break;
-        case 'restoring': result = observer.restoring(this); break;
-        case 'restored': observer.restored(this); break;
-        case 'forceDeleting': result = observer.forceDeleting(this); break;
-        case 'forceDeleted': observer.forceDeleted(this); break;
-        case 'retrieved': observer.retrieved(this); break;
+        case ModelLifecycle.creating:
+          result = observer.creating(this as dynamic);
+          break;
+        case ModelLifecycle.created:
+          observer.created(this as dynamic);
+          break;
+        case ModelLifecycle.updating:
+          result = observer.updating(this as dynamic);
+          break;
+        case ModelLifecycle.updated:
+          observer.updated(this as dynamic);
+          break;
+        case ModelLifecycle.saving:
+          result = observer.saving(this as dynamic);
+          break;
+        case ModelLifecycle.saved:
+          observer.saved(this as dynamic);
+          break;
+        case ModelLifecycle.deleting:
+          result = observer.deleting(this as dynamic);
+          break;
+        case ModelLifecycle.deleted:
+          observer.deleted(this as dynamic);
+          break;
+        case ModelLifecycle.restoring:
+          result = observer.restoring(this as dynamic);
+          break;
+        case ModelLifecycle.restored:
+          observer.restored(this as dynamic);
+          break;
+        case ModelLifecycle.forceDeleting:
+          result = observer.forceDeleting(this as dynamic);
+          break;
+        case ModelLifecycle.forceDeleted:
+          observer.forceDeleted(this as dynamic);
+          break;
+        case ModelLifecycle.retrieved:
+          observer.retrieved(this as dynamic);
+          break;
       }
-      
+
       if (halt && result == false) return false;
     }
 
     // 2. Dispatch System Events
     Event? systemEvent;
     switch (event) {
-      case 'creating': systemEvent = ModelCreating(this as T); break;
-      case 'created': systemEvent = ModelCreated(this as T); break;
-      case 'updating': systemEvent = ModelUpdating(this as T); break;
-      case 'updated': systemEvent = ModelUpdated(this as T); break;
-      case 'deleting': systemEvent = ModelDeleting(this as T); break;
-      case 'deleted': systemEvent = ModelDeleted(this as T); break;
-      // ... others
+      case ModelLifecycle.creating:
+        systemEvent = ModelCreating(this as dynamic);
+        break;
+      case ModelLifecycle.created:
+        systemEvent = ModelCreated(this as dynamic);
+        break;
+      case ModelLifecycle.updating:
+        systemEvent = ModelUpdating(this as dynamic);
+        break;
+      case ModelLifecycle.updated:
+        systemEvent = ModelUpdated(this as dynamic);
+        break;
+      case ModelLifecycle.deleting:
+        systemEvent = ModelDeleting(this as dynamic);
+        break;
+      case ModelLifecycle.deleted:
+        systemEvent = ModelDeleted(this as dynamic);
+        break;
+      case ModelLifecycle.restoring:
+        systemEvent = ModelRestoring(this as dynamic);
+        break;
+      case ModelLifecycle.restored:
+        systemEvent = ModelRestored(this as dynamic);
+        break;
+      case ModelLifecycle.forceDeleting:
+        systemEvent = ModelForceDeleting(this as dynamic);
+        break;
+      case ModelLifecycle.forceDeleted:
+        systemEvent = ModelForceDeleted(this as dynamic);
+        break;
+      case ModelLifecycle.retrieved:
+        systemEvent = ModelRetrieved(this as dynamic);
+        break;
+      default:
+        break;
     }
 
     if (systemEvent != null) {
       await Khadem.events.dispatch(systemEvent);
-      if (halt && systemEvent is StoppableEvent && systemEvent.isPropagationStopped) {
+      if (halt &&
+          systemEvent is StoppableEvent &&
+          systemEvent.isPropagationStopped) {
         return false;
       }
     }

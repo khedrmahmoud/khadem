@@ -16,7 +16,7 @@ T app<T>([String? context]) {
   if (T == dynamic || T == Object) {
     return Khadem.container as T;
   }
-  
+
   // Otherwise resolve the service
   return Khadem.make<T>(context);
 }

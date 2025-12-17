@@ -3,7 +3,11 @@ enum RelationType {
   hasMany,
   belongsTo,
   belongsToMany,
+  hasOneThrough,
+  hasManyThrough,
   morphOne,
   morphMany,
+  morphToMany,
+  morphedByMany,
   morphTo,
 }
