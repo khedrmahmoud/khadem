@@ -129,26 +129,4 @@ class JsonModel<T> {
 
     return data;
   }
-
-  Map<String, dynamic> toDatabaseJson() {
-    final data = <String, dynamic>{};
-    for (final key in model.fillable) {
-      var value = model.getField(key);
-      if (value == null) continue;
-
-      // Apply caster's set() method if applicable
-      final cast = model.casts[key];
-      if (cast is AttributeCaster) {
-        value = cast.set(value);
-        if (value == null) continue; // Skip if caster returns null
-      }
-      // Legacy DateTime handling
-      else if (value is DateTime) {
-        value = value.toUtc();
-      }
-
-      data[key] = value;
-    }
-    return data;
-  }
 }

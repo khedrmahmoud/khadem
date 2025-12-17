@@ -1,5 +1,7 @@
 import '../../../contracts/database/database_connection.dart';
 import '../../../contracts/database/query_builder_interface.dart';
+import '../model_base/khadem_model.dart';
+import '../orm/eager_loader.dart';
 import '../orm/paginated_result.dart';
 import 'grammar.dart';
 
@@ -186,11 +188,40 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   Future<List<T>> get() async {
     final sql = grammar.compileSelect(_getQueryComponents());
     final result = await connection.execute(sql, _bindings);
-    
+
+    List<T> items;
     if (modelFactory != null) {
-      return (result.data as List).map((row) => modelFactory!(row)).toList();
+      items = (result.data as List).map((row) => modelFactory!(row)).toList();
+    } else {
+      items = (result.data as List).cast<T>().toList();
     }
-    return (result.data as List).cast<T>().toList();
+
+    // Eager Loading
+    if (items.isNotEmpty && items.first is KhademModel) {
+      final models = items.cast<KhademModel>();
+      final firstModel = models.first;
+
+      final relations = <dynamic>[];
+
+      if (_withOnly.isNotEmpty) {
+        relations.addAll(_withOnly);
+      } else {
+        // Add default relations
+        relations.addAll(firstModel.defaultRelations);
+        // Add requested relations
+        relations.addAll(_with);
+        // Remove excluded relations
+        // Note: This simple removal only works for string matches.
+        // Complex relation definitions might need more robust handling.
+        relations.removeWhere((r) => _without.contains(r.toString()));
+      }
+
+      if (relations.isNotEmpty) {
+        await EagerLoader.loadRelations(models, relations);
+      }
+    }
+
+    return items;
   }
 
 
@@ -295,6 +326,18 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   @override
   QueryBuilderInterface<T> withRelations(List relations) {
     _with.addAll(relations.map((e) => e.toString()));
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> without(List<String> relations) {
+    _without.addAll(relations);
+    return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> withOnly(List<String> relations) {
+    _withOnly.addAll(relations);
     return this;
   }
   
@@ -1116,11 +1159,6 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   @override
   QueryBuilderInterface<T> withSum(String relation, String column) => this;
 
-  @override
-  QueryBuilderInterface<T> withOnly(List relations) {
-    _withOnly = relations.map((e) => e.toString()).toList();
-    return this;
-  }
 
   @override
   QueryBuilderInterface<T> orWhereBetween(String column, start, end) {
@@ -1183,11 +1221,6 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     return _addDateCondition('Time', column, '=', time, 'OR');
   }
 
-  @override
-  QueryBuilderInterface<T> without(List relations) {
-    _without.addAll(relations.map((e) => e.toString()));
-    return this;
-  }
 
   @override
   QueryBuilderInterface<T> orWhereExists(String Function(QueryBuilderInterface<dynamic> query) callback) {

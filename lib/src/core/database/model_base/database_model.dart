@@ -7,17 +7,23 @@ class DatabaseModel<T> {
 
   Future<void> save() async {
     if (model.id != null) {
+      final dirtyData = model.getDirtyForDatabase();
+      if (dirtyData.isEmpty) return;
+
       await model.event.beforeUpdate();
       // Use parameterized query to prevent SQL injection
       await model.query
           .where('id', '=', model.id)
-          .update(model.toDatabaseJson());
+          .update(dirtyData);
+      
+      model.syncOriginal();
       await model.event.afterUpdate();
     } else {
       await model.event.beforeCreate();
       // Use parameterized query to prevent SQL injection
       final id = await model.query.insert(model.toDatabaseJson());
       model.id = id;
+      model.syncOriginal();
       await model.event.afterCreate();
     }
   }

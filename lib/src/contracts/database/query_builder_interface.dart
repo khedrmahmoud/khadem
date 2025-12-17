@@ -578,6 +578,19 @@ abstract class QueryBuilderInterface<T> {
   /// ```
   QueryBuilderInterface<T> without(List<String> relations);
 
+  /// Replaces the model's defaultRelations with the specified list.
+  ///
+  /// This ignores any default relations defined on the model and
+  /// only loads exactly what is specified here.
+  ///
+  /// ```dart
+  /// // Model has defaultRelations: ['posts', 'profile']
+  /// final users = await UserModel.q<UserModel>()
+  ///   .withOnly(['roles'])  // Only loads 'roles', ignoring defaults
+  ///   .get();
+  /// ```
+  QueryBuilderInterface<T> withOnly(List<String> relations);
+
   // ---------------------------- Relationship Aggregates ----------------------------
 
   /// Load relationship counts without loading the full relationships.
@@ -656,18 +669,6 @@ abstract class QueryBuilderInterface<T> {
   /// ```
   QueryBuilderInterface<T> withMin(String relation, String column);
 
-  /// Replaces the model's defaultRelations with the specified relations.
-  ///
-  /// Use this when you want to load completely different relations
-  /// instead of the defaults.
-  ///
-  /// ```dart
-  /// // Model has defaultRelations: ['posts', 'profile']
-  /// final users = await UserModel.q<UserModel>()
-  ///   .withOnly(['followers', 'following'])  // Ignores defaults
-  ///   .get();
-  /// ```
-  QueryBuilderInterface<T> withOnly(List<dynamic> relations);
 
   /// Clones the current query builder instance.
   QueryBuilderInterface<T> clone();

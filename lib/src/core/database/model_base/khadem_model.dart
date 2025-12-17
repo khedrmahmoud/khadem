@@ -1,6 +1,7 @@
 import 'package:khadem/khadem.dart' show QueryBuilderInterface, Khadem;
 
 import '../../../contracts/events/event.dart';
+import '../orm/casting/attribute_caster.dart';
 import '../orm/observers/model_observer.dart';
 import '../orm/observers/observer_registry.dart';
 import '../orm/relation_definition.dart';
@@ -193,10 +194,75 @@ abstract class KhademModel<T> {
   /// Holds all relations
   Map<String, RelationDefinition> get relations => {};
 
-  /// Access fields
-  dynamic getField(String key) => UnimplementedError();
+  /// Attributes storage
+  final Map<String, dynamic> _attributes = {};
+  final Map<String, dynamic> _original = {};
 
-  void setField(String key, dynamic value) => UnimplementedError();
+  /// Access fields
+  dynamic getField(String key) {
+    return _attributes[key];
+  }
+
+  void setField(String key, dynamic value) {
+    _attributes[key] = value;
+  }
+
+  /// Get an attribute from the model.
+  dynamic getAttribute(String key) {
+    return getField(key);
+  }
+
+  /// Set a given attribute on the model.
+  void setAttribute(String key, dynamic value) {
+    setField(key, value);
+  }
+
+  /// Sync the original attributes with the current.
+  void syncOriginal() {
+    _original.clear();
+    _original.addAll(_attributes);
+  }
+
+  /// Get the attributes that have been changed since the last sync.
+  Map<String, dynamic> getDirty() {
+    final dirty = <String, dynamic>{};
+
+    for (final key in _attributes.keys) {
+      if (!_original.containsKey(key) || _original[key] != _attributes[key]) {
+        dirty[key] = _attributes[key];
+      }
+    }
+
+    return dirty;
+  }
+
+  /// Prepare dirty attributes for database update
+  Map<String, dynamic> getDirtyForDatabase() {
+    final dirty = getDirty();
+    final data = <String, dynamic>{};
+
+    dirty.forEach((key, value) {
+      data[key] = _prepareValueForDatabase(key, value);
+    });
+
+    return data;
+  }
+
+  dynamic _prepareValueForDatabase(String key, dynamic value) {
+    if (value == null) return null;
+
+    // Apply caster's set() method if applicable
+    final cast = casts[key];
+    if (cast is AttributeCaster) {
+      return cast.set(value);
+    }
+    // Legacy DateTime handling
+    else if (value is DateTime) {
+      return value.toUtc();
+    }
+
+    return value;
+  }
 
   /// Query builder
   QueryBuilderInterface<T> get query =>
@@ -242,10 +308,18 @@ abstract class KhademModel<T> {
     return result;
   }
 
-  Map<String, dynamic> toDatabaseJson() => json.toDatabaseJson();
+  /// Prepare all attributes for database insert
+  Map<String, dynamic> toDatabaseJson() {
+    final data = <String, dynamic>{};
+    _attributes.forEach((key, value) {
+      data[key] = _prepareValueForDatabase(key, value);
+    });
+    return data;
+  }
 
   void fromJson(Map<String, dynamic> data) {
     json.fromJson(data);
+    syncOriginal(); // Sync original after loading from JSON/DB
     _clearComputedCache(); // Clear cache when model data changes
   }
 
