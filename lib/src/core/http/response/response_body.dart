@@ -57,7 +57,8 @@ class ResponseBody {
     if (_sent) return;
 
     _headers.setContentTypeString(contentType ?? 'application/json');
-    final jsonString = data is String ? data : json.encode(data);
+    final jsonString =
+        data is String ? data : JsonEncoder(_defaultToEncodable).convert(data);
     if (_compression) {
       _response.add(gzip.encode(utf8.encode(jsonString)));
     } else {
@@ -71,7 +72,7 @@ class ResponseBody {
     if (_sent) return;
 
     _headers.setContentType(ContentType.json);
-    final encoder = JsonEncoder.withIndent(' ' * indent);
+    final encoder = JsonEncoder.withIndent(' ' * indent, _defaultToEncodable);
     final jsonString = encoder.convert(data);
     if (_compression) {
       _response.add(gzip.encode(utf8.encode(jsonString)));
@@ -195,6 +196,30 @@ class ResponseBody {
 
     _response.write(data);
     // Don't close - allow more chunks
+  }
+
+  /// Converts non-encodable objects (e.g., Exceptions) into strings for JSON.
+  dynamic _defaultToEncodable(Object? value) {
+    if (value == null) return null;
+    if (value is DateTime) return value.toIso8601String();
+    if (value is Uri) return value.toString();
+    if (value is Enum) return value.name;
+    final toJson = _tryToJson(value);
+    if (toJson != null) return toJson;
+    // Fallback to string to avoid encoder failures (e.g., database exceptions).
+    return value.toString();
+  }
+
+  dynamic _tryToJson(Object value) {
+    try {
+      final toJson = (value as dynamic).toJson;
+      if (toJson is Function) {
+        return toJson();
+      }
+    } catch (_) {
+      // ignore – fallback will handle it
+    }
+    return null;
   }
 
   /// Sends an empty response (useful for 204 No Content).

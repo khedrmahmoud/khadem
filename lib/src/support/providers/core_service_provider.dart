@@ -20,6 +20,7 @@ import 'package:khadem/khadem.dart'
         StorageManager,
         UrlService,
         Router;
+import 'package:khadem/src/application/khadem.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 import '../../contracts/exceptions/exception_handler_contract.dart';
@@ -108,6 +109,18 @@ class CoreServiceProvider extends ServiceProvider {
 
     final config = container.resolve<ConfigInterface>() as ConfigSystem;
     config.setEnvironment(envSystem.getOrDefault('APP_ENV', 'development'));
+
+    // Configure exception handling verbosity based on environment.
+    final isDebug = envSystem.getBool(
+      'APP_DEBUG',
+      defaultValue: Khadem.isDevelopment, // Default to true in development mode
+    );
+    final exceptionHandler =
+        container.resolve<ExceptionHandlerContract>() as ExceptionHandler;
+    exceptionHandler.configure(
+      showDetailedErrors: isDebug,
+      includeStackTracesInResponse: isDebug,
+    );
 
     // Load storage manager
     final storageManager = container.resolve<StorageManager>();

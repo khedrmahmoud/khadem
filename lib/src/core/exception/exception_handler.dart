@@ -19,8 +19,8 @@ import 'exception_reporter.dart';
 /// The handler automatically detects the response format and sends
 /// appropriate error responses based on the request's Accept header.
 class ExceptionHandler implements ExceptionHandlerContract {
-  /// Whether to show detailed error information in development
-  bool _showDetailedErrors = true;
+  /// Whether to show detailed error information in responses
+  bool _showDetailedErrors = false;
 
   /// Whether to include stack traces in development responses
   bool _includeStackTracesInResponse = false;
@@ -97,15 +97,21 @@ class ExceptionHandler implements ExceptionHandlerContract {
       return;
     }
 
+    final isServerError = error.statusCode >= 500;
+    final detail = (!_showDetailedErrors && isServerError)
+        ? 'An internal error occurred.'
+        : error.message;
+    final includeDetails = error.statusCode < 500 || _showDetailedErrors;
+
     // Default to RFC 7807 JSON
     res.status(error.statusCode).problem(
       type: error.type,
       title: error.title,
-      detail: error.message,
+      detail: detail,
       instance: error.instance,
       status: error.statusCode,
       extensions: {
-        if (error.details != null) 'details': error.details,
+        if (includeDetails && error.details != null) 'details': error.details,
         if (_showDetailedErrors &&
             _includeStackTracesInResponse &&
             stackTrace != null)
@@ -154,10 +160,13 @@ class ExceptionHandler implements ExceptionHandlerContract {
     AppException error,
     StackTrace? stackTrace,
   ) {
-    final html = _buildHtmlErrorResponse(error, stackTrace,
-        statusCode: error.statusCode,
-        title: error.title,
-        message: error.message,);
+    final html = _buildHtmlErrorResponse(
+      error,
+      stackTrace,
+      statusCode: error.statusCode,
+      title: error.title,
+      message: error.message,
+    );
     res.status(error.statusCode).header('Content-Type', 'text/html').send(html);
   }
 
@@ -167,11 +176,14 @@ class ExceptionHandler implements ExceptionHandlerContract {
     Object error,
     StackTrace? stackTrace,
   ) {
-    final html = _buildHtmlErrorResponse(error, stackTrace,
-        title: 'Internal Server Error',
-        message: _showDetailedErrors
-            ? error.toString()
-            : 'An unexpected error occurred.',);
+    final html = _buildHtmlErrorResponse(
+      error,
+      stackTrace,
+      title: 'Internal Server Error',
+      message: _showDetailedErrors
+          ? error.toString()
+          : 'An unexpected error occurred.',
+    );
     res.status(500).header('Content-Type', 'text/html').send(html);
   }
 
@@ -189,15 +201,19 @@ class ExceptionHandler implements ExceptionHandlerContract {
     buffer.write('<title>$title ($statusCode)</title>');
     buffer.write('<style>');
     buffer.write(
-        'body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:40px;background:#f8f9fa;color:#212529;}',);
+      'body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:40px;background:#f8f9fa;color:#212529;}',
+    );
     buffer.write(
-        '.container{max-width:800px;margin:0 auto;background:white;padding:40px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);}',);
+      '.container{max-width:800px;margin:0 auto;background:white;padding:40px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);}',
+    );
     buffer.write('h1{color:#dc3545;margin-top:0;}');
     buffer.write('.message{font-size:1.2em;margin-bottom:20px;}');
     buffer.write(
-        '.details{background:#f1f3f5;padding:15px;border-radius:4px;overflow-x:auto;font-family:monospace;font-size:0.9em;}',);
+      '.details{background:#f1f3f5;padding:15px;border-radius:4px;overflow-x:auto;font-family:monospace;font-size:0.9em;}',
+    );
     buffer.write(
-        '.stack-trace{margin-top:20px;border-top:1px solid #dee2e6;padding-top:20px;}',);
+      '.stack-trace{margin-top:20px;border-top:1px solid #dee2e6;padding-top:20px;}',
+    );
     buffer.write('</style>');
     buffer.write('</head><body>');
     buffer.write('<div class="container">');
@@ -207,7 +223,8 @@ class ExceptionHandler implements ExceptionHandlerContract {
     if (_showDetailedErrors && error is AppException && error.details != null) {
       buffer.write('<h3>Details</h3>');
       buffer.write(
-          '<div class="details">${_escapeHtml(error.details.toString())}</div>',);
+        '<div class="details">${_escapeHtml(error.details.toString())}</div>',
+      );
     }
 
     if (_showDetailedErrors &&
@@ -216,12 +233,14 @@ class ExceptionHandler implements ExceptionHandlerContract {
       buffer.write('<div class="stack-trace">');
       buffer.write('<h3>Stack Trace</h3>');
       buffer.write(
-          '<div class="details">${_escapeHtml(stackTrace.toString())}</div>',);
+        '<div class="details">${_escapeHtml(stackTrace.toString())}</div>',
+      );
       buffer.write('</div>');
     }
 
     buffer.write(
-        '<p><small>Timestamp: ${DateTime.now().toIso8601String()}</small></p>',);
+      '<p><small>Timestamp: ${DateTime.now().toIso8601String()}</small></p>',
+    );
     buffer.write('</div>');
     buffer.write('</body></html>');
 

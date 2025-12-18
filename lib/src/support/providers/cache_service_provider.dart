@@ -1,4 +1,5 @@
 import 'package:khadem/src/contracts/cache/cache_interfaces.dart';
+import 'package:khadem/src/contracts/config/config_contract.dart';
 import 'package:khadem/src/contracts/container/container_interface.dart';
 import 'package:khadem/src/contracts/provider/service_provider.dart';
 import 'package:khadem/src/core/cache/config/cache_config_loader.dart';
@@ -77,17 +78,16 @@ class CacheServiceProvider implements ServiceProvider {
   @override
   Future<void> boot(ContainerInterface container) async {
     // Initialize default cache configuration if available
-    final config = container.has('config') ? container.resolve('config') : null;
-    if (config != null) {
-      final cacheManager = container.resolve<CacheManager>();
-      // Load configuration if config is available
-      // This assumes the config has a 'cache' section
-      try {
-        cacheManager.loadFromConfig(config);
-      } catch (e) {
-        // Configuration loading failed, but don't break the application
-        // The cache system can still be used with manual driver registration
-      }
+    final config = container.resolve<ConfigInterface>();
+
+    final cacheManager = container.resolve<CacheManager>();
+    // Load configuration if config is available
+    // This assumes the config has a 'cache' section
+    try {
+      cacheManager.loadFromConfig(config);
+    } catch (e) {
+      // Configuration loading failed, but don't break the application
+      // The cache system can still be used with manual driver registration
     }
   }
 

@@ -65,6 +65,10 @@ export 'exceptions/unauthorized_exception.dart';
 // 📦 Validation_exception.dart
 // ========================
 export 'exceptions/validation_exception.dart';
+// ========================
+// 📦 DB.dart
+// ========================
+export 'facades/db.dart';
 export 'helpers/container_helper.dart';
 // ========================
 // 📦 Date_helper.dart

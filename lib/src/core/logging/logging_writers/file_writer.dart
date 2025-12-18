@@ -149,17 +149,36 @@ class FileLogHandler implements LogHandler {
   }
 
   Future<void> _rotateFiles() async {
-    for (var i = _maxBackupCount; i > 0; i--) {
-      final backupFile = File('${_logFile.path}.$i');
-      final previousBackupFile =
-          i > 1 ? File('${_logFile.path}.${i - 1}') : _logFile;
+    // Remove the oldest backup first.
+    final oldest = File('${_logFile.path}.$_maxBackupCount');
+    if (await oldest.exists()) {
+      await oldest.delete();
+    }
 
-      if (await backupFile.exists()) {
-        await backupFile.delete();
+    // Shift the remaining backups.
+    for (var i = _maxBackupCount - 1; i >= 1; i--) {
+      final source = File('${_logFile.path}.$i');
+      final destination = File('${_logFile.path}.${i + 1}');
+      if (await source.exists()) {
+        await source.rename(destination.path);
       }
+    }
 
-      if (await previousBackupFile.exists()) {
-        await previousBackupFile.rename(backupFile.path);
+    // Move the active log to .1, falling back to copy+truncate on Windows
+    // when another process keeps the file handle open and rename fails.
+    final primaryBackup = File('${_logFile.path}.1');
+    if (await primaryBackup.exists()) {
+      await primaryBackup.delete();
+    }
+
+    if (await _logFile.exists()) {
+      try {
+        await _logFile.rename(primaryBackup.path);
+      } on FileSystemException {
+        // On Windows, a locked file cannot be renamed. Copy its contents
+        // and truncate the original so logging can continue.
+        await _logFile.copy(primaryBackup.path);
+        await _logFile.writeAsBytes(const []);
       }
     }
   }

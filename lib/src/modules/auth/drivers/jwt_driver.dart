@@ -252,9 +252,8 @@ class JWTDriver implements AuthDriver {
     }
 
     // Check expiry
-    final expiresAt = tokenRecord['expires_at'] as String?;
-    if (expiresAt != null) {
-      final expiry = DateTime.parse(expiresAt);
+    final expiry = _parseDateTime(tokenRecord['expires_at']);
+    if (expiry != null) {
       if (DateTime.now().isAfter(expiry)) {
         await _tokenService.deleteToken(refreshToken);
         throw AuthException('Refresh token has expired');
@@ -441,5 +440,18 @@ class JWTDriver implements AuthDriver {
         return value.toString();
       }
     }
+  }
+
+  DateTime? _parseDateTime(Object? value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String && value.isNotEmpty) {
+      try {
+        return DateTime.parse(value);
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
   }
 }
