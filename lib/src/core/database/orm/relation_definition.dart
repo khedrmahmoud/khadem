@@ -17,9 +17,20 @@ import 'relations/relation.dart';
 class RelationDefinition<T extends KhademModel<T>> {
   final RelationType type;
   final String relatedTable;
-  final String localKey;
-  final String foreignKey;
   final T Function() factory;
+
+  /// The foreign key of the parent model.
+  final String foreignKey;
+
+  /// The local key of the parent model.
+  final String localKey;
+
+  /// The owner key of the related model (for BelongsTo).
+  final String? ownerKey;
+
+  /// The related key of the related model (for BelongsToMany).
+  final String? relatedKey;
+
   final String? pivotTable;
   final String? foreignPivotKey;
   final String? relatedPivotKey;
@@ -37,6 +48,8 @@ class RelationDefinition<T extends KhademModel<T>> {
     required this.localKey,
     required this.foreignKey,
     required this.factory,
+    this.ownerKey,
+    this.relatedKey,
     this.pivotTable,
     this.foreignPivotKey,
     this.relatedPivotKey,
@@ -61,33 +74,72 @@ class RelationDefinition<T extends KhademModel<T>> {
         return HasOne<T, KhademModel>(q, parent, factory, foreignKey, localKey);
       case RelationType.hasMany:
         return HasMany<T, KhademModel>(
-            q, parent, factory, foreignKey, localKey,);
+          q,
+          parent,
+          factory,
+          foreignKey,
+          localKey,
+        );
       case RelationType.belongsTo:
         return BelongsTo<T, KhademModel>(
-            q, parent, factory, foreignKey, localKey, relationName,);
+          q,
+          parent,
+          factory,
+          foreignKey,
+          ownerKey ?? 'id',
+          relationName,
+        );
       case RelationType.belongsToMany:
         return BelongsToMany<T, KhademModel>(
-            q,
-            parent,
-            factory,
-            pivotTable!,
-            foreignPivotKey!,
-            relatedPivotKey!,
-            localKey,
-            'id', // Assuming related key is id
-            );
+          q,
+          parent,
+          factory,
+          pivotTable!,
+          foreignPivotKey!,
+          relatedPivotKey!,
+          localKey,
+          relatedKey ?? 'id',
+        );
       case RelationType.morphOne:
         return MorphOne<T, KhademModel>(
-            q, parent, factory, morphTypeField!, morphIdField!, localKey,);
+          q,
+          parent,
+          factory,
+          morphTypeField!,
+          morphIdField!,
+          localKey,
+        );
       case RelationType.morphMany:
         return MorphMany<T, KhademModel>(
-            q, parent, factory, morphTypeField!, morphIdField!, localKey,);
+          q,
+          parent,
+          factory,
+          morphTypeField!,
+          morphIdField!,
+          localKey,
+        );
       case RelationType.hasOneThrough:
-        return HasOneThrough<T, KhademModel>(q, parent, factory, throughTable!,
-            firstKey!, secondKey!, localKey, secondLocalKey!,);
+        return HasOneThrough<T, KhademModel>(
+          q,
+          parent,
+          factory,
+          throughTable!,
+          firstKey!,
+          secondKey!,
+          localKey,
+          secondLocalKey!,
+        );
       case RelationType.hasManyThrough:
-        return HasManyThrough<T, KhademModel>(q, parent, factory, throughTable!,
-            firstKey!, secondKey!, localKey, secondLocalKey!,);
+        return HasManyThrough<T, KhademModel>(
+          q,
+          parent,
+          factory,
+          throughTable!,
+          firstKey!,
+          secondKey!,
+          localKey,
+          secondLocalKey!,
+        );
       case RelationType.morphToMany:
         return MorphToMany<T, KhademModel>(
           q,
@@ -97,7 +149,7 @@ class RelationDefinition<T extends KhademModel<T>> {
           foreignPivotKey!,
           relatedPivotKey!,
           localKey,
-          'id',
+          relatedKey ?? 'id',
           morphTypeField!,
           parent.table,
         );
@@ -110,13 +162,14 @@ class RelationDefinition<T extends KhademModel<T>> {
           foreignPivotKey!,
           relatedPivotKey!,
           localKey,
-          'id',
+          relatedKey ?? 'id',
           morphTypeField!,
           q.table,
         );
       default:
         throw UnimplementedError(
-            'Relation type $type not implemented in toRelation',);
+          'Relation type $type not implemented in toRelation',
+        );
     }
   }
 }

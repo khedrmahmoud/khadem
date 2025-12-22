@@ -63,6 +63,10 @@ mixin HasRelations<T> {
   // Relation Definitions
   // ---------------------------------------------------------------------------
 
+  /// Define a one-to-one relationship.
+  ///
+  /// [foreignKey] is the column on the related model.
+  /// [localKey] is the column on the current model (default: id).
   RelationDefinition hasOne<R extends KhademModel<R>>({
     required String foreignKey,
     required String relatedTable,
@@ -80,6 +84,10 @@ mixin HasRelations<T> {
     );
   }
 
+  /// Define a one-to-many relationship.
+  ///
+  /// [foreignKey] is the column on the related model.
+  /// [localKey] is the column on the current model (default: id).
   RelationDefinition hasMany<R extends KhademModel<R>>({
     required String foreignKey,
     required String relatedTable,
@@ -97,36 +105,50 @@ mixin HasRelations<T> {
     );
   }
 
+  /// Define an inverse one-to-one or many-to-one relationship.
+  ///
+  /// [foreignKey] is the column on the current model.
+  /// [ownerKey] is the column on the related model (default: id).
   RelationDefinition belongsTo<R extends KhademModel<R>>({
-    required String localKey,
     required String relatedTable,
     required R Function() factory,
-    String foreignKey = 'id',
+    required String foreignKey,
+    String ownerKey = 'id',
     Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<R>(
       type: RelationType.belongsTo,
-      localKey: localKey,
+      localKey: '', // Not used for belongsTo in new definition
       foreignKey: foreignKey,
+      ownerKey: ownerKey,
       relatedTable: relatedTable,
       factory: factory,
       query: query,
     );
   }
 
+  /// Define a many-to-many relationship.
+  ///
+  /// [pivotTable] is the intermediate table name.
+  /// [foreignPivotKey] is the column on pivot table for current model.
+  /// [relatedPivotKey] is the column on pivot table for related model.
+  /// [parentKey] is the column on current model (default: id).
+  /// [relatedKey] is the column on related model (default: id).
   RelationDefinition belongsToMany<R extends KhademModel<R>>({
     required String pivotTable,
     required String foreignPivotKey,
     required String relatedPivotKey,
     required String relatedTable,
-    required String localKey,
     required R Function() factory,
+    String parentKey = 'id',
+    String relatedKey = 'id',
     Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<R>(
       type: RelationType.belongsToMany,
-      localKey: localKey,
-      foreignKey: 'id',
+      localKey: parentKey,
+      foreignKey: 'id', // Not directly used in belongsToMany logic in definition
+      relatedKey: relatedKey,
       relatedTable: relatedTable,
       factory: factory,
       pivotTable: pivotTable,
