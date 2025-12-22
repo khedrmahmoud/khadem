@@ -216,7 +216,8 @@ abstract class QueryBuilderInterface<T> {
   Future<int> decrement(String column, [int amount = 1]);
 
   /// Increment multiple columns
-  Future<void> incrementEach(Map<String, int> columns);
+  Future<void> incrementEach(Map<String, int> columns,
+      [Map<String, dynamic> extras = const {}]);
 
   /// Process results in chunks
   Future<void> chunk(

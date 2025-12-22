@@ -25,15 +25,28 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   int? _limit;
   int? _offset;
   bool _distinct = false;
-  String? _lock;
-  final List<dynamic> _bindings = [];
+  // Bindings
+  final List<dynamic> _selectBindings = [];
+  final List<dynamic> _fromBindings = [];
+  final List<dynamic> _joinBindings = [];
+  final List<dynamic> _whereBindings = [];
+  final List<dynamic> _havingBindings = [];
+
   @override
-  List<dynamic> get bindings => _bindings;
+  List<dynamic> get bindings => [
+        ..._selectBindings,
+        ..._fromBindings,
+        ..._joinBindings,
+        ..._whereBindings,
+        ..._havingBindings,
+        ..._unions.expand((u) => (u['query'] as QueryBuilderInterface).bindings),
+      ];
 
   final List<Map<String, dynamic>> _joins = [];
   final List<String> _groups = [];
   final List<Map<String, dynamic>> _havings = [];
   final List<Map<String, dynamic>> _unions = [];
+  String? _lock;
 
   // Eager Loading
   final List<String> _with = [];
@@ -65,118 +78,123 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   @override
   QueryBuilderInterface<T> selectRaw(String sql, [List bindings = const []]) {
     _columns.add({'type': 'Raw', 'sql': sql});
-    _bindings.addAll(bindings);
+    _selectBindings.addAll(bindings);
+    return this;
+  }
+
+  QueryBuilderInterface<T> _addWhere(Map<String, dynamic> where,
+      [List<dynamic>? bindings]) {
+    _wheres.add(where);
+    if (bindings != null) {
+      _whereBindings.addAll(bindings);
+    }
     return this;
   }
 
   @override
   QueryBuilderInterface<T> where(
-      String column, String operator, dynamic value,) {
-    _wheres.add({
+    String column,
+    String operator,
+    dynamic value,
+  ) {
+    return _addWhere({
       'type': 'Basic',
       'column': column,
       'operator': operator,
       'value': value,
       'boolean': 'AND',
-    });
-    _bindings.add(value);
-    return this;
+    }, [value]);
   }
 
   @override
   QueryBuilderInterface<T> orWhere(
-      String column, String operator, dynamic value,) {
-    _wheres.add({
+    String column,
+    String operator,
+    dynamic value,
+  ) {
+    return _addWhere({
       'type': 'Basic',
       'column': column,
       'operator': operator,
       'value': value,
       'boolean': 'OR',
-    });
-    _bindings.add(value);
-    return this;
+    }, [value]);
   }
 
   @override
   QueryBuilderInterface<T> whereIn(String column, List<dynamic> values) {
-    _wheres.add({
+    return _addWhere({
       'type': 'In',
       'column': column,
       'values': values,
       'boolean': 'AND',
-    });
-    _bindings.addAll(values);
-    return this;
+    }, values);
   }
 
   @override
   QueryBuilderInterface<T> whereNotIn(String column, List<dynamic> values) {
-    _wheres.add({
+    return _addWhere({
       'type': 'NotIn',
       'column': column,
       'values': values,
       'boolean': 'AND',
-    });
-    _bindings.addAll(values);
-    return this;
+    }, values);
   }
 
   @override
   QueryBuilderInterface<T> whereNull(String column) {
-    _wheres.add({
+    return _addWhere({
       'type': 'Null',
       'column': column,
       'boolean': 'AND',
     });
-    return this;
   }
 
   @override
   QueryBuilderInterface<T> whereNotNull(String column) {
-    _wheres.add({
+    return _addWhere({
       'type': 'NotNull',
       'column': column,
       'boolean': 'AND',
     });
-    return this;
   }
 
   @override
   QueryBuilderInterface<T> whereRaw(String sql,
-      [List bindings = const [], String boolean = 'AND',]) {
-    _wheres.add({
+      [List bindings = const [], String boolean = 'AND']) {
+    return _addWhere({
       'type': 'Raw',
       'sql': sql,
       'boolean': boolean,
-    });
-    _bindings.addAll(bindings);
-    return this;
+    }, bindings);
   }
 
   @override
   QueryBuilderInterface<T> whereBetween(
-      String column, dynamic start, dynamic end,) {
-    _wheres.add({
+    String column,
+    dynamic start,
+    dynamic end,
+  ) {
+    return _addWhere({
       'type': 'Between',
       'column': column,
       'values': [start, end],
       'boolean': 'AND',
-    });
-    _bindings.addAll([start, end]);
-    return this;
+    }, [start, end]);
   }
 
   @override
   QueryBuilderInterface<T> whereNotBetween(
-      String column, dynamic start, dynamic end,) {
-    _wheres.add({
+    String column,
+    dynamic start,
+    dynamic end,
+  ) {
+    return _addWhere({
       'type': 'NotBetween',
       'column': column,
       'values': [start, end],
       'boolean': 'AND',
-    });
-    _bindings.addAll([start, end]);
-    return this;
+    }, [start, end]);
   }
 
   @override
@@ -193,7 +211,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   @override
   Future<List<T>> get() async {
     final sql = grammar.compileSelect(_getQueryComponents());
-    final result = await connection.execute(sql, _bindings);
+    final result = await connection.execute(sql, bindings);
 
     List<T> items;
     if (modelFactory != null) {
@@ -262,14 +280,22 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   @override
   Future<void> update(Map<String, dynamic> values) async {
     final sql = grammar.compileUpdate(_getQueryComponents(), values);
-    final bindings = [...values.values, ..._bindings];
+    final bindings = [
+      ..._fromBindings,
+      ...values.values,
+      ..._whereBindings,
+    ];
     await connection.execute(sql, bindings);
   }
 
   @override
   Future<void> delete() async {
     final sql = grammar.compileDelete(_getQueryComponents());
-    await connection.execute(sql, _bindings);
+    final bindings = [
+      ..._fromBindings,
+      ..._whereBindings,
+    ];
+    await connection.execute(sql, bindings);
   }
 
   Map<String, dynamic> _getQueryComponents() {
@@ -323,27 +349,33 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> having(
-      String column, String operator, dynamic value,) {
+    String column,
+    String operator,
+    dynamic value,
+  ) {
     _havings.add({
       'column': column,
       'operator': operator,
       'value': value,
       'boolean': 'AND',
     });
-    _bindings.add(value);
+    _havingBindings.add(value);
     return this;
   }
 
   @override
   QueryBuilderInterface<T> orHaving(
-      String column, String operator, dynamic value,) {
+    String column,
+    String operator,
+    dynamic value,
+  ) {
     _havings.add({
       'column': column,
       'operator': operator,
       'value': value,
       'boolean': 'OR',
     });
-    _bindings.add(value);
+    _havingBindings.add(value);
     return this;
   }
 
@@ -366,13 +398,66 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   @override
-  QueryBuilderInterface<T> withCount(dynamic relations) => this;
+  QueryBuilderInterface<T> withCount(dynamic relations) {
+    if (modelFactory == null) {
+      throw Exception('withCount requires a model factory');
+    }
+    final model = modelFactory!({});
+    if (model is! HasRelations) {
+      throw Exception('Model does not use HasRelations trait');
+    }
+
+    final Map<String, void Function(QueryBuilderInterface<dynamic>)> normalized = {};
+
+    if (relations is String) {
+      normalized[relations] = (q) {};
+    } else if (relations is List) {
+      for (final item in relations) {
+        if (item is String) {
+          normalized[item] = (q) {};
+        }
+      }
+    } else if (relations is Map) {
+      relations.forEach((key, value) {
+        if (value is void Function(QueryBuilderInterface<dynamic>)) {
+          normalized[key] = value;
+        }
+      });
+    }
+
+    normalized.forEach((relationName, callback) {
+      final relationObj = (model as HasRelations).relation(relationName);
+      final relationQuery = relationObj.getRelationExistenceQuery(
+        relationObj.getQuery(),
+        this,
+      );
+
+      callback(relationQuery);
+
+      if (relationQuery is QueryBuilder) {
+        relationQuery._columns = [];
+      }
+
+      relationQuery.selectRaw('COUNT(*)');
+      selectSub(relationQuery, '${relationName}_count');
+    });
+
+    return this;
+  }
 
   @override
   Future<int> count() async {
     final sql = grammar.compileAggregate(
-        _getQueryComponents(), {'function': 'COUNT', 'column': '*'},);
-    final result = await connection.execute(sql, _bindings);
+      _getQueryComponents(),
+      {'function': 'COUNT', 'column': '*'},
+    );
+    final aggregateBindings = [
+      ..._fromBindings,
+      ..._joinBindings,
+      ..._whereBindings,
+      ..._havingBindings,
+    ];
+    final result = await connection.execute(sql, aggregateBindings);
     return result.data.first['aggregate'] as int;
   }
 
@@ -402,8 +487,16 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   Future<dynamic> _aggregate(String function, String column) async {
     final sql = grammar.compileAggregate(
-        _getQueryComponents(), {'function': function, 'column': column},);
-    final result = await connection.execute(sql, _bindings);
+      _getQueryComponents(),
+      {'function': function, 'column': column},
+    );
+    final aggregateBindings = [
+      ..._fromBindings,
+      ..._joinBindings,
+      ..._whereBindings,
+      ..._havingBindings,
+    ];
+    final result = await connection.execute(sql, aggregateBindings);
     if (result.data.isNotEmpty) {
       return result.data.first['aggregate'];
     }
@@ -539,13 +632,18 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
         await callback(results);
 
         final lastItem = results.last;
+        final key = alias ?? column;
+
         if (lastItem is Map) {
-          lastId = lastItem[alias ?? column];
+          lastId = lastItem[key];
+        } else if (lastItem is KhademModel) {
+          lastId = (lastItem as KhademModel).getAttribute(key);
         } else {
           try {
-            lastId = (lastItem as dynamic)[alias ?? column];
+            lastId = (lastItem as dynamic)[key];
           } catch (_) {
-            // Fallback or error
+            throw Exception(
+                'Could not determine the value of the chunk column "$key" from the result.',);
           }
         }
       }
@@ -562,7 +660,11 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     q._limit = _limit;
     q._offset = _offset;
     q._distinct = _distinct;
-    q._bindings.addAll(_bindings);
+    q._selectBindings.addAll(_selectBindings);
+    q._fromBindings.addAll(_fromBindings);
+    q._joinBindings.addAll(_joinBindings);
+    q._whereBindings.addAll(_whereBindings);
+    q._havingBindings.addAll(_havingBindings);
     q._joins.addAll(_joins.map((e) => Map<String, dynamic>.from(e)));
     q._groups.addAll(_groups);
     q._havings.addAll(_havings.map((e) => Map<String, dynamic>.from(e)));
@@ -604,10 +706,15 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       final lastItem = items.last;
       if (lastItem is Map) {
         nextCursor = lastItem[column]?.toString();
+      } else if (lastItem is KhademModel) {
+        nextCursor = (lastItem as KhademModel).getAttribute(column)?.toString();
       } else {
         try {
           nextCursor = (lastItem as dynamic)[column]?.toString();
-        } catch (_) {}
+        } catch (_) {
+          throw Exception(
+              'Could not determine the value of the cursor column "$column" from the result.',);
+        }
       }
     }
 
@@ -631,7 +738,11 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
           'Increment requires a WHERE clause to prevent mass updates.',);
     }
     final sql = grammar.compileIncrement(_getQueryComponents(), column, amount);
-    final result = await connection.execute(sql, _bindings);
+    final bindings = [
+      ..._fromBindings,
+      ..._whereBindings,
+    ];
+    final result = await connection.execute(sql, bindings);
     return result.affectedRows ?? 0;
   }
 
@@ -654,7 +765,11 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> orWhereRaw(String sql, [List bindings = const []]) {
-    return whereRaw(sql, bindings, 'OR');
+    return _addWhere({
+      'type': 'Raw',
+      'sql': sql,
+      'boolean': 'OR',
+    }, bindings);
   }
 
   QueryBuilderInterface<T> _has(String relation, String boolean,
@@ -722,17 +837,19 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   @override
   QueryBuilderInterface<T> fromRaw(String sql, [List bindings = const []]) {
     _table = sql;
-    _bindings.addAll(bindings);
+    _fromBindings.addAll(bindings);
     return this;
   }
 
   @override
   QueryBuilderInterface<T> fromSub(
-      QueryBuilderInterface<dynamic> query, String alias,) {
+    QueryBuilderInterface<dynamic> query,
+    String alias,
+  ) {
     final subSql = (query as dynamic).toSql();
     _table = '($subSql) as $alias';
     if (query is QueryBuilder) {
-      _bindings.addAll(query._bindings);
+      _fromBindings.addAll(query.bindings);
     }
     return this;
   }
@@ -792,7 +909,11 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     }
     final sql =
         grammar.compileIncrementEach(_getQueryComponents(), columns, extras);
-    final bindings = extras.values.toList() + _bindings;
+    final bindings = [
+      ..._fromBindings,
+      ...extras.values,
+      ..._whereBindings,
+    ];
     await connection.execute(sql, bindings);
   }
 
@@ -812,46 +933,40 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> orWhereIn(String column, List values) {
-    _wheres.add({
+    return _addWhere({
       'type': 'In',
       'column': column,
       'values': values,
       'boolean': 'OR',
-    });
-    _bindings.addAll(values);
-    return this;
+    }, values);
   }
 
   @override
   QueryBuilderInterface<T> orWhereNotIn(String column, List values) {
-    _wheres.add({
+    return _addWhere({
       'type': 'NotIn',
       'column': column,
       'values': values,
       'boolean': 'OR',
-    });
-    _bindings.addAll(values);
-    return this;
+    }, values);
   }
 
   @override
   QueryBuilderInterface<T> orWhereNull(String column) {
-    _wheres.add({
+    return _addWhere({
       'type': 'Null',
       'column': column,
       'boolean': 'OR',
     });
-    return this;
   }
 
   @override
   QueryBuilderInterface<T> orWhereNotNull(String column) {
-    _wheres.add({
+    return _addWhere({
       'type': 'NotNull',
       'column': column,
       'boolean': 'OR',
     });
-    return this;
   }
 
   @override
@@ -861,7 +976,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     final sql = grammar.compileSelect(_getQueryComponents());
     _columns = originalColumns; // Restore
 
-    final result = await connection.execute(sql, _bindings);
+    final result = await connection.execute(sql, bindings);
     return result.data.map((row) => row[column]).toList();
   }
 
@@ -871,7 +986,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     final subSql = (query as dynamic).toSql();
     _columns.add('($subSql) as $alias');
     if (query is QueryBuilder) {
-      _bindings.addAll(query._bindings);
+      _selectBindings.addAll(query.bindings);
     }
     return this;
   }
@@ -1002,8 +1117,13 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     return _addDateCondition('Year', column, '=', year, 'AND');
   }
 
-  QueryBuilderInterface<T> _addDateCondition(String type, String column,
-      String operator, dynamic value, String boolean,) {
+  QueryBuilderInterface<T> _addDateCondition(
+    String type,
+    String column,
+    String operator,
+    dynamic value,
+    String boolean,
+  ) {
     _wheres.add({
       'type': type,
       'column': column,
@@ -1011,7 +1131,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'value': value,
       'boolean': boolean,
     });
-    _bindings.add(value);
+    _whereBindings.add(value);
     return this;
   }
 
@@ -1025,7 +1145,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'query': query,
       'boolean': 'AND',
     });
-    _bindings.addAll(query._bindings);
+    _whereBindings.addAll(query.bindings);
     return this;
   }
 
@@ -1039,14 +1159,16 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'query': query,
       'boolean': 'AND',
     });
-    _bindings.addAll(query._bindings);
+    _whereBindings.addAll(query.bindings);
     return this;
   }
 
   @override
   QueryBuilderInterface<T> whereFullText(
-      List<String> columns, String searchTerm,
-      {String mode = 'natural',}) {
+    List<String> columns,
+    String searchTerm, {
+    String mode = 'natural',
+  }) {
     _wheres.add({
       'type': 'FullText',
       'columns': columns,
@@ -1054,13 +1176,15 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'mode': mode,
       'boolean': 'AND',
     });
-    _bindings.add(searchTerm);
+    _whereBindings.add(searchTerm);
     return this;
   }
 
   @override
-  QueryBuilderInterface<T> whereInSubquery(String column,
-      String Function(QueryBuilderInterface<dynamic> query) callback,) {
+  QueryBuilderInterface<T> whereInSubquery(
+    String column,
+    String Function(QueryBuilderInterface<dynamic> query) callback,
+  ) {
     final query = QueryBuilder<dynamic>(connection, grammar, '');
     callback(query);
     _wheres.add({
@@ -1069,13 +1193,16 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'query': query,
       'boolean': 'AND',
     });
-    _bindings.addAll(query._bindings);
+    _whereBindings.addAll(query.bindings);
     return this;
   }
 
   @override
-  QueryBuilderInterface<T> whereJsonContains(String column, value,
-      [String? path,]) {
+  QueryBuilderInterface<T> whereJsonContains(
+    String column,
+    value, [
+    String? path,
+  ]) {
     _wheres.add({
       'type': 'JsonContains',
       'column': column,
@@ -1083,11 +1210,9 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'path': path,
       'boolean': 'AND',
     });
-    _bindings.add(value);
+    _whereBindings.add(value);
     if (path != null) {
-      // Ensure path starts with $
-      if (!path.startsWith(r'$')) path = '\$.$path';
-      _bindings.add(path);
+      _whereBindings.add(_jsonPath(path));
     }
     return this;
   }
@@ -1100,15 +1225,16 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'path': path,
       'boolean': 'AND',
     });
-    // Ensure path starts with $
-    if (!path.startsWith(r'$')) path = '\$.$path';
-    _bindings.add(path);
+    _whereBindings.add(_jsonPath(path));
     return this;
   }
 
   @override
-  QueryBuilderInterface<T> whereJsonDoesntContain(String column, value,
-      [String? path,]) {
+  QueryBuilderInterface<T> whereJsonDoesntContain(
+    String column,
+    value, [
+    String? path,
+  ]) {
     _wheres.add({
       'type': 'JsonDoesntContain',
       'column': column,
@@ -1116,18 +1242,20 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'path': path,
       'boolean': 'AND',
     });
-    _bindings.add(value);
+    _whereBindings.add(value);
     if (path != null) {
-      if (!path.startsWith(r'$')) path = '\$.$path';
-      _bindings.add(path);
+      _whereBindings.add(_jsonPath(path));
     }
     return this;
   }
 
   @override
   QueryBuilderInterface<T> whereJsonLength(
-      String column, String operator, int length,
-      [String? path,]) {
+    String column,
+    String operator,
+    int length, [
+    String? path,
+  ]) {
     _wheres.add({
       'type': 'JsonLength',
       'column': column,
@@ -1137,11 +1265,14 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'boolean': 'AND',
     });
     if (path != null) {
-      if (!path.startsWith(r'$')) path = '\$.$path';
-      _bindings.add(path);
+      _whereBindings.add(_jsonPath(path));
     }
-    _bindings.add(length);
+    _whereBindings.add(length);
     return this;
+  }
+
+  String _jsonPath(String path) {
+    return path.startsWith(r'$') ? path : '\$.$path';
   }
 
   @override
@@ -1154,7 +1285,8 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> whereNested(
-      void Function(QueryBuilderInterface<T> query) callback,) {
+    void Function(QueryBuilderInterface<T> query) callback,
+  ) {
     final query =
         QueryBuilder<T>(connection, grammar, table, modelFactory: modelFactory);
     callback(query);
@@ -1163,13 +1295,14 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'query': query,
       'boolean': 'AND',
     });
-    _bindings.addAll(query._bindings);
+    _whereBindings.addAll(query.bindings);
     return this;
   }
 
   @override
   QueryBuilderInterface<T> orWhereNested(
-      void Function(QueryBuilderInterface<T> query) callback,) {
+    void Function(QueryBuilderInterface<T> query) callback,
+  ) {
     final query =
         QueryBuilder<T>(connection, grammar, table, modelFactory: modelFactory);
     callback(query);
@@ -1178,7 +1311,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'query': query,
       'boolean': 'OR',
     });
-    _bindings.addAll(query._bindings);
+    _whereBindings.addAll(query.bindings);
     return this;
   }
 
@@ -1208,26 +1341,58 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   @override
-  QueryBuilderInterface<T> withAvg(String relation, String column) => this;
+  QueryBuilderInterface<T> withAvg(String relation, String column) =>
+      _withAggregate(relation, 'AVG', column);
 
   @override
-  QueryBuilderInterface<T> withMax(String relation, String column) => this;
+  QueryBuilderInterface<T> withMax(String relation, String column) =>
+      _withAggregate(relation, 'MAX', column);
 
   @override
-  QueryBuilderInterface<T> withMin(String relation, String column) => this;
+  QueryBuilderInterface<T> withMin(String relation, String column) =>
+      _withAggregate(relation, 'MIN', column);
 
   @override
-  QueryBuilderInterface<T> withSum(String relation, String column) => this;
+  QueryBuilderInterface<T> withSum(String relation, String column) =>
+      _withAggregate(relation, 'SUM', column);
+
+  QueryBuilderInterface<T> _withAggregate(
+      String relationName, String function, String column,) {
+    if (modelFactory == null) {
+      throw Exception('withAggregate requires a model factory');
+    }
+    final model = modelFactory!({});
+    if (model is! HasRelations) {
+      throw Exception('Model does not use HasRelations trait');
+    }
+
+    final relationObj = (model as HasRelations).relation(relationName);
+    final relationQuery = relationObj.getRelationExistenceQuery(
+      relationObj.getQuery(),
+      this,
+    );
+
+    if (relationQuery is QueryBuilder) {
+      relationQuery._columns = [];
+    }
+
+    relationQuery.selectRaw('$function(${grammar.wrap(column)})');
+    selectSub(
+        relationQuery, '${relationName}_${function.toLowerCase()}_$column',);
+
+    return this;
+  }
 
   @override
   QueryBuilderInterface<T> orWhereBetween(String column, start, end) {
     _wheres.add({
       'type': 'Between',
       'column': column,
+      'values': [start, end],
       'boolean': 'OR',
     });
-    _bindings.add(start);
-    _bindings.add(end);
+    _whereBindings.add(start);
+    _whereBindings.add(end);
     return this;
   }
 
@@ -1236,10 +1401,11 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     _wheres.add({
       'type': 'NotBetween',
       'column': column,
+      'values': [start, end],
       'boolean': 'OR',
     });
-    _bindings.add(start);
-    _bindings.add(end);
+    _whereBindings.add(start);
+    _whereBindings.add(end);
     return this;
   }
 
@@ -1291,7 +1457,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'query': query,
       'boolean': 'OR',
     });
-    _bindings.addAll(query._bindings);
+    _whereBindings.addAll(query.bindings);
     return this;
   }
 
@@ -1305,13 +1471,16 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'query': query,
       'boolean': 'OR',
     });
-    _bindings.addAll(query._bindings);
+    _whereBindings.addAll(query.bindings);
     return this;
   }
 
   @override
-  QueryBuilderInterface<T> orWhereJsonContains(String column, value,
-      [String? path,]) {
+  QueryBuilderInterface<T> orWhereJsonContains(
+    String column,
+    value, [
+    String? path,
+  ]) {
     _wheres.add({
       'type': 'JsonContains',
       'column': column,
@@ -1319,14 +1488,14 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'path': path,
       'boolean': 'OR',
     });
-    _bindings.add(value);
+    _whereBindings.add(value);
     if (path != null) {
-      if (!path.startsWith(r'$')) path = '\$.$path';
-      _bindings.add(path);
+      _whereBindings.add(_jsonPath(path));
     }
     return this;
   }
 
+  @override
   QueryBuilderInterface<T> orWhereJsonContainsKey(String column, String path) {
     _wheres.add({
       'type': 'JsonContainsKey',
@@ -1334,13 +1503,16 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'path': path,
       'boolean': 'OR',
     });
-    if (!path.startsWith(r'$')) path = '\$.$path';
-    _bindings.add(path);
+    _whereBindings.add(_jsonPath(path));
     return this;
   }
 
-  QueryBuilderInterface<T> orWhereJsonDoesntContain(String column, value,
-      [String? path,]) {
+  @override
+  QueryBuilderInterface<T> orWhereJsonDoesntContain(
+    String column,
+    value, [
+    String? path,
+  ]) {
     _wheres.add({
       'type': 'JsonDoesntContain',
       'column': column,
@@ -1348,17 +1520,20 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'path': path,
       'boolean': 'OR',
     });
-    _bindings.add(value);
+    _whereBindings.add(value);
     if (path != null) {
-      if (!path.startsWith(r'$')) path = '\$.$path';
-      _bindings.add(path);
+      _whereBindings.add(_jsonPath(path));
     }
     return this;
   }
 
+  @override
   QueryBuilderInterface<T> orWhereJsonLength(
-      String column, String operator, int length,
-      [String? path,]) {
+    String column,
+    String operator,
+    int length, [
+    String? path,
+  ]) {
     _wheres.add({
       'type': 'JsonLength',
       'column': column,
@@ -1368,10 +1543,9 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       'boolean': 'OR',
     });
     if (path != null) {
-      if (!path.startsWith(r'$')) path = '\$.$path';
-      _bindings.add(path);
+      _whereBindings.add(_jsonPath(path));
     }
-    _bindings.add(length);
+    _whereBindings.add(length);
     return this;
   }
 
@@ -1382,10 +1556,4 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   @override
   QueryBuilderInterface<T> orWhereNotLike(String column, String pattern) =>
       orWhere(column, 'NOT LIKE', pattern);
-
-  String _singular(String word) {
-    if (word.endsWith('ies')) return word.substring(0, word.length - 3) + 'y';
-    if (word.endsWith('s')) return word.substring(0, word.length - 1);
-    return word;
-  }
 }

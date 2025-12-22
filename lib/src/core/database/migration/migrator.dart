@@ -9,11 +9,14 @@ import '../database.dart';
 class Migrator {
   final DatabaseManager manager;
   final List<MigrationFile> _migrations = [];
-  SchemaBuilder get schemaBuilder => manager.schemaBuilder;
+  late final SchemaBuilder _schemaBuilder;
+  SchemaBuilder get schemaBuilder => _schemaBuilder;
 
   Migrator(
     this.manager,
-  );
+  ) {
+    _schemaBuilder = manager.schemaBuilder;
+  }
 
   void registerAll(List<MigrationFile> migrations) {
     _migrations.addAll(migrations);
@@ -32,7 +35,7 @@ class Migrator {
       }
 
       Khadem.logger.info('⚙️ Running migration: ${migration.name}');
-      await migration.up(manager.schemaBuilder);
+      await migration.up(schemaBuilder);
       await _executeSchemaQueries();
       await _markAsRan(migration.name);
     }
@@ -47,7 +50,7 @@ class Migrator {
       if (!ran.contains(migration.name)) continue;
 
       Khadem.logger.info('↩️ Reverting: ${migration.name}');
-      await migration.down(manager.schemaBuilder);
+      await migration.down(schemaBuilder);
       await _executeSchemaQueries();
       await _removeFromRan(migration.name);
     }
@@ -67,14 +70,14 @@ class Migrator {
 
   Future<void> up(String name) async {
     final migration = _findMigration(name);
-    await migration.up(manager.schemaBuilder);
+    await migration.up(schemaBuilder);
     await _executeSchemaQueries();
     await _markAsRan(migration.name);
   }
 
   Future<void> down(String name) async {
     final migration = _findMigration(name);
-    await migration.down(manager.schemaBuilder);
+    await migration.down(schemaBuilder);
     await _executeSchemaQueries();
     await _removeFromRan(migration.name);
   }

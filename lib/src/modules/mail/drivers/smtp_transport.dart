@@ -31,6 +31,8 @@ class SmtpTransport implements TransportInterface {
   Socket? _plainSocket;
   bool _isConnected = false;
   Stream<List<int>>? _socketStream;
+  Set<String> _lastEhloCapabilities = const {};
+  String? _lastCommand;
 
   SmtpTransport(this._config);
 
@@ -43,11 +45,8 @@ class SmtpTransport implements TransportInterface {
       // Validate message
       message.validate();
 
-      // Connect to SMTP server
+      // Connect to SMTP server (handles EHLO/STARTTLS internally)
       await _connect();
-
-      // Send EHLO/HELO
-      await _sendCommand('EHLO ${_config.host}', expectedCode: 250);
 
       // Authenticate if credentials provided
       if (_config.username != null && _config.password != null) {
@@ -89,7 +88,6 @@ class SmtpTransport implements TransportInterface {
   Future<bool> test() async {
     try {
       await _connect();
-      await _sendCommand('EHLO ${_config.host}', expectedCode: 250);
       await _sendCommand('QUIT', expectedCode: 221);
       await _disconnect();
       return true;
@@ -105,6 +103,11 @@ class SmtpTransport implements TransportInterface {
 
     try {
       final timeout = Duration(seconds: _config.timeout);
+      final heloName = _config.host.isNotEmpty
+          ? _config.host
+          : (Platform.localHostname.isNotEmpty
+              ? Platform.localHostname
+              : InternetAddress.loopbackIPv4.host);
 
       if (_config.encryption == 'ssl') {
         // Direct SSL connection
@@ -115,8 +118,10 @@ class SmtpTransport implements TransportInterface {
             timeout: timeout,
           );
           _socketStream = _socket!.asBroadcastStream();
+          _socket?.setOption(SocketOption.tcpNoDelay, true);
           _isConnected = true;
-          await _readResponse(); // Read server greeting
+          await _readResponse(); // Server greeting
+          await _performEhlo(heloName);
         } on SocketException catch (e) {
           throw MailTransportException(
             'Failed to connect to SMTP server ${_config.host}:${_config.port} using SSL. '
@@ -135,19 +140,32 @@ class SmtpTransport implements TransportInterface {
             _config.port,
             timeout: timeout,
           );
+          _plainSocket?.setOption(SocketOption.tcpNoDelay, true);
           _socketStream = _plainSocket!.asBroadcastStream();
           _isConnected = true;
-          await _readResponse(); // Read server greeting
+          await _readResponse(); // Server greeting
+
+          // Per RFC 3207, issue EHLO before STARTTLS and again after upgrade
+          final caps = await _performEhlo(heloName);
 
           if (_config.encryption == 'tls') {
-            // Upgrade to TLS
+            if (!caps.contains('STARTTLS')) {
+              throw MailTransportException(
+                'Server does not advertise STARTTLS but encryption "tls" was requested.',
+              );
+            }
+
             await _sendCommand('STARTTLS', expectedCode: 220);
             _socket = await SecureSocket.secure(
               _plainSocket!,
               host: _config.host,
             );
             _socketStream = _socket!.asBroadcastStream();
+            _socket?.setOption(SocketOption.tcpNoDelay, true);
             _plainSocket = null;
+
+            // Re-announce capabilities on the secured channel
+            await _performEhlo(heloName);
           }
         } on SocketException catch (e) {
           throw MailTransportException(
@@ -173,6 +191,37 @@ class SmtpTransport implements TransportInterface {
       if (e is MailTransportException) rethrow;
       throw MailTransportException('Failed to connect to SMTP server: $e');
     }
+  }
+
+  Future<Set<String>> _performEhlo(String heloName) async {
+    final caps = <String>{};
+    try {
+      final response = await _sendCommand('EHLO $heloName', expectedCode: 250);
+      caps.addAll(_extractCapabilities(response));
+    } on MailTransportException {
+      // Fallback to HELO for servers that do not support EHLO
+      final response = await _sendCommand('HELO $heloName', expectedCode: 250);
+      caps.addAll(_extractCapabilities(response));
+    }
+    _lastEhloCapabilities = caps;
+    return caps;
+  }
+
+  Set<String> _extractCapabilities(String response) {
+    final caps = <String>{};
+    final lines = response.split('\n');
+    for (final raw in lines) {
+      final line = raw.trim();
+      if (line.isEmpty) continue;
+      // Example: "250-STARTTLS" or "250 AUTH LOGIN PLAIN"
+      if (line.length >= 3 && line.startsWith(RegExp(r'\d{3}'))) {
+        final rest = line.substring(4).trim();
+        if (rest.isEmpty) continue;
+        final firstToken = rest.split(' ').first;
+        caps.add(firstToken.toUpperCase());
+      }
+    }
+    return caps;
   }
 
   /// Disconnects from the SMTP server.
@@ -346,8 +395,12 @@ class SmtpTransport implements TransportInterface {
       buffer.writeln('--$boundary--');
     }
 
-    // Write to socket
-    await _write(buffer.toString());
+    // Write to socket; ensure DATA ends with CRLF before terminating dot
+    var content = buffer.toString();
+    if (!content.endsWith('\r\n')) {
+      content += '\r\n';
+    }
+    await _write(content);
   }
 
   /// Writes an attachment to the message.
@@ -394,7 +447,11 @@ class SmtpTransport implements TransportInterface {
   }
 
   /// Sends a command to the SMTP server.
-  Future<void> _sendCommand(String command, {int? expectedCode}) async {
+  Future<String> _sendCommand(
+    String command, {
+    int? expectedCode,
+  }) async {
+    _lastCommand = command;
     await _write('$command\r\n');
     final response = await _readResponse();
 
@@ -406,6 +463,8 @@ class SmtpTransport implements TransportInterface {
         );
       }
     }
+
+    return response;
   }
 
   /// Writes data to the socket.
@@ -425,17 +484,39 @@ class SmtpTransport implements TransportInterface {
       throw MailTransportException('Not connected to SMTP server');
     }
 
+    final timeout = Duration(seconds: _config.timeout);
+    try {
+      return await _readResponseInternal().timeout(timeout, onTimeout: () {
+        throw MailTransportException(
+          'SMTP response timed out after ${timeout.inSeconds}s'
+          '${_lastCommand != null ? ' (after $_lastCommand)' : ''}',
+        );
+      });
+    } on TimeoutException {
+      rethrow;
+    }
+  }
+
+  Future<String> _readResponseInternal() async {
+    if (_socketStream == null) {
+      throw MailTransportException('Not connected to SMTP server');
+    }
+
     final response = StringBuffer();
     await for (final data in _socketStream!) {
       final text = utf8.decode(data);
       response.write(text);
 
-      // Check if this is the last line of the response
+      // Track the last complete line to determine end of multi-line replies
       if (text.contains('\n')) {
-        final lines = text.split('\n');
-        final lastLine = lines[lines.length - 2]; // -2 because last is empty
-        if (lastLine.length >= 4 && lastLine[3] == ' ') {
-          break;
+        final lines = response.toString().split('\n');
+        // Drop possible trailing empty element
+        final nonEmpty = lines.where((l) => l.trim().isNotEmpty).toList();
+        if (nonEmpty.isNotEmpty) {
+          final lastLine = nonEmpty.last;
+          if (lastLine.length >= 4 && lastLine[3] == ' ') {
+            break;
+          }
         }
       }
     }

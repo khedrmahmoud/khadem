@@ -42,20 +42,31 @@ abstract class Grammar {
 
   /// Compile an increment statement into SQL.
   String compileIncrement(
-      Map<String, dynamic> query, String column, int amount,);
+    Map<String, dynamic> query,
+    String column,
+    int amount,
+  );
 
   /// Compile an insert statement with multiple rows.
   String compileInsertMany(
-      Map<String, dynamic> query, List<Map<String, dynamic>> values,);
+    Map<String, dynamic> query,
+    List<Map<String, dynamic>> values,
+  );
 
   /// Compile an upsert statement.
-  String compileUpsert(Map<String, dynamic> query,
-      List<Map<String, dynamic>> values, List<String> uniqueBy,
-      [List<String>? update,]);
+  String compileUpsert(
+    Map<String, dynamic> query,
+    List<Map<String, dynamic>> values,
+    List<String> uniqueBy, [
+    List<String>? update,
+  ]);
 
   /// Compile an increment each statement.
-  String compileIncrementEach(Map<String, dynamic> query,
-      Map<String, int> columns, Map<String, dynamic> extras,);
+  String compileIncrementEach(
+    Map<String, dynamic> query,
+    Map<String, int> columns,
+    Map<String, dynamic> extras,
+  );
 
   /// Compile the "from" portion of the query.
   String compileFrom(String table) {
@@ -257,11 +268,16 @@ abstract class Grammar {
 
   /// Compile an aggregate query (count, max, min, etc.).
   String compileAggregate(
-      Map<String, dynamic> query, Map<String, dynamic> aggregate,) {
+    Map<String, dynamic> query,
+    Map<String, dynamic> aggregate,
+  ) {
     // Temporarily replace columns with aggregate
     final originalColumns = query['columns'];
     query['columns'] = [
-      '${aggregate['function']}(${aggregate['column']}) as aggregate',
+      {
+        'type': 'Raw',
+        'sql': '${aggregate['function']}(${aggregate['column']}) as aggregate',
+      },
     ];
 
     final sql = compileSelect(query);
