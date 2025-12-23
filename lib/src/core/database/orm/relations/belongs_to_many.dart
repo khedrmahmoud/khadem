@@ -43,10 +43,10 @@ class BelongsToMany<Related extends KhademModel<Related>, Parent>
   }
 
   @override
-  void addEagerConstraints(List<Parent> models) {
+  void addEagerConstraints(List<KhademModel> models) {
     _performJoin();
     final keys = models
-        .map((model) => (model as KhademModel).getAttribute(parentKey))
+        .map((model) => model.getAttribute(parentKey))
         .where((key) => key != null)
         .toSet()
         .toList();
@@ -75,16 +75,16 @@ class BelongsToMany<Related extends KhademModel<Related>, Parent>
   }
 
   @override
-  List<Parent> initRelation(List<Parent> models, String relation) {
+  List<KhademModel> initRelation(List<KhademModel> models, String relation) {
     for (final model in models) {
-      (model as KhademModel).setRelation(relation, <Related>[]);
+      model.setRelation(relation, <Related>[]);
     }
     return models;
   }
 
   @override
-  List<Parent> match(
-      List<Parent> models, List<Related> results, String relation,) {
+  List<KhademModel> match(
+      List<KhademModel> models, List<Related> results, String relation,) {
     // This is tricky because we need the pivot data to match.
     // In a real implementation, we would select the pivot columns as well.
     // For now, we assume the pivot data is available or we re-query (which is inefficient).

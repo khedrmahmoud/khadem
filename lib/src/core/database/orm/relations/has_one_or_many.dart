@@ -24,9 +24,9 @@ abstract class HasOneOrMany<Related extends KhademModel<Related>, Parent>
   }
 
   @override
-  void addEagerConstraints(List<Parent> models) {
+  void addEagerConstraints(List<KhademModel> models) {
     final keys = models
-        .map((model) => (model as KhademModel).getAttribute(localKey))
+        .map((model) => model.getAttribute(localKey))
         .where((key) => key != null)
         .toSet()
         .toList();
@@ -49,7 +49,7 @@ abstract class HasOneOrMany<Related extends KhademModel<Related>, Parent>
   }
 
   /// Match the eagerly loaded results to their parents.
-  List<Parent> matchOneOrMany(List<Parent> models, List<Related> results,
+  List<KhademModel> matchOneOrMany(List<KhademModel> models, List<Related> results,
       String relation, String type,) {
     final dictionary = <dynamic, List<Related>>{};
 
@@ -64,20 +64,20 @@ abstract class HasOneOrMany<Related extends KhademModel<Related>, Parent>
     }
 
     for (final model in models) {
-      final key = (model as KhademModel).getAttribute(localKey);
+      final key = model.getAttribute(localKey);
       if (dictionary.containsKey(key)) {
         final value = dictionary[key]!;
         if (type == 'one') {
-          (model as KhademModel)
+          model
               .setRelation(relation, value.isNotEmpty ? value.first : null);
         } else {
-          (model as KhademModel).setRelation(relation, value);
+          model.setRelation(relation, value);
         }
       } else {
         if (type == 'one') {
-          (model as KhademModel).setRelation(relation, null);
+          model.setRelation(relation, null);
         } else {
-          (model as KhademModel).setRelation(relation, <Related>[]);
+          model.setRelation(relation, <Related>[]);
         }
       }
     }

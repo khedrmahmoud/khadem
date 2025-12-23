@@ -263,5 +263,9 @@ class DateTimeCast extends AttributeCaster<DateTime> {
   }
 
   @override
-  dynamic set(DateTime? value) => value;
+  dynamic set(DateTime? value) {
+    if (value == null) return null;
+    // Convert to MySQL format: YYYY-MM-DD HH:MM:SS
+    return value.toUtc().toIso8601String().replaceAll('T', ' ').substring(0, 19);
+  }
 }

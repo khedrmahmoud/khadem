@@ -29,7 +29,7 @@ class MorphToMany<Related extends KhademModel<Related>, Parent>
   }
 
   @override
-  void addEagerConstraints(List<Parent> models) {
+  void addEagerConstraints(List<KhademModel> models) {
     super.addEagerConstraints(models);
     query.where('$table.$morphTypeField', '=', morphClass);
   }

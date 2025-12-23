@@ -43,10 +43,10 @@ class HasManyThrough<Related extends KhademModel<Related>, Parent>
   }
 
   @override
-  void addEagerConstraints(List<Parent> models) {
+  void addEagerConstraints(List<KhademModel> models) {
     _performJoin();
     final keys = models
-        .map((model) => (model as KhademModel).getAttribute(localKey))
+        .map((model) => model.getAttribute(localKey))
         .where((key) => key != null)
         .toSet()
         .toList();
@@ -81,16 +81,16 @@ class HasManyThrough<Related extends KhademModel<Related>, Parent>
   }
 
   @override
-  List<Parent> initRelation(List<Parent> models, String relation) {
+  List<KhademModel> initRelation(List<KhademModel> models, String relation) {
     for (final model in models) {
-      (model as KhademModel).setRelation(relation, <Related>[]);
+      model.setRelation(relation, <Related>[]);
     }
     return models;
   }
 
   @override
-  List<Parent> match(
-      List<Parent> models, List<Related> results, String relation,) {
+  List<KhademModel> match(
+      List<KhademModel> models, List<Related> results, String relation,) {
     final dictionary = <dynamic, List<Related>>{};
 
     for (final result in results) {
@@ -106,9 +106,9 @@ class HasManyThrough<Related extends KhademModel<Related>, Parent>
     }
 
     for (final model in models) {
-      final key = (model as KhademModel).getAttribute(localKey);
+      final key = model.getAttribute(localKey);
       if (dictionary.containsKey(key)) {
-        (model as KhademModel).setRelation(relation, dictionary[key]);
+        model.setRelation(relation, dictionary[key]);
       }
     }
 

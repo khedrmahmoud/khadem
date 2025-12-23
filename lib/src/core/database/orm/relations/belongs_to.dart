@@ -26,9 +26,9 @@ class BelongsTo<Related extends KhademModel<Related>, Parent>
   }
 
   @override
-  void addEagerConstraints(List<Parent> models) {
+  void addEagerConstraints(List<KhademModel> models) {
     final keys = models
-        .map((model) => (model as KhademModel).getAttribute(foreignKey))
+        .map((model) => model.getAttribute(foreignKey))
         .where((key) => key != null)
         .toSet()
         .toList();
@@ -56,16 +56,16 @@ class BelongsTo<Related extends KhademModel<Related>, Parent>
   }
 
   @override
-  List<Parent> initRelation(List<Parent> models, String relation) {
+  List<KhademModel> initRelation(List<KhademModel> models, String relation) {
     for (final model in models) {
-      (model as KhademModel).setRelation(relation, null);
+      model.setRelation(relation, null);
     }
     return models;
   }
 
   @override
-  List<Parent> match(
-      List<Parent> models, List<Related> results, String relation,) {
+  List<KhademModel> match(
+      List<KhademModel> models, List<Related> results, String relation,) {
     final dictionary = <dynamic, Related>{};
 
     for (final result in results) {
@@ -76,9 +76,9 @@ class BelongsTo<Related extends KhademModel<Related>, Parent>
     }
 
     for (final model in models) {
-      final key = (model as KhademModel).getAttribute(foreignKey);
+      final key = model.getAttribute(foreignKey);
       if (dictionary.containsKey(key)) {
-        (model as KhademModel).setRelation(relation, dictionary[key]);
+        model.setRelation(relation, dictionary[key]);
       }
     }
 

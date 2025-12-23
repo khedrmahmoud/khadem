@@ -14,6 +14,9 @@ mixin HasAttributes<T> {
   /// Cache for computed properties.
   final Map<String, dynamic> _computedCache = {};
 
+  /// Attributes currently being retrieved to prevent recursion.
+  final Set<String> _retrieving = {};
+
   final Set<String> _runtimeHidden = {};
   final Set<String> _runtimeVisible = {};
   final Set<String> _runtimeAppends = {};
@@ -65,17 +68,27 @@ mixin HasAttributes<T> {
       return _getAttributeValue(key, _attributes[key]);
     }
 
-    if (appends.containsKey(key)) {
-      if (_computedCache.containsKey(key)) {
-        return _computedCache[key];
+    // Prevent recursion when accessing appends
+    if (_retrieving.contains(key)) {
+      return null;
+    }
+    _retrieving.add(key);
+
+    try {
+      if (appends.containsKey(key)) {
+        if (_computedCache.containsKey(key)) {
+          return _computedCache[key];
+        }
+        final value = appends[key];
+        if (value is Function) {
+          final result = value();
+          _computedCache[key] = result;
+          return result;
+        }
+        return value;
       }
-      final value = appends[key];
-      if (value is Function) {
-        final result = value();
-        _computedCache[key] = result;
-        return result;
-      }
-      return value;
+    } finally {
+      _retrieving.remove(key);
     }
 
     return null;
@@ -163,7 +176,7 @@ mixin HasAttributes<T> {
     switch (castType) {
       case int:
         return int.tryParse(value.toString());
-      case double:
+      case const (double):
         return double.tryParse(value.toString());
       case String:
         return value.toString();

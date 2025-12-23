@@ -18,16 +18,16 @@ class MorphMany<Related extends KhademModel<Related>, Parent>
   }
 
   @override
-  List<Parent> initRelation(List<Parent> models, String relation) {
+  List<KhademModel> initRelation(List<KhademModel> models, String relation) {
     for (final model in models) {
-      (model as KhademModel).setRelation(relation, <Related>[]);
+      model.setRelation(relation, <Related>[]);
     }
     return models;
   }
 
   @override
-  List<Parent> match(
-      List<Parent> models, List<Related> results, String relation,) {
+  List<KhademModel> match(
+      List<KhademModel> models, List<Related> results, String relation,) {
     return matchOneOrMany(models, results, relation, 'many');
   }
 }

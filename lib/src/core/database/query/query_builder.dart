@@ -1300,6 +1300,13 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   @override
+  QueryBuilderInterface<T> whereQuery(
+    void Function(QueryBuilderInterface<T> query) callback,
+  ) {
+    return whereNested(callback);
+  }
+
+  @override
   QueryBuilderInterface<T> orWhereNested(
     void Function(QueryBuilderInterface<T> query) callback,
   ) {
@@ -1313,6 +1320,13 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     });
     _whereBindings.addAll(query.bindings);
     return this;
+  }
+
+  @override
+  QueryBuilderInterface<T> orWhereQuery(
+    void Function(QueryBuilderInterface<T> query) callback,
+  ) {
+    return orWhereNested(callback);
   }
 
   @override

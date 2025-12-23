@@ -20,14 +20,14 @@ abstract class Relation<Related extends KhademModel<Related>, Parent> {
   void addConstraints();
 
   /// Set the constraints for an eager load of the relation.
-  void addEagerConstraints(List<Parent> models);
+  void addEagerConstraints(List<KhademModel> models);
 
   /// Initialize the relation on a set of models.
-  List<Parent> initRelation(List<Parent> models, String relation);
+  List<KhademModel> initRelation(List<KhademModel> models, String relation);
 
   /// Match the eagerly loaded results to their parents.
-  List<Parent> match(
-      List<Parent> models, List<Related> results, String relation,);
+  List<KhademModel> match(
+      List<KhademModel> models, List<Related> results, String relation,);
 
   /// Get the query builder for the relation.
   QueryBuilderInterface<Related> getQuery() => query;

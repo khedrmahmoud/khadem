@@ -46,16 +46,18 @@ mixin Timestamps<T> on InteractsWithDatabase<T>, HasAttributes<T> {
     if (!timestamps) return;
 
     final now = DateTime.now().toUtc();
+    // Format for MySQL: YYYY-MM-DD HH:MM:SS
+    final formatted = now.toIso8601String().replaceAll('T', ' ').substring(0, 19);
 
     if (isCreating) {
       // Set created_at only on creation
       if (createdAt == null) {
-        createdAt = now;
+        setAttribute(createdAtColumn, formatted);
       }
     }
 
     // Always update updated_at
-    updatedAt = now;
+    setAttribute(updatedAtColumn, formatted);
   }
 
   /// Override save to automatically update timestamps

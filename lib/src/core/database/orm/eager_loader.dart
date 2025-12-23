@@ -92,7 +92,7 @@ class EagerLoader {
   ///
   /// The loaded relations are attached to each model via the model's relation property.
   static Future<void> loadRelations(
-    List<KhademModel<dynamic>> models,
+    List<KhademModel> models,
     List<dynamic> relations,
   ) async {
     if (models.isEmpty) return;

@@ -48,6 +48,12 @@ abstract class QueryBuilderInterface<T> {
     String boolean = 'AND',
   ]);
 
+  /// Adds a raw SQL OR WHERE clause.
+  QueryBuilderInterface<T> orWhereRaw(
+    String sql, [
+    List<dynamic> bindings = const [],
+  ]);
+
   /// Adds an OR WHERE clause.
   QueryBuilderInterface<T> orWhere(
     String column,
@@ -127,6 +133,13 @@ abstract class QueryBuilderInterface<T> {
     String? path,
   ]);
 
+  /// OR WHERE NOT JSON_CONTAINS(column, value, path)
+  QueryBuilderInterface<T> orWhereJsonDoesntContain(
+    String column,
+    dynamic value, [
+    String? path,
+  ]);
+
   /// WHERE JSON_LENGTH(column, path) operator value
   QueryBuilderInterface<T> whereJsonLength(
     String column,
@@ -135,8 +148,19 @@ abstract class QueryBuilderInterface<T> {
     String? path,
   ]);
 
+  /// OR WHERE JSON_LENGTH(column, path) operator value
+  QueryBuilderInterface<T> orWhereJsonLength(
+    String column,
+    String operator,
+    int length, [
+    String? path,
+  ]);
+
   /// WHERE JSON_CONTAINS_PATH(column, 'one', path)
   QueryBuilderInterface<T> whereJsonContainsKey(String column, String path);
+
+  /// OR WHERE JSON_CONTAINS_PATH(column, 'one', path)
+  QueryBuilderInterface<T> orWhereJsonContainsKey(String column, String path);
 
   // ---------------------------- Advanced Query Helpers ----------------------------
 
@@ -469,8 +493,18 @@ abstract class QueryBuilderInterface<T> {
     void Function(QueryBuilderInterface<T> query) callback,
   );
 
+  /// Add a nested WHERE clause group (Alias for whereNested)
+  QueryBuilderInterface<T> whereQuery(
+    void Function(QueryBuilderInterface<T> query) callback,
+  );
+
   /// Add a nested OR WHERE clause group
   QueryBuilderInterface<T> orWhereNested(
+    void Function(QueryBuilderInterface<T> query) callback,
+  );
+
+  /// Add a nested OR WHERE clause group (Alias for orWhereNested)
+  QueryBuilderInterface<T> orWhereQuery(
     void Function(QueryBuilderInterface<T> query) callback,
   );
 

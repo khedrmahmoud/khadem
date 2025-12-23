@@ -9,7 +9,7 @@ export 'concerns/has_events.dart';
 export 'concerns/has_relations.dart';
 export 'concerns/interacts_with_database.dart';
 
-abstract class KhademModel<T extends KhademModel<T>>
+abstract class KhademModel<T>
     with
         HasAttributes<T>,
         HasEvents<T>,
