@@ -50,8 +50,7 @@ export 'database/database_drivers/mysql/mysql_connection.dart';
 export 'database/database_drivers/mysql/mysql_schema_builder.dart';
 export 'database/database_drivers/postgres/postgres_driver.dart';
 export 'database/database_drivers/postgres/postgres_query_builder.dart';
-export 'database/database_drivers/sqlite/sqlite_driver.dart';
-export 'database/database_drivers/sqlite/sqlite_query_builder.dart';
+
 // ========================
 // 📦 Migration
 // ========================

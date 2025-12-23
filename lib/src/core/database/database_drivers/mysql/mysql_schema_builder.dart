@@ -43,9 +43,15 @@ class MySQLSchemaBuilder implements SchemaBuilder {
       parts.add(_getTypeWithLength(column));
     }
 
+    // Charset & Collation
+    if (column.charsetValue != null) {
+      parts.add('CHARACTER SET ${column.charsetValue}');
+    }
+    if (column.collationValue != null) {
+      parts.add('COLLATE ${column.collationValue}');
+    }
+
     // 2. Nullability
-    // In MySQL, columns are nullable by default unless NOT NULL is specified.
-    // However, explicit NULL/NOT NULL is better.
     parts.add(column.isNullable ? 'NULL' : 'NOT NULL');
 
     // 3. Default Value
@@ -53,28 +59,43 @@ class MySQLSchemaBuilder implements SchemaBuilder {
       parts.add(_compileDefault(column));
     }
 
-    // 4. Auto Increment
+    // 4. On Update Current Timestamp
+    if (column.useCurrentOnUpdateValue) {
+      parts.add('ON UPDATE CURRENT_TIMESTAMP');
+    }
+
+    // 5. Invisible (MySQL 8.0+)
+    if (column.isInvisible) {
+      parts.add('INVISIBLE');
+    }
+
+    // 6. Auto Increment
     if (column.isAutoIncrement) {
       parts.add('AUTO_INCREMENT');
     }
 
-    // 5. Primary Key (Inline)
-    // Note: It's often better to define PKs at the table level, especially for composite keys.
-    // But for single column PKs, inline is fine.
+    // 7. Primary Key (Inline)
     if (column.isPrimary) {
       parts.add('PRIMARY KEY');
     } else if (column.isUnique) {
       parts.add('UNIQUE');
     }
 
-    // 6. Comments
-    if (column.comment != null) {
-      parts.add("COMMENT '${column.comment!.replaceAll("'", "\\'")}'");
+    // 8. Comments
+    if (column.commentValue != null) {
+      parts.add("COMMENT '${column.commentValue!.replaceAll("'", "\\'")}'");
     }
 
-    // 7. Check Constraints (MySQL 8.0.16+)
+    // 9. Check Constraints (MySQL 8.0.16+)
     if (column.checkConstraint != null) {
       parts.add('CHECK (${column.checkConstraint})');
+    }
+
+    // 10. Positioning
+    if (column.isFirst) {
+      parts.add('FIRST');
+    } else if (column.afterColumn != null) {
+      parts.add('AFTER `${column.afterColumn}`');
     }
 
     return parts.join(' ');
@@ -82,6 +103,11 @@ class MySQLSchemaBuilder implements SchemaBuilder {
 
   String _compileDefault(ColumnDefinition column) {
     final value = column.defaultValue;
+    
+    if (column.isDefaultRaw) {
+      return 'DEFAULT $value';
+    }
+
     final type = column.type.toUpperCase();
 
     if (value == null) return 'DEFAULT NULL';
@@ -150,9 +176,9 @@ class MySQLSchemaBuilder implements SchemaBuilder {
   String _getTypeWithLength(ColumnDefinition column) {
     switch (column.type.toUpperCase()) {
       case 'VARCHAR':
-        return 'VARCHAR(${column.length ?? 255})';
+        return 'VARCHAR(${column.lengthValue ?? 255})';
       case 'CHAR':
-        return 'CHAR(${column.length ?? 255})';
+        return 'CHAR(${column.lengthValue ?? 255})';
       case 'INT':
       case 'INTEGER':
         return column.isUnsigned ? 'INT UNSIGNED' : 'INT';
@@ -165,13 +191,20 @@ class MySQLSchemaBuilder implements SchemaBuilder {
       case 'MEDIUMINT':
         return column.isUnsigned ? 'MEDIUMINT UNSIGNED' : 'MEDIUMINT';
       case 'FLOAT':
+        if (column.precisionValue != null && column.scaleValue != null) {
+          return 'FLOAT(${column.precisionValue}, ${column.scaleValue}) ${column.isUnsigned ? 'UNSIGNED' : ''}'.trim();
+        }
         return column.isUnsigned ? 'FLOAT UNSIGNED' : 'FLOAT';
       case 'DOUBLE':
+        if (column.precisionValue != null && column.scaleValue != null) {
+          return 'DOUBLE(${column.precisionValue}, ${column.scaleValue}) ${column.isUnsigned ? 'UNSIGNED' : ''}'.trim();
+        }
         return column.isUnsigned ? 'DOUBLE UNSIGNED' : 'DOUBLE';
       case 'DECIMAL':
-        // Assuming length stores precision and scale if needed, but usually passed differently.
-        // For now, default to DECIMAL(8, 2) if not specified or just DECIMAL.
-        return 'DECIMAL';
+        if (column.precisionValue != null && column.scaleValue != null) {
+          return 'DECIMAL(${column.precisionValue}, ${column.scaleValue}) ${column.isUnsigned ? 'UNSIGNED' : ''}'.trim();
+        }
+        return 'DECIMAL(8, 2)'; // Default
       case 'BOOLEAN':
       case 'BOOL':
         return 'TINYINT(1)';
@@ -195,9 +228,9 @@ class MySQLSchemaBuilder implements SchemaBuilder {
       case 'YEAR':
         return 'YEAR';
       case 'BINARY':
-        return 'BINARY(${column.length ?? 255})';
+        return 'BINARY(${column.lengthValue ?? 255})';
       case 'VARBINARY':
-        return 'VARBINARY(${column.length ?? 255})';
+        return 'VARBINARY(${column.lengthValue ?? 255})';
       case 'BLOB':
         return 'BLOB';
       case 'LONGBLOB':

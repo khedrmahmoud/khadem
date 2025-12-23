@@ -3,6 +3,7 @@ import '../../../contracts/database/migration_file.dart';
 import '../../../contracts/database/schema_builder.dart';
 import '../../../support/exceptions/database_exception.dart';
 import '../database.dart';
+import '../database_drivers/sqlite/sqlite_connection.dart';
 
 class Migrator {
   final DatabaseManager manager;
@@ -222,32 +223,68 @@ class Migrator {
   }
 
   Future<void> _dropAllTables() async {
-    final response = await manager.connection().execute('SHOW TABLES');
+    final dbConnection = manager.connection();
+
+    if (dbConnection is SQLiteConnection) {
+      await _dropAllTablesSQLite(dbConnection);
+      return;
+    }
+
+    final response = await dbConnection.execute('SHOW TABLES');
     final tables = response.data;
     if (tables == null || tables.isEmpty) return;
 
     final dbName = Khadem.config.get('database.database') as String;
     final key = 'Tables_in_$dbName';
 
-    await manager.connection().execute('SET FOREIGN_KEY_CHECKS = 0');
+    await dbConnection.execute('SET FOREIGN_KEY_CHECKS = 0');
     for (final row in tables) {
       final tableName = row[key] ?? row.values.first;
-      await manager.connection().execute('DROP TABLE IF EXISTS `$tableName`');
+      await dbConnection.execute('DROP TABLE IF EXISTS `$tableName`');
     }
-    await manager.connection().execute('SET FOREIGN_KEY_CHECKS = 1');
+    await dbConnection.execute('SET FOREIGN_KEY_CHECKS = 1');
+  }
+
+  Future<void> _dropAllTablesSQLite(SQLiteConnection connection) async {
+    // Disable foreign keys to avoid constraint violations during drop
+    await connection.unprepared('PRAGMA foreign_keys = OFF');
+
+    try {
+      final response = await connection.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+      );
+      
+      final tables = response.data;
+      if (tables != null) {
+        for (final row in tables) {
+          final tableName = row['name'];
+          await connection.execute('DROP TABLE IF EXISTS "$tableName"');
+        }
+      }
+    } finally {
+      await connection.unprepared('PRAGMA foreign_keys = ON');
+    }
   }
 
   Future<void> _executeSchemaQueries() async {
-    for (final sql in schemaBuilder.queries) {
+    final queries = List<String>.from(schemaBuilder.queries);
+    schemaBuilder.queries.clear();
+    
+    for (final sql in queries) {
       // Khadem.logger.info('📥 Executing: $sql');
       await manager.connection().execute(sql);
     }
-    schemaBuilder.queries.clear();
   }
 
   Future<void> _ensureDatabaseExists() async {
-    final dbName = Khadem.config.get('database.database') as String;
     final dbConnection = manager.connection();
+
+    // SQLite creates the database file automatically upon connection.
+    if (dbConnection is SQLiteConnection) {
+      return;
+    }
+
+    final dbName = Khadem.config.get('database.database') as String;
 
     try {
       await dbConnection.execute('USE $dbName');

@@ -4,6 +4,7 @@ import '../../contracts/database/query_builder_interface.dart';
 import '../../contracts/database/schema_builder.dart';
 import '../../support/exceptions/database_exception.dart';
 import 'database_drivers/mysql/mysql_connection.dart';
+import 'database_drivers/sqlite/sqlite_connection.dart';
 
 /// Manages the active database connection and builder.
 class DatabaseManager {
@@ -67,6 +68,8 @@ class DatabaseManager {
     switch (driver) {
       case 'mysql':
         return MySQLConnection(config);
+      case 'sqlite':
+        return SQLiteConnection(config);
       default:
         throw DatabaseException('Unsupported database driver: $driver');
     }

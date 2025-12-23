@@ -17,7 +17,7 @@ class Blueprint {
 
   /// String (VARCHAR)
   ColumnDefinition string(String name, {int length = 255}) {
-    final col = ColumnDefinition(name, 'VARCHAR').lengthVal(length);
+    final col = ColumnDefinition(name, 'VARCHAR').length(length);
     columns.add(col);
     return col;
   }
@@ -51,8 +51,25 @@ class Blueprint {
   }
 
   /// Float (FLOAT)
-  ColumnDefinition float(String name) {
+  ColumnDefinition float(String name, {int? total, int? places}) {
     final col = ColumnDefinition(name, 'FLOAT');
+    if (total != null) col.total(total, places ?? 0);
+    columns.add(col);
+    return col;
+  }
+
+  /// Double (DOUBLE)
+  ColumnDefinition double(String name, {int? total, int? places}) {
+    final col = ColumnDefinition(name, 'DOUBLE');
+    if (total != null) col.total(total, places ?? 0);
+    columns.add(col);
+    return col;
+  }
+
+  /// Decimal (DECIMAL)
+  ColumnDefinition decimal(String name, {int? total, int? places}) {
+    final col = ColumnDefinition(name, 'DECIMAL');
+    if (total != null) col.total(total, places ?? 0);
     columns.add(col);
     return col;
   }

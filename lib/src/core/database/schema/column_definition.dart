@@ -1,85 +1,88 @@
 /// Represents a single column in a database table definition.
-///
-/// This class provides a fluent API for defining column properties, such as
-/// primary keys, unique constraints, nullable columns, unsigned integers,
-/// auto-incrementing columns, default values, comments, length constraints,
-/// indexes, foreign keys, check constraints, and generated/computed columns.
 class ColumnDefinition {
   /// The name of the column.
   final String name;
 
-  /// The type of the column (e.g. 'INT', 'VARCHAR(255)', etc.).
+  /// The type of the column (e.g. 'INT', 'VARCHAR', 'DECIMAL').
   final String type;
 
-  /// Whether the column is a primary key.
-  bool isPrimary = false;
-
-  /// Whether the column has a unique constraint.
-  bool isUnique = false;
-
-  /// Whether the column allows null values.
+  // ---------------------------------------------------------------------------
+  // Modifiers
+  // ---------------------------------------------------------------------------
   bool isNullable = false;
-
-  /// Whether the column is an unsigned integer.
   bool isUnsigned = false;
-
-  /// Whether the column auto-increments.
   bool isAutoIncrement = false;
-
-  /// Whether the column has an index.
+  bool isPrimary = false;
+  bool isUnique = false;
   bool isIndexed = false;
+  bool isInvisible = false;
 
-  /// The default value for the column.
+  // ---------------------------------------------------------------------------
+  // Default Value
+  // ---------------------------------------------------------------------------
   dynamic defaultValue;
+  bool isDefaultRaw = false;
 
-  /// The length of the column (for string types).
-  int? length;
+  // ---------------------------------------------------------------------------
+  // String / Text Options
+  // ---------------------------------------------------------------------------
+  int? lengthValue;
+  String? charsetValue;
+  String? collationValue;
 
-  /// A comment for the column.
-  String? comment;
+  // ---------------------------------------------------------------------------
+  // Numeric Options (Decimal, Float)
+  // ---------------------------------------------------------------------------
+  int? precisionValue;
+  int? scaleValue;
 
-  /// The values for an ENUM column.
-  List<String>? enumValues;
-
-  /// The foreign table for the column.
+  // ---------------------------------------------------------------------------
+  // Foreign Key Options
+  // ---------------------------------------------------------------------------
   String? foreignTable;
-
-  /// The foreign key for the column.
   String? foreignKey;
-
-  /// The action to take when the foreign key is deleted.
   String? onDeleteAction;
-
-  /// The action to take when the foreign key is updated.
   String? onUpdateAction;
 
-  /// The expression for a generated/computed column.
+  // ---------------------------------------------------------------------------
+  // Generated Columns / Expressions
+  // ---------------------------------------------------------------------------
   String? generatedExpression;
-
-  /// Whether the generated column is stored.
   bool isStoredGenerated = false;
 
-  /// The check constraint for the column.
+  // ---------------------------------------------------------------------------
+  // Timestamp Options
+  // ---------------------------------------------------------------------------
+  bool useCurrentOnUpdateValue = false;
+
+  // ---------------------------------------------------------------------------
+  // Positioning (MySQL)
+  // ---------------------------------------------------------------------------
+  String? afterColumn;
+  bool isFirst = false;
+
+  // ---------------------------------------------------------------------------
+  // Metadata & Constraints
+  // ---------------------------------------------------------------------------
+  String? commentValue;
   String? checkConstraint;
+  List<String>? enumValues;
+
+  // ---------------------------------------------------------------------------
+  // Migration / Schema Change Options
+  // ---------------------------------------------------------------------------
+  String? oldName;
 
   /// Creates a new column definition.
   ColumnDefinition(this.name, this.type);
 
-  /// Specifies the column as a primary key.
-  ColumnDefinition primary() {
-    isPrimary = true;
-    return this;
-  }
-
-  /// Specifies the column as unique.
-  ColumnDefinition unique() {
-    isUnique = true;
-    return this;
-  }
+  // ===========================================================================
+  // Modifier Methods
+  // ===========================================================================
 
   /// Specifies the column as nullable.
-  ColumnDefinition nullable() {
-    isNullable = true;
+  ColumnDefinition nullable([bool value = true]) {
+    isNullable = value;
     return this;
   }
 
@@ -95,21 +98,15 @@ class ColumnDefinition {
     return this;
   }
 
-  /// Specifies a default value for the column.
-  ColumnDefinition defaultVal(dynamic value) {
-    defaultValue = value;
+  /// Specifies the column as a primary key.
+  ColumnDefinition primary() {
+    isPrimary = true;
     return this;
   }
 
-  /// Specifies a comment for the column.
-  ColumnDefinition commentText(String text) {
-    comment = text;
-    return this;
-  }
-
-  /// Specifies the length of the column (for string types).
-  ColumnDefinition lengthVal(int len) {
-    length = len;
+  /// Specifies the column as unique.
+  ColumnDefinition unique() {
+    isUnique = true;
     return this;
   }
 
@@ -119,7 +116,75 @@ class ColumnDefinition {
     return this;
   }
 
-  /// Specifies a foreign key for the column.
+  /// Specifies the column as invisible (MySQL 8.0+).
+  ColumnDefinition invisible() {
+    isInvisible = true;
+    return this;
+  }
+
+  // ===========================================================================
+  // Default Value Methods
+  // ===========================================================================
+
+  /// Specifies a default value for the column.
+  ///
+  /// [value] can be a String, num, bool, or DateTime.
+  ColumnDefinition defaultsTo(dynamic value) {
+    defaultValue = value;
+    isDefaultRaw = false;
+    return this;
+  }
+
+  /// Alias for [defaultsTo].
+  ColumnDefinition defaultVal(dynamic value) => defaultsTo(value);
+
+  /// Specifies a raw SQL default value for the column.
+  ///
+  /// Example: `defaultRaw('CURRENT_TIMESTAMP')`
+  ColumnDefinition defaultRaw(String sql) {
+    defaultValue = sql;
+    isDefaultRaw = true;
+    return this;
+  }
+
+  // ===========================================================================
+  // String / Text Methods
+  // ===========================================================================
+
+  /// Specifies the length of the column (for string types).
+  ColumnDefinition length(int len) {
+    lengthValue = len;
+    return this;
+  }
+
+  /// Specifies the character set for the column.
+  ColumnDefinition charset(String charset) {
+    charsetValue = charset;
+    return this;
+  }
+
+  /// Specifies the collation for the column.
+  ColumnDefinition collation(String collation) {
+    collationValue = collation;
+    return this;
+  }
+
+  // ===========================================================================
+  // Numeric Methods
+  // ===========================================================================
+
+  /// Specifies the precision and scale for decimal columns.
+  ColumnDefinition total(int total, [int places = 0]) {
+    precisionValue = total;
+    scaleValue = places;
+    return this;
+  }
+
+  // ===========================================================================
+  // Foreign Key Methods
+  // ===========================================================================
+
+  /// Specifies a foreign key constraint.
   ColumnDefinition foreign(String table, {String key = 'id'}) {
     foreignTable = table;
     foreignKey = key;
@@ -138,9 +203,77 @@ class ColumnDefinition {
     return this;
   }
 
-  /// Specifies the values for an ENUM column.
-  ColumnDefinition enumVal(List<String> values) {
-    enumValues = values;
+  /// Cascade on delete.
+  ColumnDefinition cascadeOnDelete() => onDelete('CASCADE');
+
+  /// Cascade on update.
+  ColumnDefinition cascadeOnUpdate() => onUpdate('CASCADE');
+
+  /// Set null on delete.
+  ColumnDefinition nullOnDelete() => onDelete('SET NULL');
+
+  /// Restrict on delete.
+  ColumnDefinition restrictOnDelete() => onDelete('RESTRICT');
+
+  // ===========================================================================
+  // Generated Column Methods
+  // ===========================================================================
+
+  /// Create a virtual generated column.
+  ColumnDefinition virtualAs(String expression) {
+    generatedExpression = expression;
+    isStoredGenerated = false;
+    return this;
+  }
+
+  /// Create a stored generated column.
+  ColumnDefinition storedAs(String expression) {
+    generatedExpression = expression;
+    isStoredGenerated = true;
+    return this;
+  }
+
+  // ===========================================================================
+  // Timestamp Methods
+  // ===========================================================================
+
+  /// Set the TIMESTAMP column to use CURRENT_TIMESTAMP as default.
+  ColumnDefinition useCurrent() {
+    return defaultRaw('CURRENT_TIMESTAMP');
+  }
+
+  /// Set the TIMESTAMP column to use CURRENT_TIMESTAMP on update.
+  ColumnDefinition useCurrentOnUpdate() {
+    useCurrentOnUpdateValue = true;
+    return this;
+  }
+
+  /// Alias for [useCurrentOnUpdate].
+  ColumnDefinition onUpdateCurrentTimestamp() => useCurrentOnUpdate();
+
+  // ===========================================================================
+  // Positioning Methods
+  // ===========================================================================
+
+  /// Place the column "after" another column.
+  ColumnDefinition after(String column) {
+    afterColumn = column;
+    return this;
+  }
+
+  /// Place the column "first" in the table.
+  ColumnDefinition first() {
+    isFirst = true;
+    return this;
+  }
+
+  // ===========================================================================
+  // Metadata & Other Methods
+  // ===========================================================================
+
+  /// Specifies a comment for the column.
+  ColumnDefinition comment(String text) {
+    commentValue = text;
     return this;
   }
 
@@ -150,17 +283,15 @@ class ColumnDefinition {
     return this;
   }
 
-  /// Specifies a generated/computed column.
-  ///
-  /// Example:
-  ///     generatedAs('now()')
-  ///
-  /// `stored` parameter:
-  /// - `true` -> stored generated (stored in the database)
-  /// - `false` -> virtual generated (generated in the application)
-  ColumnDefinition generatedAs(String expression, {bool stored = false}) {
-    generatedExpression = expression;
-    isStoredGenerated = stored;
+  /// Specifies the values for an ENUM column.
+  ColumnDefinition enumVal(List<String> values) {
+    enumValues = values;
+    return this;
+  }
+
+  /// Rename the column from an old name (used in migrations).
+  ColumnDefinition from(String oldName) {
+    this.oldName = oldName;
     return this;
   }
 }
