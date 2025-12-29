@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import '../../../contracts/http/middleware_contract.dart';
+import '../../../contracts/http/response_contract.dart';
 import '../../../support/exceptions/middleware_not_found_exception.dart';
 import '../request/request.dart';
-import '../response/response.dart';
 
 /// Enhanced middleware pipeline with priority-based execution and better error handling.
 ///
@@ -143,7 +143,7 @@ class MiddlewarePipeline {
   }
 
   /// Processes the request through the middleware pipeline.
-  Future<void> process(Request request, Response response) async {
+  Future<void> process(Request request, ResponseContract response) async {
     await execute(
       _middleware,
       request,
@@ -216,8 +216,8 @@ class MiddlewarePipeline {
   static Future<void> execute(
     List<Middleware> middlewares,
     Request request,
-    Response response,
-    FutureOr<void> Function(Request, Response) finalHandler,
+    ResponseContract response,
+    FutureOr<void> Function(Request, ResponseContract) finalHandler,
   ) async {
     var index = 0;
 

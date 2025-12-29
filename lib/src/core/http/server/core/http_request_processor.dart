@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../../contracts/http/response_contract.dart';
 import '../../../routing/router.dart';
 import '../../context/server_context.dart';
 import '../../middleware/middleware_pipeline.dart';
@@ -19,7 +20,7 @@ class HttpRequestProcessor {
     this.staticHandler,
   });
 
-  Future<void> handle(Request req, Response res) async {
+  Future<void> handle(Request req, ResponseContract res) async {
     final match = router.match(req.method, req.path);
 
     if (match != null && ServerContext.hasContext) {
@@ -27,8 +28,10 @@ class HttpRequestProcessor {
     }
 
     if (match == null) {
-      if (staticHandler != null && await staticHandler!.tryServe(req, res)) {
-        return;
+      if (staticHandler != null && res is Response) {
+        if (await staticHandler!.tryServe(req, res)) {
+          return;
+        }
       }
       res.status(404).send('Not Found');
       return;
@@ -45,7 +48,14 @@ class HttpRequestProcessor {
       match.middleware,
       req,
       res,
-      match.handler,
+      (request, response) {
+        if (response is! Response) {
+          throw StateError(
+            'HTTP route handlers require a concrete Response instance.',
+          );
+        }
+        return match.handler(request, response);
+      },
     );
   }
 }

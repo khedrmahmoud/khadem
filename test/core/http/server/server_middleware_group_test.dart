@@ -24,8 +24,11 @@ class FakeEnv implements EnvInterface {
   double getDouble(String key, {double defaultValue = 0.0}) => defaultValue;
 
   @override
-  List<String> getList(String key,
-          {String separator = ',', List<String> defaultValue = const [],}) =>
+  List<String> getList(
+    String key, {
+    String separator = ',',
+    List<String> defaultValue = const [],
+  }) =>
       defaultValue;
 
   @override
@@ -76,7 +79,7 @@ void main() {
       server.middlewareGroup('api', [
         Middleware((req, res, next) async {
           groupMiddlewareExecuted = true;
-          res.headers.setHeader('X-Group-Middleware', 'executed');
+          res.header('X-Group-Middleware', 'executed');
           await next();
         }),
       ]);

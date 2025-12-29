@@ -1,6 +1,6 @@
 import '../../contracts/http/middleware_contract.dart';
+import '../../contracts/http/response_contract.dart';
 import '../../core/http/request/request.dart';
-import '../../core/http/response/response.dart';
 import '../../core/http/response/response_wrapper.dart';
 
 class CacheMiddleware implements Middleware {
@@ -9,7 +9,7 @@ class CacheMiddleware implements Middleware {
 
   CacheMiddleware({this.duration = const Duration(seconds: 10)});
 
-  Future<void> handle(Request req, Response res, NextFunction next) async {
+  Future<void> handle(Request req, ResponseContract res, NextFunction next) async {
     if (req.method != 'GET') return next();
 
     final key = req.uri.toString();

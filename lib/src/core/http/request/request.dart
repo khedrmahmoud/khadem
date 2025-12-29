@@ -59,6 +59,47 @@ class Request {
   /// Query parameters
   Map<String, String> get query => _metadata.query;
 
+  /// Gets a query parameter with type conversion.
+  ///
+  /// Supports common types: int, double, bool, String, List&lt;String&gt;.
+  /// Returns null if the parameter doesn't exist or can't be converted.
+  T? getQuery<T>(String key, {T? defaultValue}) =>
+      _metadata.getQuery<T>(key, defaultValue: defaultValue);
+
+  /// Gets a query parameter as integer.
+  int? queryInt(String key, {int? defaultValue}) =>
+      _metadata.queryInt(key, defaultValue: defaultValue);
+
+  /// Gets a query parameter as double.
+  double? queryDouble(String key, {double? defaultValue}) =>
+      _metadata.queryDouble(key, defaultValue: defaultValue);
+
+  /// Gets a query parameter as boolean.
+  ///
+  /// Accepts: 'true', 'false', '1', '0' (case insensitive).
+  bool? queryBool(String key, {bool? defaultValue}) =>
+      _metadata.queryBool(key, defaultValue: defaultValue);
+
+  /// Gets a query parameter as string.
+  String? queryString(String key, {String? defaultValue}) =>
+      _metadata.queryString(key, defaultValue: defaultValue);
+
+  /// Gets a query parameter as list of strings.
+  ///
+  /// Splits by comma and trims whitespace by default.
+  List<String>? queryList(String key, {String separator = ',', List<String>? defaultValue}) =>
+      _metadata.queryList(key, separator: separator, defaultValue: defaultValue);
+
+  /// Gets a query parameter with custom parsing function.
+  T? queryWith<T>(String key, T? Function(String) parser, {T? defaultValue}) =>
+      _metadata.queryWith<T>(key, parser, defaultValue: defaultValue);
+
+  /// Checks if a query parameter exists.
+  bool hasQuery(String key) => _metadata.hasQuery(key);
+
+  /// Gets all query parameter keys.
+  Iterable<String> get queryKeys => _metadata.queryKeys;
+
   /// Client IP address (handles proxies)
   String get ip => _metadata.ip;
 

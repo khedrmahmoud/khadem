@@ -6,6 +6,7 @@ import 'response_body.dart';
 import 'response_headers.dart';
 import 'response_renderer.dart';
 import 'response_status.dart';
+import '../../../contracts/http/response_contract.dart';
 
 /// Represents the HTTP response sent back to the client.
 ///
@@ -16,7 +17,7 @@ import 'response_status.dart';
 /// - Modular design with separate components for headers, body, status, and rendering
 /// - Convenient shortcuts for common operations
 /// - Proper resource management and response state tracking
-class Response {
+class Response implements ResponseContract {
   final HttpRequest _raw;
   bool _sent = false;
   Request? _request;
@@ -48,6 +49,7 @@ class Response {
   }
 
   /// Whether the response has already been sent.
+  @override
   bool get sent => _sent;
 
   /// Access to header management functionality
@@ -57,6 +59,7 @@ class Response {
   ResponseStatus get statusManager => _status;
 
   /// Access to response status functionality
+  @override
   int get statusCode => _status.statusCode;
 
   /// Access to body content functionality
@@ -69,24 +72,28 @@ class Response {
   Cookies get cookieHandler => _cookies;
 
   /// Sets the HTTP status code (legacy method for backward compatibility).
+  @override
   Response status(int code) {
     _status.setStatus(code);
     return this;
   }
 
   /// Sets the HTTP status code (convenience method).
+  @override
   Response setStatusCode(int code) {
     _status.setStatus(code);
     return this;
   }
 
   /// Adds a response header (convenience method).
+  @override
   Response header(String name, String value) {
     _headers.setHeader(name, value);
     return this;
   }
 
   /// Sets multiple headers (convenience method).
+  @override
   Response withHeaders(Map<String, String> headers) {
     headers.forEach((key, value) {
       _headers.setHeader(key, value);
@@ -121,18 +128,21 @@ class Response {
   }
 
   /// Sends a plain text response (convenience method).
+  @override
   void send(String text) {
     _body.sendText(text);
     _sent = true;
   }
 
   /// Sends a JSON response (convenience method).
+  @override
   void sendJson(dynamic data) {
     _body.sendJson(data);
     _sent = true;
   }
 
   /// Alias for sendJson.
+  @override
   void json(dynamic data) => sendJson(data);
 
   /// Sends an HTML response (convenience method).
@@ -161,6 +171,7 @@ class Response {
   }
 
   /// Sends a Problem Details response (RFC 7807).
+  @override
   void problem({
     required String title,
     required int status,
@@ -276,6 +287,7 @@ class Response {
   }
 
   /// Sends an empty response (convenience method).
+  @override
   void empty() {
     _body.sendEmpty();
     _sent = true;
@@ -329,6 +341,7 @@ class Response {
   }
 
   /// Sets CORS headers (convenience method)
+  @override
   Response cors({
     String? allowOrigin,
     String? allowMethods,
@@ -349,6 +362,7 @@ class Response {
   }
 
   /// Sets security headers (convenience method)
+  @override
   Response security({
     bool enableHsts = false,
     bool enableCsp = false,

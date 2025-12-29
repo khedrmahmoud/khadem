@@ -4,8 +4,8 @@ import 'package:khadem/src/modules/auth/core/request_auth.dart';
 
 import '../../../contracts/exceptions/app_exception.dart';
 import '../../../contracts/http/middleware_contract.dart';
+import '../../../contracts/http/response_contract.dart';
 import '../../../core/http/request/request.dart';
-import '../../../core/http/response/response.dart';
 import '../contracts/authenticatable.dart';
 import '../exceptions/auth_exception.dart';
 import '../services/auth_manager.dart';
@@ -159,7 +159,7 @@ class AuthMiddleware extends Middleware {
 
   /// Creates the middleware handler based on configuration
   static MiddlewareHandler _createHandler(AuthMiddlewareConfig config) {
-    return (Request req, Response res, NextFunction next) async {
+    return (Request req, ResponseContract res, NextFunction next) async {
       try {
         // Extract credentials based on auth type
         final credentials = await _extractCredentials(req, config);
@@ -345,7 +345,7 @@ class AuthMiddleware extends Middleware {
   static Future<void> _handleAuthError(
     dynamic error,
     Request request,
-    Response response,
+    ResponseContract response,
     AuthMiddlewareConfig config,
   ) async {
     if (error is AuthException) {

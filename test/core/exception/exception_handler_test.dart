@@ -5,16 +5,14 @@ import 'package:test/test.dart';
 
 import 'exception_handler_test.mocks.dart';
 
-@GenerateMocks([Response, Logger])
+@GenerateMocks([Logger])
 void main() {
   group('ExceptionHandler', () {
     late ExceptionHandler handler;
-    late MockResponse mockResponse;
     late MockLogger mockLogger;
 
     setUp(() {
       handler = ExceptionHandler();
-      mockResponse = MockResponse();
       mockLogger = MockLogger();
 
       // Register mock logger
@@ -22,69 +20,65 @@ void main() {
       container.instance<Logger>(mockLogger);
 
       // Mock logger methods
-      when(mockLogger.error(any,
-              context: anyNamed('context'), stackTrace: anyNamed('stackTrace'),),)
-          .thenReturn(null);
-      when(mockLogger.warning(any,
-              context: anyNamed('context'), stackTrace: anyNamed('stackTrace'),),)
-          .thenReturn(null);
-      when(mockLogger.critical(any,
-              context: anyNamed('context'), stackTrace: anyNamed('stackTrace'),),)
-          .thenReturn(null);
-
-      // Default behavior for mock response
-      when(mockResponse.status(any)).thenReturn(mockResponse);
-      when(mockResponse.header(any, any)).thenReturn(mockResponse);
-      when(mockResponse.sent).thenReturn(false);
+      when(mockLogger.error(
+        any,
+        context: anyNamed('context'),
+        stackTrace: anyNamed('stackTrace'),
+      ),).thenReturn(null);
+      when(mockLogger.warning(
+        any,
+        context: anyNamed('context'),
+        stackTrace: anyNamed('stackTrace'),
+      ),).thenReturn(null);
+      when(mockLogger.critical(
+        any,
+        context: anyNamed('context'),
+        stackTrace: anyNamed('stackTrace'),
+      ),).thenReturn(null);
     });
 
     tearDown(() {
       ContainerProvider.instance.flush();
     });
 
-    test('should handle AppException with RFC 7807 JSON response', () async {
+    test('should handle AppException and return ErrorResult', () async {
       final exception = AppExceptionTest('Test Error', statusCode: 400);
 
-      await handler.handle(mockResponse, exception);
+      final result = await handler.handle(exception);
 
-      verify(mockResponse.status(400)).called(1);
-      verify(mockResponse.problem(
-        type: 'about:blank',
-        title: 'Application Error',
-        status: 400,
-        detail: 'Test Error',
-        extensions: anyNamed('extensions'),
-      ),).called(1);
+      expect(result, isA<ErrorResult>());
+      expect(result.statusCode, 400);
+      expect(result.title, 'Application Error');
+      expect(result.message, 'Test Error');
+      expect(result.type, 'about:blank');
     });
 
     test('should handle generic Exception with 500 status', () async {
       final exception = Exception('Generic Error');
 
-      await handler.handle(mockResponse, exception);
+      final result = await handler.handle(exception);
 
-      verify(mockResponse.status(500)).called(1);
-      verify(mockResponse.problem(
-        type: 'about:blank',
-        title: 'Internal Server Error',
-        status: 500,
-        detail: anyNamed('detail'),
-        extensions: anyNamed('extensions'),
-      ),).called(1);
+      expect(result, isA<ErrorResult>());
+      expect(result.statusCode, 500);
+      expect(result.title, 'Internal Server Error');
+      expect(result.message, 'An unexpected error occurred.');
+      expect(result.type, 'about:blank');
     });
 
     test('should use custom handler if registered', () async {
-      bool customHandlerCalled = false;
-      handler.register<CustomException>((res, error, stack) async {
-        customHandlerCalled = true;
+      handler.register<CustomException>((error, stack) async {
+        return const ErrorResult(
+          statusCode: 418,
+          title: 'I am a teapot',
+          message: 'Custom Handler',
+        );
       });
 
-      await handler.handle(mockResponse, CustomException());
+      final result = await handler.handle(CustomException());
 
-      expect(customHandlerCalled, isTrue);
-      verifyNever(mockResponse.problem(
-        title: anyNamed('title'),
-        status: anyNamed('status'),
-      ),);
+      expect(result.statusCode, 418);
+      expect(result.title, 'I am a teapot');
+      expect(result.message, 'Custom Handler');
     });
   });
 }

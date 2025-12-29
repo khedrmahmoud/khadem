@@ -1,4 +1,5 @@
 import '../../../contracts/http/middleware_contract.dart';
+import '../../../contracts/http/response_contract.dart';
 import '../../../core/http/request/request.dart';
 import '../../../core/http/response/response.dart';
 import '../services/auth_manager.dart';
@@ -19,7 +20,7 @@ class WebAuthMiddleware {
     String guard = 'web',
   }) {
     return Middleware(
-      (Request request, Response response, NextFunction next) async {
+      (Request request, ResponseContract response, NextFunction next) async {
         // Check if route is excluded
         if (_isExcluded(request.path, except)) {
           return next();
@@ -36,7 +37,7 @@ class WebAuthMiddleware {
   /// Handles web authentication using sessions
   static Future<void> _handleWebAuth(
     Request request,
-    Response response,
+    ResponseContract response,
     NextFunction next,
     String guard,
     String redirectTo,
@@ -109,7 +110,7 @@ class WebAuthMiddleware {
     String guard = 'web',
   }) {
     return Middleware(
-      (Request request, Response response, NextFunction next) async {
+      (Request request, ResponseContract response, NextFunction next) async {
         // Check if route is excluded
         if (_isExcluded(request.path, except)) {
           return next();
@@ -120,7 +121,11 @@ class WebAuthMiddleware {
         final token = request.session.get('token') as String?;
 
         if (user != null && token != null) {
-          response.redirect(redirectTo);
+          if (response is Response) {
+            await response.redirect(redirectTo);
+          } else {
+            response.status(401).sendJson({'message': 'Unauthenticated'});
+          }
           return;
         }
 
@@ -139,7 +144,7 @@ class WebAuthMiddleware {
     String guard = 'web',
   }) {
     return Middleware(
-      (Request request, Response response, NextFunction next) async {
+      (Request request, ResponseContract response, NextFunction next) async {
         // First check basic authentication
         if (_isExcluded(request.path, except)) {
           return next();
@@ -156,7 +161,9 @@ class WebAuthMiddleware {
         if (role != 'admin') {
           request.session
               .flash('message', 'Access denied. Admin privileges required.');
-          response.redirect('/dashboard');
+          if (response is Response) {
+            await response.redirect('/dashboard');
+          }
           return;
         }
 
@@ -188,7 +195,7 @@ class WebAuthMiddleware {
   /// Handles unauthenticated users
   static Future<void> _handleUnauthenticated(
     Request request,
-    Response response,
+    ResponseContract response,
     String redirectTo,
   ) async {
     // Store intended URL for redirect after login
@@ -199,7 +206,11 @@ class WebAuthMiddleware {
     request.session.flash('message', 'Please log in to continue');
 
     // Redirect to login
-    response.redirect(redirectTo);
+    if (response is Response) {
+      await response.redirect(redirectTo);
+    } else {
+      response.status(401).sendJson({'message': 'Unauthenticated'});
+    }
   }
 
   /// Attaches user data to the request

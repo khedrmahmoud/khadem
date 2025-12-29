@@ -1,5 +1,5 @@
 import 'package:khadem/khadem.dart'
-    show KhademModel, RelationDefinition, Timestamps, ModelLifecycle;
+    show KhademModel, RelationDefinition, Timestamps;
 
 class User extends KhademModel<User> with Timestamps {
   String? get name => getAttribute('name');
@@ -14,13 +14,7 @@ class User extends KhademModel<User> with Timestamps {
         'updated_at': DateTime,
       };
 
-  // @override
-  // Map<ModelLifecycle, Event Function(User)> get dispatchesEvents => {
-  //       ModelLifecycle.created: (user) => null,
-  //       ModelLifecycle.updated: (user) => null,
-  //       ModelLifecycle.deleted: (user) => null,
-  //     };
-
+  
   @override
   List<String> get fillable =>
       ['name', 'email', 'password', 'created_at', 'updated_at'];

@@ -50,7 +50,8 @@ export 'database/database_drivers/mysql/mysql_connection.dart';
 export 'database/database_drivers/mysql/mysql_schema_builder.dart';
 export 'database/database_drivers/postgres/postgres_driver.dart';
 export 'database/database_drivers/postgres/postgres_query_builder.dart';
-
+export 'database/database_drivers/sqlite/sqlite_connection.dart';
+export 'database/database_drivers/sqlite/sqlite_schema_builder.dart';
 // ========================
 // 📦 Migration
 // ========================
@@ -60,6 +61,10 @@ export 'database/migration/seeder.dart';
 // 📦 Model_base
 // ========================
 export 'database/model_base/base_model.dart';
+export 'database/model_base/concerns/has_attributes.dart';
+export 'database/model_base/concerns/has_events.dart';
+export 'database/model_base/concerns/has_relations.dart';
+export 'database/model_base/concerns/interacts_with_database.dart';
 export 'database/model_base/khadem_model.dart';
 // ========================
 // 📦 Orm
@@ -69,6 +74,7 @@ export 'database/orm/casting/built_in_casters.dart';
 export 'database/orm/casting/index.dart';
 export 'database/orm/eager_loader.dart';
 export 'database/orm/model_events.dart';
+export 'database/orm/model_lifecycle.dart';
 export 'database/orm/model_reflector.dart';
 export 'database/orm/observers/index.dart';
 export 'database/orm/observers/model_observer.dart';
@@ -77,6 +83,19 @@ export 'database/orm/paginated_result.dart';
 export 'database/orm/relation_definition.dart';
 export 'database/orm/relation_meta.dart';
 export 'database/orm/relation_type.dart';
+export 'database/orm/relations/belongs_to.dart';
+export 'database/orm/relations/belongs_to_many.dart';
+export 'database/orm/relations/has_many.dart';
+export 'database/orm/relations/has_many_through.dart';
+export 'database/orm/relations/has_one.dart';
+export 'database/orm/relations/has_one_or_many.dart';
+export 'database/orm/relations/has_one_through.dart';
+export 'database/orm/relations/morph_many.dart';
+export 'database/orm/relations/morph_one.dart';
+export 'database/orm/relations/morph_one_or_many.dart';
+export 'database/orm/relations/morph_to_many.dart';
+export 'database/orm/relations/morphed_by_many.dart';
+export 'database/orm/relations/relation.dart';
 export 'database/orm/traits/has_slug.dart';
 export 'database/orm/traits/has_translations.dart';
 export 'database/orm/traits/orm_traits.dart';
@@ -90,6 +109,7 @@ export 'database/orm/traits/uuid_primary_key.dart';
 // ========================
 export 'database/query/grammar.dart';
 export 'database/query/grammars/mysql_grammar.dart';
+export 'database/query/grammars/sqlite_grammar.dart';
 export 'database/query/query_builder.dart';
 // ========================
 // 📦 Schema
@@ -120,6 +140,10 @@ export 'events/event_system.dart';
 // 📦 Subscriber_scanner.dart
 // ========================
 export 'events/subscriber_scanner.dart';
+// ========================
+// 📦 Error_result.dart
+// ========================
+export 'exception/error_result.dart';
 // ========================
 // 📦 Exception_handler.dart
 // ========================
@@ -371,17 +395,34 @@ export 'session/session_storage.dart';
 // ========================
 export 'session/session_validator.dart';
 // ========================
+// 📦 Channel
+// ========================
+export 'socket/channel/socket_channel.dart';
+export 'socket/controller/socket_controller.dart';
+// ========================
+// 📦 Routing
+// ========================
+export 'socket/routing/socket_router.dart';
+// ========================
 // 📦 Server.dart
 // ========================
 export 'socket/server.dart';
+// ========================
+// 📦 Socket_adapters
+// ========================
+export 'socket/socket_adapters/in_memory_socket_adapter.dart';
 // ========================
 // 📦 Socket_client.dart
 // ========================
 export 'socket/socket_client.dart';
 // ========================
-// 📦 Socket_exception_handler.dart
+// 📦 Socket_config.dart
 // ========================
-export 'socket/socket_exception_handler.dart';
+export 'socket/socket_config.dart';
+// ========================
+// 📦 Socket_context.dart
+// ========================
+export 'socket/socket_context.dart';
 // ========================
 // 📦 Socket_handler.dart
 // ========================
@@ -391,9 +432,9 @@ export 'socket/socket_handler.dart';
 // ========================
 export 'socket/socket_manager.dart';
 // ========================
-// 📦 Socket_middleware_pipeline.dart
+// 📦 Socket_packet.dart
 // ========================
-export 'socket/socket_middleware_pipeline.dart';
+export 'socket/socket_packet.dart';
 // ========================
 // 📦 Local_disk.dart
 // ========================
@@ -450,3 +491,4 @@ export 'view/html_escaper.dart';
 // 📦 Renderer.dart
 // ========================
 export 'view/renderer.dart';
+

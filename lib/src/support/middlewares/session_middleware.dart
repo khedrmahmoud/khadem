@@ -1,10 +1,11 @@
 import 'dart:async';
 
-import 'package:khadem/khadem.dart'
-    show Middleware, NextFunction, Request, Response;
+import 'package:khadem/khadem.dart' show Middleware, NextFunction, Request;
 import 'package:khadem/src/core/http/cookie.dart';
 
+import '../../contracts/http/response_contract.dart';
 import '../../contracts/session/session_driver_registry.dart';
+import '../../core/http/response/response.dart';
 import '../../core/session/drivers/file_session_driver.dart';
 import '../../core/session/session_manager.dart';
 
@@ -34,7 +35,7 @@ class SessionMiddleware extends Middleware {
   /// Handles session management for the request
   static FutureOr<void> _handleSession(
     Request req,
-    Response res,
+    ResponseContract res,
     NextFunction next,
   ) async {
     final middleware = SessionMiddleware();
@@ -44,7 +45,7 @@ class SessionMiddleware extends Middleware {
   /// Processes session for the current request
   Future<void> _processSession(
     Request req,
-    Response res,
+    ResponseContract res,
     NextFunction next,
   ) async {
     String? sessionId;
@@ -82,8 +83,10 @@ class SessionMiddleware extends Middleware {
         await _sessionManager.updateSession(sessionId, updatedSession);
       }
 
-      // Set session cookie in response
-      _sessionManager.setSessionCookie(res.raw.response, sessionId);
+      // Set session cookie in response (HTTP only)
+      if (res is Response) {
+        _sessionManager.setSessionCookie(res.raw.response, sessionId);
+      }
     } catch (e) {
       // If session handling fails, continue without session
       await next();
@@ -104,17 +107,19 @@ class CookieMiddleware extends Middleware {
   /// Handles cookie management for the request
   static FutureOr<void> _handleCookies(
     Request req,
-    Response res,
+    ResponseContract res,
     NextFunction next,
   ) async {
     // Add cookie helper methods to request
     req.setAttribute('cookies', Cookies(req.raw));
 
-    // Add cookie helper methods to request (we'll access response through the helper)
-    req.setAttribute(
-      'response_cookies',
-      Cookies.response(res.raw.response),
-    );
+    // Add cookie helper methods to request (HTTP only)
+    if (res is Response) {
+      req.setAttribute(
+        'response_cookies',
+        Cookies.response(res.raw.response),
+      );
+    }
 
     // Continue to next middleware/route handler
     await next();

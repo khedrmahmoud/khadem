@@ -1,5 +1,4 @@
 import 'package:khadem/src/core/database/database_drivers/mysql/mysql_schema_builder.dart';
-import 'package:khadem/src/core/database/schema/blueprint.dart';
 import 'package:test/test.dart';
 
 void main() {

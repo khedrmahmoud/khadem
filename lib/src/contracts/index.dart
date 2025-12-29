@@ -42,7 +42,7 @@ export 'config/config_contract.dart';
 // ========================
 export 'container/container_interface.dart';
 // ========================
-// 📦 Connection_interface.dart
+// 📦 Database_connection.dart
 // ========================
 export 'database/database_connection.dart';
 // ========================
@@ -106,6 +106,10 @@ export 'exceptions/exception_handler_contract.dart';
 // 📦 Middleware_contract.dart
 // ========================
 export 'http/middleware_contract.dart';
+// ========================
+// 📦 Response_contract.dart
+// ========================
+export 'http/response_contract.dart';
 // ========================
 // 📦 Route_group_contract.dart
 // ========================
@@ -201,13 +205,13 @@ export 'session/session_driver_registry.dart';
 // ========================
 export 'session/session_interfaces.dart';
 // ========================
+// 📦 Socket_adapter.dart
+// ========================
+export 'socket/socket_adapter.dart';
+// ========================
 // 📦 Socket_event_handler.dart
 // ========================
 export 'socket/socket_event_handler.dart';
-// ========================
-// 📦 Socket_middleware.dart
-// ========================
-export 'socket/socket_middleware.dart';
 // ========================
 // 📦 Storage_disk.dart
 // ========================
@@ -220,3 +224,4 @@ export 'validation/rule.dart';
 // 📦 Directive_contract.dart
 // ========================
 export 'views/directive_contract.dart';
+

@@ -1,17 +1,18 @@
-import '../../core/http/response/response.dart';
+import '../../core/exception/error_result.dart';
 
 /// Contract for handling exceptions in the application.
 abstract interface class ExceptionHandlerContract {
-  /// Handle an exception and send appropriate response.
-  Future<void> handle(
-    Response response,
+  /// Handle an exception and return a standardized error result.
+  Future<ErrorResult> handle(
     Object error, [
     StackTrace? stackTrace,
   ]);
 
   /// Register a custom handler for a specific exception type.
   void register<T extends Object>(
-    Future<void> Function(Response response, T error, StackTrace? stackTrace)
-        handler,
+    Future<ErrorResult> Function(
+      T error,
+      StackTrace? stackTrace,
+    ) handler,
   );
 }

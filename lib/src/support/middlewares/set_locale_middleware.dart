@@ -1,12 +1,12 @@
 import '../../contracts/http/middleware_contract.dart';
+import '../../contracts/http/response_contract.dart';
 import '../../core/http/request/request.dart';
-import '../../core/http/response/response.dart';
 import '../../core/lang/lang.dart';
 
 class SetLocaleMiddleware implements Middleware {
   @override
   MiddlewareHandler get handler =>
-      (Request req, Response res, NextFunction next) async {
+      (Request req, ResponseContract res, NextFunction next) async {
         try {
           final lang = req.headers.get('accept-language');
           if (lang == null) return await next();

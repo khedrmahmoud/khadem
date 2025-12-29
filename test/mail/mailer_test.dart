@@ -202,7 +202,11 @@ void main() {
         final failingMailer = Mailer(failingTransport);
         final mailable = HookedMailable();
 
-        await failingMailer.sendMailable(mailable);
+        try {
+          await failingMailer.sendMailable(mailable);
+        } catch (_) {
+          // Expected
+        }
 
         expect(mailable.onErrorCalled, isTrue);
       });

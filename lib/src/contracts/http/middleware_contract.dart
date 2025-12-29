@@ -1,11 +1,11 @@
 import 'dart:async';
 import '../../core/http/request/request.dart';
-import '../../core/http/response/response.dart';
+import 'response_contract.dart';
 
 /// Signature of a middleware function.
 typedef MiddlewareHandler = FutureOr<void> Function(
   Request request,
-  Response response,
+  ResponseContract response,
   NextFunction next,
 );
 

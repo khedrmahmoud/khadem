@@ -491,7 +491,7 @@ class SmtpTransport implements TransportInterface {
           'SMTP response timed out after ${timeout.inSeconds}s'
           '${_lastCommand != null ? ' (after $_lastCommand)' : ''}',
         );
-      });
+      },);
     } on TimeoutException {
       rethrow;
     }

@@ -81,11 +81,33 @@ class ServerLifecycle {
               _middleware.pipeline.middleware,
               req,
               res,
-              handler.handle,
+              (request, response) {
+                if (response is! Response) {
+                  throw StateError(
+                    'HTTP server lifecycle requires a concrete Response instance.',
+                  );
+                }
+                return handler.handle(request, response);
+              },
             );
           } catch (e, stackTrace) {
             final exceptionHandler = Khadem.make<ExceptionHandlerContract>();
-            await exceptionHandler.handle(res, e, stackTrace);
+            final result = await exceptionHandler.handle(e, stackTrace);
+            
+            if (!res.sent) {
+               res.status(result.statusCode).problem(
+                title: result.title,
+                status: result.statusCode,
+                detail: result.message,
+                type: result.type,
+                instance: result.instance,
+                extensions: {
+                  if (result.details != null) 'details': result.details,
+                  if (result.stackTrace != null) 'stack_trace': result.stackTrace.toString(),
+                  ...result.extensions,
+                },
+              );
+            }
           } finally {
             // Clean up request resources (e.g. temporary files)
             await req.cleanup();

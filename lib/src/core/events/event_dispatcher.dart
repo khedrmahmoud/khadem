@@ -60,7 +60,7 @@ class EventDispatcher implements Dispatcher {
 
         for (final channel in channels) {
           // Broadcast to specific room/channel
-          socketManager.broadcast(channel, eventName, data);
+          socketManager.broadcastToRoom(channel, eventName, data);
         }
       }
     } catch (e) {

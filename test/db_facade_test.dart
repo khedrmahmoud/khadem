@@ -1,5 +1,4 @@
 import 'package:khadem/khadem.dart';
-import 'package:khadem/src/support/facades/db.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 

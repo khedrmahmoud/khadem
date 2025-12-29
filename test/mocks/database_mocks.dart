@@ -1,12 +1,9 @@
-import 'package:khadem/src/contracts/config/config_contract.dart';
 import 'package:khadem/src/contracts/database/database_connection.dart';
 import 'package:khadem/src/contracts/database/query_builder_interface.dart';
 import 'package:khadem/src/contracts/database/schema_builder.dart';
 import 'package:khadem/src/core/database/database.dart';
 
 class FakeDatabaseManager implements DatabaseManager {
-  @override
-  late final ConfigInterface _config;
   late final DatabaseConnection _connection;
 
   @override

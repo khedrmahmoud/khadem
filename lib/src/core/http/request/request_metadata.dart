@@ -21,6 +21,97 @@ class RequestMetadata {
   /// Gets query parameters.
   Map<String, String> get query => _raw.uri.queryParameters;
 
+  /// Gets a query parameter with type conversion.
+  ///
+  /// Supports common types: int, double, bool, String, List&lt;String&gt;.
+  /// Returns null if the parameter doesn't exist or can't be converted.
+  T? getQuery<T>(String key, {T? defaultValue}) {
+    final value = _raw.uri.queryParameters[key];
+    if (value == null || value.isEmpty) {
+      return defaultValue;
+    }
+
+    try {
+      if (T == int) {
+        return int.tryParse(value) as T?;
+      } else if (T == double) {
+        return double.tryParse(value) as T?;
+      } else if (T == bool) {
+        if (value.toLowerCase() == 'true' || value == '1') return true as T?;
+        if (value.toLowerCase() == 'false' || value == '0') return false as T?;
+        return null;
+      } else if (T == String) {
+        return value as T?;
+      } else if (T == List<String>) {
+        return value.split(',').map((s) => s.trim()).toList() as T?;
+      }
+    } catch (_) {
+      // Return default value on parsing error
+    }
+
+    return defaultValue;
+  }
+
+  /// Gets a query parameter as integer.
+  int? queryInt(String key, {int? defaultValue}) {
+    return getQuery<int>(key, defaultValue: defaultValue);
+  }
+
+  /// Gets a query parameter as double.
+  double? queryDouble(String key, {double? defaultValue}) {
+    return getQuery<double>(key, defaultValue: defaultValue);
+  }
+
+  /// Gets a query parameter as boolean.
+  ///
+  /// Accepts: 'true', 'false', '1', '0' (case insensitive).
+  bool? queryBool(String key, {bool? defaultValue}) {
+    return getQuery<bool>(key, defaultValue: defaultValue);
+  }
+
+  /// Gets a query parameter as string.
+  String? queryString(String key, {String? defaultValue}) {
+    return getQuery<String>(key, defaultValue: defaultValue);
+  }
+
+  /// Gets a query parameter as list of strings.
+  ///
+  /// Splits by comma and trims whitespace by default.
+  List<String>? queryList(String key, {String separator = ',', List<String>? defaultValue}) {
+    final value = _raw.uri.queryParameters[key];
+    if (value == null || value.isEmpty) {
+      return defaultValue;
+    }
+
+    try {
+      return value.split(separator).map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    } catch (_) {
+      return defaultValue;
+    }
+  }
+
+  /// Gets a query parameter with custom parsing function.
+  T? queryWith<T>(String key, T? Function(String) parser, {T? defaultValue}) {
+    final value = _raw.uri.queryParameters[key];
+    if (value == null || value.isEmpty) {
+      return defaultValue;
+    }
+
+    try {
+      return parser(value);
+    } catch (_) {
+      return defaultValue;
+    }
+  }
+
+  /// Checks if a query parameter exists.
+  bool hasQuery(String key) {
+    return _raw.uri.queryParameters.containsKey(key);
+  }
+
+  /// Gets all query parameter keys.
+  Iterable<String> get queryKeys => _raw.uri.queryParameters.keys;
+
   /// Gets client IP address (handles proxies).
   String get ip {
     // Check for forwarded IP from proxy

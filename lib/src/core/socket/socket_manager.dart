@@ -1,176 +1,113 @@
-import '../../contracts/socket/socket_event_handler.dart';
-import '../../contracts/socket/socket_middleware.dart';
+import 'package:khadem/src/contracts/socket/socket_adapter.dart';
+
+import 'socket_adapters/in_memory_socket_adapter.dart';
 import 'socket_client.dart';
-import 'socket_middleware_pipeline.dart';
 
-class _EventEntry {
-  final SocketEventHandler handler;
-  final List<SocketMiddleware> middlewares;
-
-  _EventEntry(this.handler, this.middlewares);
-}
-
+/// Manages the state of WebSocket clients, rooms, and event subscriptions.
+///
+/// This class delegates the actual state management to a [SocketAdapter],
+/// allowing for different implementations (e.g., in-memory, Redis).
 class SocketManager {
-  final Map<String, SocketClient> _clients = {};
-  final Map<dynamic, String> _userClientMap = {};
-  final Map<String, Set<SocketClient>> _rooms = {};
-  final Map<String, _EventEntry> _eventHandlers = {};
-  final Map<String, List<SocketMiddleware>> _roomMiddlewares = {};
-  final Map<String, Set<SocketClient>> _eventSubscribers = {};
+  final SocketAdapter _adapter;
 
-  // Reference to global middleware pipeline
-  SocketMiddlewarePipeline? _globalMiddleware;
+  SocketManager({SocketAdapter? adapter})
+      : _adapter = adapter ?? InMemorySocketAdapter();
 
-  void setGlobalMiddleware(SocketMiddlewarePipeline middleware) {
-    _globalMiddleware = middleware;
-  }
-
+  /// Add a new client to the manager.
   void addClient(SocketClient client) {
-    _clients[client.id] = client;
-    final user = client.get('user');
-    if (user != null && user['id'] != null) {
-      _userClientMap[user['id']] = client.id;
-    }
+    _adapter.addClient(client);
   }
 
+  /// Remove a client from the manager.
   void removeClient(SocketClient client) {
-    _clients.remove(client.id);
-    for (final room in client.rooms) {
-      _rooms[room]?.remove(client);
-      if (_rooms[room]?.isEmpty ?? false) {
-        _rooms.remove(room);
-      }
-    }
-    // Remove client from all event subscriptions
-    for (final subscribers in _eventSubscribers.values) {
-      subscribers.remove(client);
-    }
-    // Clean up empty subscriber sets
-    _eventSubscribers.removeWhere((event, subscribers) => subscribers.isEmpty);
-
-    final user = client.get('user');
-    if (user != null && user['id'] != null) {
-      _userClientMap.remove(user['id']);
-    }
+    _adapter.removeClient(client);
   }
 
-  void on(
-    String event,
-    SocketEventHandler handler, {
-    List<SocketMiddleware> middlewares = const [],
-  }) {
-    _eventHandlers[event] = _EventEntry(handler, List.from(middlewares));
-  }
-
-  void useRoom(String room, List<SocketMiddleware> middlewares) {
-    _roomMiddlewares[room] = List.from(middlewares);
-  }
-
-  _EventEntry? getEvent(String event) => _eventHandlers[event];
-
-  List<SocketMiddleware> getRoomMiddlewares(Set<String> rooms) {
-    return rooms
-        .where((room) => _roomMiddlewares.containsKey(room))
-        .expand((room) => _roomMiddlewares[room]!)
-        .toList();
-  }
-
-  void join(String room, SocketClient client) async {
-    // Execute room middleware before joining
-    if (_globalMiddleware != null) {
-      await _globalMiddleware!.executeRoom(client, room);
-    }
-
-    _rooms.putIfAbsent(room, () => {}).add(client);
+  /// Add a client to a room.
+  void join(String room, SocketClient client) {
+    _adapter.join(room, client);
     client.rooms.add(room);
   }
 
-  void leave(String room, SocketClient client) async {
-    // Execute room middleware before leaving
-    if (_globalMiddleware != null) {
-      await _globalMiddleware!.executeRoom(client, room);
-    }
-
-    _rooms[room]?.remove(client);
+  /// Remove a client from a room.
+  void leave(String room, SocketClient client) {
+    _adapter.leave(room, client);
     client.rooms.remove(room);
-    if (_rooms[room]?.isEmpty ?? false) {
-      _rooms.remove(room);
-    }
   }
 
-  void broadcast(String room, String event, dynamic data) {
-    if (!hasRoom(room)) return;
-    _rooms[room]?.forEach((client) => client.send(event, data));
+  /// Broadcast an event to all clients in a room.
+  void broadcastToRoom(String room, String event, dynamic data,
+      {String? namespace,}) {
+    _adapter.broadcastToRoom(room, event, data, namespace: namespace);
   }
 
-  /// Subscribe a client to an event for future broadcasts
-  void subscribeToEvent(String event, SocketClient client) {
-    _eventSubscribers.putIfAbsent(event, () => {}).add(client);
+  /// Broadcast an event to all clients in a room except specific ones.
+  void broadcastToRoomExcept(
+      String room, String event, dynamic data, Set<String> excludedClientIds,
+      {String? namespace,}) {
+    _adapter.broadcastToRoomExcept(room, event, data, excludedClientIds,
+        namespace: namespace,);
   }
 
-  /// Unsubscribe a client from an event
-  void unsubscribeFromEvent(String event, SocketClient client) {
-    _eventSubscribers[event]?.remove(client);
-    if (_eventSubscribers[event]?.isEmpty ?? false) {
-      _eventSubscribers.remove(event);
-    }
+  /// Subscribe a client to an event for future broadcasts.
+  void subscribe(String event, SocketClient client) {
+    _adapter.subscribe(event, client);
   }
 
-  /// Broadcast an event to all clients who have subscribed to it
-  void broadcastToEventSubscribers(String event, dynamic data) {
-    final subscribers = _eventSubscribers[event];
-    if (subscribers != null && subscribers.isNotEmpty) {
-      for (final client in subscribers) {
-        client.send(event, data);
-      }
-    }
+  /// Unsubscribe a client from an event.
+  void unsubscribe(String event, SocketClient client) {
+    _adapter.unsubscribe(event, client);
   }
 
-  /// Broadcast an event to all clients who have registered interest in it
-  /// This is an alias for broadcastToEventSubscribers for convenience
-  void broadcastEvent(String event, dynamic data) {
-    broadcastToEventSubscribers(event, data);
+  /// Broadcast an event to all clients who have subscribed to it.
+  void broadcast(String event, dynamic data, {String? namespace}) {
+    _adapter.broadcast(event, data, namespace: namespace);
   }
 
-  /// Get the number of subscribers for an event
-  int getEventSubscriberCount(String event) {
-    return _eventSubscribers[event]?.length ?? 0;
+  /// Get the number of subscribers for an event.
+  int subscriberCount(String event) {
+    return _adapter.subscriberCount(event);
   }
 
-  /// Check if a client is subscribed to an event
-  bool isClientSubscribedToEvent(String event, SocketClient client) {
-    return _eventSubscribers[event]?.contains(client) ?? false;
+  /// Check if a room exists (has active clients).
+  bool hasRoom(String room) {
+    return _adapter.hasRoom(room);
   }
 
-  /// Get all events a client is subscribed to
-  Set<String> getClientSubscriptions(SocketClient client) {
-    final subscriptions = <String>{};
-    for (final entry in _eventSubscribers.entries) {
-      if (entry.value.contains(client)) {
-        subscriptions.add(entry.key);
-      }
-    }
-    return subscriptions;
+  /// Check if a client is subscribed to an event.
+  bool isSubscribed(String event, SocketClient client) {
+    return _adapter.isSubscribed(event, client);
   }
 
+  /// Get all events a client is subscribed to.
+  Set<String> subscriptions(SocketClient client) {
+    return _adapter.subscriptions(client);
+  }
+
+  /// Send a message to a specific client by ID.
   void sendTo(String id, String event, dynamic data) {
-    _clients[id]?.send(event, data);
+    _adapter.getClient(id)?.send(event, data);
   }
 
-  void sendToUser(String userId, String event, dynamic data) {
-    final clientId = _userClientMap[userId];
-    if (clientId != null) {
-      _clients[clientId]?.send(event, data);
-    }
+  /// Send a message to a specific user by User ID.
+  ///
+  /// Requires clients to be authenticated and have a user ID.
+  void sendToUser(dynamic userId, String event, dynamic data) {
+    _adapter.sendToUser(userId, event, data);
   }
 
-  SocketClient? getClient(String id) => _clients[id];
+  /// Send a message to multiple specific users by User IDs.
+  ///
+  /// Requires clients to be authenticated and have user IDs.
+  void sendToUsers(List<dynamic> userIds, String event, dynamic data) {
+    _adapter.sendToUsers(userIds, event, data);
+  }
 
-  bool hasRoom(String room) => _rooms.containsKey(room);
+  /// Get a client instance by ID.
+  SocketClient? getClient(String id) => _adapter.getClient(id);
 
-  /// Check if an event has any subscribers
-  bool hasEventSubscribers(String event) {
-    return _eventSubscribers.containsKey(event) &&
-        (_eventSubscribers[event]?.isNotEmpty ?? false);
+  /// Check if an event has any subscribers.
+  bool hasSubscribers(String event) {
+    return _adapter.hasSubscribers(event);
   }
 }

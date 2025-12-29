@@ -58,7 +58,7 @@ class SQLiteConnection implements DatabaseConnection {
 
   @override
   Future<DatabaseResponse> execute(String sql,
-      [List<dynamic> bindings = const []]) async {
+      [List<dynamic> bindings = const [],]) async {
     if (_db == null) await connect();
 
     final preparedBindings = _prepareBindings(bindings);
@@ -89,7 +89,7 @@ class SQLiteConnection implements DatabaseConnection {
       }
     } catch (e) {
       throw DatabaseException(
-          'SQLite Error: $e\nQuery: $sql\nBindings: $preparedBindings');
+          'SQLite Error: $e\nQuery: $sql\nBindings: $preparedBindings',);
     }
   }
 
@@ -118,9 +118,9 @@ class SQLiteConnection implements DatabaseConnection {
 
   @override
   QueryBuilderInterface<T> queryBuilder<T>(String table,
-      {T Function(Map<String, dynamic>)? modelFactory}) {
+      {T Function(Map<String, dynamic>)? modelFactory,}) {
     return QueryBuilder<T>(this, SQLiteGrammar(), table,
-        modelFactory: modelFactory);
+        modelFactory: modelFactory,);
   }
 
   @override

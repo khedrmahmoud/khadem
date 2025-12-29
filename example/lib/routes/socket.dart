@@ -1,8 +1,12 @@
 import 'package:khadem/khadem.dart';
+import '../app/socket/controllers/chat_controller.dart';
 
 void registerSocketRoutes(SocketServer server) {
-  // Socket event: ping
-  server.on('ping', (client, data) {
-    client.send('pong', {'message': 'pong'});
+  // Register Chat Controller
+  server.registerController(ChatController());
+
+  // Global events (no namespace)
+  server.on('ping', (context) {
+    context.emit('pong', {'message': 'pong', 'received': context.data});
   });
 }
