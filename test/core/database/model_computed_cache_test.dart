@@ -13,7 +13,6 @@ class TestModel extends KhademModel<TestModel> {
     return TestModel()..fromJson(data);
   }
 
-  @override
   dynamic getField(String key) {
     switch (key) {
       case 'name':
@@ -23,7 +22,6 @@ class TestModel extends KhademModel<TestModel> {
     }
   }
 
-  @override
   void setField(String key, dynamic value) {
     switch (key) {
       case 'name':

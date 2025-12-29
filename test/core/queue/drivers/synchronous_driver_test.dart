@@ -106,15 +106,6 @@ void main() {
       expect(job2.executedAt!.isBefore(job3.executedAt!), isTrue);
     });
 
-    test(
-      'should handle job failures gracefully',
-      () async {
-        // Skip this test - error handling with retries is complex and causes timeouts
-        // The base driver automatically retries failed jobs which causes this to hang
-        // This functionality is already tested in the base driver tests
-      },
-      skip: 'Error handling with retries causes timeout',
-    );
 
     test('should track metrics when enabled', () async {
       final metrics = QueueMetrics();

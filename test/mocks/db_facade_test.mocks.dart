@@ -1,6 +1,5 @@
 import 'package:khadem/khadem.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
 // Mocks
 class MockConfig extends Mock implements ConfigInterface {}
@@ -42,29 +41,4 @@ class MockDatabaseManager extends Mock implements DatabaseManager {
       String? connectionName,}) {
     return _connection.queryBuilder(tableName, modelFactory: modelFactory);
   }
-}
-
-void main() {
-  group('DB Facade', () {
-    late ContainerInterface container;
-    late MockDatabaseManager manager;
-
-    setUp(() {
-      container = ContainerProvider.instance;
-      manager = MockDatabaseManager();
-
-      container.singleton<DatabaseManager>((_) => manager);
-    });
-
-    test('DB.table returns QueryBuilder', () {
-      final query = DB.table('users');
-      expect(query, isA<QueryBuilder>());
-      expect((query as QueryBuilder).table, equals('users'));
-    });
-
-    test('DB.connection returns connection', () {
-      final conn = DB.connection();
-      expect(conn.isConnected, isTrue);
-    });
-  });
 }

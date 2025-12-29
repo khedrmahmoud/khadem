@@ -3,7 +3,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
-import 'exception_handler_test.mocks.dart';
+import '../../mocks/exception_handler_test.mocks.dart';
 
 @GenerateMocks([Logger])
 void main() {

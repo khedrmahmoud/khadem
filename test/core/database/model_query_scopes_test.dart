@@ -57,7 +57,6 @@ class TestUser extends KhademModel<TestUser> with QueryScopes<TestUser> {
     return TestUser()..fromJson(data);
   }
 
-  @override
   dynamic getField(String key) {
     switch (key) {
       case 'id':
@@ -77,7 +76,6 @@ class TestUser extends KhademModel<TestUser> with QueryScopes<TestUser> {
     }
   }
 
-  @override
   void setField(String key, dynamic value) {
     switch (key) {
       case 'id':

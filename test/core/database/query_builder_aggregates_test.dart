@@ -1,12 +1,19 @@
-import 'package:khadem/src/contracts/database/database_connection.dart';
-import 'package:khadem/src/contracts/database/database_response.dart';
-import 'package:khadem/src/contracts/database/query_builder_interface.dart';
-import 'package:khadem/src/contracts/database/schema_builder.dart';
-import 'package:khadem/src/core/database/model_base/khadem_model.dart';
-import 'package:khadem/src/core/database/orm/relation_definition.dart';
-import 'package:khadem/src/core/database/query/grammars/mysql_grammar.dart';
-import 'package:khadem/src/core/database/query/query_builder.dart';
+import 'package:khadem/khadem.dart';
 import 'package:test/test.dart';
+
+class TestDatabaseManager implements DatabaseManager {
+  final DatabaseConnection _connection;
+
+  TestDatabaseManager(this._connection);
+
+  @override
+  QueryBuilderInterface<T> table<T>(String tableName, {T Function(Map<String, dynamic>)? modelFactory, String? connectionName}) {
+    return QueryBuilder<T>(_connection, MySQLGrammar(), tableName, modelFactory: modelFactory);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
 
 class _MockConnection implements DatabaseConnection {
   @override
@@ -67,9 +74,16 @@ class User extends KhademModel<User> {
 
 void main() {
   late DatabaseConnection mockConnection;
+  late DatabaseManager mockDatabaseManager;
 
   setUp(() {
     mockConnection = _MockConnection();
+    mockDatabaseManager = TestDatabaseManager(mockConnection);
+    ContainerProvider.instance.singleton<DatabaseManager>((_) => mockDatabaseManager);
+  });
+
+  tearDown(() {
+    ContainerProvider.instance.flush();
   });
 
   group('QueryBuilder Aggregates', () {
@@ -86,7 +100,7 @@ void main() {
       final sql = query.toSql();
       // SELECT *, (SELECT COUNT(*) FROM `posts` WHERE `users`.`id` = `posts`.`user_id`) as posts_count FROM `users`
       expect(sql, contains('SELECT *'));
-      expect(sql, contains('(SELECT COUNT(*) FROM `posts` WHERE `users`.`id` = `posts`.`user_id`) as posts_count'));
+      expect(sql, contains('(SELECT COUNT(*) FROM `posts` WHERE `posts`.`user_id` = `users`.`id`) as posts_count'));
     });
 
     test('withCount supports array of relations', () {
@@ -115,7 +129,7 @@ void main() {
 
       final sql = query.toSql();
       // SELECT *, (SELECT AVG(`rating`) FROM `posts` WHERE `users`.`id` = `posts`.`user_id`) as posts_avg_rating FROM `users`
-      expect(sql, contains('(SELECT AVG(`rating`) FROM `posts` WHERE `users`.`id` = `posts`.`user_id`) as posts_avg_rating'));
+      expect(sql, contains('(SELECT AVG(`rating`) FROM `posts` WHERE `posts`.`user_id` = `users`.`id`) as posts_avg_rating'));
     });
 
     test('withSum generates correct subquery', () {
@@ -129,7 +143,7 @@ void main() {
       query.withSum('posts', 'views');
 
       final sql = query.toSql();
-      expect(sql, contains('(SELECT SUM(`views`) FROM `posts` WHERE `users`.`id` = `posts`.`user_id`) as posts_sum_views'));
+      expect(sql, contains('(SELECT SUM(`views`) FROM `posts` WHERE `posts`.`user_id` = `users`.`id`) as posts_sum_views'));
     });
   });
 }

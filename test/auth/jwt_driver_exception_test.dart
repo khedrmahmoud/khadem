@@ -7,7 +7,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
-import 'jwt_driver_exception_test.mocks.dart';
+import '../mocks/jwt_driver_exception_test.mocks.dart';
 
 @GenerateMocks([AuthConfig, TokenService])
 void main() {
