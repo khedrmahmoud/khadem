@@ -1,201 +1,214 @@
+import 'dart:async';
+import 'dart:convert';
 import '../../contracts/validation/rule.dart';
 
+/// Validates that a value is a valid UUID (Universal Unique Identifier).
+///
+/// Supports UUID versions 1, 3, 4, and 5.
+/// Matches strict RFC 4122 format.
 class UuidRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (value == null) {
-      return 'uuid_validation';
-    }
+  String get signature => 'uuid';
 
-    if (value is! String) {
-      return 'uuid_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    if (value == null) return false;
+    if (value is! String) return false;
 
+    // Strict regex for UUID v1-v5
+    // xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx
+    // M is version (1-5), N is variant (8, 9, a, b)
     final uuidRegex = RegExp(
-      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+      caseSensitive: false,
     );
 
-    if (!uuidRegex.hasMatch(value)) {
-      return 'uuid_validation';
-    }
-
-    return null;
+    return uuidRegex.hasMatch(value);
   }
+
+  @override
+  String message(ValidationContext context) => 'uuid_validation';
 }
 
+/// Validates that a value is a valid JSON string.
+///
+/// Uses [jsonDecode] to verify the string structure.
 class JsonRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (value == null) {
-      return 'json_validation';
-    }
+  String get signature => 'json';
 
-    if (value is! String) {
-      return 'json_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    if (value == null) return false;
+    if (value is! String) return false;
 
     try {
-      // Try to parse as JSON
-      // Note: In Dart, we can use json.decode but for validation purposes,
-      // we'll do a basic check
-      if (!value.trim().startsWith('{') && !value.trim().startsWith('[')) {
-        return 'json_validation';
-      }
-
-      // Basic JSON structure validation
-      final trimmed = value.trim();
-      if ((trimmed.startsWith('{') && !trimmed.endsWith('}')) ||
-          (trimmed.startsWith('[') && !trimmed.endsWith(']'))) {
-        return 'json_validation';
-      }
-
-      return null;
+      jsonDecode(value);
+      return true;
     } catch (e) {
-      return 'json_validation';
+      return false;
     }
   }
+
+  @override
+  String message(ValidationContext context) => 'json_validation';
 }
 
+/// Validates that a value is a valid phone number.
+///
+/// Checks against E.164 standard format (up to 15 digits).
+/// Allows optional leading `+` and sanitized separators like spaces, dashes, and parentheses.
 class PhoneRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (value == null) {
-      return 'phone_validation';
-    }
+  String get signature => 'phone';
 
-    if (value is! String) {
-      return 'phone_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    if (value == null) return false;
+    if (value is! String) return false;
 
-    // Basic international phone number regex
-    // This is a simplified version - in production, you might want to use
-    // a more comprehensive phone number validation library
+    // E.164 compliant (ish) + optional spaces/dashes
     final phoneRegex = RegExp(
-      r'^\+?[\d\s\-\(\)]{10,15}$',
+      r'^\+?[1-9]\d{1,14}$', 
     );
-
-    if (!phoneRegex.hasMatch(value.replaceAll(RegExp(r'\s+'), ''))) {
-      return 'phone_validation';
-    }
-
-    return null;
+    // Sanitize
+    final sanitized = value.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+    return phoneRegex.hasMatch(sanitized);
   }
+
+  @override
+  String message(ValidationContext context) => 'phone_validation';
 }
 
+/// Indicates that the field under validation may be null.
+///
+/// This rule is a marker for the validator to skip other rules if the value is null.
+/// It always passes validation itself.
 class NullableRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
+  String get signature => 'nullable';
+
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
     // Nullable rule always passes validation.
-    // When used in combination with other rules, it indicates that null values are allowed
-    // and other validation rules should be skipped if the field value is null.
-    // The actual nullable logic is handled in the Validator class.
-    return null;
+    return true;
   }
+
+  @override
+  String message(ValidationContext context) => '';
 }
 
+/// Indicates that the field under validation is optional and may not be present in the input data.
+///
+/// If the field is present, it will be validated against other rules.
+/// If absent, other rules are skipped.
 class SometimesRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    // Sometimes rule indicates that the field may or may not be present
-    // This is typically used to make validation conditional
-    return null;
+  String get signature => 'sometimes';
+
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    return true;
   }
+
+  @override
+  String message(ValidationContext context) => '';
 }
 
+/// Validates that the field must be missing or empty.
+///
+/// Fails if the field is present and not empty (not null, not empty string, not empty list/map).
 class ProhibitedRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    // Prohibited rule fails if the field is present
-    return 'prohibited_validation';
+  String get signature => 'prohibited';
+
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    
+    // If null, it's considered empty/missing -> Pass
+    if (value == null) return true;
+    
+    // If string and empty -> Pass
+    if (value is String && value.trim().isEmpty) return true;
+    
+    // If collection and empty -> Pass
+    if (value is Iterable && value.isEmpty) return true;
+    if (value is Map && value.isEmpty) return true;
+
+    // Otherwise, it is present and not empty -> Fail
+    return false;
   }
+
+  @override
+  String message(ValidationContext context) => 'prohibited_validation';
 }
 
+/// Validates that the field must be missing or empty if another field is equal to a value.
 class ProhibitedIfRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (arg == null) {
-      return 'prohibited_if_validation';
-    }
+  String get signature => 'prohibited_if';
 
-    final parts = arg.split(',');
-    if (parts.length < 2) {
-      return 'prohibited_if_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final args = context.parameters;
+    final data = context.data;
+    if (args.length < 2) return true; 
 
-    final otherField = parts[0];
-    final expectedValue = parts[1];
+    final otherField = args[0];
+    final expectedValue = args[1];
 
+    // Check if condition is met
     if (data.containsKey(otherField) &&
         data[otherField].toString() == expectedValue) {
-      return 'prohibited_if_validation';
+        
+        // If condition meets, field must be prohibited (empty/missing)
+        // Re-use logic from ProhibitedRule
+        final value = context.value;
+        if (value == null) return true;
+        if (value is String && value.trim().isEmpty) return true;
+        if (value is Iterable && value.isEmpty) return true;
+        if (value is Map && value.isEmpty) return true;
+        
+        return false;
     }
-
-    return null;
+    return true;
   }
+
+  @override
+  String message(ValidationContext context) => 'prohibited_if_validation';
 }
 
+/// Validates that the field is required if another field is equal to a value.
 class RequiredIfRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (arg == null) {
-      return null; // If no condition specified, don't enforce
-    }
+  String get signature => 'required_if';
 
-    final parts = arg.split(',');
-    if (parts.length < 2) {
-      return null;
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final args = context.parameters;
+    final data = context.data;
+    final value = context.value;
 
-    final otherField = parts[0];
-    final expectedValue = parts[1];
+    if (args.length < 2) return true;
+
+    final otherField = args[0];
+    final expectedValue = args[1];
 
     if (data.containsKey(otherField) &&
         data[otherField].toString() == expectedValue) {
-      if (value == null || (value is String && value.isEmpty)) {
-        return 'required_if_validation';
-      }
+      // Condition met, so it IS required
+      if (value == null) return false;
+      if (value is String && value.trim().isEmpty) return false;
+      if (value is Iterable && value.isEmpty) return false;
+      if (value is Map && value.isEmpty) return false;
     }
-
-    return null;
+    return true;
   }
+
+  @override
+  String message(ValidationContext context) => 'required_if_validation';
 }

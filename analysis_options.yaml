@@ -26,6 +26,7 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    - "example/lib/database/migrations/**"
   errors:
     invalid_annotation_target: ignore
   

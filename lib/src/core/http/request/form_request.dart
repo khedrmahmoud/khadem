@@ -335,7 +335,7 @@ abstract class FormRequest {
   /// ```
   ///
   /// Returns: A map of field names to validation rule strings.
-  Map<String, String> rules();
+  Map<String, dynamic> rules();
 
   /// Define custom error messages for validation rules.
   ///
@@ -454,7 +454,7 @@ abstract class FormRequest {
   /// - [errors]: A map of field names to error messages
   ///
   /// Throws: [ValidationException] (by default implementation)
-  void failedValidation(Map<String, String> errors) {
+  void failedValidation(Map<String, List<String>> errors) {
     throw ValidationException(errors);
   }
 

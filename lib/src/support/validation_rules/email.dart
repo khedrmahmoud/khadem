@@ -1,22 +1,24 @@
+import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
+/// Validates that the field is a valid email address.
 class EmailRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
+  String get signature => 'email';
+
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
     if (value == null || value is! String) {
-      return 'email_validation';
+      return false;
     }
 
+    // Basic email regex, could be improved or use a library
     final emailRegex =
         RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    if (!emailRegex.hasMatch(value)) {
-      return 'email_validation';
-    }
-    return null;
+    return emailRegex.hasMatch(value);
   }
+
+  @override
+  String message(ValidationContext context) => 'email_validation';
 }

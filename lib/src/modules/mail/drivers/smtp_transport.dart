@@ -31,7 +31,6 @@ class SmtpTransport implements TransportInterface {
   Socket? _plainSocket;
   bool _isConnected = false;
   Stream<List<int>>? _socketStream;
-  Set<String> _lastEhloCapabilities = const {};
   String? _lastCommand;
 
   SmtpTransport(this._config);
@@ -203,7 +202,6 @@ class SmtpTransport implements TransportInterface {
       final response = await _sendCommand('HELO $heloName', expectedCode: 250);
       caps.addAll(_extractCapabilities(response));
     }
-    _lastEhloCapabilities = caps;
     return caps;
   }
 

@@ -174,17 +174,17 @@ mixin HasAttributes<T> {
     }
 
     switch (castType) {
-      case int:
+      case const (int):
         return int.tryParse(value.toString());
       case const (double):
         return double.tryParse(value.toString());
-      case String:
+      case const (String):
         return value.toString();
-      case bool:
+      case const (bool):
         if (value is bool) return value;
         if (value is int) return value == 1;
         return value.toString().toLowerCase() == 'true';
-      case DateTime:
+      case const (DateTime):
         if (value is DateTime) return value;
         return DateTime.tryParse(value.toString());
       case const (List<String>):
@@ -210,7 +210,7 @@ mixin HasAttributes<T> {
         }
         return [];
       case const (Map<String, dynamic>):
-      case Map:
+      case const (Map):
         if (value is Map) return value;
         if (value is String) {
           try {

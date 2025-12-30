@@ -1,3 +1,4 @@
+// ignore_for_file: directives_ordering
 // ========================
 // 📦 Array_rules.dart
 // ========================
@@ -118,10 +119,7 @@ export 'providers/event_service_provider.dart';
 // ========================
 export 'middlewares/exception_middleware.dart';
 
-// ========================
-// 📦 Fakes
-// ========================
-export 'testing/fakes/event_fake.dart';
+
 
 // ========================
 // 📦 File_rules.dart

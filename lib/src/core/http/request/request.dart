@@ -213,15 +213,15 @@ class Request {
 
   /// Validates request body
   Future<Map<String, dynamic>> validate(
-    Map<String, String> rules, {
+    Map<String, dynamic> rules, {
     Map<String, String>? messages,
   }) =>
       _validator.validateBody(rules, messages: messages);
 
   /// Validates specific data
-  Map<String, dynamic> validateData(
+  Future<Map<String, dynamic>> validateData(
     Map<String, dynamic> data,
-    Map<String, String> rules,
+    Map<String, dynamic> rules,
   ) =>
       _validator.validateData(data, rules);
 

@@ -16,7 +16,7 @@ class RequestValidator {
   /// Throws [ValidationException] if validation fails.
   /// Returns the validated input data if validation passes.
   Future<Map<String, dynamic>> validateBody(
-    Map<String, String> rules, {
+    Map<String, dynamic> rules, {
     Map<String, String>? messages,
   }) async {
     final input = await _bodyParser.parse();
@@ -29,7 +29,7 @@ class RequestValidator {
     final validator =
         InputValidator(input, rules, customMessages: messages ?? {});
 
-    if (!validator.passes()) {
+    if (!await validator.passes()) {
       throw ValidationException(validator.errors);
     }
 
@@ -41,10 +41,10 @@ class RequestValidator {
   }
 
   /// Validates specific input data against rules.
-  Map<String, dynamic> validateData(
+  Future<Map<String, dynamic>> validateData(
     Map<String, dynamic> data,
-    Map<String, String> rules,
-  ) {
+    Map<String, dynamic> rules,
+  ) async {
     // If no files are provided in data, try to get them from the body parser
     final validationData = Map<String, dynamic>.from(data);
     if (_bodyParser.files != null && !validationData.containsKey('files')) {
@@ -53,7 +53,7 @@ class RequestValidator {
 
     final validator = InputValidator(validationData, rules);
 
-    if (!validator.passes()) {
+    if (!await validator.passes()) {
       throw ValidationException(validator.errors);
     }
 

@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use_from_same_package
 import 'package:khadem/src/contracts/events/event_system_interface.dart';
 import 'package:khadem/src/core/events/event_method.dart';
 import 'package:test/test.dart';

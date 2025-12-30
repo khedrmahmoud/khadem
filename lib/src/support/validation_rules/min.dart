@@ -1,45 +1,53 @@
+import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
+/// Validates that the field is at least [min].
+///
+/// Behavior depends on type:
+/// - Numeric: value >= min
+/// - String: length >= min
+/// - Collection: length >= min
 class MinRule extends Rule {
-  @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    final min = int.tryParse(arg ?? '') ?? 0;
+  final num? _min;
+  MinRule([this._min]);
 
-    if (value == null) return null;
+  @override
+  String get signature => 'min';
+
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    final args = context.parameters;
+    final min = _min ?? num.tryParse(args.isNotEmpty ? args[0] : '') ?? 0;
+
+    if (value == null) return true; // Null rules usually handled by 'required'
 
     if (value is num) {
-      if (value < min) {
-        return 'min_value_validation';
-      }
+      return value >= min;
     } else if (value is String) {
-      // Try to parse as number first
-      final numValue = num.tryParse(value);
-      if (numValue != null) {
-        if (numValue < min) {
-          return 'min_value_validation';
-        }
-      } else {
-        // If not a number, check string length
-        if (value.length < min) {
-          return 'min_validation';
-        }
-      }
-    } else if (value is List || value is Map) {
-      if (value.length < min) {
-        return 'min_validation';
-      }
+      // Check if string is numeric and we strictly want numeric comparison ?? 
+      // Laravel heuristic: if 'numeric' rule is present, treat as number.
+      // Here we assume String -> Length, unless it looks like a number? 
+      // Standard is: String -> Length. Numeric -> Value.
+      // But if input is from HTTP form, it's always string.
+      // Better approach: context.isNumeric? 
+      // For now, adhere to simple type check: String -> Length.
+      // UNLESS the user explicitly casts it or we check 'numeric' rule presence (hard here).
+      // Let's stick to standard behavior: String=length.
+      return value.length >= min;
+    } else if (value is Iterable || value is Map) {
+      return value.length >= min;
     } else {
-      final str = value.toString();
-      if (str.length < min) {
-        return 'min_validation';
-      }
+      return value.toString().length >= min;
     }
+  }
 
-    return null;
+  @override
+  String message(ValidationContext context) {
+    final value = context.value;
+    if (value is num) {
+      return 'min_value_validation';
+    }
+    return 'min_validation';
   }
 }

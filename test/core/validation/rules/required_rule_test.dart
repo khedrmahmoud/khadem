@@ -1,3 +1,4 @@
+import 'package:khadem/src/contracts/validation/rule.dart';
 import 'package:khadem/src/support/validation_rules/required.dart';
 import 'package:test/test.dart';
 
@@ -9,34 +10,58 @@ void main() {
   });
 
   group('RequiredRule', () {
-    test('should return error message when value is null', () {
-      final result = rule.validate('field', null, null, data: {});
-      expect(result, equals('required_validation'));
+    test('should return false when value is null', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: null,
+        data: {},
+      ),);
+      expect(result, isFalse);
     });
 
-    test('should return error message when value is empty string', () {
-      final result = rule.validate('field', '', null, data: {});
-      expect(result, equals('required_validation'));
+    test('should return false when value is empty string', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: '',
+        data: {},
+      ),);
+      expect(result, isFalse);
     });
 
-    test('should return error message when value is whitespace', () {
-      final result = rule.validate('field', '   ', null, data: {});
-      expect(result, equals('required_validation'));
+    test('should return false when value is whitespace', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: '   ',
+        data: {},
+      ),);
+      expect(result, isFalse);
     });
 
-    test('should return null when value is non-empty string', () {
-      final result = rule.validate('field', 'value', null, data: {});
-      expect(result, isNull);
+    test('should return true when value is non-empty string', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: 'value',
+        data: {},
+      ),);
+      expect(result, isTrue);
     });
 
-    test('should return null when value is number', () {
-      final result = rule.validate('field', 42, null, data: {});
-      expect(result, isNull);
+    test('should return true when value is number', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: 42,
+        data: {},
+      ),);
+      expect(result, isTrue);
     });
 
-    test('should return null when value is boolean', () {
-      final result = rule.validate('field', true, null, data: {});
-      expect(result, isNull);
+    test('should return true when value is boolean', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: true,
+        data: {},
+      ),);
+      expect(result, isTrue);
     });
   });
 }

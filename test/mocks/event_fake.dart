@@ -1,6 +1,6 @@
 import 'dart:async';
-import '../../../contracts/events/dispatcher.dart';
-import '../../../contracts/events/event.dart';
+import 'package:khadem/src/contracts/events/dispatcher.dart';
+import 'package:khadem/src/contracts/events/event.dart';
 
 /// A fake event dispatcher for testing purposes.
 ///

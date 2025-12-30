@@ -57,14 +57,14 @@ class FakeRequest implements Request {
 
   @override
   Future<Map<String, dynamic>> validate(
-    Map<String, String> rules, {
+    Map<String, dynamic> rules, {
     Map<String, String>? messages,
   }) async {
     // Use the real InputValidator for proper testing
     final validator =
         InputValidator(_bodyData, rules, customMessages: messages ?? {});
 
-    if (!validator.passes()) {
+    if (!await validator.passes()) {
       throw ValidationException(validator.errors);
     }
 
@@ -83,7 +83,7 @@ class FakeRequest implements Request {
 // Test FormRequest implementations
 class TestFormRequest extends FormRequest {
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {
       'name': 'required|max:50',
       'email': 'required|email',
@@ -93,7 +93,7 @@ class TestFormRequest extends FormRequest {
 
 class TestFormRequestWithMessages extends FormRequest {
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {
       'email': 'required|email',
       'password': 'required|min:8',
@@ -115,7 +115,7 @@ class TestFormRequestWithHooks extends FormRequest {
   bool failedWasCalled = false;
 
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {'name': 'required'};
   }
 
@@ -131,7 +131,7 @@ class TestFormRequestWithHooks extends FormRequest {
   }
 
   @override
-  void failedValidation(Map<String, String> errors) {
+  void failedValidation(Map<String, List<String>> errors) {
     failedWasCalled = true;
     super.failedValidation(errors);
   }
@@ -143,7 +143,7 @@ class TestFormRequestWithAuth extends FormRequest {
   TestFormRequestWithAuth({this.shouldAuthorize = true});
 
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {'name': 'required'};
   }
 
@@ -155,14 +155,14 @@ class TestFormRequestWithAuth extends FormRequest {
 
 class EmptyRulesFormRequest extends FormRequest {
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {};
   }
 }
 
 class TestFormRequestWithNumeric extends FormRequest {
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {
       'name': 'required|max:50',
       'email': 'required|email',
@@ -175,7 +175,7 @@ class TestFormRequestWithOrderedHooks extends FormRequest {
   List<String> callOrder = [];
 
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {'name': 'required'};
   }
 
@@ -196,7 +196,7 @@ class TestFormRequestWithOrderedHooks extends FormRequest {
   }
 
   @override
-  void failedValidation(Map<String, String> errors) {
+  void failedValidation(Map<String, List<String>> errors) {
     callOrder.add('failed');
     super.failedValidation(errors);
   }
@@ -206,7 +206,7 @@ class TestFormRequestWithRequestCheck extends FormRequest {
   Request? receivedRequest;
 
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {'name': 'required'};
   }
 
@@ -218,7 +218,7 @@ class TestFormRequestWithRequestCheck extends FormRequest {
 
 class TestFormRequestWithDataModification extends FormRequest {
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {
       'name': 'required',
       'email': 'required|email',
@@ -236,7 +236,7 @@ class TestFormRequestWithAuthCheck extends FormRequest {
   Request? authorizedRequest;
 
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {'name': 'required'};
   }
 
@@ -249,7 +249,7 @@ class TestFormRequestWithAuthCheck extends FormRequest {
 
 class TestFormRequestComplex extends FormRequest {
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {
       'name': 'required|string|max:100',
       'email': 'required|email',
@@ -269,12 +269,12 @@ class CustomTestException implements Exception {
 
 class TestFormRequestWithCustomException extends FormRequest {
   @override
-  Map<String, String> rules() {
+  Map<String, dynamic> rules() {
     return {'name': 'required'};
   }
 
   @override
-  void failedValidation(Map<String, String> errors) {
+  void failedValidation(Map<String, List<String>> errors) {
     throw CustomTestException('Custom validation failure');
   }
 }
@@ -903,7 +903,7 @@ void main() {
         } catch (e) {
           expect(e, isA<ValidationException>());
           final validationException = e as ValidationException;
-          expect(validationException.errors, isA<Map<String, String>>());
+          expect(validationException.errors, isA<Map<String, List<String>>>());
           expect(validationException.errors.isNotEmpty, isTrue);
         }
       });

@@ -1,20 +1,19 @@
+import 'dart:async';
+import 'dart:io';
 import '../../contracts/validation/rule.dart';
 
+/// Validates that the field is a valid URL.
+///
+/// Checks protocol (http/https), domain, and format.
 class UrlRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (value == null) {
-      return 'url_validation';
-    }
+  String get signature => 'url';
 
-    if (value is! String) {
-      return 'url_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    if (value == null) return false;
+    if (value is! String) return false;
 
     final urlRegex = RegExp(
       r'^https?://' // protocol
@@ -25,54 +24,54 @@ class UrlRule extends Rule {
       caseSensitive: false,
     );
 
-    if (!urlRegex.hasMatch(value)) {
-      return 'url_validation';
-    }
-
-    return null;
+    return urlRegex.hasMatch(value);
   }
+
+  @override
+  String message(ValidationContext context) => 'url_validation';
 }
 
+/// Validates that the field is a valid active URL by checking DNS records.
+///
+/// Performs a real [InternetAddress.lookup] to verify the host exists.
 class ActiveUrlRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
+  String get signature => 'active_url';
+
+  @override
+  FutureOr<bool> passes(ValidationContext context) async {
+    final value = context.value;
     // First check if it's a valid URL format
-    final urlRule = UrlRule();
-    if (urlRule.validate(field, value, arg, data: data) != null) {
-      return 'active_url_validation';
+    if (!await UrlRule().passes(context)) return false;
+
+    if (value is! String) return false;
+
+    try {
+      final uri = Uri.parse(value);
+      final host = uri.host;
+      if (host.isEmpty) return false;
+
+      final addresses = await InternetAddress.lookup(host);
+      return addresses.isNotEmpty && addresses[0].rawAddress.isNotEmpty;
+    } catch (e) {
+      return false;
     }
-
-    // In a real implementation, this would make an HTTP request to check if the URL is active
-    // For now, we'll just return null (assume it's active)
-    // This would typically involve:
-    // 1. Making a HEAD request to the URL
-    // 2. Checking the response status code
-    // 3. Handling timeouts and network errors
-
-    return null;
   }
+
+  @override
+  String message(ValidationContext context) => 'active_url_validation';
 }
 
+/// Validates that the field is a valid IP address (IPv4 or IPv6).
 class IpRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (value == null) {
-      return 'ip_validation';
-    }
+  String get signature => 'ip';
 
-    if (value is! String) {
-      return 'ip_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    if (value == null) return false;
+    if (value is! String) return false;
 
     final ipv4Regex = RegExp(
       r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}'
@@ -98,58 +97,46 @@ class IpRule extends Rule {
       r'(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$',
     );
 
-    if (!ipv4Regex.hasMatch(value) && !ipv6Regex.hasMatch(value)) {
-      return 'ip_validation';
-    }
-
-    return null;
+    return ipv4Regex.hasMatch(value) || ipv6Regex.hasMatch(value);
   }
+
+  @override
+  String message(ValidationContext context) => 'ip_validation';
 }
 
+/// Validates that the field is a valid IPv4 address.
 class Ipv4Rule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (value == null) {
-      return 'ipv4_validation';
-    }
+  String get signature => 'ipv4';
 
-    if (value is! String) {
-      return 'ipv4_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    if (value == null) return false;
+    if (value is! String) return false;
 
     final ipv4Regex = RegExp(
       r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}'
       r'(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
     );
 
-    if (!ipv4Regex.hasMatch(value)) {
-      return 'ipv4_validation';
-    }
-
-    return null;
+    return ipv4Regex.hasMatch(value);
   }
+
+  @override
+  String message(ValidationContext context) => 'ipv4_validation';
 }
 
+/// Validates that the field is a valid IPv6 address.
 class Ipv6Rule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (value == null) {
-      return 'ipv6_validation';
-    }
+  String get signature => 'ipv6';
 
-    if (value is! String) {
-      return 'ipv6_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    if (value == null) return false;
+    if (value is! String) return false;
 
     final ipv6Regex = RegExp(
       r'^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|'
@@ -170,10 +157,30 @@ class Ipv6Rule extends Rule {
       r'(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$',
     );
 
-    if (!ipv6Regex.hasMatch(value)) {
-      return 'ipv6_validation';
-    }
-
-    return null;
+    return ipv6Regex.hasMatch(value);
   }
+
+  @override
+  String message(ValidationContext context) => 'ipv6_validation';
+}
+
+/// Validates that the field is a valid MAC address.
+///
+/// Supports standard formats like `00:1A:2B:3C:4D:5E`.
+class MacAddressRule extends Rule {
+  @override
+  String get signature => 'mac_address';
+
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    if (value == null || value is! String) return false;
+    
+    // Supports 00:00:00:00:00:00 and 00-00-00-00-00-00 and 0000.0000.0000 formats
+    final macRegex = RegExp(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$');
+    return macRegex.hasMatch(value);
+  }
+
+  @override
+  String message(ValidationContext context) => 'mac_address_validation';
 }

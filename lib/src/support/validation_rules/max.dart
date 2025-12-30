@@ -1,29 +1,44 @@
+import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
+/// Validates that the field is at most [max].
+///
+/// Behavior depends on type:
+/// - Numeric: value <= max
+/// - String: length <= max
+/// - Collection: length <= max
 class MaxRule extends Rule {
-  @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    final max = int.tryParse(arg ?? '') ?? 9999;
-    if (value is String || value is List || value is Map) {
-      if (value.length > max) {
-        return 'max_validation';
-      }
-    } else if (value is num) {
-      if (value > max) {
-        return 'max_value_validation';
-      }
-    } else {
-      final str = value.toString();
-      if (str.length > max) {
-        return 'max_validation';
-      }
-    }
+  final num? _max;
+  MaxRule([this._max]);
 
-    return null;
+  @override
+  String get signature => 'max';
+
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    final args = context.parameters;
+    final max = _max ?? num.tryParse(args.isNotEmpty ? args[0] : '') ?? 9999;
+
+    if (value == null) return true;
+
+    if (value is num) {
+       return value <= max;
+    } else if (value is String) {
+       return value.length <= max;
+    } else if (value is Iterable || value is Map) {
+       return value.length <= max;
+    } else {
+       return value.toString().length <= max;
+    }
+  }
+
+  @override
+  String message(ValidationContext context) {
+    final value = context.value;
+    if (value is num) {
+      return 'max_value_validation';
+    }
+    return 'max_validation';
   }
 }

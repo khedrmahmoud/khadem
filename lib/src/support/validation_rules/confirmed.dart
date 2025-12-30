@@ -1,17 +1,20 @@
+import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
+/// Validates that the field matches the value of `{field}_confirmation`.
 class ConfirmedRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
+  String get signature => 'confirmed';
+
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final field = context.attribute;
+    final value = context.value;
+    final data = context.data;
     final confirmation = data['${field}_confirmation'];
-    if (value != confirmation) {
-      return 'confirmed_validation';
-    }
-    return null;
+    return value == confirmation;
   }
+
+  @override
+  String message(ValidationContext context) => 'confirmed_validation';
 }

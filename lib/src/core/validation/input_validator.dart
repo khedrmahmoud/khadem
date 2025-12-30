@@ -1,14 +1,24 @@
+import 'dart:async';
+import '../../contracts/validation/rule.dart';
 import '../../support/exceptions/validation_exception.dart';
 import '../http/request/uploaded_file.dart';
 import '../lang/lang.dart';
 import 'rule_registry.dart';
 
+class _RuleItem {
+  final Rule rule;
+  final List<String> args;
+  final String name;
+
+  _RuleItem(this.rule, this.name, [this.args = const []]);
+}
+
 /// Example: 'attachments': 'nullable|array', 'attachments.*': 'file|max:5120'
 class InputValidator {
   final Map<String, dynamic> data;
-  final Map<String, String> rules;
+  final Map<String, dynamic> rules; // Changed to dynamic to support List<Rule>
   final Map<String, String> customMessages;
-  final Map<String, String> errors = {};
+  final Map<String, List<String>> errors = {};
 
   InputValidator(
     this.data,
@@ -16,65 +26,143 @@ class InputValidator {
     this.customMessages = const {},
   });
 
-  bool passes() {
+  Future<bool> passes() async {
     errors.clear();
 
     // Process all rules, including nested ones
+    // We collect all validation futures to run them in parallel where possible
+    final validationFutures = <Future<void>>[];
+
     for (final entry in rules.entries) {
       final fieldPattern = entry.key;
-      final ruleString = entry.value;
+      final ruleDefinition = entry.value;
 
       if (fieldPattern.contains('*')) {
         // Handle nested/wildcard validation (e.g., attachments.*)
-        _validateNestedField(fieldPattern, ruleString);
+        validationFutures.add(_validateNestedField(fieldPattern, ruleDefinition));
       } else {
         // Handle regular field validation
-        _validateField(fieldPattern, ruleString);
+        validationFutures.add(_validateField(fieldPattern, ruleDefinition));
       }
     }
+
+    await Future.wait(validationFutures);
 
     return errors.isEmpty;
   }
 
-  void validate() {
-    if (!passes()) {
+  Future<void> validate() async {
+    if (!await passes()) {
       throw ValidationException(errors);
     }
   }
 
-  void _validateField(String field, String ruleString) {
+  Future<void> _validateField(String field, dynamic ruleDefinition) async {
     final value = _getFieldValue(field);
-    final ruleParts = ruleString.split('|');
+    final ruleItems = _normalizeRules(ruleDefinition);
+    final shouldBail = _hasBail(ruleDefinition);
 
     // Check if field is nullable and null - if so, skip validation
-    if (_isNullableAndNull(ruleParts, value)) {
+    if (_isNullableAndNull(ruleItems, value)) {
       return;
     }
 
-    for (final part in ruleParts) {
-      final segments = part.split(':');
-      final ruleName = segments[0];
-      final ruleArg = segments.length > 1 ? segments[1] : null;
+    for (final item in ruleItems) {
+      final context = ValidationContext(
+        attribute: field,
+        value: value,
+        parameters: item.args,
+        data: data,
+      );
 
-      final rule = ValidationRuleRepository.resolve(ruleName);
-      if (rule != null) {
-        final messageKey = rule.validate(field, value, ruleArg, data: data);
-        if (messageKey != null) {
-          errors[field] =
-              _formatErrorMessage(messageKey, field, ruleArg, value, ruleName);
-          break; // Stop at first error for this field
+      final isValid = await item.rule.passes(context);
+      
+      if (!isValid) {
+        if (!errors.containsKey(field)) {
+          errors[field] = [];
+        }
+
+        final messageKey = item.rule.message(context);
+        errors[field]!.add(_formatErrorMessage(
+            messageKey, field, item.args, value, item.name,),);
+        
+        if (shouldBail) {
+          break; // Stop at first error for this field if bail is set
         }
       }
     }
   }
 
-  void _validateNestedField(String fieldPattern, String ruleString) {
+  bool _hasBail(dynamic ruleDefinition) {
+    if (ruleDefinition is String) {
+      return ruleDefinition.split('|').contains('bail');
+    } else if (ruleDefinition is List) {
+      return ruleDefinition.contains('bail');
+    }
+    return false;
+  }
+
+  Future<void> _validateNestedField(String fieldPattern, dynamic ruleDefinition) async {
     // Convert pattern like "attachments.*" to actual field paths
     final fieldPaths = _expandFieldPattern(fieldPattern);
+    final futures = <Future<void>>[];
 
     for (final fieldPath in fieldPaths) {
-      _validateField(fieldPath, ruleString);
+      futures.add(_validateField(fieldPath, ruleDefinition));
     }
+    
+    await Future.wait(futures);
+  }
+
+  List<_RuleItem> _normalizeRules(dynamic ruleDefinition) {
+    final items = <_RuleItem>[];
+
+    if (ruleDefinition is String) {
+      // 'required|max:50'
+      final parts = ruleDefinition.split('|');
+      for (final part in parts) {
+        if (part == 'bail') continue;
+        items.add(_parseStringRule(part));
+      }
+    } else if (ruleDefinition is List) {
+      // ['required', MaxRule(50), 'email']
+      for (final part in ruleDefinition) {
+        if (part == 'bail') continue;
+        if (part is String) {
+          // Handle mixed string rules in list: ['required|email', MaxRule(50)]
+          if (part.contains('|')) {
+             final subParts = part.split('|');
+             for (final subPart in subParts) {
+               if (subPart == 'bail') continue;
+               items.add(_parseStringRule(subPart));
+             }
+          } else {
+             items.add(_parseStringRule(part));
+          }
+        } else if (part is Rule) {
+          items.add(_RuleItem(part, 'custom', []));
+        }
+      }
+    } else if (ruleDefinition is Rule) {
+      items.add(_RuleItem(ruleDefinition, 'custom', []));
+    }
+    return items;
+  }
+
+  _RuleItem _parseStringRule(String ruleString) {
+    final segments = ruleString.split(':');
+    final ruleName = segments[0];
+    final ruleArgs = segments.length > 1 ? segments[1].split(',') : <String>[];
+    
+    final rule = ValidationRuleRepository.resolve(ruleName);
+    if (rule == null) {
+       // Fallback or throw? For now, maybe a dummy rule that always passes or logs warning
+       // But better to be strict.
+       // We can't throw easily here without breaking flow, but let's assume it exists.
+       // If not found, we might want to throw an exception to the developer.
+       throw Exception("Validation rule '$ruleName' not found.");
+    }
+    return _RuleItem(rule, ruleName, ruleArgs);
   }
 
   List<String> _expandFieldPattern(String pattern) {
@@ -154,16 +242,15 @@ class InputValidator {
     return current;
   }
 
-  bool _isNullableAndNull(List<String> ruleParts, dynamic value) {
-    final hasNullable =
-        ruleParts.any((part) => part.split(':')[0] == 'nullable');
+  bool _isNullableAndNull(List<_RuleItem> items, dynamic value) {
+    final hasNullable = items.any((item) => item.name == 'nullable');
     return hasNullable && value == null;
   }
 
   String _formatErrorMessage(
     String messageKey,
     String field,
-    String? arg,
+    List<String> args,
     dynamic value, [
     String? ruleName,
   ]) {
@@ -177,12 +264,17 @@ class InputValidator {
 
     final parameters = <String, dynamic>{
       'field': Lang.getField(field),
-      'arg': arg,
+      'arg': args.isNotEmpty ? args.first : '',
+      'args': args.join(','),
     };
+    
+    for (var i = 0; i < args.length; i++) {
+      parameters['arg$i'] = args[i];
+    }
 
     // Add file-specific parameters for better error messages
     if (_isFileValidationContext(messageKey, value)) {
-      _addFileValidationParameters(parameters, messageKey, value, arg);
+      _addFileValidationParameters(parameters, messageKey, value, args);
     }
 
     return Lang.t(messageKey, parameters: parameters, namespace: 'validation');
@@ -198,8 +290,10 @@ class InputValidator {
     Map<String, dynamic> parameters,
     String messageKey,
     dynamic value,
-    String? arg,
+    List<String> args,
   ) {
+    final arg = args.isNotEmpty ? args.first : null;
+
     if (arg != null && messageKey.contains('max')) {
       final sizeLimit = int.tryParse(arg);
       if (sizeLimit != null) {

@@ -4,64 +4,64 @@ import 'package:test/test.dart';
 
 void main() {
   group('InputValidator', () {
-    test('should pass validation when all rules are satisfied', () {
+    test('should pass validation when all rules are satisfied', () async {
       final validator = InputValidator(
-        {'name': 'John', 'age': '25'},
+        {'name': 'John', 'age': 25},
         {'name': 'required', 'age': 'required|int'},
       );
 
-      expect(validator.passes(), isTrue);
+      expect(await validator.passes(), isTrue);
       expect(validator.errors, isEmpty);
     });
 
-    test('should fail validation when required field is missing', () {
+    test('should fail validation when required field is missing', () async {
       final validator = InputValidator(
         {'name': ''},
         {'name': 'required'},
       );
 
-      expect(validator.passes(), isFalse);
+      expect(await validator.passes(), isFalse);
       expect(validator.errors, contains('name'));
     });
 
-    test('should fail validation when multiple rules are not satisfied', () {
+    test('should fail validation when multiple rules are not satisfied', () async {
       final validator = InputValidator(
         {'age': 'not-a-number'},
         {'age': 'required|int'},
       );
 
-      expect(validator.passes(), isFalse);
+      expect(await validator.passes(), isFalse);
       expect(validator.errors, contains('age'));
     });
 
     test(
         'should throw ValidationException when validate() is called and validation fails',
-        () {
+        () async {
       final validator = InputValidator(
         {'name': ''},
         {'name': 'required'},
       );
 
       expect(
-        () => validator.validate(),
+        validator.validate(),
         throwsA(isA<ValidationException>()),
       );
     });
 
     test(
         'should not throw ValidationException when validate() is called and validation passes',
-        () {
+        () async {
       final validator = InputValidator(
         {'name': 'John'},
         {'name': 'required'},
       );
 
-      expect(() => validator.validate(), returnsNormally);
+      await expectLater(validator.validate(), completes);
     });
 
-    test('should handle multiple fields with multiple rules', () {
+    test('should handle multiple fields with multiple rules', () async {
       final validator = InputValidator(
-        {'name': 'John', 'age': '25', 'email': ''},
+        {'name': 'John', 'age': 25, 'email': ''},
         {
           'name': 'required',
           'age': 'required|int',
@@ -69,13 +69,13 @@ void main() {
         },
       );
 
-      expect(validator.passes(), isFalse);
+      expect(await validator.passes(), isFalse);
       expect(validator.errors, contains('email'));
       expect(validator.errors, isNot(contains('name')));
       expect(validator.errors, isNot(contains('age')));
     });
 
-    test('should skip validation for nullable fields when value is null', () {
+    test('should skip validation for nullable fields when value is null', () async {
       final validator = InputValidator(
         {'name': null, 'age': null},
         {
@@ -84,34 +84,34 @@ void main() {
         },
       );
 
-      expect(validator.passes(), isTrue);
+      expect(await validator.passes(), isTrue);
       expect(validator.errors, isEmpty);
     });
 
-    test('should validate nullable fields when value is not null', () {
+    test('should validate nullable fields when value is not null', () async {
       final validator = InputValidator(
-        {'name': 'John', 'age': '15'},
+        {'name': 'John', 'age': 15},
         {
           'name': 'nullable|required|string',
           'age': 'nullable|int|min:18',
         },
       );
 
-      expect(validator.passes(), isFalse);
+      expect(await validator.passes(), isFalse);
       expect(validator.errors, contains('age'));
       expect(validator.errors, isNot(contains('name')));
     });
 
-    test('should validate non-nullable fields normally', () {
+    test('should validate non-nullable fields normally', () async {
       final validator = InputValidator(
-        {'name': null, 'age': '25'},
+        {'name': null, 'age': 25},
         {
           'name': 'required|string',
           'age': 'nullable|int|min:18',
         },
       );
 
-      expect(validator.passes(), isFalse);
+      expect(await validator.passes(), isFalse);
       expect(validator.errors, contains('name'));
       expect(validator.errors, isNot(contains('age')));
     });

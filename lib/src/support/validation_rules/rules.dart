@@ -2,6 +2,7 @@ library;
 
 export 'array_rules.dart';
 export 'bool_rule.dart';
+export 'comparison_rules.dart';
 export 'confirmed.dart';
 export 'date_rules.dart';
 export 'email.dart';
@@ -13,6 +14,7 @@ export 'min.dart';
 export 'misc_rules.dart';
 export 'network_rules.dart';
 export 'numeric.dart';
+export 'payment_rules.dart';
 export 'regex.dart';
 export 'required.dart';
 export 'string_rules.dart';

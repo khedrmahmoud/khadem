@@ -1,3 +1,4 @@
+import 'package:khadem/src/contracts/validation/rule.dart';
 import 'package:khadem/src/support/validation_rules/int_rule.dart';
 import 'package:test/test.dart';
 
@@ -9,44 +10,72 @@ void main() {
   });
 
   group('IntRule', () {
-    test('should return null when value is an integer', () {
-      final result = rule.validate('field', 42, null, data: {});
-      expect(result, isNull);
+    test('should return true when value is an integer', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: 42,
+        data: {},
+      ),);
+      expect(result, isTrue);
     });
 
-    test('should return null when value is a string containing valid integer',
-        () {
-      final result = rule.validate('field', '42', null, data: {});
-      expect(result, isNull);
-    });
-
-    test(
-        'should return error message when value is a string containing non-integer',
-        () {
-      final result = rule.validate('field', 'not-an-int', null, data: {});
-      expect(result, equals('int_validation'));
-    });
-
-    test('should return error message when value is a decimal number', () {
-      final result = rule.validate('field', 42.5, null, data: {});
-      expect(result, equals('int_validation'));
+    test('should return true when value is a string containing valid integer',
+        () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: '42',
+        data: {},
+      ),);
+      expect(result, isTrue);
     });
 
     test(
-        'should return error message when value is a string containing decimal',
-        () {
-      final result = rule.validate('field', '42.5', null, data: {});
-      expect(result, equals('int_validation'));
+        'should return false when value is a string containing non-integer',
+        () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: 'not-an-int',
+        data: {},
+      ),);
+      expect(result, isFalse);
     });
 
-    test('should return error message when value is null', () {
-      final result = rule.validate('field', null, null, data: {});
-      expect(result, equals('int_validation'));
+    test('should return false when value is a decimal number', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: 42.5,
+        data: {},
+      ),);
+      expect(result, isFalse);
     });
 
-    test('should return error message when value is boolean', () {
-      final result = rule.validate('field', true, null, data: {});
-      expect(result, equals('int_validation'));
+    test(
+        'should return false when value is a string containing decimal',
+        () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: '42.5',
+        data: {},
+      ),);
+      expect(result, isFalse);
+    });
+
+    test('should return false when value is null', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: null,
+        data: {},
+      ),);
+      expect(result, isFalse);
+    });
+
+    test('should return false when value is boolean', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: true,
+        data: {},
+      ),);
+      expect(result, isFalse);
     });
   });
 }

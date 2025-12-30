@@ -64,7 +64,9 @@ class Khadem {
   static Migrator get migrator => container.resolve<Migrator>();
   static SeederManager get seeder => container.resolve<SeederManager>();
   static QueueManager get queue => container.resolve<QueueManager>();
+  // ignore: deprecated_member_use_from_same_package
   static EventSystemInterface get eventBus =>
+      // ignore: deprecated_member_use_from_same_package
       container.resolve<EventSystemInterface>();
 
   /// Returns the event dispatcher.

@@ -1,3 +1,4 @@
+import 'package:khadem/src/contracts/validation/rule.dart';
 import 'package:khadem/src/support/validation_rules/email.dart';
 import 'package:test/test.dart';
 
@@ -9,7 +10,7 @@ void main() {
   });
 
   group('EmailRule', () {
-    test('should return null for valid email addresses', () {
+    test('should return true for valid email addresses', () async {
       final validEmails = [
         'test@example.com',
         'user.name@domain.co.uk',
@@ -18,12 +19,16 @@ void main() {
       ];
 
       for (final email in validEmails) {
-        final result = rule.validate('email', email, null, data: {});
-        expect(result, isNull, reason: 'Failed for email: $email');
+        final result = await rule.passes(ValidationContext(
+          attribute: 'email',
+          value: email,
+          data: {},
+        ),);
+        expect(result, isTrue, reason: 'Failed for email: $email');
       }
     });
 
-    test('should return error message for invalid email addresses', () {
+    test('should return false for invalid email addresses', () async {
       final invalidEmails = [
         'invalid.email',
         '@domain.com',
@@ -34,33 +39,44 @@ void main() {
       ];
 
       for (final email in invalidEmails) {
-        final result = rule.validate('email', email, null, data: {});
+        final result = await rule.passes(ValidationContext(
+          attribute: 'email',
+          value: email,
+          data: {},
+        ),);
         expect(
           result,
-          equals('email_validation'),
+          isFalse,
           reason: 'Failed for email: $email',
         );
       }
     });
 
-    test('should return error message when value is null', () {
-      final result = rule.validate('email', null, null, data: {});
-      expect(result, equals('email_validation'));
-    });
-
-    test('should return error message when value is not a string', () {
-      final result = rule.validate('email', 42, null, data: {});
-      expect(result, equals('email_validation'));
-    });
-
-    test('should handle email addresses with special characters', () {
-      final result = rule.validate(
-        'email',
-        'user.name+label@sub.domain-name.com',
-        null,
+    test('should return false when value is null', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'email',
+        value: null,
         data: {},
-      );
-      expect(result, isNull);
+      ),);
+      expect(result, isFalse);
+    });
+
+    test('should return false when value is not a string', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'email',
+        value: 42,
+        data: {},
+      ),);
+      expect(result, isFalse);
+    });
+
+    test('should handle email addresses with special characters', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'email',
+        value: 'user.name+label@sub.domain-name.com',
+        data: {},
+      ),);
+      expect(result, isTrue);
     });
   });
 }

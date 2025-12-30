@@ -58,107 +58,107 @@ void main() {
     });
 
     group('Data Validation', () {
-      test('should validate data successfully', () {
+      test('should validate data successfully', () async {
         final data = {'name': 'John', 'email': 'john@example.com', 'age': 25};
         final rules = {
           'name': 'required',
           'email': 'required|email',
-          'age': 'required|integer',
+          'age': 'required|int', // Changed integer to int as per registry
         };
 
-        final result = validator.validateData(data, rules);
+        final result = await validator.validateData(data, rules);
 
         expect(result, equals(data));
       });
 
-      test('should throw validation exception for invalid data', () {
+      test('should throw validation exception for invalid data', () async {
         final data = {'name': '', 'email': 'invalid-email'};
         final rules = {'name': 'required', 'email': 'required|email'};
 
-        expect(() => validator.validateData(data, rules), throwsException);
+        await expectLater(() => validator.validateData(data, rules), throwsException);
       });
 
-      test('should validate required fields', () {
+      test('should validate required fields', () async {
         final data = {'name': 'John'};
         final rules = {'name': 'required', 'email': 'required'};
 
-        expect(() => validator.validateData(data, rules), throwsException);
+        await expectLater(() => validator.validateData(data, rules), throwsException);
       });
 
-      test('should validate email format', () {
+      test('should validate email format', () async {
         final data = {'email': 'invalid-email'};
         final rules = {'email': 'email'};
 
-        expect(() => validator.validateData(data, rules), throwsException);
+        await expectLater(() => validator.validateData(data, rules), throwsException);
       });
 
-      test('should validate email format correctly', () {
+      test('should validate email format correctly', () async {
         final data = {'email': 'john@example.com'};
         final rules = {'email': 'email'};
 
-        final result = validator.validateData(data, rules);
+        final result = await validator.validateData(data, rules);
 
         expect(result, equals(data));
       });
 
-      test('should validate minimum length', () {
+      test('should validate minimum length', () async {
         final data = {'name': 'Jo'};
         final rules = {'name': 'min:3'};
 
-        expect(() => validator.validateData(data, rules), throwsException);
+        await expectLater(() => validator.validateData(data, rules), throwsException);
       });
 
-      test('should validate maximum length', () {
+      test('should validate maximum length', () async {
         final data = {'name': 'VeryLongName'};
         final rules = {'name': 'max:5'};
 
-        expect(() => validator.validateData(data, rules), throwsException);
+        await expectLater(() => validator.validateData(data, rules), throwsException);
       });
 
-      test('should validate integer type', () {
+      test('should validate integer type', () async {
         final data = {'age': 25};
-        final rules = {'age': 'integer'};
+        final rules = {'age': 'int'}; // Changed integer to int
 
-        final result = validator.validateData(data, rules);
+        final result = await validator.validateData(data, rules);
 
         expect(result, equals(data));
       });
 
-      test('should validate minimum value', () {
+      test('should validate minimum value', () async {
         final data = {'age': 17};
         final rules = {'age': 'min:18'};
 
-        expect(() => validator.validateData(data, rules), throwsException);
+        await expectLater(() => validator.validateData(data, rules), throwsException);
       });
 
-      test('should validate maximum value', () {
+      test('should validate maximum value', () async {
         final data = {'score': 150};
         final rules = {'score': 'max:100'};
 
-        expect(() => validator.validateData(data, rules), throwsException);
+        await expectLater(() => validator.validateData(data, rules), throwsException);
       });
     });
 
     group('Edge Cases', () {
-      test('should handle empty data', () {
+      test('should handle empty data', () async {
         final data = <String, dynamic>{};
         final rules = {'name': 'required'};
 
-        expect(() => validator.validateData(data, rules), throwsException);
+        await expectLater(() => validator.validateData(data, rules), throwsException);
       });
 
-      test('should handle null values', () {
+      test('should handle null values', () async {
         final data = {'name': null};
         final rules = {'name': 'required'};
 
-        expect(() => validator.validateData(data, rules), throwsException);
+        await expectLater(() => validator.validateData(data, rules), throwsException);
       });
 
-      test('should handle empty rules', () {
+      test('should handle empty rules', () async {
         final data = {'name': 'John'};
         final rules = <String, String>{};
 
-        final result = validator.validateData(data, rules);
+        final result = await validator.validateData(data, rules);
 
         expect(result, isEmpty);
       });

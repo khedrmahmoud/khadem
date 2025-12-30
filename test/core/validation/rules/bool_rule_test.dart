@@ -1,3 +1,4 @@
+import 'package:khadem/src/contracts/validation/rule.dart';
 import 'package:khadem/src/support/validation_rules/bool_rule.dart';
 import 'package:test/test.dart';
 
@@ -9,39 +10,76 @@ void main() {
   });
 
   group('BoolRule', () {
-    test('should return null when value is a boolean true', () {
-      final result = rule.validate('field', true, null, data: {});
-      expect(result, isNull);
+    test('should return true when value is a boolean true', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: true,
+        data: {},
+      ),);
+      expect(result, isTrue);
     });
 
-    test('should return null when value is a boolean false', () {
-      final result = rule.validate('field', false, null, data: {});
-      expect(result, isNull);
+    test('should return true when value is a boolean false', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: false,
+        data: {},
+      ),);
+      expect(result, isTrue);
     });
 
-    test('should return null when value is string "true"', () {
-      final result = rule.validate('field', 'true', null, data: {});
-      expect(result, isNull);
+    test('should return true when value is string "true"', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: 'true',
+        data: {},
+      ),);
+      expect(result, isTrue);
     });
 
-    test('should return null when value is string "false"', () {
-      final result = rule.validate('field', 'false', null, data: {});
-      expect(result, isNull);
+    test('should return true when value is string "false"', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: 'false',
+        data: {},
+      ),);
+      expect(result, isTrue);
     });
 
-    test('should return error message when value is non-boolean string', () {
-      final result = rule.validate('field', 'not-a-bool', null, data: {});
-      expect(result, equals('bool_validation'));
+    test('should return false when value is non-boolean string', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: 'not-a-bool',
+        data: {},
+      ),);
+      expect(result, isFalse);
     });
 
-    test('should return error message when value is null', () {
-      final result = rule.validate('field', null, null, data: {});
-      expect(result, equals('bool_validation'));
+    test('should return false when value is null', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: null,
+        data: {},
+      ),);
+      expect(result, isFalse);
     });
 
-    test('should return error message when value is number', () {
-      final result = rule.validate('field', 1, null, data: {});
-      expect(result, equals('bool_validation'));
+    test('should return true when value is number 1 (if accepted)', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: 1,
+        data: {},
+      ),);
+      expect(result, isTrue);
+    });
+
+    test('should return true when value is number 0', () async {
+      final result = await rule.passes(ValidationContext(
+        attribute: 'field',
+        value: 0,
+        data: {},
+      ),);
+      expect(result, isTrue);
     });
   });
 }

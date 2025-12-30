@@ -1,94 +1,94 @@
+import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
+/// Validates that the field is a valid date string.
+///
+/// Uses [DateTime.parse] to validate ISO-8601 formatted dates.
 class DateRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (value == null) {
-      return 'date_validation';
-    }
+  String get signature => 'date';
 
-    if (value is! String) {
-      return 'date_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    if (value == null) return false;
+    if (value is! String) return false;
 
     try {
       DateTime.parse(value);
-      return null;
+      return true;
     } catch (e) {
-      return 'date_validation';
+      return false;
     }
   }
+
+  @override
+  String message(ValidationContext context) => 'date_validation';
 }
 
+/// Validates that the field matches the given date format.
+///
+/// Supports basic formats like `Y-m-d` (YYYY-MM-DD).
+/// For other formats, it falls back to standard [DateTime.parse].
 class DateFormatRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (value == null || arg == null) {
-      return 'date_format_validation';
-    }
+  String get signature => 'date_format';
 
-    if (value is! String) {
-      return 'date_format_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    final args = context.parameters;
+    if (value == null || args.isEmpty) return false;
+    if (value is! String) return false;
 
     try {
-      // For now, we'll only support ISO 8601 format
-      // In a real implementation, this would support various date formats
-      if (arg == 'Y-m-d' || arg == 'Y/m/d') {
+      final format = args[0];
+      if (format == 'Y-m-d' || format == 'Y/m/d') {
         final dateRegex = RegExp(r'^\d{4}[-/]\d{2}[-/]\d{2}$');
-        if (!dateRegex.hasMatch(value)) {
-          return 'date_format_validation';
-        }
-        // Validate the date is actually valid
+        if (!dateRegex.hasMatch(value)) return false;
+
         final parts = value.split(RegExp(r'[-/]'));
         final year = int.parse(parts[0]);
         final month = int.parse(parts[1]);
         final day = int.parse(parts[2]);
 
         final date = DateTime(year, month, day);
-        if (date.year != year || date.month != month || date.day != day) {
-          return 'date_format_validation';
-        }
+        return date.year == year && date.month == month && date.day == day;
       } else {
-        // For other formats, try parsing as DateTime
         DateTime.parse(value);
       }
-      return null;
+      return true;
     } catch (e) {
-      return 'date_format_validation';
+      return false;
     }
   }
+
+  @override
+  String message(ValidationContext context) => 'date_format_validation';
 }
 
+/// Validates that the date is before a given date.
+///
+/// checks against:
+/// - 'today', 'tomorrow', 'yesterday'
+/// - another field in the data
+/// - a specific date string
 class BeforeRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (value == null) {
-      return 'before_validation';
-    }
+  String get signature => 'before';
 
-    if (value is! String) {
-      return 'before_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    final args = context.parameters;
+    final data = context.data;
+    if (value == null) return false;
+    if (value is! String) return false;
 
     try {
       final valueDate = DateTime.parse(value);
       DateTime compareDate;
+      final arg = args.isNotEmpty ? args[0] : null;
 
       if (arg == 'today') {
         compareDate = DateTime.now();
@@ -96,48 +96,51 @@ class BeforeRule extends Rule {
         compareDate = DateTime.now().add(const Duration(days: 1));
       } else if (arg == 'yesterday') {
         compareDate = DateTime.now().subtract(const Duration(days: 1));
-      } else if (data.containsKey(arg!)) {
+      } else if (arg != null && data.containsKey(arg)) {
         final otherValue = data[arg];
         if (otherValue is String) {
           compareDate = DateTime.parse(otherValue);
         } else {
-          return 'before_validation';
+          return false;
         }
-      } else {
-        // Try parsing arg as a date
+      } else if (arg != null) {
         compareDate = DateTime.parse(arg);
+      } else {
+        return false;
       }
 
-      if (!valueDate.isBefore(compareDate)) {
-        return 'before_validation';
-      }
-
-      return null;
+      return valueDate.isBefore(compareDate);
     } catch (e) {
-      return 'before_validation';
+      return false;
     }
   }
+
+  @override
+  String message(ValidationContext context) => 'before_validation';
 }
 
+/// Validates that the date is after a given date.
+///
+/// checks against:
+/// - 'today', 'tomorrow', 'yesterday'
+/// - another field in the data
+/// - a specific date string
 class AfterRule extends Rule {
   @override
-  String? validate(
-    String field,
-    dynamic value,
-    String? arg, {
-    required Map<String, dynamic> data,
-  }) {
-    if (value == null) {
-      return 'after_validation';
-    }
+  String get signature => 'after';
 
-    if (value is! String) {
-      return 'after_validation';
-    }
+  @override
+  FutureOr<bool> passes(ValidationContext context) {
+    final value = context.value;
+    final args = context.parameters;
+    final data = context.data;
+    if (value == null) return false;
+    if (value is! String) return false;
 
     try {
       final valueDate = DateTime.parse(value);
       DateTime compareDate;
+      final arg = args.isNotEmpty ? args[0] : null;
 
       if (arg == 'today') {
         compareDate = DateTime.now();
@@ -145,25 +148,25 @@ class AfterRule extends Rule {
         compareDate = DateTime.now().add(const Duration(days: 1));
       } else if (arg == 'yesterday') {
         compareDate = DateTime.now().subtract(const Duration(days: 1));
-      } else if (data.containsKey(arg!)) {
+      } else if (arg != null && data.containsKey(arg)) {
         final otherValue = data[arg];
         if (otherValue is String) {
           compareDate = DateTime.parse(otherValue);
         } else {
-          return 'after_validation';
+          return false;
         }
-      } else {
-        // Try parsing arg as a date
+      } else if (arg != null) {
         compareDate = DateTime.parse(arg);
+      } else {
+        return false;
       }
 
-      if (!valueDate.isAfter(compareDate)) {
-        return 'after_validation';
-      }
-
-      return null;
+      return valueDate.isAfter(compareDate);
     } catch (e) {
-      return 'after_validation';
+      return false;
     }
   }
+
+  @override
+  String message(ValidationContext context) => 'after_validation';
 }

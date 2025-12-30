@@ -2,7 +2,7 @@ import '../../contracts/exceptions/app_exception.dart';
 import '../../core/lang/lang.dart';
 
 class ValidationException extends AppException {
-  final Map<String, String> errors;
+  final Map<String, List<String>> errors;
 
   ValidationException(this.errors, {dynamic additionalDetails})
       : super(
