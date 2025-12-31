@@ -269,6 +269,11 @@ export 'middlewares/session_middleware.dart';
 export 'middlewares/set_locale_middleware.dart';
 
 // ========================
+// 📦 asset.dart
+// ========================
+export 'facades/asset.dart';
+
+// ========================
 // 📦 Socket.dart
 // ========================
 export 'facades/socket.dart';
