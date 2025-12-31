@@ -48,7 +48,7 @@ class Kernel {
       ];
 
   /// List of global middlewares
-  static List<Middleware> get middlewares => [
+  static List<Middleware> get middleware => [
         CorsMiddleware(),
         LoggingMiddleware(),
         SetLocaleMiddleware(),

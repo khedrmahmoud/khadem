@@ -1,5 +1,5 @@
 import 'package:khadem/src/application/khadem.dart';
-
+ 
 import '../../../contracts/http/middleware_contract.dart';
 import '../../routing/router.dart';
 import 'server_lifecycle.dart';
@@ -51,7 +51,7 @@ class Server {
   }
 
   /// Register multiple global middlewares.
-  void applyMiddlewares(List<Middleware> middlewares) {
+  void applyMiddleware(List<Middleware> middlewares) {
     _registeredMiddlewares.addAll(middlewares);
     _serverMiddleware.useMiddlewares(middlewares);
   }

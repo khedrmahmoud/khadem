@@ -77,14 +77,19 @@ class RequestMetadata {
   /// Gets a query parameter as list of strings.
   ///
   /// Splits by comma and trims whitespace by default.
-  List<String>? queryList(String key, {String separator = ',', List<String>? defaultValue}) {
+  List<String>? queryList(String key,
+      {String separator = ',', List<String>? defaultValue}) {
     final value = _raw.uri.queryParameters[key];
     if (value == null || value.isEmpty) {
       return defaultValue;
     }
 
     try {
-      return value.split(separator).map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+      return value
+          .split(separator)
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
     } catch (_) {
       return defaultValue;
     }
@@ -163,7 +168,28 @@ class RequestMetadata {
   String? get host => _raw.headers.value('host');
 
   /// Gets origin (for CORS).
-  String? get origin => _raw.headers.value('origin');
+  String get origin {
+    // Prefer explicit Origin header when present (browser CORS requests)
+    final headerOrigin = _raw.headers.value('origin');
+    if (headerOrigin != null && headerOrigin.isNotEmpty) return headerOrigin;
+
+    // Use requestedUri origin when URI contains scheme and host
+    final requested = _raw.requestedUri;
+    if (requested.hasScheme && requested.host.isNotEmpty) {
+      try {
+        return requested.origin;
+      } catch (_) {
+        // ignore and fallthrough to header-based fallback
+      }
+    }
+
+    // Fallback: infer from common proxy headers or host header
+    final proto = _raw.headers.value('x-forwarded-proto') ?? 'http';
+    final host = _raw.headers.value('host') ?? requested.host;
+    if (host.isNotEmpty) return '$proto://$host';
+
+    return requested.origin;
+  }
 
   /// Gets referrer.
   String? get referrer => _raw.headers.value('referer');

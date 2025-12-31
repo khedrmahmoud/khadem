@@ -327,7 +327,7 @@ class Request {
   String? get host => _metadata.host;
 
   /// Gets origin (CORS)
-  String? get origin => _metadata.origin;
+  String get origin => _metadata.origin;
 
   /// Gets referrer
   String? get referrer => _metadata.referrer;

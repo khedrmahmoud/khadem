@@ -1,17 +1,16 @@
+import 'package:khadem/src/support/facades/env.dart';
+
 /// Provides methods for generating URLs, assets, and routes.
 class UrlService {
-  final String _baseUrl;
   final String _assetBaseUrl;
   final bool _forceHttps;
   final Map<String, String> _namedRoutes;
 
   UrlService({
-    required String baseUrl,
     String? assetBaseUrl,
     bool forceHttps = false,
     Map<String, String>? namedRoutes,
-  })  : _baseUrl = _normalizeBaseUrl(baseUrl),
-        _assetBaseUrl = assetBaseUrl ?? _normalizeBaseUrl(baseUrl),
+  })  : _assetBaseUrl = assetBaseUrl ?? '',
         _forceHttps = forceHttps,
         _namedRoutes = namedRoutes ?? {};
 
@@ -28,12 +27,14 @@ class UrlService {
   }
 
   /// Generate a full URL to the given path.
-  String to(String path, {Map<String, dynamic>? query}) => url(path, query: query);
+  String to(String path, {Map<String, dynamic>? query}) =>
+      url(path, query: query);
 
   /// Generate a full URL to the given path.
   String url(String path, {Map<String, dynamic>? query}) {
-    var fullUrl =
-        '$_baseUrl/${path.startsWith('/') ? path.substring(1) : path}';
+    final envBaseUrl = Env.get('APP_URL') ?? 'http://localhost:8080';
+    final baseUrl = _normalizeBaseUrl(envBaseUrl);
+    var fullUrl = '$baseUrl/${path.startsWith('/') ? path.substring(1) : path}';
 
     if (_forceHttps && fullUrl.startsWith('http://')) {
       fullUrl = fullUrl.replaceFirst('http://', 'https://');
@@ -58,8 +59,12 @@ class UrlService {
 
   /// Generate a URL to an asset.
   String asset(String path, {Map<String, dynamic>? query}) {
+    final envBaseUrl = Env.get('APP_URL') ?? 'http://localhost:8080';
+    final assetBase = _assetBaseUrl.isNotEmpty
+        ? _assetBaseUrl
+        : _normalizeBaseUrl(envBaseUrl);
     var assetUrl =
-        '$_assetBaseUrl/assets/${path.startsWith('/') ? path.substring(1) : path}';
+        '$assetBase/assets/${path.startsWith('/') ? path.substring(1) : path}';
 
     if (_forceHttps && assetUrl.startsWith('http://')) {
       assetUrl = assetUrl.replaceFirst('http://', 'https://');
@@ -158,7 +163,7 @@ class UrlService {
   }
 
   /// Get the base URL.
-  String get baseUrl => _baseUrl;
+  String get baseUrl => Env.get('APP_URL') ?? 'http://localhost:8080';
 
   /// Get the asset base URL.
   String get assetBaseUrl => _assetBaseUrl;

@@ -27,7 +27,7 @@ Future _startHttpServer(ContainerInterface container) async {
   final server = Server();
 
   // Register global middlewares
-  server.applyMiddlewares(Kernel.middlewares);
+  server.applyMiddleware(Kernel.middleware);
   // Inject web routes
   server.injectRoutes(registerRoutes);
   // Serve static files from `public` folder

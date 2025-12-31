@@ -119,8 +119,6 @@ export 'providers/event_service_provider.dart';
 // ========================
 export 'middlewares/exception_middleware.dart';
 
-
-
 // ========================
 // 📦 File_rules.dart
 // ========================
@@ -156,6 +154,10 @@ export 'helpers/json_save.dart';
 // ========================
 export 'facades/log.dart';
 
+// ========================
+// 📦 dynamic_app_url_middleware.dart
+// ========================t
+export 'middlewares/dynamic_app_url_middleware.dart';
 // ========================
 // 📦 Logging_middleware.dart
 // ========================
@@ -305,4 +307,3 @@ export 'services/url_service.dart';
 // 📦 Validation_exception.dart
 // ========================
 export 'exceptions/validation_exception.dart';
-

@@ -78,26 +78,12 @@ class CoreServiceProvider extends ServiceProvider {
       final env = c.resolve<EnvInterface>();
       final appConfig = config.section('app') ?? {};
 
-      // Smart Base URL Detection
-      String? baseUrl = appConfig['url'] as String?;
-      if (baseUrl == null || baseUrl.isEmpty) {
-        baseUrl = env.get('APP_URL');
-      }
-
-      if (baseUrl == null || baseUrl.isEmpty) {
-        final host = env.getOrDefault('HOST', 'localhost');
-        final port = env.getOrDefault('PORT', '8080');
-        final scheme = env.getBool('FORCE_HTTPS') ? 'https' : 'http';
-        baseUrl = '$scheme://$host:$port';
-      }
-
       final assetUrl =
           appConfig['asset_url'] as String? ?? env.get('ASSET_URL');
       final forceHttps = appConfig['force_https'] as bool? ??
           env.getBool('FORCE_HTTPS', defaultValue: false);
 
       final urlService = UrlService(
-        baseUrl: baseUrl,
         assetBaseUrl: assetUrl,
         forceHttps: forceHttps,
       );
