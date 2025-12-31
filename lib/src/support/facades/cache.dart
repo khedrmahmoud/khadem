@@ -1,3 +1,7 @@
+/// Facade for the cache system.
+///
+/// Provides convenient synchronous/static access to the application's cache
+/// manager. Use `Cache.put`, `Cache.get`, etc. from anywhere in the codebase.
 import 'package:khadem/src/application/khadem.dart';
 import 'package:khadem/src/contracts/cache/cache_driver.dart';
 import 'package:khadem/src/contracts/cache/cache_manager_contract.dart';

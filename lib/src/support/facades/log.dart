@@ -1,9 +1,11 @@
 import 'package:khadem/khadem.dart' show LogLevel;
 import '../../application/khadem.dart';
 
-/// A static facade for the logging system.
+/// Facade for application logging.
 ///
-/// Provides easy access to logging functionality without injecting the Logger service.
+/// Use `Log.debug/info/warning/error` to emit structured logs via the
+/// framework logger. Call `Log.channel('name')` to obtain a channel-specific
+/// logger.
 ///
 /// Example:
 /// ```dart

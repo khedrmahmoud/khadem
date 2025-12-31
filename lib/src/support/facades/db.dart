@@ -1,3 +1,7 @@
+/// Facade for the database system.
+///
+/// Provides quick access to database connections, query builders and
+/// transaction helpers via static methods, e.g. `DB.table('users')`.
 import '../../application/khadem.dart';
 import '../../contracts/database/database_connection.dart';
 import '../../contracts/database/query_builder_interface.dart';

@@ -1,8 +1,11 @@
 import '../../application/khadem.dart';
 import '../../core/socket/socket_client.dart';
 import '../../core/socket/socket_manager.dart';
-
 /// Facade for the Socket system.
+///
+/// Provides static helpers to interact with the framework's socket manager
+/// (broadcasts, room management, client lookup). Useful in jobs, controllers
+/// and background tasks where dependency injection isn't available.
 class Socket {
   /// Gets the socket manager instance.
   static SocketManager get _manager => Khadem.make<SocketManager>();

@@ -1,6 +1,10 @@
 import 'package:khadem/src/application/khadem.dart';
 import 'package:khadem/src/contracts/env/env_interface.dart';
 
+/// Facade for environment variables access.
+///
+/// Shortcuts for `Env` operations such as `Env.get`, `Env.set` and
+/// type-safe helpers. This facade delegates to the global `EnvSystem`.
 class Env {
   static EnvInterface get _instance => Khadem.make<EnvInterface>();
 

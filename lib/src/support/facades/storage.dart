@@ -1,3 +1,8 @@
+/// Facade for the storage system.
+///
+/// Provides convenient static access to storage operations (put/get/copy/etc.)
+/// and a short-hand to the default or named disks. Use `Storage.put(...)`,
+/// `Storage.disk('s3')`, or `Storage.temporaryUrl(...)` from anywhere.
 import 'package:khadem/src/application/khadem.dart';
 import 'package:khadem/src/contracts/storage/storage_disk.dart';
 import 'package:khadem/src/core/storage/storage_manager.dart';

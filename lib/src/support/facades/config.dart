@@ -1,3 +1,7 @@
+/// Facade for application configuration.
+///
+/// Use `Config.get`, `Config.section`, and related helpers to access
+/// configuration values without resolving the config service manually.
 import 'package:khadem/src/application/khadem.dart';
 import 'package:khadem/src/contracts/config/config_contract.dart';
 
