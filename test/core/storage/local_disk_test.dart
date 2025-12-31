@@ -57,7 +57,7 @@ void main() {
       expect(await disk.mimeType('image.jpg'), equals('image/jpeg'));
       expect(await disk.mimeType('doc.pdf'), equals('application/pdf'));
       expect(await disk.mimeType('data.json'), equals('application/json'));
-      expect(await disk.mimeType('unknown.xyz'), isNull);
+      expect(await disk.mimeType('unknown.khedr_unknown_ext'), isNull);
     });
 
     test('temporaryUrl should return path', () async {

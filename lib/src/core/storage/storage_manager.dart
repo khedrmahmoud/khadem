@@ -123,4 +123,46 @@ class StorageManager {
 
   /// Gets the number of registered drivers
   int get driverCount => _drivers.length;
+
+  // Proxy methods to the default disk
+
+  Future<void> put(String path, List<int> bytes) => disk().put(path, bytes);
+
+  Future<void> writeString(String path, String content) =>
+      disk().writeString(path, content);
+
+  Future<String> readString(String path) => disk().readString(path);
+
+  Future<List<int>> get(String path) => disk().get(path);
+
+  Stream<List<int>> getStream(String path) => disk().getStream(path);
+
+  Future<void> putStream(String path, Stream<List<int>> stream) =>
+      disk().putStream(path, stream);
+
+  Future<void> delete(String path) => disk().delete(path);
+
+  Future<bool> exists(String path) => disk().exists(path);
+
+  Future<String?> mimeType(String path) => disk().mimeType(path);
+
+  Future<int> size(String path) => disk().size(path);
+
+  Future<DateTime> lastModified(String path) => disk().lastModified(path);
+
+  Future<void> copy(String from, String to) => disk().copy(from, to);
+
+  Future<void> move(String from, String to) => disk().move(from, to);
+
+  String url(String path) => disk().url(path);
+
+  Future<String> temporaryUrl(String path, DateTime expiration) =>
+      disk().temporaryUrl(path, expiration);
+
+  Future<void> makeDirectory(String path) => disk().makeDirectory(path);
+
+  Future<void> deleteDirectory(String path) => disk().deleteDirectory(path);
+
+  Future<List<String>> listFiles(String directoryPath) =>
+      disk().listFiles(directoryPath);
 }

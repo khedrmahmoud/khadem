@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:mime/mime.dart';
+
 import '../../contracts/storage/storage_disk.dart';
 
 class LocalDisk implements StorageDisk {
@@ -77,22 +79,7 @@ class LocalDisk implements StorageDisk {
 
   @override
   Future<String?> mimeType(String path) async {
-    // Basic extension-based mime type detection
-    final ext = path.split('.').last.toLowerCase();
-    const mimes = {
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'png': 'image/png',
-      'gif': 'image/gif',
-      'pdf': 'application/pdf',
-      'txt': 'text/plain',
-      'json': 'application/json',
-      'html': 'text/html',
-      'css': 'text/css',
-      'js': 'application/javascript',
-      'zip': 'application/zip',
-    };
-    return mimes[ext];
+    return lookupMimeType(path);
   }
 
   @override
