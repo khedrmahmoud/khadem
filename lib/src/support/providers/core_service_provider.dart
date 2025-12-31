@@ -39,17 +39,19 @@ class CoreServiceProvider extends ServiceProvider {
   /// Registers all core services of the Khadem framework,
   /// including configuration, environment, logger, router, cache, and events.
   void _registerCoreBindings(ContainerInterface container) {
+    _registerBaseServices(container);
+    _registerStorageServices(container);
+    _registerUrlServices(container);
+    _registerLocalizationServices(container);
+  }
+
+  void _registerBaseServices(ContainerInterface container) {
     container
         .lazySingleton<ExceptionHandlerContract>((c) => ExceptionHandler());
-
     container.lazySingleton<Router>((c) => Router());
-
     container.lazySingleton<EventSystemInterface>((c) => EventSystem());
-
     container.lazySingleton<Dispatcher>((c) => EventDispatcher(c));
-
     container.lazySingleton<EnvInterface>((c) => EnvSystem());
-
     container.lazySingleton<ConfigInterface>(
       (c) => ConfigSystem(
         configPath: 'config',
@@ -57,24 +59,42 @@ class CoreServiceProvider extends ServiceProvider {
             c.resolve<EnvInterface>().getOrDefault('APP_ENV', 'development'),
       ),
     );
-
     container.lazySingleton<Logger>((c) => Logger());
-
     container.lazySingleton<MiddlewarePipeline>((c) => MiddlewarePipeline());
-
-    container.lazySingleton<StorageManager>((c) => StorageManager());
-
-    container.lazySingleton<LangProvider>((c) => FileLangProvider());
-
     container.lazySingleton<SocketManager>((c) => SocketManager());
+  }
 
-    // URL and Asset Services
+  void _registerStorageServices(ContainerInterface container) {
+    container.lazySingleton<StorageManager>((c) => StorageManager());
+  }
+
+  void _registerLocalizationServices(ContainerInterface container) {
+    container.lazySingleton<LangProvider>((c) => FileLangProvider());
+  }
+
+  void _registerUrlServices(ContainerInterface container) {
     container.lazySingleton<UrlService>((c) {
       final config = c.resolve<ConfigInterface>();
+      final env = c.resolve<EnvInterface>();
       final appConfig = config.section('app') ?? {};
-      final baseUrl = appConfig['url'] ?? 'http://localhost:8080';
-      final assetUrl = appConfig['asset_url'];
-      final forceHttps = appConfig['force_https'] ?? false;
+
+      // Smart Base URL Detection
+      String? baseUrl = appConfig['url'] as String?;
+      if (baseUrl == null || baseUrl.isEmpty) {
+        baseUrl = env.get('APP_URL');
+      }
+
+      if (baseUrl == null || baseUrl.isEmpty) {
+        final host = env.getOrDefault('HOST', 'localhost');
+        final port = env.getOrDefault('PORT', '8080');
+        final scheme = env.getBool('FORCE_HTTPS') ? 'https' : 'http';
+        baseUrl = '$scheme://$host:$port';
+      }
+
+      final assetUrl =
+          appConfig['asset_url'] as String? ?? env.get('ASSET_URL');
+      final forceHttps = appConfig['force_https'] as bool? ??
+          env.getBool('FORCE_HTTPS', defaultValue: false);
 
       final urlService = UrlService(
         baseUrl: baseUrl,
