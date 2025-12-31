@@ -16,11 +16,26 @@ abstract class StorageDisk {
   /// Retrieves the bytes saved at the given path on the disk.
   Future<List<int>> get(String path);
 
+  /// Retrieves the file content as a stream.
+  Stream<List<int>> getStream(String path);
+
+  /// Saves the given stream to the given path on the disk.
+  Future<void> putStream(String path, Stream<List<int>> stream);
+
   /// Deletes the file saved at the given path on the disk.
   Future<void> delete(String path);
 
+  /// Creates a directory.
+  Future<void> makeDirectory(String path);
+
+  /// Deletes a directory.
+  Future<void> deleteDirectory(String path);
+
   /// Checks if the file exists at the given path.
   Future<bool> exists(String path);
+
+  /// Returns the MIME type of the file.
+  Future<String?> mimeType(String path);
 
   /// Copies the file from one path to another.
   Future<void> copy(String from, String to);
@@ -39,4 +54,7 @@ abstract class StorageDisk {
 
   /// Returns the full URL or public path to the file.
   String url(String path);
+
+  /// Returns a temporary URL to the file (e.g. signed URL).
+  Future<String> temporaryUrl(String path, DateTime expiration);
 }
