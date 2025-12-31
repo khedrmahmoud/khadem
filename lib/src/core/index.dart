@@ -448,6 +448,10 @@ export 'storage/storage_manager.dart';
 // ========================
 export 'validation/input_validator.dart';
 // ========================
+// 📦 rule_builder.dart
+// ========================
+export 'validation/rule_builder.dart';
+// ========================
 // 📦 Rule_registry.dart
 // ========================
 export 'validation/rule_registry.dart';
