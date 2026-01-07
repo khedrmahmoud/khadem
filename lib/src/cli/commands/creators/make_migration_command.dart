@@ -1,5 +1,6 @@
 import 'dart:io';
 import '../../bus/command.dart';
+import '../../utils/cli_naming.dart';
 
 class MakeMigrationCommand extends KhademCommand {
   MakeMigrationCommand({required super.logger}) {
@@ -18,12 +19,13 @@ class MakeMigrationCommand extends KhademCommand {
     final tableName = argResults?['name'] as String?;
     if (tableName == null || tableName.trim().isEmpty) {
       logger.error('❌ Usage: dart run khadem make:migration --name=likes');
-      exit(1);
+      exitCode = 1;
+      return;
     }
 
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final migrationName = 'create_${tableName}_table';
-    final className = _toClassName(migrationName);
+    final className = CliNaming.toPascalCase(migrationName);
     final file =
         File('lib/database/migrations/${timestamp}_$migrationName.dart');
 
@@ -35,14 +37,8 @@ class MakeMigrationCommand extends KhademCommand {
     await _updateMigrationsFile();
 
     logger.info('🔄 migrations.dart updated successfully.');
-    exit(0);
-  }
-
-  String _toClassName(String name) {
-    return name
-        .split('_')
-        .map((word) => word[0].toUpperCase() + word.substring(1))
-        .join();
+    exitCode = 0;
+    return;
   }
 
   String _migrationStub(String className, String tableName) {
@@ -86,7 +82,7 @@ class $className extends MigrationFile {
 
     for (final file in files) {
       final fileName = file.uri.pathSegments.last;
-      final className = _toClassName(
+      final className = CliNaming.toPascalCase(
         fileName.replaceAll('.dart', '').split('_').skip(1).join('_'),
       );
       classNames.add(className);

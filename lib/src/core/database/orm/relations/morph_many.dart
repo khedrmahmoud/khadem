@@ -27,7 +27,10 @@ class MorphMany<Related extends KhademModel<Related>, Parent>
 
   @override
   List<KhademModel> match(
-      List<KhademModel> models, List<Related> results, String relation,) {
+    List<KhademModel> models,
+    List<Related> results,
+    String relation,
+  ) {
     return matchOneOrMany(models, results, relation, 'many');
   }
 }

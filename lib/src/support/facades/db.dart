@@ -1,9 +1,9 @@
-
 import '../../application/khadem.dart';
 import '../../contracts/database/database_connection.dart';
 import '../../contracts/database/query_builder_interface.dart';
 import '../../contracts/database/schema_builder.dart';
 import '../../core/database/database.dart';
+
 /// Facade for the database system.
 ///
 /// Provides quick access to database connections, query builders and

@@ -72,7 +72,7 @@ class PhoneRule extends Rule {
 
     // E.164 compliant (ish) + optional spaces/dashes
     final phoneRegex = RegExp(
-      r'^\+?[1-9]\d{1,14}$', 
+      r'^\+?[1-9]\d{1,14}$',
     );
     // Sanitize
     final sanitized = value.replaceAll(RegExp(r'[\s\-\(\)]'), '');
@@ -128,13 +128,13 @@ class ProhibitedRule extends Rule {
   @override
   FutureOr<bool> passes(ValidationContext context) {
     final value = context.value;
-    
+
     // If null, it's considered empty/missing -> Pass
     if (value == null) return true;
-    
+
     // If string and empty -> Pass
     if (value is String && value.trim().isEmpty) return true;
-    
+
     // If collection and empty -> Pass
     if (value is Iterable && value.isEmpty) return true;
     if (value is Map && value.isEmpty) return true;
@@ -156,7 +156,7 @@ class ProhibitedIfRule extends Rule {
   FutureOr<bool> passes(ValidationContext context) {
     final args = context.parameters;
     final data = context.data;
-    if (args.length < 2) return true; 
+    if (args.length < 2) return true;
 
     final otherField = args[0];
     final expectedValue = args[1];
@@ -164,16 +164,15 @@ class ProhibitedIfRule extends Rule {
     // Check if condition is met
     if (data.containsKey(otherField) &&
         data[otherField].toString() == expectedValue) {
-        
-        // If condition meets, field must be prohibited (empty/missing)
-        // Re-use logic from ProhibitedRule
-        final value = context.value;
-        if (value == null) return true;
-        if (value is String && value.trim().isEmpty) return true;
-        if (value is Iterable && value.isEmpty) return true;
-        if (value is Map && value.isEmpty) return true;
-        
-        return false;
+      // If condition meets, field must be prohibited (empty/missing)
+      // Re-use logic from ProhibitedRule
+      final value = context.value;
+      if (value == null) return true;
+      if (value is String && value.trim().isEmpty) return true;
+      if (value is Iterable && value.isEmpty) return true;
+      if (value is Map && value.isEmpty) return true;
+
+      return false;
     }
     return true;
   }

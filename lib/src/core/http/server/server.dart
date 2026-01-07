@@ -1,5 +1,5 @@
 import 'package:khadem/src/application/khadem.dart';
- 
+
 import '../../../contracts/http/middleware_contract.dart';
 import '../../routing/router.dart';
 import 'server_lifecycle.dart';

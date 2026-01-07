@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import '../../bus/command.dart';
+import '../../utils/cli_naming.dart';
 
 class MakeControllerCommand extends KhademCommand {
   MakeControllerCommand({required super.logger}) {
@@ -20,26 +21,24 @@ class MakeControllerCommand extends KhademCommand {
   @override
   Future<void> handle(List<String> args) async {
     final name = argResults?['name'] as String?;
-    if (name == null) {
+    if (name == null || name.trim().isEmpty) {
       logger.error(
         'Usage: khadem make:controller --name=ControllerName or --name=folder/ControllerName',
       );
-      exit(1);
+      exitCode = 1;
+      return;
     }
 
-    // Parse folder and controller name
-    final parts = name.split('/');
-    String folder = '';
-    final rawControllerName = parts.last;
+    final parts = CliNaming.splitFolderAndName(name);
+    final folder = parts.folder;
+    final rawControllerName = parts.name;
+    final controllerName = CliNaming.ensureSuffix(
+      CliNaming.toPascalCase(rawControllerName),
+      'Controller',
+    );
 
-    if (parts.length > 1) {
-      folder = parts.sublist(0, parts.length - 1).join('/');
-    }
-
-    // Clean and format controller name
-    final String controllerName = _formatControllerName(rawControllerName);
-
-    final fileName = _toSnakeCase(controllerName.replaceAll('Controller', ''));
+    final fileName =
+        CliNaming.toSnakeCase(controllerName.replaceAll('Controller', ''));
     final relativePath = folder.isEmpty
         ? 'lib/app/http/controllers/${fileName}_controller.dart'
         : 'lib/app/http/controllers/$folder/${fileName}_controller.dart';
@@ -49,30 +48,8 @@ class MakeControllerCommand extends KhademCommand {
 
     await file.writeAsString(_controllerStub(controllerName, fileName, folder));
     logger.info('✅ Controller "$controllerName" created at "$relativePath".');
-    exit(0);
-  }
-
-  String _formatControllerName(String name) {
-    // Remove 'Controller' suffix if present
-    final String baseName = name.replaceAll(RegExp(r'Controller$'), '');
-
-    // Capitalize first letter and add 'Controller' suffix
-    final String capitalized = baseName.isNotEmpty
-        ? '${baseName[0].toUpperCase()}${baseName.substring(1)}'
-        : '';
-
-    return '${capitalized}Controller';
-  }
-
-  String _toSnakeCase(String input) {
-    if (input.isEmpty) return 'controller';
-
-    return input
-        .replaceAllMapped(
-          RegExp(r'[A-Z]'),
-          (m) => '_${m.group(0)!.toLowerCase()}',
-        )
-        .replaceFirst(RegExp(r'^_'), '');
+    exitCode = 0;
+    return;
   }
 
   String _controllerStub(String className, String fileName, String folder) {

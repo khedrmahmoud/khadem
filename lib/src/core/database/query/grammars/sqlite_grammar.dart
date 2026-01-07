@@ -6,7 +6,7 @@ class SQLiteGrammar extends Grammar {
   String wrap(String value) {
     if (value == '*') return value;
     if (value.startsWith('(')) return value; // Subquery or expression
-    
+
     if (value.contains('.')) {
       return value.split('.').map((part) {
         if (part == '*') return part;
@@ -83,7 +83,7 @@ class SQLiteGrammar extends Grammar {
 
     // Lock (Not supported in SQLite in the same way, usually ignored or handled differently)
     // We'll ignore it for now or just append if user insists, but SQLite might error.
-    
+
     // Unions
     if (query['unions'] != null && (query['unions'] as List).isNotEmpty) {
       components.add(compileUnions(query['unions']));
@@ -115,62 +115,68 @@ class SQLiteGrammar extends Grammar {
   String compileWheres(List<Map<String, dynamic>> wheres) {
     if (wheres.isEmpty) return '';
 
-    final sql = wheres.map((where) {
-      final boolean = where['boolean'];
-      final type = where['type'];
-      String segment = '';
+    final sql = wheres
+        .map((where) {
+          final boolean = where['boolean'];
+          final type = where['type'];
+          String segment = '';
 
-      if (type == 'Basic') {
-        segment = '${wrap(where['column'])} ${where['operator']} ?';
-      } else if (type == 'Null') {
-        segment = '${wrap(where['column'])} IS NULL';
-      } else if (type == 'NotNull') {
-        segment = '${wrap(where['column'])} IS NOT NULL';
-      } else if (type == 'In') {
-        final values = (where['values'] as List).map((_) => '?').join(', ');
-        segment = '${wrap(where['column'])} IN ($values)';
-      } else if (type == 'NotIn') {
-        final values = (where['values'] as List).map((_) => '?').join(', ');
-        segment = '${wrap(where['column'])} NOT IN ($values)';
-      } else if (type == 'Between') {
-        segment = '${wrap(where['column'])} BETWEEN ? AND ?';
-      } else if (type == 'NotBetween') {
-        segment = '${wrap(where['column'])} NOT BETWEEN ? AND ?';
-      } else if (type == 'Date') {
-        segment = 'DATE(${wrap(where['column'])}) ${where['operator']} ?';
-      } else if (type == 'Year') {
-        segment = 'strftime(\'%Y\', ${wrap(where['column'])}) ${where['operator']} ?';
-      } else if (type == 'Month') {
-        segment = 'strftime(\'%m\', ${wrap(where['column'])}) ${where['operator']} ?';
-      } else if (type == 'Day') {
-        segment = 'strftime(\'%d\', ${wrap(where['column'])}) ${where['operator']} ?';
-      } else if (type == 'Raw') {
-        segment = where['sql'];
-      } else if (type == 'Nested') {
-        final nestedSql = compileWheres(where['query'].wheres);
-        if (nestedSql.isNotEmpty) {
-          final cleanedSql = nestedSql
-              .replaceFirst('WHERE ', '')
-              .replaceFirst(RegExp(r'^(AND|OR) '), '');
-          segment = '($cleanedSql)';
-        }
-      } else if (type == 'Exists') {
-        final subquery = (where['query'] as dynamic).toSql();
-        segment = 'EXISTS ($subquery)';
-      } else if (type == 'NotExists') {
-        final subquery = (where['query'] as dynamic).toSql();
-        segment = 'NOT EXISTS ($subquery)';
-      } else if (type == 'InSub') {
-        final subquery = (where['query'] as dynamic).toSql();
-        segment = '${wrap(where['column'])} IN ($subquery)';
-      } else if (type == 'NotInSub') {
-        final subquery = (where['query'] as dynamic).toSql();
-        segment = '${wrap(where['column'])} NOT IN ($subquery)';
-      }
+          if (type == 'Basic') {
+            segment = '${wrap(where['column'])} ${where['operator']} ?';
+          } else if (type == 'Null') {
+            segment = '${wrap(where['column'])} IS NULL';
+          } else if (type == 'NotNull') {
+            segment = '${wrap(where['column'])} IS NOT NULL';
+          } else if (type == 'In') {
+            final values = (where['values'] as List).map((_) => '?').join(', ');
+            segment = '${wrap(where['column'])} IN ($values)';
+          } else if (type == 'NotIn') {
+            final values = (where['values'] as List).map((_) => '?').join(', ');
+            segment = '${wrap(where['column'])} NOT IN ($values)';
+          } else if (type == 'Between') {
+            segment = '${wrap(where['column'])} BETWEEN ? AND ?';
+          } else if (type == 'NotBetween') {
+            segment = '${wrap(where['column'])} NOT BETWEEN ? AND ?';
+          } else if (type == 'Date') {
+            segment = 'DATE(${wrap(where['column'])}) ${where['operator']} ?';
+          } else if (type == 'Year') {
+            segment =
+                'strftime(\'%Y\', ${wrap(where['column'])}) ${where['operator']} ?';
+          } else if (type == 'Month') {
+            segment =
+                'strftime(\'%m\', ${wrap(where['column'])}) ${where['operator']} ?';
+          } else if (type == 'Day') {
+            segment =
+                'strftime(\'%d\', ${wrap(where['column'])}) ${where['operator']} ?';
+          } else if (type == 'Raw') {
+            segment = where['sql'];
+          } else if (type == 'Nested') {
+            final nestedSql = compileWheres(where['query'].wheres);
+            if (nestedSql.isNotEmpty) {
+              final cleanedSql = nestedSql
+                  .replaceFirst('WHERE ', '')
+                  .replaceFirst(RegExp(r'^(AND|OR) '), '');
+              segment = '($cleanedSql)';
+            }
+          } else if (type == 'Exists') {
+            final subquery = (where['query'] as dynamic).toSql();
+            segment = 'EXISTS ($subquery)';
+          } else if (type == 'NotExists') {
+            final subquery = (where['query'] as dynamic).toSql();
+            segment = 'NOT EXISTS ($subquery)';
+          } else if (type == 'InSub') {
+            final subquery = (where['query'] as dynamic).toSql();
+            segment = '${wrap(where['column'])} IN ($subquery)';
+          } else if (type == 'NotInSub') {
+            final subquery = (where['query'] as dynamic).toSql();
+            segment = '${wrap(where['column'])} NOT IN ($subquery)';
+          }
 
-      if (segment.isEmpty) return '';
-      return '$boolean $segment';
-    }).where((s) => s.isNotEmpty).join(' ');
+          if (segment.isEmpty) return '';
+          return '$boolean $segment';
+        })
+        .where((s) => s.isNotEmpty)
+        .join(' ');
 
     if (sql.isEmpty) return '';
 
@@ -213,7 +219,8 @@ class SQLiteGrammar extends Grammar {
   }
 
   @override
-  String compileInsert(Map<String, dynamic> query, Map<String, dynamic> values) {
+  String compileInsert(
+      Map<String, dynamic> query, Map<String, dynamic> values,) {
     final table = wrapTable(query['table']);
     final columns = values.keys.map(wrap).join(', ');
     final placeholders = values.keys.map((_) => '?').join(', ');
@@ -244,7 +251,7 @@ class SQLiteGrammar extends Grammar {
   ]) {
     final sql = compileInsertMany(query, values);
     final columns = update ?? values.first.keys.toList();
-    
+
     final updateSql = columns.map((col) {
       final wrapped = wrap(col);
       return '$wrapped = excluded.$wrapped';
@@ -256,7 +263,8 @@ class SQLiteGrammar extends Grammar {
   }
 
   @override
-  String compileUpdate(Map<String, dynamic> query, Map<String, dynamic> values) {
+  String compileUpdate(
+      Map<String, dynamic> query, Map<String, dynamic> values,) {
     final table = wrapTable(query['table']);
     final columns = values.keys.map((key) => '${wrap(key)} = ?').join(', ');
     final wheres = compileWheres(query['wheres'] ?? []);
@@ -271,17 +279,19 @@ class SQLiteGrammar extends Grammar {
 
     return 'DELETE FROM $table $wheres'.trim();
   }
-  
+
   @override
-  String compileIncrement(Map<String, dynamic> query, String column, int amount) {
+  String compileIncrement(
+      Map<String, dynamic> query, String column, int amount,) {
     final table = wrapTable(query['table']);
     final wrappedCol = wrap(column);
     final wheres = compileWheres(query['wheres'] ?? []);
-    
+
     final sign = amount >= 0 ? '+' : '-';
     final absAmount = amount.abs();
 
-    return 'UPDATE $table SET $wrappedCol = $wrappedCol $sign $absAmount $wheres'.trim();
+    return 'UPDATE $table SET $wrappedCol = $wrappedCol $sign $absAmount $wheres'
+        .trim();
   }
 
   @override
@@ -292,9 +302,9 @@ class SQLiteGrammar extends Grammar {
   ) {
     final table = wrapTable(query['table']);
     final wheres = compileWheres(query['wheres'] ?? []);
-    
+
     final updates = <String>[];
-    
+
     columns.forEach((col, amount) {
       final wrapped = wrap(col);
       final sign = amount >= 0 ? '+' : '-';
@@ -307,8 +317,9 @@ class SQLiteGrammar extends Grammar {
 
     return 'UPDATE $table SET ${updates.join(', ')} $wheres'.trim();
   }
-  
-  String compileInsertOrIgnore(Map<String, dynamic> query, Map<String, dynamic> values) {
+
+  String compileInsertOrIgnore(
+      Map<String, dynamic> query, Map<String, dynamic> values,) {
     final table = wrapTable(query['table']);
     final columns = values.keys.map(wrap).join(', ');
     final placeholders = values.keys.map((_) => '?').join(', ');

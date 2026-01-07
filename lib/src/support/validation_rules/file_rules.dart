@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 // ignore: depend_on_referenced_packages
-import 'package:mime/mime.dart'; 
+import 'package:mime/mime.dart';
 import '../../contracts/validation/rule.dart';
 import '../../core/http/request/uploaded_file.dart';
 
@@ -10,15 +10,13 @@ class FileRule extends Rule {
   @override
   String get signature => 'file';
 
-
-
   @override
   String message(ValidationContext context) {
     final value = context.value;
     if (value is List<UploadedFile> && value.isEmpty) {
       return 'file_required_validation';
     }
-    // Check for specific filename errors if we could pass context info, 
+    // Check for specific filename errors if we could pass context info,
     // but generic 'file_validation' is okay, or we can add specific errors.
     return 'file_validation';
   }
@@ -27,13 +25,13 @@ class FileRule extends Rule {
   bool _isFilenameSafe(String filename) {
     // 1. Block null bytes
     if (filename.contains('\u0000')) return false;
-    
+
     // 2. Block directory traversal
     if (filename.contains('..')) return false;
-    
+
     // 3. Block ridiculously long filenames (255 chars is standard max)
     if (filename.length > 255) return false;
-    
+
     // 4. Validate characters (allow alphanumeric, dot, dash, underscore, space, parenthesis)
     // Strict mode: r'^[a-zA-Z0-9._\-\(\) ]+$'
     // We'll be reasonably strict to prevent shell injection or weirdness.
@@ -48,11 +46,13 @@ class FileRule extends Rule {
     if (value == null) return false;
 
     if (value is UploadedFile) {
-       return _isFilenameSafe(value.filename);
+      return _isFilenameSafe(value.filename);
     }
 
     if (value is List<UploadedFile>) {
-      if (value.isEmpty) return false; // Default Required-like behavior? No, FileRule implies "is a valid file".
+      if (value.isEmpty) {
+        return false; // Default Required-like behavior? No, FileRule implies "is a valid file".
+      }
       return value.every((f) => _isFilenameSafe(f.filename));
     }
 
@@ -76,8 +76,12 @@ class ImageRule extends Rule {
     if (!await FileRule().passes(context)) return false;
 
     final allowedMimes = [
-      'image/jpeg', 'image/png', 'image/gif', 
-      'image/bmp', 'image/webp', 'image/svg+xml',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/bmp',
+      'image/webp',
+      'image/svg+xml',
     ];
 
     if (value is UploadedFile) {
@@ -135,7 +139,7 @@ class MimesRule extends Rule {
   Future<bool> _validateMime(UploadedFile file, List<String> allowed) async {
     // 1. Sniff MIME type from content (Magic Numbers)
     final snifferMime = await _sniffMimeType(file);
-    
+
     // If we can't determine mime, fail secure? Or allow if extension matches?
     // Strong security: Fail if we can't identify it.
     if (snifferMime == null) return false;
@@ -143,7 +147,7 @@ class MimesRule extends Rule {
     // 2. Consistency Check: Extension vs Content match
     // Prevent "image.png" (actual exe)
     final extMime = lookupMimeType(file.filename);
-    
+
     // If extension has a known mime, it MUST match the sniffed mime.
     // Exception: Generic types like application/octet-stream or text/plain subtleties.
     // But for images/pdfs, they should match.
@@ -152,23 +156,24 @@ class MimesRule extends Rule {
       // But lookupMimeType handles common aliases usually.
       // Special case: text/plain vs text/csv etc might overlap.
       // If extension implies distinct mime, and sniff allows it?
-      
+
       // Strict Check:
-      // If I upload 'malware.exe' renamed to 'report.pdf' -> 
-      // extMime='application/pdf', snifferMime='application/x-dosexec'. 
+      // If I upload 'malware.exe' renamed to 'report.pdf' ->
+      // extMime='application/pdf', snifferMime='application/x-dosexec'.
       // Mismatch -> Block.
-      
+
       // If I upload 'text.csv' -> extMime='text/csv', snifferMime='text/plain'.
       // This is a common failure point. CSV is text.
-      // So we allow if sniffer is 'text/plain' and ext is text-based? 
+      // So we allow if sniffer is 'text/plain' and ext is text-based?
       // Or we just rely on the 'allowed' list being checked against sniffed.
-      
-      // THE USER ASKED FOR STRONGER SECURITY. 
+
+      // THE USER ASKED FOR STRONGER SECURITY.
       // Blocking mismatched extension/content is the strongest move.
       // We can relax for text/* types.
-      final isText = snifferMime.startsWith('text/') && extMime.startsWith('text/');
+      final isText =
+          snifferMime.startsWith('text/') && extMime.startsWith('text/');
       if (!isText && snifferMime != extMime) {
-          return false;
+        return false;
       }
     }
 
@@ -222,7 +227,9 @@ class MaxFileSizeRule extends Rule {
   @override
   String message(ValidationContext context) {
     final value = context.value;
-    if (value is List<UploadedFile> && value.length > 1) return 'files_too_large_validation';
+    if (value is List<UploadedFile> && value.length > 1) {
+      return 'files_too_large_validation';
+    }
     return 'file_too_large_validation';
   }
 }
@@ -256,7 +263,9 @@ class MinFileSizeRule extends Rule {
   @override
   String message(ValidationContext context) {
     final value = context.value;
-    if (value is List<UploadedFile> && value.length > 1) return 'files_too_small_validation';
+    if (value is List<UploadedFile> && value.length > 1) {
+      return 'files_too_small_validation';
+    }
     return 'file_too_small_validation';
   }
 }
@@ -267,12 +276,12 @@ class MinFileSizeRule extends Rule {
 Future<String?> _sniffMimeType(UploadedFile file) async {
   try {
     List<int> headerBytes;
-    
+
     if (file.isDiskBased && file.tempPath != null) {
       // Read first 12 bytes from disk
       final f = File(file.tempPath!);
       if (!await f.exists()) return null;
-      headerBytes = await f.openRead(0, 12).first; 
+      headerBytes = await f.openRead(0, 12).first;
     } else {
       // Memory based - take from data
       final data = file.data;

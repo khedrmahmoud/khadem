@@ -25,12 +25,12 @@ class MinRule extends Rule {
     if (value is num) {
       return value >= min;
     } else if (value is String) {
-      // Check if string is numeric and we strictly want numeric comparison ?? 
+      // Check if string is numeric and we strictly want numeric comparison ??
       // Laravel heuristic: if 'numeric' rule is present, treat as number.
-      // Here we assume String -> Length, unless it looks like a number? 
+      // Here we assume String -> Length, unless it looks like a number?
       // Standard is: String -> Length. Numeric -> Value.
       // But if input is from HTTP form, it's always string.
-      // Better approach: context.isNumeric? 
+      // Better approach: context.isNumeric?
       // For now, adhere to simple type check: String -> Length.
       // UNLESS the user explicitly casts it or we check 'numeric' rule presence (hard here).
       // Let's stick to standard behavior: String=length.

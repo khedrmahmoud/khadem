@@ -10,7 +10,8 @@ class AsyncTestRule extends Rule {
 
   @override
   FutureOr<bool> passes(ValidationContext context) async {
-    await Future.delayed(const Duration(milliseconds: 10)); // Simulate async work
+    await Future.delayed(
+        const Duration(milliseconds: 10),); // Simulate async work
     return context.value != 'invalid';
   }
 
@@ -40,7 +41,8 @@ class ObjectTestRule extends Rule {
 
 void main() {
   group('Flexible InputValidator', () {
-    test('should support List<dynamic> rules with mixed strings and objects', () async {
+    test('should support List<dynamic> rules with mixed strings and objects',
+        () async {
       final validator = InputValidator(
         {'age': 25, 'name': 'John'},
         {
@@ -51,7 +53,8 @@ void main() {
 
       expect(await validator.passes(), isFalse);
       expect(validator.errors, contains('age'));
-      expect(validator.errors['age'], contains('max_error')); // Assuming default formatting uses key
+      expect(validator.errors['age'],
+          contains('max_error'),); // Assuming default formatting uses key
       expect(validator.errors, isNot(contains('name')));
     });
 
@@ -74,7 +77,7 @@ void main() {
       );
       expect(await validator.passes(), isFalse);
       expect(validator.errors, contains('email'));
-      
+
       final validator2 = InputValidator(
         {'name': ''},
         {
@@ -92,7 +95,7 @@ void main() {
       );
       expect(await validator.passes(), isFalse);
       // 'abc' is length 3, min(5) fails. required passes.
-      expect(validator.errors['name']?.length, equals(1)); 
+      expect(validator.errors['name']?.length, equals(1));
     });
 
     test('should support bail', () async {
@@ -109,7 +112,7 @@ void main() {
     });
 
     test('should collect multiple errors without bail', () async {
-       final validator = InputValidator(
+      final validator = InputValidator(
         {'code': 'abc'},
         {
           'code': ['numeric', 'min:5'],

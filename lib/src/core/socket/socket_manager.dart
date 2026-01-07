@@ -36,17 +36,30 @@ class SocketManager {
   }
 
   /// Broadcast an event to all clients in a room.
-  void broadcastToRoom(String room, String event, dynamic data,
-      {String? namespace,}) {
+  void broadcastToRoom(
+    String room,
+    String event,
+    dynamic data, {
+    String? namespace,
+  }) {
     _adapter.broadcastToRoom(room, event, data, namespace: namespace);
   }
 
   /// Broadcast an event to all clients in a room except specific ones.
   void broadcastToRoomExcept(
-      String room, String event, dynamic data, Set<String> excludedClientIds,
-      {String? namespace,}) {
-    _adapter.broadcastToRoomExcept(room, event, data, excludedClientIds,
-        namespace: namespace,);
+    String room,
+    String event,
+    dynamic data,
+    Set<String> excludedClientIds, {
+    String? namespace,
+  }) {
+    _adapter.broadcastToRoomExcept(
+      room,
+      event,
+      data,
+      excludedClientIds,
+      namespace: namespace,
+    );
   }
 
   /// Subscribe a client to an event for future broadcasts.

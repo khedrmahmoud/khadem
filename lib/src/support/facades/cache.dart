@@ -2,6 +2,7 @@ import 'package:khadem/src/application/khadem.dart';
 import 'package:khadem/src/contracts/cache/cache_driver.dart';
 import 'package:khadem/src/contracts/cache/cache_manager_contract.dart';
 import 'package:khadem/src/core/cache/cache_stats.dart';
+
 /// Facade for the cache system.
 ///
 /// Provides convenient synchronous/static access to the application's cache

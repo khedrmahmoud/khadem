@@ -118,7 +118,8 @@ class FakeHttpSession implements HttpSession {
 
   @override
   Map<K2, V2> map<K2, V2>(
-      MapEntry<K2, V2> Function(dynamic key, dynamic value) convert,) {
+    MapEntry<K2, V2> Function(dynamic key, dynamic value) convert,
+  ) {
     return _data.map(convert);
   }
 
@@ -131,8 +132,11 @@ class FakeHttpSession implements HttpSession {
   }
 
   @override
-  dynamic update(dynamic key, dynamic Function(dynamic value) update,
-      {dynamic Function()? ifAbsent,}) {
+  dynamic update(
+    dynamic key,
+    dynamic Function(dynamic value) update, {
+    dynamic Function()? ifAbsent,
+  }) {
     return _data.update(key, update, ifAbsent: ifAbsent);
   }
 

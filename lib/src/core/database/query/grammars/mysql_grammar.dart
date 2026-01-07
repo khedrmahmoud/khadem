@@ -110,7 +110,9 @@ class MySQLGrammar extends Grammar {
 
   @override
   String compileInsert(
-      Map<String, dynamic> query, Map<String, dynamic> values,) {
+    Map<String, dynamic> query,
+    Map<String, dynamic> values,
+  ) {
     final table = wrapTable(query['table']);
     final columns = values.keys.map(wrap).join(', ');
     final placeholders = List.filled(values.length, '?').join(', ');
@@ -120,7 +122,9 @@ class MySQLGrammar extends Grammar {
 
   @override
   String compileUpdate(
-      Map<String, dynamic> query, Map<String, dynamic> values,) {
+    Map<String, dynamic> query,
+    Map<String, dynamic> values,
+  ) {
     final table = wrapTable(query['table']);
     final columns = values.keys.map((key) => '${wrap(key)} = ?').join(', ');
     final wheres =
@@ -140,7 +144,10 @@ class MySQLGrammar extends Grammar {
 
   @override
   String compileIncrement(
-      Map<String, dynamic> query, String column, int amount,) {
+    Map<String, dynamic> query,
+    String column,
+    int amount,
+  ) {
     final table = wrapTable(query['table']);
     final wheres =
         query['wheres'] != null ? compileWheres(query['wheres']) : '';
@@ -154,7 +161,9 @@ class MySQLGrammar extends Grammar {
 
   @override
   String compileInsertMany(
-      Map<String, dynamic> query, List<Map<String, dynamic>> values,) {
+    Map<String, dynamic> query,
+    List<Map<String, dynamic>> values,
+  ) {
     final table = wrapTable(query['table']);
     final first = values.first;
     final columns = first.keys.map(wrap).join(', ');
@@ -167,9 +176,12 @@ class MySQLGrammar extends Grammar {
   }
 
   @override
-  String compileUpsert(Map<String, dynamic> query,
-      List<Map<String, dynamic>> values, List<String> uniqueBy,
-      [List<String>? update,]) {
+  String compileUpsert(
+    Map<String, dynamic> query,
+    List<Map<String, dynamic>> values,
+    List<String> uniqueBy, [
+    List<String>? update,
+  ]) {
     final sql = compileInsertMany(query, values);
 
     final updateColumns = update ??
@@ -184,8 +196,11 @@ class MySQLGrammar extends Grammar {
   }
 
   @override
-  String compileIncrementEach(Map<String, dynamic> query,
-      Map<String, int> columns, Map<String, dynamic> extras,) {
+  String compileIncrementEach(
+    Map<String, dynamic> query,
+    Map<String, int> columns,
+    Map<String, dynamic> extras,
+  ) {
     final table = wrapTable(query['table']);
     final wheres =
         query['wheres'] != null ? compileWheres(query['wheres']) : '';

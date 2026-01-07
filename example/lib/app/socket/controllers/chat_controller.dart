@@ -31,7 +31,8 @@ class ChatController extends SocketController {
   }
 
   /// Handle sending a new message
-  Future<void> _onMessage(SocketContext context, Map<String, dynamic> data) async {
+  Future<void> _onMessage(
+      SocketContext context, Map<String, dynamic> data,) async {
     validate({
       'conversation_id': 'required|string',
       'content': 'required|string|min:1',
@@ -69,14 +70,15 @@ class ChatController extends SocketController {
   }
 
   /// Handle typing indicators
-  Future<void> _onTyping(SocketContext context, Map<String, dynamic> data) async {
+  Future<void> _onTyping(
+      SocketContext context, Map<String, dynamic> data,) async {
     final conversationId = data['conversation_id'];
     if (conversationId == null) return;
 
     // Broadcast to others in the room (excluding sender)
     context.client.broadcastTo(
-      'conversation:$conversationId', 
-      'typing', 
+      'conversation:$conversationId',
+      'typing',
       {'user_id': context.client.id, 'is_typing': true},
     );
   }

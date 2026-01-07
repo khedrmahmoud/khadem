@@ -175,7 +175,7 @@ class MacAddressRule extends Rule {
   FutureOr<bool> passes(ValidationContext context) {
     final value = context.value;
     if (value == null || value is! String) return false;
-    
+
     // Supports 00:00:00:00:00:00 and 00-00-00-00-00-00 and 0000.0000.0000 formats
     final macRegex = RegExp(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$');
     return macRegex.hasMatch(value);

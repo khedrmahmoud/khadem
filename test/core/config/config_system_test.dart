@@ -622,8 +622,8 @@ void main() {
         File('$configPath/app.json')
           ..writeAsStringSync('{"name": "ModifiedNoCache"}');
 
-        // With caching disabled, should still return cached value
-        expect(config.get<String>('app.name'), equals('NoCacheApp'));
+        // With caching disabled, ConfigSystem should reload on file changes
+        expect(config.get<String>('app.name'), equals('ModifiedNoCache'));
 
         // But reload() should work
         config.reload();

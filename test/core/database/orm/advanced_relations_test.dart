@@ -13,8 +13,10 @@ import 'package:test/test.dart';
 
 class _MockConnection implements DatabaseConnection {
   @override
-  Future<DatabaseResponse> execute(String query,
-      [List<dynamic> bindings = const [],]) async {
+  Future<DatabaseResponse> execute(
+    String query, [
+    List<dynamic> bindings = const [],
+  ]) async {
     return DatabaseResponse(data: [], affectedRows: 0);
   }
 
@@ -34,23 +36,31 @@ class _MockConnection implements DatabaseConnection {
   bool get isConnected => true;
 
   @override
-  QueryBuilderInterface<T> queryBuilder<T>(String table,
-      {T Function(Map<String, dynamic>)? modelFactory,}) {
-    return QueryBuilder<T>(this, MySQLGrammar(), table,
-        modelFactory: modelFactory,);
+  QueryBuilderInterface<T> queryBuilder<T>(
+    String table, {
+    T Function(Map<String, dynamic>)? modelFactory,
+  }) {
+    return QueryBuilder<T>(
+      this,
+      MySQLGrammar(),
+      table,
+      modelFactory: modelFactory,
+    );
   }
 
   @override
   SchemaBuilder getSchemaBuilder() => throw UnimplementedError();
 
   @override
-  Future<T> transaction<T>(Future<T> Function() callback,
-      {int maxRetries = 3,
-      Duration retryDelay = const Duration(milliseconds: 100),
-      Future<void> Function(T result)? onSuccess,
-      Future<void> Function(dynamic error)? onFailure,
-      Future<void> Function()? onFinally,
-      String? isolationLevel,}) async {
+  Future<T> transaction<T>(
+    Future<T> Function() callback, {
+    int maxRetries = 3,
+    Duration retryDelay = const Duration(milliseconds: 100),
+    Future<void> Function(T result)? onSuccess,
+    Future<void> Function(dynamic error)? onFailure,
+    Future<void> Function()? onFinally,
+    String? isolationLevel,
+  }) async {
     return callback();
   }
 
@@ -105,8 +115,10 @@ void main() {
 
       final sql = relation.getQuery().toSql();
       // select * from `posts` inner join `users` on `users`.`id` = `posts`.`user_id` where `users`.`country_id` = ?
-      expect(sql,
-          contains('INNER JOIN `users` ON `users`.`id` = `posts`.`user_id`'),);
+      expect(
+        sql,
+        contains('INNER JOIN `users` ON `users`.`id` = `posts`.`user_id`'),
+      );
       expect(sql, contains('WHERE `users`.`country_id` = ?'));
       expect(relation.getQuery().bindings, equals([1]));
     });
@@ -130,10 +142,14 @@ void main() {
 
       final sql = relation.getQuery().toSql();
       // select `posts`.*, users.country_id as khadem_through_key from `posts` inner join `users` on `users`.`id` = `posts`.`user_id` where `users`.`country_id` in (?)
-      expect(sql,
-          contains('SELECT `posts`.*, users.country_id as khadem_through_key'),);
-      expect(sql,
-          contains('INNER JOIN `users` ON `users`.`id` = `posts`.`user_id`'),);
+      expect(
+        sql,
+        contains('SELECT `posts`.*, users.country_id as khadem_through_key'),
+      );
+      expect(
+        sql,
+        contains('INNER JOIN `users` ON `users`.`id` = `posts`.`user_id`'),
+      );
       expect(sql, contains('WHERE `users`.`country_id` IN (?)'));
     });
   });
@@ -142,7 +158,10 @@ void main() {
     test('generates correct SQL for hasOneThrough', () {
       final mechanic = User()..setAttribute('id', 1); // Mechanic
       final query = QueryBuilder<Post>(
-          mockConnection, MySQLGrammar(), 'owners',); // Car Owner
+        mockConnection,
+        MySQLGrammar(),
+        'owners',
+      ); // Car Owner
 
       // Mechanic has one Car Owner through Car
       final relation = HasOneThrough<Post, User>(
@@ -159,8 +178,10 @@ void main() {
       relation.addConstraints();
 
       final sql = relation.getQuery().toSql();
-      expect(sql,
-          contains('INNER JOIN `cars` ON `cars`.`id` = `owners`.`car_id`'),);
+      expect(
+        sql,
+        contains('INNER JOIN `cars` ON `cars`.`id` = `owners`.`car_id`'),
+      );
       expect(sql, contains('WHERE `cars`.`mechanic_id` = ?'));
     });
   });
@@ -188,9 +209,11 @@ void main() {
       final sql = relation.getQuery().toSql();
       // select `tags`.*, `taggables`.`taggable_id` as pivot_taggable_id, `taggables`.`tag_id` as pivot_tag_id from `tags` inner join `taggables` on `tags`.`id` = `taggables`.`tag_id` where `taggables`.`taggable_id` = ? and `taggables`.`taggable_type` = ?
       expect(
-          sql,
-          contains(
-              'INNER JOIN `taggables` ON `tags`.`id` = `taggables`.`tag_id`',),);
+        sql,
+        contains(
+          'INNER JOIN `taggables` ON `tags`.`id` = `taggables`.`tag_id`',
+        ),
+      );
       expect(sql, contains('WHERE `taggables`.`taggable_id` = ?'));
       expect(sql, contains('AND `taggables`.`taggable_type` = ?'));
       expect(relation.getQuery().bindings, equals([1, 'posts']));
@@ -219,9 +242,11 @@ void main() {
 
       final sql = relation.getQuery().toSql();
       expect(
-          sql,
-          contains(
-              'INNER JOIN `taggables` ON `posts`.`id` = `taggables`.`taggable_id`',),);
+        sql,
+        contains(
+          'INNER JOIN `taggables` ON `posts`.`id` = `taggables`.`taggable_id`',
+        ),
+      );
       expect(sql, contains('WHERE `taggables`.`tag_id` = ?'));
       expect(sql, contains('AND `taggables`.`taggable_type` = ?'));
       expect(relation.getQuery().bindings, equals([1, 'posts']));

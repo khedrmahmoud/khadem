@@ -25,12 +25,13 @@ void main() {
   group('SocketServer Integration', () {
     late SocketServer server;
     late SocketManager manager;
-    
+
     setUp(() async {
       // Register dummy logger to avoid Service Not Found error
       ContainerProvider.instance.singleton<Logger>((_) => DummyLogger());
       // Register ExceptionHandler
-      ContainerProvider.instance.singleton<ExceptionHandlerContract>((_) => ExceptionHandler());
+      ContainerProvider.instance
+          .singleton<ExceptionHandlerContract>((_) => ExceptionHandler());
       // Register Env
       ContainerProvider.instance.singleton<EnvInterface>((_) => DummyEnv());
 
@@ -65,10 +66,11 @@ void main() {
 
       ws.add(jsonEncode({'event': 'ping', 'data': {}}));
 
-      final response = await completer.future.timeout(const Duration(seconds: 2));
+      final response =
+          await completer.future.timeout(const Duration(seconds: 2));
       expect(response['event'], equals('pong'));
       expect(response['data']['message'], equals('pong'));
-      
+
       await ws.close();
     });
 
@@ -77,13 +79,14 @@ void main() {
         router.channel('/').on('join', (context) {
           context.client.joinRoom('test_room');
           // Broadcast to everyone in the room
-          manager.broadcastToRoom('test_room', 'new_user', {'id': context.client.id});
+          manager.broadcastToRoom(
+              'test_room', 'new_user', {'id': context.client.id},);
         });
       });
 
       final ws1 = await connect();
       final ws2 = await connect();
-      
+
       final ws1Completer = Completer<Map>();
       ws1.listen((data) {
         final msg = jsonDecode(data);
@@ -94,7 +97,7 @@ void main() {
 
       // WS1 joins room
       ws1.add(jsonEncode({'event': 'join', 'data': {}}));
-      
+
       // Wait a bit for WS1 to be in room
       await Future.delayed(const Duration(milliseconds: 50));
 
@@ -112,7 +115,8 @@ void main() {
     test('should enforce maxMessageBytes', () async {
       await server.stop();
       manager = SocketManager();
-      const config = SocketConfig(port: 0, maxMessageBytes: 10); // Very small limit
+      const config =
+          SocketConfig(port: 0, maxMessageBytes: 10); // Very small limit
       server = SocketServer(config, manager: manager);
       await server.start();
 
@@ -124,12 +128,16 @@ void main() {
       });
 
       // Send a large message
-      ws.add(jsonEncode({'event': 'large', 'data': 'this is definitely larger than 10 bytes'}));
+      ws.add(jsonEncode({
+        'event': 'large',
+        'data': 'this is definitely larger than 10 bytes',
+      }),);
 
-      final response = await completer.future.timeout(const Duration(seconds: 2));
+      final response =
+          await completer.future.timeout(const Duration(seconds: 2));
       expect(response['event'], equals('error'));
       expect(response['data']['status'], equals(413)); // Payload Too Large
-      
+
       await ws.close();
     });
   });

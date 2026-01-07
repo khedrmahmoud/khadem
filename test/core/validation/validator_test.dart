@@ -24,7 +24,8 @@ void main() {
       expect(validator.errors, contains('name'));
     });
 
-    test('should fail validation when multiple rules are not satisfied', () async {
+    test('should fail validation when multiple rules are not satisfied',
+        () async {
       final validator = InputValidator(
         {'age': 'not-a-number'},
         {'age': 'required|int'},
@@ -75,7 +76,8 @@ void main() {
       expect(validator.errors, isNot(contains('age')));
     });
 
-    test('should skip validation for nullable fields when value is null', () async {
+    test('should skip validation for nullable fields when value is null',
+        () async {
       final validator = InputValidator(
         {'name': null, 'age': null},
         {

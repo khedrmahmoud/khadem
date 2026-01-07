@@ -11,56 +11,68 @@ void main() {
 
   group('RequiredRule', () {
     test('should return false when value is null', () async {
-      final result = await rule.passes(ValidationContext(
-        attribute: 'field',
-        value: null,
-        data: {},
-      ),);
+      final result = await rule.passes(
+        ValidationContext(
+          attribute: 'field',
+          value: null,
+          data: {},
+        ),
+      );
       expect(result, isFalse);
     });
 
     test('should return false when value is empty string', () async {
-      final result = await rule.passes(ValidationContext(
-        attribute: 'field',
-        value: '',
-        data: {},
-      ),);
+      final result = await rule.passes(
+        ValidationContext(
+          attribute: 'field',
+          value: '',
+          data: {},
+        ),
+      );
       expect(result, isFalse);
     });
 
     test('should return false when value is whitespace', () async {
-      final result = await rule.passes(ValidationContext(
-        attribute: 'field',
-        value: '   ',
-        data: {},
-      ),);
+      final result = await rule.passes(
+        ValidationContext(
+          attribute: 'field',
+          value: '   ',
+          data: {},
+        ),
+      );
       expect(result, isFalse);
     });
 
     test('should return true when value is non-empty string', () async {
-      final result = await rule.passes(ValidationContext(
-        attribute: 'field',
-        value: 'value',
-        data: {},
-      ),);
+      final result = await rule.passes(
+        ValidationContext(
+          attribute: 'field',
+          value: 'value',
+          data: {},
+        ),
+      );
       expect(result, isTrue);
     });
 
     test('should return true when value is number', () async {
-      final result = await rule.passes(ValidationContext(
-        attribute: 'field',
-        value: 42,
-        data: {},
-      ),);
+      final result = await rule.passes(
+        ValidationContext(
+          attribute: 'field',
+          value: 42,
+          data: {},
+        ),
+      );
       expect(result, isTrue);
     });
 
     test('should return true when value is boolean', () async {
-      final result = await rule.passes(ValidationContext(
-        attribute: 'field',
-        value: true,
-        data: {},
-      ),);
+      final result = await rule.passes(
+        ValidationContext(
+          attribute: 'field',
+          value: true,
+          data: {},
+        ),
+      );
       expect(result, isTrue);
     });
   });

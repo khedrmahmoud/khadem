@@ -78,7 +78,7 @@ class RequestMetadata {
   ///
   /// Splits by comma and trims whitespace by default.
   List<String>? queryList(String key,
-      {String separator = ',', List<String>? defaultValue}) {
+      {String separator = ',', List<String>? defaultValue,}) {
     final value = _raw.uri.queryParameters[key];
     if (value == null || value.isEmpty) {
       return defaultValue;

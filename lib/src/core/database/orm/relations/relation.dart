@@ -27,7 +27,10 @@ abstract class Relation<Related extends KhademModel<Related>, Parent> {
 
   /// Match the eagerly loaded results to their parents.
   List<KhademModel> match(
-      List<KhademModel> models, List<Related> results, String relation,);
+    List<KhademModel> models,
+    List<Related> results,
+    String relation,
+  );
 
   /// Get the query builder for the relation.
   QueryBuilderInterface<Related> getQuery() => query;
@@ -37,7 +40,8 @@ abstract class Relation<Related extends KhademModel<Related>, Parent> {
 
   /// Add the constraints for a relationship count query.
   QueryBuilderInterface<Related> getRelationExistenceQuery(
-      QueryBuilderInterface<Related> query,
-      QueryBuilderInterface<Parent> parentQuery,
-      [List<String> columns = const ['*'],]);
+    QueryBuilderInterface<Related> query,
+    QueryBuilderInterface<Parent> parentQuery, [
+    List<String> columns = const ['*'],
+  ]);
 }

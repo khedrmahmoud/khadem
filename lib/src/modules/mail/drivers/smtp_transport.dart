@@ -484,12 +484,15 @@ class SmtpTransport implements TransportInterface {
 
     final timeout = Duration(seconds: _config.timeout);
     try {
-      return await _readResponseInternal().timeout(timeout, onTimeout: () {
-        throw MailTransportException(
-          'SMTP response timed out after ${timeout.inSeconds}s'
-          '${_lastCommand != null ? ' (after $_lastCommand)' : ''}',
-        );
-      },);
+      return await _readResponseInternal().timeout(
+        timeout,
+        onTimeout: () {
+          throw MailTransportException(
+            'SMTP response timed out after ${timeout.inSeconds}s'
+            '${_lastCommand != null ? ' (after $_lastCommand)' : ''}',
+          );
+        },
+      );
     } on TimeoutException {
       rethrow;
     }

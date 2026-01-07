@@ -147,7 +147,8 @@ mixin HasRelations<T> {
     return RelationDefinition<R>(
       type: RelationType.belongsToMany,
       localKey: parentKey,
-      foreignKey: 'id', // Not directly used in belongsToMany logic in definition
+      foreignKey:
+          'id', // Not directly used in belongsToMany logic in definition
       relatedKey: relatedKey,
       relatedTable: relatedTable,
       factory: factory,

@@ -23,13 +23,13 @@ class MaxRule extends Rule {
     if (value == null) return true;
 
     if (value is num) {
-       return value <= max;
+      return value <= max;
     } else if (value is String) {
-       return value.length <= max;
+      return value.length <= max;
     } else if (value is Iterable || value is Map) {
-       return value.length <= max;
+      return value.length <= max;
     } else {
-       return value.toString().length <= max;
+      return value.toString().length <= max;
     }
   }
 

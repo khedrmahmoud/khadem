@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import '../../bus/command.dart';
+import '../../utils/cli_naming.dart';
 
 class MakeListenerCommand extends KhademCommand {
   MakeListenerCommand({required super.logger}) {
@@ -25,26 +26,24 @@ class MakeListenerCommand extends KhademCommand {
       logger.error(
         '❌ Usage: khadem make:listener --name=ListenerName or --name=folder/ListenerName',
       );
-      exit(1);
+      exitCode = 1;
+      return;
     }
 
-    // Parse folder and listener name
-    final parts = name.split('/');
-    String folder = '';
-    String listenerName = parts.last;
-
-    if (parts.length > 1) {
-      folder = parts.sublist(0, parts.length - 1).join('/');
-    }
+    final parts = CliNaming.splitFolderAndName(name);
+    final folder = parts.folder;
+    var listenerName = parts.name;
 
     // Ensure listener name ends with 'EventsHandler'
-    if (!listenerName.endsWith('EventsHandler')) {
-      listenerName = '${listenerName}EventsHandler';
-    }
+    listenerName = CliNaming.ensureSuffix(
+      CliNaming.toPascalCase(listenerName),
+      'EventsHandler',
+    );
 
-    final className = _capitalize(listenerName);
+    final className = listenerName;
+    final listenerBase = listenerName.replaceAll('EventsHandler', '');
     final fileName =
-        '${_snakeCase(listenerName.replaceAll('EventsHandler', ''))}_events_handler.dart';
+        '${CliNaming.toSnakeCase(listenerBase)}_events_handler.dart';
     final relativePath = folder.isEmpty
         ? 'lib/app/listeners/$fileName'
         : 'lib/app/listeners/$folder/$fileName';
@@ -55,29 +54,20 @@ class MakeListenerCommand extends KhademCommand {
     await file.writeAsString(
       _listenerStub(
         className,
-        listenerName.replaceAll('EventsHandler', ''),
+        listenerBase,
         folder,
       ),
     );
 
     logger.info('✅ Listener "$className" created at "$relativePath"');
-    exit(0);
-  }
-
-  String _capitalize(String input) =>
-      input.isEmpty ? input : input[0].toUpperCase() + input.substring(1);
-
-  String _snakeCase(String input) {
-    return input
-        .replaceAllMapped(
-          RegExp(r'[A-Z]'),
-          (match) => '_${match.group(0)!.toLowerCase()}',
-        )
-        .replaceFirst(RegExp(r'^_'), '');
+    exitCode = 0;
+    return;
   }
 
   String _listenerStub(String className, String listenerName, String folder) {
     final namespace = folder.isEmpty ? '' : '$folder/';
+    final eventBase = CliNaming.toSnakeCase(listenerName);
+    final displayName = CliNaming.toPascalCase(listenerName);
     return '''
 import 'package:khadem/khadem.dart'
     show Khadem, EventMethod, EventSubscriberInterface;
@@ -86,29 +76,29 @@ class $className implements EventSubscriberInterface {
   @override
   List<EventMethod> getEventHandlers() => [
         EventMethod(
-          eventName: '${_snakeCase(listenerName)}.created',
+          eventName: '$eventBase.created',
           handler: (payload) async => await onCreated(payload),
         ),
         EventMethod(
-          eventName: '${_snakeCase(listenerName)}.updated',
+          eventName: '$eventBase.updated',
           handler: (payload) async => await onUpdated(payload),
         ),
         EventMethod(
-          eventName: '${_snakeCase(listenerName)}.deleted',
+          eventName: '$eventBase.deleted',
           handler: (payload) async => await onDeleted(payload),
         ),
       ];
 
   Future onCreated(dynamic payload) async {
-    print('📥 ${namespace}${_capitalize(listenerName)} created: \$payload');
+    print('📥 ${namespace}${displayName} created: \$payload');
   }
 
   Future onUpdated(dynamic payload) async {
-    print('✏️ ${namespace}${_capitalize(listenerName)} updated: \$payload');
+    print('✏️ ${namespace}${displayName} updated: \$payload');
   }
 
   Future onDeleted(dynamic payload) async {
-    print('🗑️ ${namespace}${_capitalize(listenerName)} deleted: \$payload');
+    print('🗑️ ${namespace}${displayName} deleted: \$payload');
   }
 }
 ''';

@@ -57,9 +57,10 @@ class HasManyThrough<Related extends KhademModel<Related>, Parent>
 
   @override
   QueryBuilderInterface<Related> getRelationExistenceQuery(
-      QueryBuilderInterface<Related> query,
-      QueryBuilderInterface<Parent> parentQuery,
-      [List<String> columns = const ['*'],]) {
+    QueryBuilderInterface<Related> query,
+    QueryBuilderInterface<Parent> parentQuery, [
+    List<String> columns = const ['*'],
+  ]) {
     _performJoin(query);
 
     final parentTable = parentQuery.table;
@@ -90,7 +91,10 @@ class HasManyThrough<Related extends KhademModel<Related>, Parent>
 
   @override
   List<KhademModel> match(
-      List<KhademModel> models, List<Related> results, String relation,) {
+    List<KhademModel> models,
+    List<Related> results,
+    String relation,
+  ) {
     final dictionary = <dynamic, List<Related>>{};
 
     for (final result in results) {

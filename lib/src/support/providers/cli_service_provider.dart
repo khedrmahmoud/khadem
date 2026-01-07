@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:khadem/khadem.dart'
     show
         ServiceProvider,
@@ -20,10 +22,12 @@ class CliServiceProvider extends ServiceProvider {
   void register(ContainerInterface container) {
     // Minimal config and logging
 
+    final configPath = _resolveConfigPath();
+
     container.lazySingleton<EnvInterface>((c) => EnvSystem());
     container.singleton<ConfigInterface>(
       (c) => ConfigSystem(
-        configPath: 'config',
+        configPath: configPath,
         environment:
             c.resolve<EnvInterface>().getOrDefault('APP_ENV', 'development'),
       ),
@@ -53,11 +57,75 @@ class CliServiceProvider extends ServiceProvider {
     final config = container.resolve<ConfigInterface>() as ConfigSystem;
     config.setEnvironment(envSystem.getOrDefault('APP_ENV', 'development'));
 
-    final database = container.resolve<DatabaseManager>();
+    final logger = container.resolve<Logger>();
     final queue = container.resolve<QueueManager>();
 
-    await database.init();
-    queue.loadFromConfig();
-    container.resolve<Logger>().info('✅ CLI services initialized');
+    _ensureDatabaseConfigFromEnv(envSystem, config);
+
+    try {
+      queue.loadFromConfig();
+    } catch (e) {
+      logger.warning(
+        '⚠️ Queue not configured. Queue-related commands may fail. ($e)',
+      );
+    }
+
+    logger.info('✅ CLI services initialized');
+  }
+
+  void _ensureDatabaseConfigFromEnv(
+    EnvInterface env,
+    ConfigInterface config,
+  ) {
+    final driver = env.getOrDefault('DB_CONNECTION', 'mysql');
+
+    final existing =
+        config.get<Map<String, dynamic>>('database.connections.$driver');
+    if (existing != null) {
+      return;
+    }
+
+    config.set('database.default', driver);
+
+    switch (driver) {
+      case 'sqlite':
+        config.set(
+          'database.connections.sqlite',
+          <String, dynamic>{
+            'driver': 'sqlite',
+            'path': env.getOrDefault('DB_DATABASE', 'storage/database.sqlite'),
+          },
+        );
+        return;
+
+      case 'mysql':
+      default:
+        config.set(
+          'database.connections.mysql',
+          <String, dynamic>{
+            'driver': 'mysql',
+            'host': env.getOrDefault('DB_HOST', '127.0.0.1'),
+            'port': env.getInt('DB_PORT', defaultValue: 3306),
+            'database': env.getOrDefault('DB_DATABASE', 'khadem'),
+            'username': env.getOrDefault('DB_USERNAME', 'root'),
+            'password': env.getOrDefault('DB_PASSWORD', ''),
+          },
+        );
+        return;
+    }
+  }
+
+  String _resolveConfigPath() {
+    const primary = 'config';
+    if (Directory(primary).existsSync()) {
+      return primary;
+    }
+
+    const examplePath = 'example/config';
+    if (Directory(examplePath).existsSync()) {
+      return examplePath;
+    }
+
+    return primary;
   }
 }

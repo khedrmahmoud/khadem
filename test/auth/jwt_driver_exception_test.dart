@@ -54,17 +54,19 @@ void main() {
 
       expect(
         () => driver.verifyToken(token),
-        throwsA(isA<AuthException>()
-            .having(
-              (e) => e.statusCode,
-              'statusCode',
-              401,
-            )
-            .having(
-              (e) => e.message,
-              'message',
-              contains('expired'),
-            ),),
+        throwsA(
+          isA<AuthException>()
+              .having(
+                (e) => e.statusCode,
+                'statusCode',
+                401,
+              )
+              .having(
+                (e) => e.message,
+                'message',
+                contains('expired'),
+              ),
+        ),
       );
     });
 
@@ -79,17 +81,19 @@ void main() {
 
       expect(
         () => driver.verifyToken(token),
-        throwsA(isA<AuthException>()
-            .having(
-              (e) => e.statusCode,
-              'statusCode',
-              401,
-            )
-            .having(
-              (e) => e.message,
-              'message',
-              contains('Invalid token'),
-            ),),
+        throwsA(
+          isA<AuthException>()
+              .having(
+                (e) => e.statusCode,
+                'statusCode',
+                401,
+              )
+              .having(
+                (e) => e.message,
+                'message',
+                contains('Invalid token'),
+              ),
+        ),
       );
     });
 
@@ -100,11 +104,13 @@ void main() {
 
       expect(
         () => driver.verifyToken('malformed.token'),
-        throwsA(isA<AuthException>().having(
-          (e) => e.statusCode,
-          'statusCode',
-          401,
-        ),),
+        throwsA(
+          isA<AuthException>().having(
+            (e) => e.statusCode,
+            'statusCode',
+            401,
+          ),
+        ),
       );
     });
   });

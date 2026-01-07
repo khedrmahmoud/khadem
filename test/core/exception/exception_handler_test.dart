@@ -20,21 +20,27 @@ void main() {
       container.instance<Logger>(mockLogger);
 
       // Mock logger methods
-      when(mockLogger.error(
-        any,
-        context: anyNamed('context'),
-        stackTrace: anyNamed('stackTrace'),
-      ),).thenReturn(null);
-      when(mockLogger.warning(
-        any,
-        context: anyNamed('context'),
-        stackTrace: anyNamed('stackTrace'),
-      ),).thenReturn(null);
-      when(mockLogger.critical(
-        any,
-        context: anyNamed('context'),
-        stackTrace: anyNamed('stackTrace'),
-      ),).thenReturn(null);
+      when(
+        mockLogger.error(
+          any,
+          context: anyNamed('context'),
+          stackTrace: anyNamed('stackTrace'),
+        ),
+      ).thenReturn(null);
+      when(
+        mockLogger.warning(
+          any,
+          context: anyNamed('context'),
+          stackTrace: anyNamed('stackTrace'),
+        ),
+      ).thenReturn(null);
+      when(
+        mockLogger.critical(
+          any,
+          context: anyNamed('context'),
+          stackTrace: anyNamed('stackTrace'),
+        ),
+      ).thenReturn(null);
     });
 
     tearDown(() {

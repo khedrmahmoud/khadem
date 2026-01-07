@@ -1,5 +1,7 @@
 import 'package:khadem/khadem.dart';
 
+import '../support/utils/package_metadata.dart';
+
 /// Central access point for all Khadem framework services and utilities.
 class Khadem {
   Khadem._();
@@ -90,7 +92,7 @@ class Khadem {
   // ========= 🛠️ Miscellaneous Helpers & Utilities ========
 
   /// Framework version.
-  static String get version => '1.2.0-beta';
+  static String get version => KhademPackageMetadataLoader.loadSync().version;
 
   /// Checks if the framework is fully booted.
   static bool get isBooted => providers.isBooted;

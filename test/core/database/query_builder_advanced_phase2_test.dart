@@ -42,8 +42,12 @@ class _MockConnection implements DatabaseConnection {
     String table, {
     T Function(Map<String, dynamic>)? modelFactory,
   }) {
-    return QueryBuilder<T>(this, MySQLGrammar(), table,
-        modelFactory: modelFactory,);
+    return QueryBuilder<T>(
+      this,
+      MySQLGrammar(),
+      table,
+      modelFactory: modelFactory,
+    );
   }
 
   @override
@@ -122,7 +126,8 @@ void main() {
         expect(
           sql,
           contains(
-              'LEFT JOIN `profiles` ON `users`.`id` = `profiles`.`user_id`',),
+            'LEFT JOIN `profiles` ON `users`.`id` = `profiles`.`user_id`',
+          ),
         );
       });
 
@@ -145,7 +150,8 @@ void main() {
         expect(
           sql,
           contains(
-              'RIGHT JOIN `settings` ON `users`.`id` = `settings`.`user_id`',),
+            'RIGHT JOIN `settings` ON `users`.`id` = `settings`.`user_id`',
+          ),
         );
       });
     });
@@ -177,8 +183,10 @@ void main() {
             .orderBy('posts.created_at', direction: 'DESC');
 
         final sql = queryBuilder.toSql();
-        expect(sql,
-            contains('SELECT `users`.*, `posts`.`title`, `profiles`.`bio`'),);
+        expect(
+          sql,
+          contains('SELECT `users`.*, `posts`.`title`, `profiles`.`bio`'),
+        );
         expect(sql, contains('INNER JOIN `posts`'));
         expect(sql, contains('LEFT JOIN `profiles`'));
         expect(sql, contains('WHERE `posts`.`published` = ?'));

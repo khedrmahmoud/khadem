@@ -21,7 +21,10 @@ class BelongsTo<Related extends KhademModel<Related>, Parent>
   void addConstraints() {
     if ((parent as KhademModel).getAttribute(foreignKey) != null) {
       query.where(
-          ownerKey, '=', (parent as KhademModel).getAttribute(foreignKey),);
+        ownerKey,
+        '=',
+        (parent as KhademModel).getAttribute(foreignKey),
+      );
     }
   }
 
@@ -37,9 +40,10 @@ class BelongsTo<Related extends KhademModel<Related>, Parent>
 
   @override
   QueryBuilderInterface<Related> getRelationExistenceQuery(
-      QueryBuilderInterface<Related> query,
-      QueryBuilderInterface<Parent> parentQuery,
-      [List<String> columns = const ['*'],]) {
+    QueryBuilderInterface<Related> query,
+    QueryBuilderInterface<Parent> parentQuery, [
+    List<String> columns = const ['*'],
+  ]) {
     final relatedTable = query.table;
     final parentTable = parentQuery.table;
 
@@ -65,7 +69,10 @@ class BelongsTo<Related extends KhademModel<Related>, Parent>
 
   @override
   List<KhademModel> match(
-      List<KhademModel> models, List<Related> results, String relation,) {
+    List<KhademModel> models,
+    List<Related> results,
+    String relation,
+  ) {
     final dictionary = <dynamic, Related>{};
 
     for (final result in results) {

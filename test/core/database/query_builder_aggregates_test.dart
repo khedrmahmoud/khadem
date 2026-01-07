@@ -7,8 +7,11 @@ class TestDatabaseManager implements DatabaseManager {
   TestDatabaseManager(this._connection);
 
   @override
-  QueryBuilderInterface<T> table<T>(String tableName, {T Function(Map<String, dynamic>)? modelFactory, String? connectionName}) {
-    return QueryBuilder<T>(_connection, MySQLGrammar(), tableName, modelFactory: modelFactory);
+  QueryBuilderInterface<T> table<T>(String tableName,
+      {T Function(Map<String, dynamic>)? modelFactory,
+      String? connectionName,}) {
+    return QueryBuilder<T>(_connection, MySQLGrammar(), tableName,
+        modelFactory: modelFactory,);
   }
 
   @override
@@ -17,7 +20,8 @@ class TestDatabaseManager implements DatabaseManager {
 
 class _MockConnection implements DatabaseConnection {
   @override
-  Future<DatabaseResponse> execute(String query, [List<dynamic> bindings = const []]) async {
+  Future<DatabaseResponse> execute(String query,
+      [List<dynamic> bindings = const [],]) async {
     return DatabaseResponse(data: [], affectedRows: 0);
   }
 
@@ -37,15 +41,23 @@ class _MockConnection implements DatabaseConnection {
   bool get isConnected => true;
 
   @override
-  QueryBuilderInterface<T> queryBuilder<T>(String table, {T Function(Map<String, dynamic>)? modelFactory}) {
-    return QueryBuilder<T>(this, MySQLGrammar(), table, modelFactory: modelFactory);
+  QueryBuilderInterface<T> queryBuilder<T>(String table,
+      {T Function(Map<String, dynamic>)? modelFactory,}) {
+    return QueryBuilder<T>(this, MySQLGrammar(), table,
+        modelFactory: modelFactory,);
   }
 
   @override
   SchemaBuilder getSchemaBuilder() => throw UnimplementedError();
 
   @override
-  Future<T> transaction<T>(Future<T> Function() callback, {int maxRetries = 3, Duration retryDelay = const Duration(milliseconds: 100), Future<void> Function(T result)? onSuccess, Future<void> Function(dynamic error)? onFailure, Future<void> Function()? onFinally, String? isolationLevel}) async {
+  Future<T> transaction<T>(Future<T> Function() callback,
+      {int maxRetries = 3,
+      Duration retryDelay = const Duration(milliseconds: 100),
+      Future<void> Function(T result)? onSuccess,
+      Future<void> Function(dynamic error)? onFailure,
+      Future<void> Function()? onFinally,
+      String? isolationLevel,}) async {
     return callback();
   }
 
@@ -64,12 +76,12 @@ class User extends KhademModel<User> {
 
   @override
   Map<String, RelationDefinition> get definedRelations => {
-    'posts': hasMany<Post>(
-      foreignKey: 'user_id',
-      relatedTable: 'posts',
-      factory: () => Post(),
-    ),
-  };
+        'posts': hasMany<Post>(
+          foreignKey: 'user_id',
+          relatedTable: 'posts',
+          factory: () => Post(),
+        ),
+      };
 }
 
 void main() {
@@ -79,7 +91,8 @@ void main() {
   setUp(() {
     mockConnection = _MockConnection();
     mockDatabaseManager = TestDatabaseManager(mockConnection);
-    ContainerProvider.instance.singleton<DatabaseManager>((_) => mockDatabaseManager);
+    ContainerProvider.instance
+        .singleton<DatabaseManager>((_) => mockDatabaseManager);
   });
 
   tearDown(() {
@@ -89,8 +102,8 @@ void main() {
   group('QueryBuilder Aggregates', () {
     test('withCount generates correct subquery', () {
       final query = QueryBuilder<User>(
-        mockConnection, 
-        MySQLGrammar(), 
+        mockConnection,
+        MySQLGrammar(),
         'users',
         modelFactory: (data) => User()..fromJson(data),
       );
@@ -100,13 +113,16 @@ void main() {
       final sql = query.toSql();
       // SELECT *, (SELECT COUNT(*) FROM `posts` WHERE `users`.`id` = `posts`.`user_id`) as posts_count FROM `users`
       expect(sql, contains('SELECT *'));
-      expect(sql, contains('(SELECT COUNT(*) FROM `posts` WHERE `posts`.`user_id` = `users`.`id`) as posts_count'));
+      expect(
+          sql,
+          contains(
+              '(SELECT COUNT(*) FROM `posts` WHERE `posts`.`user_id` = `users`.`id`) as posts_count',),);
     });
 
     test('withCount supports array of relations', () {
       final query = QueryBuilder<User>(
-        mockConnection, 
-        MySQLGrammar(), 
+        mockConnection,
+        MySQLGrammar(),
         'users',
         modelFactory: (data) => User()..fromJson(data),
       );
@@ -119,8 +135,8 @@ void main() {
 
     test('withAvg generates correct subquery', () {
       final query = QueryBuilder<User>(
-        mockConnection, 
-        MySQLGrammar(), 
+        mockConnection,
+        MySQLGrammar(),
         'users',
         modelFactory: (data) => User()..fromJson(data),
       );
@@ -129,13 +145,16 @@ void main() {
 
       final sql = query.toSql();
       // SELECT *, (SELECT AVG(`rating`) FROM `posts` WHERE `users`.`id` = `posts`.`user_id`) as posts_avg_rating FROM `users`
-      expect(sql, contains('(SELECT AVG(`rating`) FROM `posts` WHERE `posts`.`user_id` = `users`.`id`) as posts_avg_rating'));
+      expect(
+          sql,
+          contains(
+              '(SELECT AVG(`rating`) FROM `posts` WHERE `posts`.`user_id` = `users`.`id`) as posts_avg_rating',),);
     });
 
     test('withSum generates correct subquery', () {
       final query = QueryBuilder<User>(
-        mockConnection, 
-        MySQLGrammar(), 
+        mockConnection,
+        MySQLGrammar(),
         'users',
         modelFactory: (data) => User()..fromJson(data),
       );
@@ -143,7 +162,10 @@ void main() {
       query.withSum('posts', 'views');
 
       final sql = query.toSql();
-      expect(sql, contains('(SELECT SUM(`views`) FROM `posts` WHERE `posts`.`user_id` = `users`.`id`) as posts_sum_views'));
+      expect(
+          sql,
+          contains(
+              '(SELECT SUM(`views`) FROM `posts` WHERE `posts`.`user_id` = `users`.`id`) as posts_sum_views',),);
     });
   });
 }

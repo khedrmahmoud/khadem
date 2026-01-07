@@ -10,7 +10,8 @@ class FakeConnection implements DatabaseConnection {
   List<List<dynamic>> executedBindings = [];
 
   @override
-  Future<DatabaseResponse> execute(String sql, [List<dynamic>? bindings = const []]) async {
+  Future<DatabaseResponse> execute(String sql,
+      [List<dynamic>? bindings = const [],]) async {
     executedSql.add(sql);
     executedBindings.add(bindings ?? []);
     return DatabaseResponse(affectedRows: 1, insertId: 1, data: []);
@@ -21,7 +22,7 @@ class FakeConnection implements DatabaseConnection {
 
   @override
   Future<void> disconnect() async {}
-  
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -69,7 +70,7 @@ void main() {
     // Bindings order: [1 (from), '2023-01-01' (extra), true (where)]
     expect(connection.executedBindings.last, equals([1, '2023-01-01', true]));
   });
-  
+
   test('delete bindings order with fromRaw and where', () async {
     await queryBuilder
         .fromRaw('users JOIN roles ON users.role_id = ?', [1])

@@ -64,6 +64,12 @@ class ConfigSystem implements ConfigInterface {
   /// Internal storage for configuration data.
   final Map<String, dynamic> _config = {};
 
+  /// Tracks config sections that were modified at runtime (via set/push/pop/loadFromRegistry).
+  ///
+  /// When caching is disabled, we reload from disk on access. However, runtime overrides
+  /// should win and must not be clobbered by reloads.
+  final Set<String> _runtimeDirtyConfigs = {};
+
   /// Path to the configuration directory (e.g., 'config').
   final String _configPath;
 
@@ -233,17 +239,11 @@ class ConfigSystem implements ConfigInterface {
         }
       }
     } else {
-      // When caching is disabled, always check if file has been modified
+      // When caching is disabled, always reload from disk on access.
+      // This avoids relying on filesystem timestamp resolution.
       final baseFile = File('$_configPath/$configName.json');
-      if (baseFile.existsSync()) {
-        final fileStat = baseFile.statSync();
-        final fileModified = fileStat.modified;
-
-        if (!_cacheTimestamps.containsKey(configName) ||
-            fileModified.isAfter(_cacheTimestamps[configName]!)) {
-          // File has been modified, reload this config
-          _reloadConfig(configName);
-        }
+      if (baseFile.existsSync() && !_runtimeDirtyConfigs.contains(configName)) {
+        _reloadConfig(configName);
       }
     }
 
@@ -318,6 +318,8 @@ class ConfigSystem implements ConfigInterface {
   void set(String key, dynamic value) {
     final parts = key.split('.');
     final configName = parts.first;
+
+    _runtimeDirtyConfigs.add(configName);
 
     if (!_config.containsKey(configName)) {
       _config[configName] = <String, dynamic>{};
@@ -448,6 +450,7 @@ class ConfigSystem implements ConfigInterface {
   void reload() {
     _config.clear();
     _cacheTimestamps.clear();
+    _runtimeDirtyConfigs.clear();
     _loadConfigurations();
   }
 
@@ -466,5 +469,6 @@ class ConfigSystem implements ConfigInterface {
   @override
   void loadFromRegistry(Map<String, Map<String, dynamic>> registry) {
     _config.addAll(registry);
+    _runtimeDirtyConfigs.addAll(registry.keys);
   }
 }

@@ -156,8 +156,11 @@ void main() {
     });
 
     test('cookie() adds a cookie to the response', () {
-      responseObj.cookie('test_cookie', 'test_value',
-          maxAge: const Duration(hours: 1),);
+      responseObj.cookie(
+        'test_cookie',
+        'test_value',
+        maxAge: const Duration(hours: 1),
+      );
 
       final cookies = request.response.cookies;
       expect(cookies, hasLength(1));

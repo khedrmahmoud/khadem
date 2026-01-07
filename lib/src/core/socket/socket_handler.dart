@@ -1,4 +1,3 @@
-
 import 'package:khadem/src/application/khadem.dart';
 import 'package:khadem/src/contracts/exceptions/exception_handler_contract.dart';
 import 'package:khadem/src/support/exceptions/not_found_exception.dart';
@@ -92,7 +91,8 @@ class SocketHandler {
 
     final details = <String, dynamic>{
       if (result.details != null) ...result.details!,
-      if (result.stackTrace != null) 'stack_trace': result.stackTrace.toString(),
+      if (result.stackTrace != null)
+        'stack_trace': result.stackTrace.toString(),
     };
 
     // Add socket-specific context if in development
@@ -117,7 +117,8 @@ class SocketHandler {
       id: packet?.id,
       event: packet?.event,
       status: result.statusCode,
-      message: result.message??'An error occurred while processing your request',
+      message:
+          result.message ?? 'An error occurred while processing your request',
       details: details.isNotEmpty ? details : null,
     );
   }
@@ -125,5 +126,4 @@ class SocketHandler {
   void _onDone() {
     _manager.removeClient(_client);
   }
-
 }

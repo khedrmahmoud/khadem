@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:khadem/src/core/storage/local_disk.dart';
 import 'package:test/test.dart';
@@ -21,22 +21,22 @@ void main() {
     });
 
     test('putStream and getStream should write and read file', () async {
-      final content = 'Hello Stream World';
+      const content = 'Hello Stream World';
       final stream = Stream.value(utf8.encode(content));
-      
+
       await disk.putStream('stream.txt', stream);
-      
+
       expect(await disk.exists('stream.txt'), isTrue);
-      
+
       final readStream = disk.getStream('stream.txt');
       final readContent = await utf8.decodeStream(readStream);
-      
+
       expect(readContent, equals(content));
     });
 
     test('makeDirectory should create directory', () async {
       await disk.makeDirectory('new_dir');
-      
+
       final dir = Directory('${tempDir.path}/new_dir');
       expect(await dir.exists(), isTrue);
     });
@@ -44,11 +44,11 @@ void main() {
     test('deleteDirectory should remove directory', () async {
       await disk.makeDirectory('del_dir');
       await disk.writeString('del_dir/file.txt', 'content');
-      
+
       expect(await disk.exists('del_dir/file.txt'), isTrue);
-      
+
       await disk.deleteDirectory('del_dir');
-      
+
       final dir = Directory('${tempDir.path}/del_dir');
       expect(await dir.exists(), isFalse);
     });
@@ -62,7 +62,8 @@ void main() {
 
     test('temporaryUrl should return path', () async {
       await disk.writeString('file.txt', 'content');
-      final url = await disk.temporaryUrl('file.txt', DateTime.now().add(Duration(hours: 1)));
+      final url = await disk.temporaryUrl(
+          'file.txt', DateTime.now().add(const Duration(hours: 1)),);
       // Since LocalDisk just returns the resolved path
       expect(url, contains('file.txt'));
     });

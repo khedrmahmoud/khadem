@@ -38,7 +38,8 @@ class MySQLSchemaBuilder implements SchemaBuilder {
       parts.add('ENUM($enumValues)');
     } else if (column.generatedExpression != null) {
       parts.add(
-          'AS (${column.generatedExpression}) ${column.isStoredGenerated ? 'STORED' : 'VIRTUAL'}',);
+        'AS (${column.generatedExpression}) ${column.isStoredGenerated ? 'STORED' : 'VIRTUAL'}',
+      );
     } else {
       parts.add(_getTypeWithLength(column));
     }
@@ -103,7 +104,7 @@ class MySQLSchemaBuilder implements SchemaBuilder {
 
   String _compileDefault(ColumnDefinition column) {
     final value = column.defaultValue;
-    
+
     if (column.isDefaultRaw) {
       return 'DEFAULT $value';
     }
@@ -192,17 +193,20 @@ class MySQLSchemaBuilder implements SchemaBuilder {
         return column.isUnsigned ? 'MEDIUMINT UNSIGNED' : 'MEDIUMINT';
       case 'FLOAT':
         if (column.precisionValue != null && column.scaleValue != null) {
-          return 'FLOAT(${column.precisionValue}, ${column.scaleValue}) ${column.isUnsigned ? 'UNSIGNED' : ''}'.trim();
+          return 'FLOAT(${column.precisionValue}, ${column.scaleValue}) ${column.isUnsigned ? 'UNSIGNED' : ''}'
+              .trim();
         }
         return column.isUnsigned ? 'FLOAT UNSIGNED' : 'FLOAT';
       case 'DOUBLE':
         if (column.precisionValue != null && column.scaleValue != null) {
-          return 'DOUBLE(${column.precisionValue}, ${column.scaleValue}) ${column.isUnsigned ? 'UNSIGNED' : ''}'.trim();
+          return 'DOUBLE(${column.precisionValue}, ${column.scaleValue}) ${column.isUnsigned ? 'UNSIGNED' : ''}'
+              .trim();
         }
         return column.isUnsigned ? 'DOUBLE UNSIGNED' : 'DOUBLE';
       case 'DECIMAL':
         if (column.precisionValue != null && column.scaleValue != null) {
-          return 'DECIMAL(${column.precisionValue}, ${column.scaleValue}) ${column.isUnsigned ? 'UNSIGNED' : ''}'.trim();
+          return 'DECIMAL(${column.precisionValue}, ${column.scaleValue}) ${column.isUnsigned ? 'UNSIGNED' : ''}'
+              .trim();
         }
         return 'DECIMAL(8, 2)'; // Default
       case 'BOOLEAN':

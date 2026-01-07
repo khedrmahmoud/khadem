@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import '../../bus/command.dart';
+import '../../utils/cli_naming.dart';
 
 class MakeProviderCommand extends KhademCommand {
   MakeProviderCommand({required super.logger}) {
@@ -22,31 +23,30 @@ class MakeProviderCommand extends KhademCommand {
     final input = argResults?['name'] as String?;
     if (input == null || input.trim().isEmpty) {
       logger.error('❌ Usage: khadem make:provider --name=Auth/Event');
-      exit(1);
+      exitCode = 1;
+      return;
     }
 
-    final normalized = input.replaceAll('\\', '/');
-    final parts = normalized.split('/');
-    final name = parts.last;
-    final folderParts = parts.sublist(0, parts.length - 1);
-    final folder = folderParts.map((e) => e.toLowerCase()).join('/');
+    final parts = CliNaming.splitFolderAndName(input);
+    final name = parts.name;
+    final folder = parts.folder.toLowerCase();
 
-    final className = '${_toPascalCase(name)}ServiceProvider';
-    final fileName = '${_toSnakeCase(name)}_service_provider.dart';
+    final className = '${CliNaming.toPascalCase(name)}ServiceProvider';
+    final fileName = '${CliNaming.toSnakeCase(name)}_service_provider.dart';
     final filePath =
         'lib/app/providers/${folder.isEmpty ? '' : '$folder/'}$fileName';
 
     final file = File(filePath);
     if (await file.exists()) {
       logger.error('❌ Provider file already exists at $filePath');
-      exit(1);
+      exitCode = 1;
+      return;
     }
 
     await file.create(recursive: true);
 
     await file.writeAsString('''
-import 'package:khadem/khadem.dart';
-  show ServiceProvider, ContainerInterface, registerSubscribers;
+import 'package:khadem/khadem.dart' show ServiceProvider, ContainerInterface;
 
 class $className extends ServiceProvider {
   @override
@@ -62,25 +62,7 @@ class $className extends ServiceProvider {
 ''');
 
     logger.info('✅ Service provider "$className" created at $filePath');
-    exit(0);
-  }
-
-  String _toPascalCase(String input) {
-    if (input.isEmpty) return input;
-    return input
-        .split('_')
-        .map(
-          (e) => e.isEmpty
-              ? ''
-              : e[0].toUpperCase() + e.substring(1).toLowerCase(),
-        )
-        .join();
-  }
-
-  String _toSnakeCase(String input) {
-    if (input.isEmpty) return input;
-    return input
-        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]}_${m[2]}')
-        .toLowerCase();
+    exitCode = 0;
+    return;
   }
 }

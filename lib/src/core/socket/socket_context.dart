@@ -74,13 +74,15 @@ class SocketContext {
   }
 
   /// Validate the payload against rules.
-  /// 
+  ///
   /// Throws [ValidationException] if validation fails.
-  Future<void> validate(Map<String, dynamic> rules, {Map<String, String> messages = const {}}) async {
+  Future<void> validate(Map<String, dynamic> rules,
+      {Map<String, String> messages = const {},}) async {
     if (data is! Map<String, dynamic>) {
       throw const FormatException('Payload must be a Map to be validated');
     }
-    final validator = InputValidator(data as Map<String, dynamic>, rules, customMessages: messages);
+    final validator = InputValidator(data as Map<String, dynamic>, rules,
+        customMessages: messages,);
     await validator.validate();
   }
 
@@ -95,10 +97,10 @@ class SocketContext {
   }
 
   /// Helper to send an error reply.
-  void error(String message, {int code=400, dynamic details}) {
+  void error(String message, {int code = 400, dynamic details}) {
     client.sendError(message: message, status: code, details: details);
   }
-  
+
   // ===========================================================================
   // Room Management Helpers
   // ===========================================================================

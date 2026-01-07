@@ -32,9 +32,10 @@ abstract class MorphOneOrMany<Related extends KhademModel<Related>, Parent>
 
   @override
   QueryBuilderInterface<Related> getRelationExistenceQuery(
-      QueryBuilderInterface<Related> query,
-      QueryBuilderInterface<Parent> parentQuery,
-      [List<String> columns = const ['*'],]) {
+    QueryBuilderInterface<Related> query,
+    QueryBuilderInterface<Parent> parentQuery, [
+    List<String> columns = const ['*'],
+  ]) {
     return super
         .getRelationExistenceQuery(query, parentQuery, columns)
         .where(morphTypeField, '=', morphType);

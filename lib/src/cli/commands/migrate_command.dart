@@ -1,17 +1,12 @@
 import 'dart:io';
-import 'dart:mirrors';
-
 import 'package:khadem/khadem.dart';
-import 'package:path/path.dart' as path;
 
-import '../command_bootstrapper.dart'; // Dynamic imports for migration classes
-// These would be generated in a production system
-// For now, we'll use conditional imports based on the project structure
-
-// Import migration classes dynamically based on file path
-// This is a workaround since Dart doesn't have full runtime reflection
+import '../bus/command.dart';
 
 class MigrateCommand extends KhademCommand {
+  @override
+  bool get requiresKernelBootstrap => true;
+
   @override
   String get name => 'migrate';
 
@@ -68,8 +63,6 @@ class MigrateCommand extends KhademCommand {
   @override
   Future<void> handle(List<String> args) async {
     try {
-      await CommandBootstrapper.register();
-      await CommandBootstrapper.boot();
       // Check if we're in production without force flag
       final isProduction = Khadem.isProduction;
 
@@ -79,14 +72,11 @@ class MigrateCommand extends KhademCommand {
         logger.error('❌ Production environment detected!');
         logger.error('💡 Use --force flag to run migrations in production');
         logger.error('⚠️  This can be dangerous. Make sure you have backups!');
-        exit(1);
+        exitCode = 1;
+        return;
       }
 
       final migrator = Khadem.container.resolve<Migrator>();
-
-      // Discover and register migrations
-      final migrations = await _discoverMigrations();
-      migrator.registerAll(migrations);
 
       if (argResults?['status'] == true) {
         await _showMigrationStatus(migrator);
@@ -102,107 +92,16 @@ class MigrateCommand extends KhademCommand {
       }
 
       logger.info('✅ Migration command completed successfully.');
-      exit(0);
+      exitCode = 0;
+      return;
     } catch (e, stackTrace) {
       logger.error('❌ Migration failed: $e');
       if (argResults?['verbose'] == true) {
         logger.error('Stack trace: $stackTrace');
       }
-      logger.error('� Try running with --verbose for more details');
-      exit(1);
-    }
-  }
-
-  Future<List<MigrationFile>> _discoverMigrations() async {
-    final migrationsPath =
-        argResults?['path'] as String? ?? 'lib/database/migrations';
-    final migrationsDir = Directory(migrationsPath);
-
-    if (!await migrationsDir.exists()) {
-      logger.error('❌ Migrations directory not found: $migrationsPath');
-      logger.error('💡 Make sure you\'re in a Khadem project directory');
-      exit(1);
-    }
-
-    // Fallback: Discover migration files manually
-    final migrations = <MigrationFile>[];
-    final files = await migrationsDir.list().toList();
-
-    // Filter Dart files (exclude migrations.dart)
-    final migrationFiles = files
-        .whereType<File>()
-        .where(
-          (file) =>
-              file.path.endsWith('.dart') &&
-              !file.path.endsWith('migrations.dart'),
-        )
-        .toList();
-
-    if (migrationFiles.isEmpty) {
-      logger.warning('⚠️ No migration files found in $migrationsPath');
-      return migrations;
-    }
-
-    logger.info('🔍 Found ${migrationFiles.length} migration files');
-
-    for (final file in migrationFiles) {
-      try {
-        final migration = await _loadMigrationFromFile(file);
-        if (migration != null) {
-          migrations.add(migration);
-          if (argResults?['verbose'] == true) {
-            logger.info('📄 Loaded: ${migration.name}');
-          }
-        }
-      } catch (e) {
-        logger.error('❌ Failed to load migration: ${file.path}');
-        logger.error('   Error: $e');
-        if (argResults?['verbose'] == true) {
-          rethrow;
-        }
-      }
-    }
-
-    // Sort migrations by filename (assuming they start with numbers)
-    migrations.sort((a, b) => a.name.compareTo(b.name));
-
-    logger.info('📋 Total migrations loaded: ${migrations.length}');
-    return migrations;
-  }
-
-  Future<MigrationFile?> _loadMigrationFromFile(File file) async {
-    try {
-      final fileName = path.basenameWithoutExtension(file.path);
-      final className = _extractMigrationClassName(fileName);
-
-      if (className == null) {
-        logger.error('❌ Could not extract class name from file: $fileName');
-        return null;
-      }
-
-      if (argResults?['verbose'] == true) {
-        logger.info('🔧 Loading migration: $className from $fileName');
-      }
-
-      // Use Dart mirrors to dynamically load and instantiate the migration
-      final migration = await _instantiateMigrationWithMirrors(file, className);
-
-      if (migration != null) {
-        if (argResults?['verbose'] == true) {
-          logger.info('✅ Successfully loaded migration: $className');
-        }
-        return migration;
-      } else {
-        logger.error('❌ Failed to instantiate migration: $className');
-        return null;
-      }
-    } catch (e, stackTrace) {
-      logger.error('❌ Failed to load migration from file: ${file.path}');
-      logger.error('   Error: $e');
-      if (argResults?['verbose'] == true) {
-        logger.error('   Stack trace: $stackTrace');
-      }
-      return null;
+      logger.error('💡 Try running with --verbose for more details');
+      exitCode = 1;
+      return;
     }
   }
 
@@ -224,7 +123,8 @@ class MigrateCommand extends KhademCommand {
       final stepCount = int.tryParse(step);
       if (stepCount == null || stepCount <= 0) {
         logger.error('❌ Invalid step count: $step');
-        exit(1);
+        exitCode = 1;
+        return;
       }
 
       logger.info('⚡ Running migrations in steps: $stepCount at a time');
@@ -270,206 +170,5 @@ class MigrateCommand extends KhademCommand {
     }
 
     await migrator.refresh();
-  }
-
-  String? _extractMigrationClassName(String fileName) {
-    try {
-      // Handle different migration file naming patterns
-      // Examples:
-      // - 0_create_users_table.dart -> CreateUsersTable
-      // - 1757064547568_create_chat_rooms_table.dart -> CreateChatRoomsTable
-      // - create_posts_table.dart -> CreatePostsTable
-
-      // Remove timestamp prefix if present (numbers followed by underscore)
-      final nameWithoutTimestamp = fileName.replaceFirst(RegExp(r'^\d+_'), '');
-
-      // Remove .dart extension and convert to PascalCase
-      final baseName = nameWithoutTimestamp.replaceAll('_', ' ');
-      final words = baseName
-          .split(' ')
-          .map(
-            (word) => word.isNotEmpty
-                ? word[0].toUpperCase() + word.substring(1).toLowerCase()
-                : '',
-          )
-          .where((word) => word.isNotEmpty);
-
-      return words.join();
-    } catch (e) {
-      logger.error('❌ Failed to extract class name from: $fileName');
-      return null;
-    }
-  }
-
-  Future<MigrationFile?> _instantiateMigrationWithMirrors(
-    File file,
-    String className,
-  ) async {
-    try {
-      // First, try to find the class in the current mirror system
-      final mirrorSystem = currentMirrorSystem();
-      ClassMirror? migrationClassMirror;
-
-      for (final library in mirrorSystem.libraries.values) {
-        try {
-          migrationClassMirror =
-              library.declarations[Symbol(className)] as ClassMirror?;
-          if (migrationClassMirror != null) {
-            break;
-          }
-        } catch (e) {
-          // Continue searching
-        }
-      }
-
-      if (migrationClassMirror != null) {
-        // Check if it extends MigrationFile
-        final migrationType = reflectType(MigrationFile);
-        if (!migrationClassMirror.isSubtypeOf(migrationType)) {
-          logger.warning('⚠️ Class "$className" does not extend MigrationFile');
-          return null;
-        }
-
-        // Create an instance using the default constructor
-        final instanceMirror =
-            migrationClassMirror.newInstance(const Symbol(''), []);
-        final migration = instanceMirror.reflectee as MigrationFile;
-
-        if (argResults?['verbose'] == true) {
-          logger.info('✅ Successfully instantiated migration: $className');
-        }
-
-        return migration;
-      }
-
-      // If not found in mirror system, try dynamic loading approach
-      logger.warning(
-        '⚠️ Migration class "$className" not found in mirror system',
-      );
-      logger.warning('   Attempting dynamic loading from file...');
-
-      return await _loadMigrationFromFileContent(file, className);
-    } catch (e, stackTrace) {
-      logger.error('❌ Failed to instantiate migration with mirror: $className');
-      logger.error('   Error: $e');
-      if (argResults?['verbose'] == true) {
-        logger.error('   Stack trace: $stackTrace');
-      }
-      return null;
-    }
-  }
-
-  Future<MigrationFile?> _loadMigrationFromFileContent(
-    File file,
-    String className,
-  ) async {
-    try {
-      // Read the migration file content
-      final content = await file.readAsString();
-
-      // Check if the file contains a valid migration class
-      if (!content.contains('class $className extends MigrationFile')) {
-        logger.error('❌ File does not contain expected class: $className');
-        return null;
-      }
-
-      // For now, we'll create a simple migration instance
-      // In a production system, this would use code generation or dart_eval
-      logger.info('📄 Found migration class: $className');
-      logger.info('   File: ${file.path}');
-
-      // Extract the migration name from the file
-      final fileName = path.basenameWithoutExtension(file.path);
-      final migrationName = _extractMigrationName(fileName);
-
-      // Create a basic migration wrapper
-      // This is a temporary solution - in production you'd use proper instantiation
-      final migration =
-          _createMigrationWrapper(className, migrationName, content);
-
-      if (migration != null) {
-        logger.info('✅ Created migration wrapper for: $className');
-        return migration;
-      }
-
-      return null;
-    } catch (e) {
-      logger.error('❌ Failed to load migration from file content: $e');
-      return null;
-    }
-  }
-
-  String _extractMigrationName(String fileName) {
-    // Convert file name to migration name
-    // Example: 0_create_users_table.dart -> create_users_table
-    final parts = fileName.split('_');
-    if (parts.length > 1 && RegExp(r'^\d+$').hasMatch(parts[0])) {
-      return parts.sublist(1).join('_');
-    }
-    return fileName;
-  }
-
-  MigrationFile? _createMigrationWrapper(
-    String className,
-    String migrationName,
-    String content,
-  ) {
-    // This is a simplified approach for demonstration
-    // In a real implementation, you'd parse the up() and down() methods
-
-    try {
-      // Extract up method content
-      final upMatch = RegExp(
-        r'Future<void>\s+up\s*\([^)]*\)\s*async\s*\{([^}]*)\}',
-        multiLine: true,
-      ).firstMatch(content);
-      final downMatch = RegExp(
-        r'Future<void>\s+down\s*\([^)]*\)\s*async\s*\{([^}]*)\}',
-        multiLine: true,
-      ).firstMatch(content);
-
-      if (upMatch == null) {
-        logger.error('❌ Could not find up() method in migration: $className');
-        return null;
-      }
-
-      // Create a simple migration implementation
-      return _SimpleMigration(
-        className,
-        upMatch.group(1) ?? '',
-        downMatch?.group(1) ?? '',
-      );
-    } catch (e) {
-      logger.error('❌ Failed to create migration wrapper: $e');
-      return null;
-    }
-  }
-}
-
-// Simple migration wrapper for demonstration
-class _SimpleMigration extends MigrationFile {
-  final String _className;
-  final String _upContent;
-  final String _downContent;
-
-  _SimpleMigration(this._className, this._upContent, this._downContent);
-
-  @override
-  String get name => _className;
-
-  @override
-  Future<void> up(builder) async {
-    // This is a placeholder - in production you'd execute the actual migration code
-    print('🚀 Running UP migration: $_className');
-    print('   Content: $_upContent');
-    // For now, we'll skip actual execution
-  }
-
-  @override
-  Future<void> down(builder) async {
-    // This is a placeholder - in production you'd execute the actual migration code
-    print('↩️ Running DOWN migration: $_className');
-    print('   Content: $_downContent');
-    // For now, we'll skip actual execution
   }
 }

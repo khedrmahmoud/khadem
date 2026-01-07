@@ -370,7 +370,7 @@ void main() {
     test('returns DateTime as-is', () {
       final now = DateTime.now();
       expect(caster.get(now), equals(now));
-      
+
       final formatted = caster.set(now);
       expect(formatted, isA<String>());
       // Check format YYYY-MM-DD HH:MM:SS

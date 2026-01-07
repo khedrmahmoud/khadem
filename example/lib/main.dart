@@ -1,7 +1,13 @@
 import 'dart:async';
 
 import 'package:khadem/khadem.dart'
-    show Khadem, ContainerInterface, SocketServer, Server, SocketManager, SocketConfig;
+    show
+        Khadem,
+        ContainerInterface,
+        SocketServer,
+        Server,
+        SocketManager,
+        SocketConfig;
 
 import '../core/kernel.dart';
 import '../routes/socket.dart';
@@ -42,7 +48,8 @@ Future<void> _startSocketServer(
   SocketManager manager,
 ) async {
   final socketPort = _extractPort("socket_port", defaultValue: 8080);
-  final socketServer = SocketServer(SocketConfig(port: socketPort), manager: manager);
+  final socketServer =
+      SocketServer(SocketConfig(port: socketPort), manager: manager);
   // Inject socket routes
   registerSocketRoutes(socketServer);
 

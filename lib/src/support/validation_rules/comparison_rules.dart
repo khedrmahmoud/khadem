@@ -14,10 +14,10 @@ class DifferentRule extends Rule {
 
     final otherField = args[0];
     if (!data.containsKey(otherField)) {
-       // If other field is missing, strictly it relies on how we define "different".
-       // Laravel: "The given field must be different than the field under validation."
-       // If other field is null/missing, and this field is not null, they are different.
-       return true;
+      // If other field is missing, strictly it relies on how we define "different".
+      // Laravel: "The given field must be different than the field under validation."
+      // If other field is null/missing, and this field is not null, they are different.
+      return true;
     }
 
     final otherValue = data[otherField];
@@ -63,7 +63,7 @@ class AcceptedRule extends Rule {
   FutureOr<bool> passes(ValidationContext context) {
     final value = context.value;
     if (value == null) return false;
-    
+
     final acceptedValues = ['yes', 'on', '1', 1, true, 'true'];
     if (value is String) {
       return acceptedValues.contains(value.toLowerCase());

@@ -14,14 +14,14 @@ void main() {
       expect(registry.coreCommands, isNotEmpty);
       expect(registry.customCommands, isEmpty);
 
-      // Test auto-discovery (this will load the package name internally)
+      // Test auto-discovery (no-op after dart:mirrors removal)
       await registry.autoDiscoverCommands(Directory.current.path);
 
       // The package name should be loaded and used correctly
       // We can't directly test the private field, but we can verify the system works
       expect(
         registry.commands.length,
-        greaterThanOrEqualTo(registry.coreCommands.length),
+        equals(registry.coreCommands.length),
       );
     });
 
@@ -34,6 +34,29 @@ void main() {
 
       // This should not throw an exception
       await registry.autoDiscoverCommands(Directory.current.path);
+    });
+  });
+
+  group('CommandRegistry Core Commands', () {
+    test('should not duplicate core commands across registry instances', () {
+      final logger = Logger();
+      final registryA = CommandRegistry(logger);
+      final registryB = CommandRegistry(logger);
+
+      expect(
+          registryA.coreCommands.length, equals(registryB.coreCommands.length),);
+      expect(
+        registryA.coreCommands.map((c) => c.name).toSet().length,
+        equals(registryA.coreCommands.length),
+      );
+    });
+
+    test('should suggest close command names', () {
+      final logger = Logger();
+      final registry = CommandRegistry(logger);
+
+      final suggestions = registry.suggestCommands('verion');
+      expect(suggestions, contains('version'));
     });
   });
 }

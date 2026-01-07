@@ -118,7 +118,9 @@ class MySQLConnection implements DatabaseConnection {
   }
 
   Future<DatabaseResponse> _executeInternal(
-      String sql, List<dynamic> bindings,) async {
+    String sql,
+    List<dynamic> bindings,
+  ) async {
     final results = await _connection!.query(sql, bindings);
 
     return DatabaseResponse(

@@ -10,11 +10,14 @@ void main() {
     });
 
     test('add should store value only if key does not exist', () async {
-      expect(await driver.add('key', 'value', const Duration(minutes: 1)), isTrue);
+      expect(
+          await driver.add('key', 'value', const Duration(minutes: 1)), isTrue,);
       expect(await driver.get('key'), equals('value'));
 
       expect(
-          await driver.add('key', 'new_value', const Duration(minutes: 1)), isFalse,);
+        await driver.add('key', 'new_value', const Duration(minutes: 1)),
+        isFalse,
+      );
       expect(await driver.get('key'), equals('value'));
     });
 
@@ -29,10 +32,13 @@ void main() {
     });
 
     test('putMany should store multiple values', () async {
-      await driver.putMany({
-        'key1': 'value1',
-        'key2': 'value2',
-      }, const Duration(minutes: 1),);
+      await driver.putMany(
+        {
+          'key1': 'value1',
+          'key2': 'value2',
+        },
+        const Duration(minutes: 1),
+      );
 
       expect(await driver.get('key1'), equals('value1'));
       expect(await driver.get('key2'), equals('value2'));

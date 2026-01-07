@@ -1,6 +1,5 @@
 import 'package:khadem/khadem.dart';
 
-
 /// A utility class for eager loading database relations in the Khadem ORM.
 ///
 /// This class provides functionality to load related models efficiently by parsing

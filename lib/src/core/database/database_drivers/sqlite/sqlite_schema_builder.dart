@@ -15,7 +15,7 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
 
     final columnSQLs = blueprint.columns.map(_columnToSQL).toList();
     final constraints = _generateTableConstraints(blueprint.columns, tableName);
-    
+
     final fullSQL = [
       ...columnSQLs,
       ...constraints,
@@ -26,7 +26,8 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
     // Add Indexes
     for (final column in blueprint.columns) {
       if (column.isIndexed) {
-        _queries.add('CREATE INDEX "${tableName}_${column.name}_index" ON "$tableName" ("${column.name}");');
+        _queries.add(
+            'CREATE INDEX "${tableName}_${column.name}_index" ON "$tableName" ("${column.name}");',);
       }
     }
   }
@@ -41,7 +42,7 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
 
     final columnSQLs = blueprint.columns.map(_columnToSQL).toList();
     final constraints = _generateTableConstraints(blueprint.columns, tableName);
-    
+
     final fullSQL = [
       ...columnSQLs,
       ...constraints,
@@ -52,7 +53,8 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
     // Add Indexes
     for (final column in blueprint.columns) {
       if (column.isIndexed) {
-        _queries.add('CREATE INDEX IF NOT EXISTS "${tableName}_${column.name}_index" ON "$tableName" ("${column.name}");');
+        _queries.add(
+            'CREATE INDEX IF NOT EXISTS "${tableName}_${column.name}_index" ON "$tableName" ("${column.name}");',);
       }
     }
   }
@@ -141,12 +143,12 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
       case 'BOOLEAN':
       case 'BOOL':
         return 'INTEGER';
-      
+
       case 'FLOAT':
       case 'DOUBLE':
       case 'REAL':
         return 'REAL';
-      
+
       case 'DECIMAL':
       case 'NUMERIC':
         if (column.precisionValue != null && column.scaleValue != null) {
@@ -158,7 +160,7 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
       case 'DATETIME':
       case 'TIMESTAMP':
       case 'TIME':
-        // SQLite doesn't have a dedicated date/time type. 
+        // SQLite doesn't have a dedicated date/time type.
         // TEXT, REAL, or INTEGER are used. We default to TEXT (ISO8601).
         return 'TEXT';
 
@@ -188,7 +190,8 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
 
   bool _isInteger(ColumnDefinition column) {
     final type = column.type.toUpperCase();
-    return ['INT', 'INTEGER', 'BIGINT', 'TINYINT', 'SMALLINT', 'MEDIUMINT'].contains(type);
+    return ['INT', 'INTEGER', 'BIGINT', 'TINYINT', 'SMALLINT', 'MEDIUMINT']
+        .contains(type);
   }
 
   String _compileDefault(ColumnDefinition column) {
@@ -197,7 +200,7 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
     }
 
     final value = column.defaultValue;
-    
+
     if (value == null) {
       return 'DEFAULT NULL';
     }
@@ -224,7 +227,8 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
   // Table Constraints
   // ===========================================================================
 
-  List<String> _generateTableConstraints(List<ColumnDefinition> columns, String tableName) {
+  List<String> _generateTableConstraints(
+      List<ColumnDefinition> columns, String tableName,) {
     final constraints = <String>[];
 
     for (final column in columns) {

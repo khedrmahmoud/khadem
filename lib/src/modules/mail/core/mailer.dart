@@ -174,8 +174,11 @@ class Mailer implements MailerInterface {
 
       return result;
     } catch (e, stack) {
-      throw MailException('Failed to send email',
-          originalError: e, stackTrace: stack,);
+      throw MailException(
+        'Failed to send email',
+        originalError: e,
+        stackTrace: stack,
+      );
     }
   }
 

@@ -44,7 +44,7 @@ class Migrator {
         await migration.up(schemaBuilder);
         await _executeSchemaQueries();
         await _markAsRan(migration.name, batch);
-        
+
         final duration = DateTime.now().difference(startTime).inMilliseconds;
         Khadem.logger.info('✅ Migrated:  ${migration.name} (${duration}ms)');
         count++;
@@ -101,16 +101,16 @@ class Migrator {
   Future<void> reset() async {
     Khadem.logger.warning('⚠️ Resetting all migrations...');
     final ran = await _ranMigrations();
-    
+
     // Rollback in reverse order
     for (final name in ran.reversed) {
-        final migration = _findMigration(name);
-        Khadem.logger.info('⚙️ Rolling back: $name');
-        await migration.down(schemaBuilder);
-        await _executeSchemaQueries();
-        await _removeFromRan(name);
+      final migration = _findMigration(name);
+      Khadem.logger.info('⚙️ Rolling back: $name');
+      await migration.down(schemaBuilder);
+      await _executeSchemaQueries();
+      await _removeFromRan(name);
     }
-    
+
     Khadem.logger.info('✅ Database reset completed.');
   }
 
@@ -124,7 +124,8 @@ class Migrator {
 
   /// Drop all tables and re-run migrations.
   Future<void> fresh() async {
-    Khadem.logger.warning('🧨 Dropping all tables and re-running migrations...');
+    Khadem.logger
+        .warning('🧨 Dropping all tables and re-running migrations...');
     await _dropAllTables();
     await _ensureMigrationTable();
     await upAll();
@@ -134,23 +135,27 @@ class Migrator {
   Future<void> status() async {
     await _ensureDatabaseExists();
     await _ensureMigrationTable();
-    
+
     final ran = await _getRanMigrationsWithDetails();
     final ranNames = ran.map((m) => m['name'] as String).toSet();
 
     Khadem.logger.info('\n📊 Migration Status:');
     Khadem.logger.info('--------------------------------------------------');
-    Khadem.logger.info('| Status   | Migration Name                           | Batch |');
+    Khadem.logger.info(
+        '| Status   | Migration Name                           | Batch |',);
     Khadem.logger.info('--------------------------------------------------');
 
     for (final migration in _migrations) {
       final isRan = ranNames.contains(migration.name);
       final status = isRan ? '✅ Ran  ' : '❌ Pending';
-      final batch = isRan 
-          ? ran.firstWhere((m) => m['name'] == migration.name)['batch'].toString() 
+      final batch = isRan
+          ? ran
+              .firstWhere((m) => m['name'] == migration.name)['batch']
+              .toString()
           : '-';
-      
-      Khadem.logger.info('| $status | ${migration.name.padRight(36)} | ${batch.padRight(5)} |');
+
+      Khadem.logger.info(
+          '| $status | ${migration.name.padRight(36)} | ${batch.padRight(5)} |',);
     }
     Khadem.logger.info('--------------------------------------------------\n');
   }
@@ -253,7 +258,7 @@ class Migrator {
       final response = await connection.execute(
         "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
       );
-      
+
       final tables = response.data;
       if (tables != null) {
         for (final row in tables) {
@@ -269,7 +274,7 @@ class Migrator {
   Future<void> _executeSchemaQueries() async {
     final queries = List<String>.from(schemaBuilder.queries);
     schemaBuilder.queries.clear();
-    
+
     for (final sql in queries) {
       // Khadem.logger.info('📥 Executing: $sql');
       await manager.connection().execute(sql);

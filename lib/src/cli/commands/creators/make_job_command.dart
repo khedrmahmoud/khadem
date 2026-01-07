@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import '../../bus/command.dart';
+import '../../utils/cli_naming.dart';
 
 class MakeJobCommand extends KhademCommand {
   MakeJobCommand({required super.logger}) {
@@ -25,25 +26,20 @@ class MakeJobCommand extends KhademCommand {
       logger.error(
         '❌ Usage: khadem make:job --name=JobName or --name=folder/JobName',
       );
-      exit(1);
+      exitCode = 1;
+      return;
     }
 
-    // Parse folder and job name
-    final parts = name.split('/');
-    String folder = '';
-    String jobName = parts.last;
-
-    if (parts.length > 1) {
-      folder = parts.sublist(0, parts.length - 1).join('/');
-    }
+    final parts = CliNaming.splitFolderAndName(name);
+    final folder = parts.folder;
+    var jobName = parts.name;
 
     // Ensure job name ends with 'Job'
-    if (!jobName.endsWith('Job')) {
-      jobName = '${jobName}Job';
-    }
+    jobName = CliNaming.ensureSuffix(CliNaming.toPascalCase(jobName), 'Job');
 
-    final className = _capitalize(jobName);
-    final fileName = '${_snakeCase(jobName.replaceAll('Job', ''))}_job.dart';
+    final className = jobName;
+    final fileName =
+        '${CliNaming.toSnakeCase(jobName.replaceAll('Job', ''))}_job.dart';
     final relativePath = folder.isEmpty
         ? 'lib/app/jobs/$fileName'
         : 'lib/app/jobs/$folder/$fileName';
@@ -55,19 +51,8 @@ class MakeJobCommand extends KhademCommand {
     );
 
     logger.info('✅ Job "$className" created at "$relativePath"');
-    exit(0);
-  }
-
-  String _capitalize(String input) =>
-      input.isEmpty ? input : input[0].toUpperCase() + input.substring(1);
-
-  String _snakeCase(String input) {
-    return input
-        .replaceAllMapped(
-          RegExp(r'[A-Z]'),
-          (match) => '_${match.group(0)!.toLowerCase()}',
-        )
-        .replaceFirst(RegExp(r'^_'), '');
+    exitCode = 0;
+    return;
   }
 
   String _jobStub(String className, String jobName, String folder) {

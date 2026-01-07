@@ -71,7 +71,9 @@ class EventDispatcher implements Dispatcher {
 
   /// Dispatches the event to a specific listener definition.
   Future<void> _dispatchToListener(
-      Event event, dynamic listenerDefinition,) async {
+    Event event,
+    dynamic listenerDefinition,
+  ) async {
     dynamic listener;
 
     if (listenerDefinition is Function) {

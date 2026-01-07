@@ -93,9 +93,9 @@ class ServerLifecycle {
           } catch (e, stackTrace) {
             final exceptionHandler = Khadem.make<ExceptionHandlerContract>();
             final result = await exceptionHandler.handle(e, stackTrace);
-            
+
             if (!res.sent) {
-               res.status(result.statusCode).problem(
+              res.status(result.statusCode).problem(
                 title: result.title,
                 status: result.statusCode,
                 detail: result.message,
@@ -103,7 +103,8 @@ class ServerLifecycle {
                 instance: result.instance,
                 extensions: {
                   if (result.details != null) 'details': result.details,
-                  if (result.stackTrace != null) 'stack_trace': result.stackTrace.toString(),
+                  if (result.stackTrace != null)
+                    'stack_trace': result.stackTrace.toString(),
                   ...result.extensions,
                 },
               );

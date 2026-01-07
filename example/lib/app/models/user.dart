@@ -14,7 +14,6 @@ class User extends KhademModel<User> with Timestamps {
         'updated_at': DateTime,
       };
 
-  
   @override
   List<String> get fillable =>
       ['name', 'email', 'password', 'created_at', 'updated_at'];

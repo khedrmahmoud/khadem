@@ -163,7 +163,7 @@ class SubsetRule extends Rule {
   FutureOr<bool> passes(ValidationContext context) {
     final value = context.value;
     final args = context.parameters;
-    
+
     if (value == null || args.isEmpty) return false;
     if (value is! List) return false;
 

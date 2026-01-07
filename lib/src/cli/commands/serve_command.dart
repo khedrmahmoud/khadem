@@ -13,6 +13,7 @@ class ServeCommand extends KhademCommand {
   StreamSubscription? _watcherSubscription;
   StreamSubscription? _stdinSubscription;
   Timer? _debounceTimer;
+  Completer<void>? _done;
 
   bool _isRestarting = false;
   bool _isShuttingDown = false;
@@ -42,6 +43,8 @@ class ServeCommand extends KhademCommand {
   Future<void> handle(List<String> args) async {
     logger.info('🚀 Starting Khadem development server...');
 
+    _done ??= Completer<void>();
+
     await _startServer();
 
     // Set up file watcher for auto-reload
@@ -53,7 +56,7 @@ class ServeCommand extends KhademCommand {
     _setupStdinListener();
 
     // Keep the command alive
-    await Completer<void>().future;
+    await _done!.future;
   }
 
   Future<void> _startServer() async {
@@ -146,9 +149,28 @@ class ServeCommand extends KhademCommand {
 
     logger.info('💡 Commands: [r] reload | [f] full restart | [q] quit');
 
-    // Use line-based input (works everywhere, just press Enter after command)
-    stdin.lineMode = true;
-    stdin.echoMode = true;
+    // Always allow Ctrl+C to stop, even when stdin isn't usable.
+    ProcessSignal.sigint.watch().listen((_) {
+      _shutdown();
+    });
+
+    // When running without a real TTY (common on Windows or when piped),
+    // touching stdin lineMode/echoMode can throw (handle is invalid).
+    if (!stdin.hasTerminal) {
+      logger.info('ℹ️ Interactive stdin disabled (no terminal detected).');
+      logger.info('   Use Ctrl+C to stop the server.');
+      return;
+    }
+
+    // Use line-based input (press Enter after command)
+    try {
+      stdin.lineMode = true;
+      stdin.echoMode = true;
+    } on StdinException catch (e) {
+      logger.warning('⚠️ Interactive stdin disabled: $e');
+      logger.info('   Use Ctrl+C to stop the server.');
+      return;
+    }
 
     _stdinSubscription = stdin
         .transform(utf8.decoder)
@@ -244,6 +266,9 @@ class ServeCommand extends KhademCommand {
     _vmService?.dispose();
     _serverProcess?.kill();
 
-    exit(0);
+    exitCode = 0;
+    if (_done != null && !_done!.isCompleted) {
+      _done!.complete();
+    }
   }
 }

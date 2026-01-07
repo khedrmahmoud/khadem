@@ -133,7 +133,8 @@ class RuleBuilder {
 
   // --- Database Rules ---
 
-  RuleBuilder unique(String table, {String? column, dynamic ignoreId, String ignoreColumn = 'id'}) {
+  RuleBuilder unique(String table,
+      {String? column, dynamic ignoreId, String ignoreColumn = 'id',}) {
     _rules.add(UniqueRule(table, column, ignoreId, ignoreColumn));
     return this;
   }
@@ -167,13 +168,15 @@ class RuleBuilder {
     bool requireNumbers = true,
     bool requireSymbols = true,
   }) {
-    _rules.add(PasswordRule(
-      minLength: minLength,
-      requireUppercase: requireUppercase,
-      requireLowercase: requireLowercase,
-      requireNumbers: requireNumbers,
-      requireSymbols: requireSymbols,
-    ),);
+    _rules.add(
+      PasswordRule(
+        minLength: minLength,
+        requireUppercase: requireUppercase,
+        requireLowercase: requireLowercase,
+        requireNumbers: requireNumbers,
+        requireSymbols: requireSymbols,
+      ),
+    );
     return this;
   }
 }

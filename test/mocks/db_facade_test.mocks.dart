@@ -15,10 +15,16 @@ class MockConnection extends Mock implements DatabaseConnection {
   bool get isConnected => true;
 
   @override
-  QueryBuilderInterface<T> queryBuilder<T>(String table,
-      {T Function(Map<String, dynamic>)? modelFactory,}) {
-    return QueryBuilder<T>(this, MySQLGrammar(), table,
-        modelFactory: modelFactory,);
+  QueryBuilderInterface<T> queryBuilder<T>(
+    String table, {
+    T Function(Map<String, dynamic>)? modelFactory,
+  }) {
+    return QueryBuilder<T>(
+      this,
+      MySQLGrammar(),
+      table,
+      modelFactory: modelFactory,
+    );
   }
 
   @override
@@ -36,9 +42,11 @@ class MockDatabaseManager extends Mock implements DatabaseManager {
   }
 
   @override
-  QueryBuilderInterface<T> table<T>(String tableName,
-      {T Function(Map<String, dynamic>)? modelFactory,
-      String? connectionName,}) {
+  QueryBuilderInterface<T> table<T>(
+    String tableName, {
+    T Function(Map<String, dynamic>)? modelFactory,
+    String? connectionName,
+  }) {
     return _connection.queryBuilder(tableName, modelFactory: modelFactory);
   }
 }

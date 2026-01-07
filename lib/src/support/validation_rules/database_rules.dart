@@ -18,7 +18,8 @@ class UniqueRule extends Rule {
   final dynamic _ignoreId;
   final String _ignoreColumn;
 
-  UniqueRule([this._table, this._column, this._ignoreId, this._ignoreColumn = 'id']);
+  UniqueRule(
+      [this._table, this._column, this._ignoreId, this._ignoreColumn = 'id',]);
 
   @override
   String get signature => 'unique';
@@ -43,9 +44,15 @@ class UniqueRule extends Rule {
     // Parse string arguments if provided
     if (args.isNotEmpty) {
       tableName = args[0];
-      if (args.length > 1 && args[1].toUpperCase() != 'NULL') columnName = args[1];
-      if (args.length > 2 && args[2].toUpperCase() != 'NULL') ignoreIdValue = args[2];
-      if (args.length > 3 && args[3].toUpperCase() != 'NULL') ignoreColumnName = args[3];
+      if (args.length > 1 && args[1].toUpperCase() != 'NULL') {
+        columnName = args[1];
+      }
+      if (args.length > 2 && args[2].toUpperCase() != 'NULL') {
+        ignoreIdValue = args[2];
+      }
+      if (args.length > 3 && args[3].toUpperCase() != 'NULL') {
+        ignoreColumnName = args[3];
+      }
 
       // Extra where clauses: key,value pairs starting from index 4
       for (int i = 4; i < args.length; i += 2) {
@@ -64,7 +71,7 @@ class UniqueRule extends Rule {
 
     final db = DB.table(tableName);
     final dbColumn = columnName ?? field;
-    
+
     // Main unique check
     db.where(dbColumn, '=', value);
 
@@ -130,7 +137,9 @@ class ExistsRule extends Rule {
 
     if (args.isNotEmpty) {
       tableName = args[0];
-      if (args.length > 1 && args[1].toUpperCase() != 'NULL') columnName = args[1];
+      if (args.length > 1 && args[1].toUpperCase() != 'NULL') {
+        columnName = args[1];
+      }
 
       // Extra where clauses: key,value pairs starting from index 2
       for (int i = 2; i < args.length; i += 2) {
@@ -172,5 +181,3 @@ class ExistsRule extends Rule {
   @override
   String message(ValidationContext context) => 'exists_validation';
 }
-
-

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import '../../bus/command.dart';
+import '../../utils/cli_naming.dart';
 
 class MakeMiddlewareCommand extends KhademCommand {
   @override
@@ -21,30 +22,27 @@ class MakeMiddlewareCommand extends KhademCommand {
   @override
   Future<void> handle(List<String> args) async {
     final name = argResults?['name'] as String?;
-    if (name == null) {
+    if (name == null || name.trim().isEmpty) {
       logger.error(
         'Usage: khadem make:middleware --name=MiddlewareName or --name=folder/MiddlewareName',
       );
-      exit(1);
+      exitCode = 1;
+      return;
     }
 
-    // Parse folder and middleware name
-    final parts = name.split('/');
-    String folder = '';
-    String middlewareName = parts.last;
-
-    if (parts.length > 1) {
-      folder = parts.sublist(0, parts.length - 1).join('/');
-    }
+    final parts = CliNaming.splitFolderAndName(name);
+    final folder = parts.folder;
+    var middlewareName = parts.name;
 
     // Ensure middleware name ends with 'Middleware'
-    if (!middlewareName.endsWith('Middleware')) {
-      middlewareName = '${middlewareName}Middleware';
-    }
+    middlewareName = CliNaming.ensureSuffix(
+      CliNaming.toPascalCase(middlewareName),
+      'Middleware',
+    );
 
-    final className = _toPascalCase(middlewareName);
+    final className = middlewareName;
     final fileName =
-        '${_toSnakeCase(middlewareName.replaceAll('Middleware', ''))}_middleware.dart';
+        '${CliNaming.toSnakeCase(middlewareName.replaceAll('Middleware', ''))}_middleware.dart';
     final relativePath = folder.isEmpty
         ? 'lib/app/http/middleware/$fileName'
         : 'lib/app/http/middleware/$folder/$fileName';
@@ -53,7 +51,8 @@ class MakeMiddlewareCommand extends KhademCommand {
 
     if (file.existsSync()) {
       logger.error('❌ Middleware "$fileName" already exists!');
-      exit(1);
+      exitCode = 1;
+      return;
     }
 
     await file.create(recursive: true);
@@ -66,7 +65,8 @@ class MakeMiddlewareCommand extends KhademCommand {
     );
 
     logger.info('✅ Middleware "$className" created at "$relativePath"');
-    exit(0);
+    exitCode = 0;
+    return;
   }
 
   String _template(String className, String middlewareName, String folder) {
@@ -89,18 +89,5 @@ class $className implements Middleware {
   MiddlewarePriority get priority => MiddlewarePriority.normal;
 }
 ''';
-  }
-
-  String _toPascalCase(String input) {
-    return input
-        .split(RegExp(r'[_\s-]+'))
-        .map((word) => word[0].toUpperCase() + word.substring(1))
-        .join();
-  }
-
-  String _toSnakeCase(String input) {
-    return input
-        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]}_${m[2]}')
-        .toLowerCase();
   }
 }

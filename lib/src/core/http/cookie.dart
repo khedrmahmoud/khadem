@@ -230,23 +230,34 @@ class CookieManager {
       Cookies(request).get(name);
   static Map<String, String> getAllCookies(HttpRequest request) =>
       Cookies(request).all;
-  static void setCookie(HttpResponse response, String name, String value,
-          {String? domain,
-          String? path,
-          DateTime? expires,
-          Duration? maxAge,
-          bool httpOnly = false,
-          bool secure = false,
-          String? sameSite,}) =>
-      Cookies.response(response).set(name, value,
-          domain: domain,
-          path: path,
-          expires: expires,
-          maxAge: maxAge,
-          httpOnly: httpOnly,
-          secure: secure,
-          sameSite: sameSite,);
-  static void deleteCookie(HttpResponse response, String name,
-          {String? domain, String? path,}) =>
+  static void setCookie(
+    HttpResponse response,
+    String name,
+    String value, {
+    String? domain,
+    String? path,
+    DateTime? expires,
+    Duration? maxAge,
+    bool httpOnly = false,
+    bool secure = false,
+    String? sameSite,
+  }) =>
+      Cookies.response(response).set(
+        name,
+        value,
+        domain: domain,
+        path: path,
+        expires: expires,
+        maxAge: maxAge,
+        httpOnly: httpOnly,
+        secure: secure,
+        sameSite: sameSite,
+      );
+  static void deleteCookie(
+    HttpResponse response,
+    String name, {
+    String? domain,
+    String? path,
+  }) =>
       Cookies.response(response).delete(name, domain: domain, path: path);
 }

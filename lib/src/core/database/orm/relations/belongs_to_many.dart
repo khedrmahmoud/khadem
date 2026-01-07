@@ -25,8 +25,11 @@ class BelongsToMany<Related extends KhademModel<Related>, Parent>
   void addConstraints() {
     _performJoin();
     if ((parent as KhademModel).getAttribute(parentKey) != null) {
-      query.where('$table.$foreignPivotKey', '=',
-          (parent as KhademModel).getAttribute(parentKey),);
+      query.where(
+        '$table.$foreignPivotKey',
+        '=',
+        (parent as KhademModel).getAttribute(parentKey),
+      );
     }
   }
 
@@ -55,9 +58,10 @@ class BelongsToMany<Related extends KhademModel<Related>, Parent>
 
   @override
   QueryBuilderInterface<Related> getRelationExistenceQuery(
-      QueryBuilderInterface<Related> query,
-      QueryBuilderInterface<Parent> parentQuery,
-      [List<String> columns = const ['*'],]) {
+    QueryBuilderInterface<Related> query,
+    QueryBuilderInterface<Parent> parentQuery, [
+    List<String> columns = const ['*'],
+  ]) {
     _performJoin(query);
 
     final parentTable = parentQuery.table;
@@ -84,7 +88,10 @@ class BelongsToMany<Related extends KhademModel<Related>, Parent>
 
   @override
   List<KhademModel> match(
-      List<KhademModel> models, List<Related> results, String relation,) {
+    List<KhademModel> models,
+    List<Related> results,
+    String relation,
+  ) {
     // This is tricky because we need the pivot data to match.
     // In a real implementation, we would select the pivot columns as well.
     // For now, we assume the pivot data is available or we re-query (which is inefficient).

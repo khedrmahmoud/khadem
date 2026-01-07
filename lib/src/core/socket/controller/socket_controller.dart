@@ -4,7 +4,6 @@ import '../../../contracts/socket/socket_event_handler.dart';
 import '../channel/socket_channel.dart';
 import '../routing/socket_router.dart';
 import '../socket_context.dart';
- 
 
 /// Base class for WebSocket controllers.
 ///
@@ -22,7 +21,6 @@ abstract class SocketController {
   /// This is only available during the execution of an event handler.
   SocketContext get context => SocketContext.current;
 
-
   /// Internal method to register the controller with the router.
   void register(SocketRouter router) {
     _channel = router.channel(namespace);
@@ -31,7 +29,7 @@ abstract class SocketController {
   }
 
   /// Initialize event handlers.
-  /// 
+  ///
   /// Override this method to register your event listeners using [on] or [onData].
   void init();
 
@@ -41,9 +39,10 @@ abstract class SocketController {
   }
 
   /// Register a typed event handler.
-  /// 
+  ///
   /// [T] is the expected type of the data payload.
-  void onData<T>(String event, FutureOr<void> Function(SocketContext context, T data) handler) {
+  void onData<T>(String event,
+      FutureOr<void> Function(SocketContext context, T data) handler,) {
     _channel.on(event, (context) => handler(context, context.payload<T>()));
   }
 
@@ -73,7 +72,8 @@ abstract class SocketController {
   }
 
   /// Validate the payload against rules.
-  void validate(Map<String, String> rules, {Map<String, String> messages = const {}}) {
+  void validate(Map<String, String> rules,
+      {Map<String, String> messages = const {},}) {
     context.validate(rules, messages: messages);
   }
 }

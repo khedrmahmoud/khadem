@@ -1,6 +1,7 @@
 import '../../application/khadem.dart';
 import '../../core/socket/socket_client.dart';
 import '../../core/socket/socket_manager.dart';
+
 /// Facade for the Socket system.
 ///
 /// Provides static helpers to interact with the framework's socket manager
@@ -30,21 +31,38 @@ class Socket {
   }
 
   /// Broadcast an event to all clients in a room.
-  static void broadcastToRoom(String room, String event, dynamic data,
-      {String? namespace,}) {
+  static void broadcastToRoom(
+    String room,
+    String event,
+    dynamic data, {
+    String? namespace,
+  }) {
     _manager.broadcastToRoom(room, event, data, namespace: namespace);
   }
 
   /// Broadcast an event to all clients in a room except specific ones.
   static void broadcastToRoomExcept(
-      String room, String event, dynamic data, Set<String> excludedClientIds,
-      {String? namespace,}) {
-    _manager.broadcastToRoomExcept(room, event, data, excludedClientIds,
-        namespace: namespace,);
+    String room,
+    String event,
+    dynamic data,
+    Set<String> excludedClientIds, {
+    String? namespace,
+  }) {
+    _manager.broadcastToRoomExcept(
+      room,
+      event,
+      data,
+      excludedClientIds,
+      namespace: namespace,
+    );
   }
 
   /// Broadcast an event to all clients who have subscribed to it.
-  static void broadcast(String event, dynamic data, {String? namespace,}) {
+  static void broadcast(
+    String event,
+    dynamic data, {
+    String? namespace,
+  }) {
     _manager.broadcast(event, data, namespace: namespace);
   }
 

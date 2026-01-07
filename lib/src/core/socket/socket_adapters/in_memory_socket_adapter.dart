@@ -56,8 +56,12 @@ class InMemorySocketAdapter implements SocketAdapter {
   }
 
   @override
-  void broadcastToRoom(String room, String event, dynamic data,
-      {String? namespace,}) {
+  void broadcastToRoom(
+    String room,
+    String event,
+    dynamic data, {
+    String? namespace,
+  }) {
     if (!hasRoom(room)) return;
     for (final client in _rooms[room]!) {
       client.send(event, data, namespace: namespace);
@@ -66,8 +70,12 @@ class InMemorySocketAdapter implements SocketAdapter {
 
   @override
   void broadcastToRoomExcept(
-      String room, String event, dynamic data, Set<String> excludedClientIds,
-      {String? namespace,}) {
+    String room,
+    String event,
+    dynamic data,
+    Set<String> excludedClientIds, {
+    String? namespace,
+  }) {
     if (!hasRoom(room)) return;
     for (final client in _rooms[room]!) {
       if (!excludedClientIds.contains(client.id)) {

@@ -24,7 +24,8 @@ class ExceptionHandler implements ExceptionHandlerContract {
   bool _includeStackTracesInResponse = false;
 
   /// Registry of custom exception handlers
-  final Map<Type, Future<ErrorResult> Function(dynamic, StackTrace?)> _handlers = {};
+  final Map<Type, Future<ErrorResult> Function(dynamic, StackTrace?)>
+      _handlers = {};
 
   /// Configure exception handling settings
   void configure({
@@ -88,7 +89,9 @@ class ExceptionHandler implements ExceptionHandlerContract {
       type: error.type,
       instance: error.instance,
       details: includeDetails ? error.details : null,
-      stackTrace: (_showDetailedErrors && _includeStackTracesInResponse) ? stackTrace : null,
+      stackTrace: (_showDetailedErrors && _includeStackTracesInResponse)
+          ? stackTrace
+          : null,
     );
   }
 
@@ -103,7 +106,9 @@ class ExceptionHandler implements ExceptionHandlerContract {
       message: _showDetailedErrors
           ? error.toString()
           : 'An unexpected error occurred.',
-      stackTrace: (_showDetailedErrors && _includeStackTracesInResponse) ? stackTrace : null,
+      stackTrace: (_showDetailedErrors && _includeStackTracesInResponse)
+          ? stackTrace
+          : null,
     );
   }
 

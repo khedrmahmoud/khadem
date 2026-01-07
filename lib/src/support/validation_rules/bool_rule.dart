@@ -14,8 +14,8 @@ class BoolRule extends Rule {
     if (value is bool) return true;
     if (value is num) return value == 0 || value == 1;
     if (value is String) {
-        final lower = value.toLowerCase();
-        return ['true', 'false', '1', '0'].contains(lower);
+      final lower = value.toLowerCase();
+      return ['true', 'false', '1', '0'].contains(lower);
     }
     return false;
   }

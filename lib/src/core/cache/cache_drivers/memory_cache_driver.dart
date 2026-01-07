@@ -155,8 +155,11 @@ class MemoryCacheDriver implements CacheDriver {
     final int currentValue =
         (value is int) ? value : int.tryParse(value.toString()) ?? 0;
     final newValue = currentValue + amount;
-    await put(key, newValue,
-        const Duration(days: 365 * 100),); // Long TTL for counters usually
+    await put(
+      key,
+      newValue,
+      const Duration(days: 365 * 100),
+    ); // Long TTL for counters usually
     return newValue;
   }
 

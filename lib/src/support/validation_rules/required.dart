@@ -12,7 +12,7 @@ class RequiredRule extends Rule {
   FutureOr<bool> passes(ValidationContext context) {
     final value = context.value;
     if (value == null) return false;
-    
+
     if (value is String) return value.trim().isNotEmpty;
     if (value is Iterable) return value.isNotEmpty;
     if (value is Map) return value.isNotEmpty;

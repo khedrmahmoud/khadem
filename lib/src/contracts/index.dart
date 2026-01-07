@@ -224,4 +224,3 @@ export 'validation/rule.dart';
 // 📦 Directive_contract.dart
 // ========================
 export 'views/directive_contract.dart';
-

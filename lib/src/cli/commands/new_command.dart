@@ -16,22 +16,12 @@ class NewCommand extends KhademCommand {
   }
 
   @override
-  Future<void> run() async {
-    try {
-      await handle(argResults!.arguments);
-    } catch (e, stack) {
-      logger.error('❌ Command failed: $e');
-      logger.debug(stack.toString());
-    }
-    exit(exitCode);
-  }
-
-  @override
   Future<void> handle(List<String> args) async {
     final projectName = argResults?['name'] as String?;
     if (projectName == null) {
       logger.error('Usage: khadem new --name=<project_name>');
-      exit(1);
+      exitCode = 1;
+      return;
     }
 
     final targetPath =
@@ -40,7 +30,8 @@ class NewCommand extends KhademCommand {
     // Check if target directory already exists
     if (Directory(targetPath).existsSync()) {
       logger.error('❌ Directory "$projectName" already exists');
-      exit(1);
+      exitCode = 1;
+      return;
     }
 
     logger.info('📁 Creating new project: $projectName');
@@ -53,6 +44,9 @@ class NewCommand extends KhademCommand {
       // Clean up git directory
       await _cleanupGitDirectory(targetPath);
 
+      // Remove template license file (projects should provide their own)
+      await _cleanupLicenseFiles(targetPath);
+
       // Replace placeholders in files
       await _replaceProjectPlaceholders(Directory(targetPath), projectName);
 
@@ -61,14 +55,16 @@ class NewCommand extends KhademCommand {
 
       logger.info('✅ Project "$projectName" created successfully!');
       logger.info('👉 Next: cd $projectName && dart pub get');
-      exit(0);
+      exitCode = 0;
+      return;
     } catch (e) {
       logger.error('❌ Failed to create project: $e');
       // Clean up partial directory if it exists
       if (Directory(targetPath).existsSync()) {
         await Directory(targetPath).delete(recursive: true);
       }
-      exit(1);
+      exitCode = 1;
+      return;
     }
   }
 
@@ -93,6 +89,28 @@ class NewCommand extends KhademCommand {
     if (gitDir.existsSync()) {
       await gitDir.delete(recursive: true);
       logger.info('🧹 Cleaned up git directory');
+    }
+  }
+
+  Future<void> _cleanupLicenseFiles(String projectPath) async {
+    final candidates = <String>[
+      'LICENSE',
+      'LICENSE.md',
+      'LICENCE',
+      'LICENCE.md',
+    ];
+
+    var deleted = 0;
+    for (final name in candidates) {
+      final file = File(p.join(projectPath, name));
+      if (file.existsSync()) {
+        await file.delete();
+        deleted++;
+      }
+    }
+
+    if (deleted > 0) {
+      logger.info('🧹 Removed template license file(s)');
     }
   }
 

@@ -1,40 +1,42 @@
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
-import 'package:khadem/src/cli/command_registry.dart';
-import 'package:khadem/src/cli/commands/version_command.dart';
-import 'package:khadem/src/core/logging/logger.dart';
-import 'package:khadem/src/core/logging/logging_writers/console_writer.dart';
+import 'package:khadem/src/cli/cli_entry.dart';
 
 void main(List<String> args) async {
-  final logger = Logger();
-  logger.addHandler(ConsoleLogHandler());
-
-  // Handle --version flag before command runner
-  if (args.contains('--version') || args.contains('-v')) {
-    final versionCommand = VersionCommand(logger: logger);
-    await versionCommand.handle([]);
-    exit(0);
+  if (args.length == 1 &&
+      (args.first == '--version' || args.first == '-v' || args.first == '-V')) {
+    exitCode = await runKhademCli(args);
+    return;
   }
 
-  final registry = CommandRegistry(logger);
-
-  // Auto-discover custom commands from the current project
-  final currentDir = Directory.current.path;
-  await registry.autoDiscoverCommands(currentDir);
-
-  final runner = CommandRunner('khadem', 'Khadem Dart CLI');
-
-  // Add all commands (core + custom)
-  for (final command in registry.commands) {
-    runner.addCommand(command);
+  if (args.isNotEmpty && args.first == 'cli:install') {
+    exitCode = await runKhademCli(args);
+    return;
   }
 
-  try {
-    await runner.run(args);
-  } catch (e) {
-    logger.error('❌ Error: $e');
-    exit(1);
+  // If a project has a local CLI runner, delegate to it.
+  // This is the only reliable way to execute/reflect project code (Kernel,
+  // config registries, seeders, etc.) because Dart cannot mirror code that
+  // is not imported into the running program.
+  const delegateEnv = 'KHADEM_CLI_DELEGATED';
+  if (Platform.environment[delegateEnv] != '1') {
+    final delegate = File('bin/khadem_cli.dart');
+    if (await delegate.exists()) {
+      final result = await Process.run(
+        'dart',
+        ['run', 'bin/khadem_cli.dart', ...args],
+        environment: {
+          ...Platform.environment,
+          delegateEnv: '1',
+        },
+      );
+
+      stdout.write(result.stdout);
+      stderr.write(result.stderr);
+      exitCode = result.exitCode;
+      return;
+    }
   }
-  exit(0);
+
+  exitCode = await runKhademCli(args);
 }

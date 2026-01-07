@@ -42,8 +42,12 @@ class _MockConnection implements DatabaseConnection {
     String table, {
     T Function(Map<String, dynamic>)? modelFactory,
   }) {
-    return QueryBuilder<T>(this, MySQLGrammar(), table,
-        modelFactory: modelFactory,);
+    return QueryBuilder<T>(
+      this,
+      MySQLGrammar(),
+      table,
+      modelFactory: modelFactory,
+    );
   }
 
   @override
@@ -690,8 +694,10 @@ void main() {
       final sql = queryBuilder.toSql();
 
       // Verify SQL structure
-      expect(sql,
-          startsWith('SELECT DISTINCT `id`, `name`, `email`, `created_at`'),);
+      expect(
+        sql,
+        startsWith('SELECT DISTINCT `id`, `name`, `email`, `created_at`'),
+      );
       expect(sql, contains('FROM `users`'));
       expect(sql, contains('WHERE'));
       expect(sql, contains('ORDER BY `created_at` DESC'));

@@ -56,13 +56,15 @@ class DatabaseManager {
 
     if (config == null) {
       throw DatabaseException(
-          'Database connection [' + name + '] not configured',);
+        'Database connection [' + name + '] not configured',
+      );
     }
 
     final driver = config['driver'] as String?;
     if (driver == null) {
       throw DatabaseException(
-          'Driver not specified for connection [' + name + ']',);
+        'Driver not specified for connection [' + name + ']',
+      );
     }
 
     switch (driver) {

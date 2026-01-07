@@ -1,5 +1,7 @@
 import 'package:khadem/src/cli/bus/command.dart';
 
+import '../../support/utils/package_metadata.dart';
+
 class VersionCommand extends KhademCommand {
   @override
   String get name => 'version';
@@ -11,20 +13,16 @@ class VersionCommand extends KhademCommand {
 
   @override
   Future<void> handle(List<String> args) async {
-    // Static version information
-    const version = '1.2.0-beta';
-
-    const documentation = 'https://khadem-framework.github.io/khadem-docs/';
-    const releaseDate = 'September 2025';
-    const sdkConstraint = '>=3.0.0';
+    final metadata = KhademPackageMetadataLoader.loadSync();
 
     logger.info('🚀 Khadem Framework CLI');
-    logger.info('📦 Version: $version');
-    logger.info('🎯 Dart SDK: Compatible with Dart $sdkConstraint');
-    logger.info('📅 Release Date: $releaseDate');
+    logger.info('📦 Version: ${metadata.version}');
+    logger.info('🎯 Dart SDK: ${metadata.sdkConstraint}');
+    logger.info('📅 Release Date: ${metadata.releaseDate}');
+    logger.info('👨‍💻 Developed by: ${metadata.author}');
 
     logger.info('');
     logger.info('💡 For help, run: khadem --help');
-    logger.info('📚 Documentation: $documentation');
+    logger.info('📚 Documentation: ${metadata.documentation}');
   }
 }

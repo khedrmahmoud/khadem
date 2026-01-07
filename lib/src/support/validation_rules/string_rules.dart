@@ -143,7 +143,9 @@ class PasswordRule extends Rule {
     if (requireUppercase && !value.contains(RegExp(r'[A-Z]'))) return false;
     if (requireLowercase && !value.contains(RegExp(r'[a-z]'))) return false;
     if (requireNumbers && !value.contains(RegExp(r'[0-9]'))) return false;
-    if (requireSymbols && !value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) return false;
+    if (requireSymbols && !value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      return false;
+    }
 
     return true;
   }
@@ -152,7 +154,7 @@ class PasswordRule extends Rule {
   String message(ValidationContext context) {
     final value = context.value;
     if (value == null || value is! String) return 'password_validation';
-    
+
     if (value.length < minLength) return 'password_length_validation';
     if (requireUppercase && !value.contains(RegExp(r'[A-Z]'))) {
       return 'password_uppercase_validation';
@@ -181,9 +183,9 @@ class DigitsRule extends Rule {
     final value = context.value;
     final args = context.parameters;
     if (value == null || args.isEmpty) return false;
-    
+
     final strVal = value.toString();
-    
+
     final length = int.tryParse(args[0]);
     if (length == null) return false;
 
@@ -222,4 +224,3 @@ class DigitsBetweenRule extends Rule {
   @override
   String message(ValidationContext context) => 'digits_between_validation';
 }
-

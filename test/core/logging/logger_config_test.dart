@@ -73,7 +73,11 @@ void main() {
               'level': 'debug',
               'days': 14,
             },
-            'console': {'driver': 'console', 'level': 'debug', 'colorize': true},
+            'console': {
+              'driver': 'console',
+              'level': 'debug',
+              'colorize': true,
+            },
           },
         },
       };

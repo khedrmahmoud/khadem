@@ -16,7 +16,7 @@ class InRule extends Rule {
 
     final args = context.parameters;
     final options = _values?.map((e) => e.toString()).toList() ?? args;
-    
+
     return options.contains(value.toString());
   }
 

@@ -81,7 +81,7 @@ class CoreServiceProvider extends ServiceProvider {
       final assetUrl =
           appConfig['asset_url'] as String? ?? env.get('ASSET_URL');
       final forceHttps = appConfig['force_https'] as bool? ??
-          env.getBool('FORCE_HTTPS', defaultValue: false);
+          env.getBool('FORCE_HTTPS');
 
       final urlService = UrlService(
         assetBaseUrl: assetUrl,

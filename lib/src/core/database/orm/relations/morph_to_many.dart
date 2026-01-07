@@ -36,9 +36,10 @@ class MorphToMany<Related extends KhademModel<Related>, Parent>
 
   @override
   QueryBuilderInterface<Related> getRelationExistenceQuery(
-      QueryBuilderInterface<Related> query,
-      QueryBuilderInterface<Parent> parentQuery,
-      [List<String> columns = const ['*'],]) {
+    QueryBuilderInterface<Related> query,
+    QueryBuilderInterface<Parent> parentQuery, [
+    List<String> columns = const ['*'],
+  ]) {
     final q = super.getRelationExistenceQuery(query, parentQuery, columns);
     return q.where('$table.$morphTypeField', '=', morphClass);
   }

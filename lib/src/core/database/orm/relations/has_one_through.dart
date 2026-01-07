@@ -33,7 +33,10 @@ class HasOneThrough<Related extends KhademModel<Related>, Parent>
 
   @override
   List<KhademModel> match(
-      List<KhademModel> models, List<Related> results, String relation,) {
+    List<KhademModel> models,
+    List<Related> results,
+    String relation,
+  ) {
     final dictionary = <dynamic, Related>{};
 
     for (final result in results) {

@@ -81,8 +81,12 @@ class MockDatabaseManager implements DatabaseManager {
     T Function(Map<String, dynamic>)? modelFactory,
     String? connectionName,
   }) {
-    return QueryBuilder<T>(_MockConnection(), MySQLGrammar(), tableName,
-        modelFactory: modelFactory,);
+    return QueryBuilder<T>(
+      _MockConnection(),
+      MySQLGrammar(),
+      tableName,
+      modelFactory: modelFactory,
+    );
   }
 
   @override
@@ -125,8 +129,12 @@ class _MockConnection implements DatabaseConnection {
     String table, {
     T Function(Map<String, dynamic>)? modelFactory,
   }) {
-    return QueryBuilder<T>(this, MySQLGrammar(), table,
-        modelFactory: modelFactory,);
+    return QueryBuilder<T>(
+      this,
+      MySQLGrammar(),
+      table,
+      modelFactory: modelFactory,
+    );
   }
 
   @override
@@ -166,8 +174,12 @@ void main() {
   setUp(() {
     Khadem.container.instance<DatabaseManager>(MockDatabaseManager());
     connection = _MockConnection();
-    query = QueryBuilder<MockModel>(connection, MySQLGrammar(), 'users',
-        modelFactory: (data) => MockModel()..fromJson(data),);
+    query = QueryBuilder<MockModel>(
+      connection,
+      MySQLGrammar(),
+      'users',
+      modelFactory: (data) => MockModel()..fromJson(data),
+    );
   });
 
   group('OR WHERE Variants', () {
@@ -397,20 +409,24 @@ void main() {
 
     test('has is shorthand for whereHas', () {
       final sql1 = query.has('posts').toSql();
-      final sql2 = QueryBuilder<MockModel>(connection, MySQLGrammar(), 'users',
-              modelFactory: (data) => MockModel()..fromJson(data),)
-          .whereHas('posts')
-          .toSql();
+      final sql2 = QueryBuilder<MockModel>(
+        connection,
+        MySQLGrammar(),
+        'users',
+        modelFactory: (data) => MockModel()..fromJson(data),
+      ).whereHas('posts').toSql();
 
       expect(sql1, equals(sql2));
     });
 
     test('doesntHave is shorthand for whereDoesntHave', () {
       final sql1 = query.doesntHave('posts').toSql();
-      final sql2 = QueryBuilder<MockModel>(connection, MySQLGrammar(), 'users',
-              modelFactory: (data) => MockModel()..fromJson(data),)
-          .whereDoesntHave('posts')
-          .toSql();
+      final sql2 = QueryBuilder<MockModel>(
+        connection,
+        MySQLGrammar(),
+        'users',
+        modelFactory: (data) => MockModel()..fromJson(data),
+      ).whereDoesntHave('posts').toSql();
 
       expect(sql1, equals(sql2));
     });
@@ -500,9 +516,10 @@ void main() {
   group('Subquery Methods', () {
     test('fromSub uses subquery as FROM clause', () {
       final subquery = QueryBuilder<Map<String, dynamic>>(
-              connection, MySQLGrammar(), 'users',)
-          .where('active', '=', true)
-          .select(['id', 'name']);
+        connection,
+        MySQLGrammar(),
+        'users',
+      ).where('active', '=', true).select(['id', 'name']);
 
       final sql =
           QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'temp')
@@ -528,32 +545,42 @@ void main() {
 
     test('selectSub adds subquery to SELECT clause', () {
       final subquery = QueryBuilder<Map<String, dynamic>>(
-              connection, MySQLGrammar(), 'posts',)
-          .where('posts.user_id', '=', 'users.id')
-          .select(['COUNT(*)']);
+        connection,
+        MySQLGrammar(),
+        'posts',
+      ).where('posts.user_id', '=', 'users.id').select(['COUNT(*)']);
 
       final sql = QueryBuilder<Map<String, dynamic>>(
-              connection, MySQLGrammar(), 'users',)
-          .select(['id', 'name'])
-          .selectSub(subquery, 'posts_count')
-          .toSql();
+        connection,
+        MySQLGrammar(),
+        'users',
+      ).select(['id', 'name']).selectSub(subquery, 'posts_count').toSql();
 
-      expect(sql,
-          contains('SELECT `id`, `name`, (SELECT `COUNT(*)` FROM `posts`'),);
+      expect(
+        sql,
+        contains('SELECT `id`, `name`, (SELECT `COUNT(*)` FROM `posts`'),
+      );
       expect(sql, contains(') as posts_count'));
     });
 
     test('multiple selectSub clauses', () {
       final postsCount = QueryBuilder<Map<String, dynamic>>(
-              connection, MySQLGrammar(), 'posts',)
-          .select(['COUNT(*)']);
+        connection,
+        MySQLGrammar(),
+        'posts',
+      ).select(['COUNT(*)']);
 
       final commentsCount = QueryBuilder<Map<String, dynamic>>(
-              connection, MySQLGrammar(), 'comments',)
-          .select(['COUNT(*)']);
+        connection,
+        MySQLGrammar(),
+        'comments',
+      ).select(['COUNT(*)']);
 
       final sql = QueryBuilder<Map<String, dynamic>>(
-              connection, MySQLGrammar(), 'users',)
+        connection,
+        MySQLGrammar(),
+        'users',
+      )
           .select(['id'])
           .selectSub(postsCount, 'posts_count')
           .selectSub(commentsCount, 'comments_count')
@@ -668,13 +695,16 @@ void main() {
   group('Clone Preserves New Fields', () {
     test('clone preserves fromSubquery and selectSubqueries', () {
       final subquery = QueryBuilder<Map<String, dynamic>>(
-              connection, MySQLGrammar(), 'active_users',)
-          .where('active', '=', true);
+        connection,
+        MySQLGrammar(),
+        'active_users',
+      ).where('active', '=', true);
 
       final original = QueryBuilder<Map<String, dynamic>>(
-              connection, MySQLGrammar(), 'users',)
-          .fromSub(subquery, 'au')
-          .selectSub(subquery, 'count');
+        connection,
+        MySQLGrammar(),
+        'users',
+      ).fromSub(subquery, 'au').selectSub(subquery, 'count');
 
       final cloned = original.clone();
       final sql1 = original.toSql();

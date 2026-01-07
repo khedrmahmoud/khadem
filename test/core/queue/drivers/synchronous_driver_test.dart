@@ -106,7 +106,6 @@ void main() {
       expect(job2.executedAt!.isBefore(job3.executedAt!), isTrue);
     });
 
-
     test('should track metrics when enabled', () async {
       final metrics = QueueMetrics();
       final driverWithMetrics = SynchronousDriver(

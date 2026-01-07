@@ -47,7 +47,8 @@ mixin Timestamps<T> on InteractsWithDatabase<T>, HasAttributes<T> {
 
     final now = DateTime.now().toUtc();
     // Format for MySQL: YYYY-MM-DD HH:MM:SS
-    final formatted = now.toIso8601String().replaceAll('T', ' ').substring(0, 19);
+    final formatted =
+        now.toIso8601String().replaceAll('T', ' ').substring(0, 19);
 
     if (isCreating) {
       // Set created_at only on creation

@@ -221,14 +221,17 @@ class RedisCacheDriver implements CacheDriver {
     final ttlInSeconds = ttl.inSeconds;
 
     // SET key value NX EX ttl
-    final result = await _executeCommand([
-      'SET',
-      key,
-      serializedValue,
-      'NX',
-      'EX',
-      ttlInSeconds > 0 ? ttlInSeconds : 1,
-    ], isWrite: true,);
+    final result = await _executeCommand(
+      [
+        'SET',
+        key,
+        serializedValue,
+        'NX',
+        'EX',
+        ttlInSeconds > 0 ? ttlInSeconds : 1,
+      ],
+      isWrite: true,
+    );
 
     return result == 'OK';
   }

@@ -19,7 +19,10 @@ abstract class HasOneOrMany<Related extends KhademModel<Related>, Parent>
   void addConstraints() {
     if ((parent as KhademModel).getAttribute(localKey) != null) {
       query.where(
-          foreignKey, '=', (parent as KhademModel).getAttribute(localKey),);
+        foreignKey,
+        '=',
+        (parent as KhademModel).getAttribute(localKey),
+      );
     }
   }
 
@@ -35,9 +38,10 @@ abstract class HasOneOrMany<Related extends KhademModel<Related>, Parent>
 
   @override
   QueryBuilderInterface<Related> getRelationExistenceQuery(
-      QueryBuilderInterface<Related> query,
-      QueryBuilderInterface<Parent> parentQuery,
-      [List<String> columns = const ['*'],]) {
+    QueryBuilderInterface<Related> query,
+    QueryBuilderInterface<Parent> parentQuery, [
+    List<String> columns = const ['*'],
+  ]) {
     final relatedTable = query.table;
     final parentTable = parentQuery.table;
 
@@ -49,8 +53,12 @@ abstract class HasOneOrMany<Related extends KhademModel<Related>, Parent>
   }
 
   /// Match the eagerly loaded results to their parents.
-  List<KhademModel> matchOneOrMany(List<KhademModel> models, List<Related> results,
-      String relation, String type,) {
+  List<KhademModel> matchOneOrMany(
+    List<KhademModel> models,
+    List<Related> results,
+    String relation,
+    String type,
+  ) {
     final dictionary = <dynamic, List<Related>>{};
 
     for (final result in results) {
@@ -68,8 +76,7 @@ abstract class HasOneOrMany<Related extends KhademModel<Related>, Parent>
       if (dictionary.containsKey(key)) {
         final value = dictionary[key]!;
         if (type == 'one') {
-          model
-              .setRelation(relation, value.isNotEmpty ? value.first : null);
+          model.setRelation(relation, value.isNotEmpty ? value.first : null);
         } else {
           model.setRelation(relation, value);
         }

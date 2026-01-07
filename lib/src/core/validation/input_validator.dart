@@ -39,7 +39,8 @@ class InputValidator {
 
       if (fieldPattern.contains('*')) {
         // Handle nested/wildcard validation (e.g., attachments.*)
-        validationFutures.add(_validateNestedField(fieldPattern, ruleDefinition));
+        validationFutures
+            .add(_validateNestedField(fieldPattern, ruleDefinition));
       } else {
         // Handle regular field validation
         validationFutures.add(_validateField(fieldPattern, ruleDefinition));
@@ -76,16 +77,23 @@ class InputValidator {
       );
 
       final isValid = await item.rule.passes(context);
-      
+
       if (!isValid) {
         if (!errors.containsKey(field)) {
           errors[field] = [];
         }
 
         final messageKey = item.rule.message(context);
-        errors[field]!.add(_formatErrorMessage(
-            messageKey, field, item.args, value, item.name,),);
-        
+        errors[field]!.add(
+          _formatErrorMessage(
+            messageKey,
+            field,
+            item.args,
+            value,
+            item.name,
+          ),
+        );
+
         if (shouldBail) {
           break; // Stop at first error for this field if bail is set
         }
@@ -102,7 +110,8 @@ class InputValidator {
     return false;
   }
 
-  Future<void> _validateNestedField(String fieldPattern, dynamic ruleDefinition) async {
+  Future<void> _validateNestedField(
+      String fieldPattern, dynamic ruleDefinition,) async {
     // Convert pattern like "attachments.*" to actual field paths
     final fieldPaths = _expandFieldPattern(fieldPattern);
     final futures = <Future<void>>[];
@@ -110,7 +119,7 @@ class InputValidator {
     for (final fieldPath in fieldPaths) {
       futures.add(_validateField(fieldPath, ruleDefinition));
     }
-    
+
     await Future.wait(futures);
   }
 
@@ -131,13 +140,13 @@ class InputValidator {
         if (part is String) {
           // Handle mixed string rules in list: ['required|email', MaxRule(50)]
           if (part.contains('|')) {
-             final subParts = part.split('|');
-             for (final subPart in subParts) {
-               if (subPart == 'bail') continue;
-               items.add(_parseStringRule(subPart));
-             }
+            final subParts = part.split('|');
+            for (final subPart in subParts) {
+              if (subPart == 'bail') continue;
+              items.add(_parseStringRule(subPart));
+            }
           } else {
-             items.add(_parseStringRule(part));
+            items.add(_parseStringRule(part));
           }
         } else if (part is Rule) {
           items.add(_RuleItem(part, 'custom', []));
@@ -153,14 +162,14 @@ class InputValidator {
     final segments = ruleString.split(':');
     final ruleName = segments[0];
     final ruleArgs = segments.length > 1 ? segments[1].split(',') : <String>[];
-    
+
     final rule = ValidationRuleRepository.resolve(ruleName);
     if (rule == null) {
-       // Fallback or throw? For now, maybe a dummy rule that always passes or logs warning
-       // But better to be strict.
-       // We can't throw easily here without breaking flow, but let's assume it exists.
-       // If not found, we might want to throw an exception to the developer.
-       throw Exception("Validation rule '$ruleName' not found.");
+      // Fallback or throw? For now, maybe a dummy rule that always passes or logs warning
+      // But better to be strict.
+      // We can't throw easily here without breaking flow, but let's assume it exists.
+      // If not found, we might want to throw an exception to the developer.
+      throw Exception("Validation rule '$ruleName' not found.");
     }
     return _RuleItem(rule, ruleName, ruleArgs);
   }
@@ -267,7 +276,7 @@ class InputValidator {
       'arg': args.isNotEmpty ? args.first : '',
       'args': args.join(','),
     };
-    
+
     for (var i = 0; i < args.length; i++) {
       parameters['arg$i'] = args[i];
     }

@@ -32,8 +32,11 @@ class FakeDatabaseManager implements DatabaseManager {
 
 class FakeQueryBuilder<T> implements QueryBuilderInterface<T> {
   @override
-  QueryBuilderInterface<T> where(String column, String operator,
-          [dynamic value,]) =>
+  QueryBuilderInterface<T> where(
+    String column,
+    String operator, [
+    dynamic value,
+  ]) =>
       this;
 
   @override
