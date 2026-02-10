@@ -2,6 +2,11 @@ import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
 /// Validates that the field under validation is an integer.
+///
+/// Signature: `int`
+///
+/// Examples:
+/// - `int`
 class IntRule extends Rule {
   @override
   String get signature => 'int';

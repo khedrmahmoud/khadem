@@ -1,4 +1,5 @@
-import 'package:khadem/khadem.dart';
+import 'package:khadem/lang.dart' show Lang;
+import 'package:khadem/src/contracts/views/directive_contract.dart';
 
 class LangDirective implements ViewDirective {
   // Regex patterns for different directive types

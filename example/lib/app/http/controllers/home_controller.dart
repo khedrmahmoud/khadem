@@ -1,4 +1,4 @@
-import 'package:khadem/khadem.dart' show Request, Response;
+import 'package:khadem/http.dart' show Request, Response;
 
 class HomeController {
   HomeController._();

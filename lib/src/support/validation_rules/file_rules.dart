@@ -6,6 +6,11 @@ import '../../contracts/validation/rule.dart';
 import '../../core/http/request/uploaded_file.dart';
 
 /// Validates that the field is an [UploadedFile].
+///
+/// Signature: `file`
+///
+/// Examples:
+/// - `file`
 class FileRule extends Rule {
   @override
   String get signature => 'file';
@@ -64,6 +69,11 @@ class FileRule extends Rule {
 ///
 /// Uses magic numbers (header bytes) to verify the actual file type,
 /// not just the extension or client-provided content type.
+///
+/// Signature: `image`
+///
+/// Examples:
+/// - `image`
 class ImageRule extends Rule {
   @override
   String get signature => 'image';
@@ -108,7 +118,13 @@ class ImageRule extends Rule {
 /// Validates that the file matches one of the given MIME types or extensions.
 ///
 /// Securely checks magic numbers where possible.
-class MimesRule extends Rule {
+///
+/// Signature: `mimes:type1,type2,...`
+///
+/// Examples:
+/// - `mimes:jpg,png,webp`
+/// - `mimes:application/pdf,image/png`
+class MimesRule extends Rule implements RuleMessageParametersProvider {
   final List<String>? _types;
   MimesRule([this._types]);
 
@@ -196,9 +212,25 @@ class MimesRule extends Rule {
 
   @override
   String message(ValidationContext context) => 'invalid_file_type_validation';
+
+  @override
+  Map<String, dynamic> messageParameters(ValidationContext context) {
+    final args = context.parameters;
+    final allowedTypes = _types?.map((e) => e.trim()).toList() ??
+        args.map((e) => e.trim()).toList();
+
+    return {
+      'values': allowedTypes.join(', '),
+    };
+  }
 }
 
 /// Validates that the file size is less than or equal to [maxSize] (in kilobytes).
+///
+/// Signature: `max_file_size:kilobytes`
+///
+/// Examples:
+/// - `max_file_size:2048`
 class MaxFileSizeRule extends Rule {
   @override
   String get signature => 'max_file_size';
@@ -235,6 +267,11 @@ class MaxFileSizeRule extends Rule {
 }
 
 /// Validates that the file size is greater than or equal to [minSize] (in kilobytes).
+///
+/// Signature: `min_file_size:kilobytes`
+///
+/// Examples:
+/// - `min_file_size:10`
 class MinFileSizeRule extends Rule {
   @override
   String get signature => 'min_file_size';

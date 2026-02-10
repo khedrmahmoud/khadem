@@ -1,9 +1,9 @@
-import 'package:khadem/khadem.dart' show ServiceProvider;
+import 'package:khadem/contracts.dart' show ContainerInterface, ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider {
   @override
-  void register(container) {}
+  void register(ContainerInterface container) {}
 
   @override
-  Future<void> boot(container) async {}
+  Future<void> boot(ContainerInterface container) async {}
 }

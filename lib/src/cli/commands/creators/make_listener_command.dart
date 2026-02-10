@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeListenerCommand extends KhademCommand {
@@ -65,41 +65,25 @@ class MakeListenerCommand extends KhademCommand {
   }
 
   String _listenerStub(String className, String listenerName, String folder) {
-    final namespace = folder.isEmpty ? '' : '$folder/';
-    final eventBase = CliNaming.toSnakeCase(listenerName);
-    final displayName = CliNaming.toPascalCase(listenerName);
     return '''
-import 'package:khadem/khadem.dart'
-    show Khadem, EventMethod, EventSubscriberInterface;
+import 'package:khadem/contracts.dart';
 
-class $className implements EventSubscriberInterface {
+
+class $className implements Subscriber {
   @override
-  List<EventMethod> getEventHandlers() => [
-        EventMethod(
-          eventName: '$eventBase.created',
-          handler: (payload) async => await onCreated(payload),
-        ),
-        EventMethod(
-          eventName: '$eventBase.updated',
-          handler: (payload) async => await onUpdated(payload),
-        ),
-        EventMethod(
-          eventName: '$eventBase.deleted',
-          handler: (payload) async => await onDeleted(payload),
-        ),
-      ];
+  void subscribe(Dispatcher dispatcher) {
+    // dispatcher.listen<ModelCreated<User>>(onCreated);
 
-  Future onCreated(dynamic payload) async {
-    print('📥 ${namespace}${displayName} created: \$payload');
   }
 
-  Future onUpdated(dynamic payload) async {
-    print('✏️ ${namespace}${displayName} updated: \$payload');
-  }
+  
+  // Future<void> onCreated(ModelCreated<User> event) async {
+  //   final user = event.model;
+  //   // Handle the event, e.g., send a welcome email
+  //   Log.info('User created: \${user.email}');
+  // }
 
-  Future onDeleted(dynamic payload) async {
-    print('🗑️ ${namespace}${displayName} deleted: \$payload');
-  }
+ 
 }
 ''';
   }

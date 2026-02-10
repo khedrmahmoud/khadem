@@ -8,6 +8,7 @@ import 'package:khadem/src/core/cache/cache_stats.dart';
 /// Provides convenient synchronous/static access to the application's cache
 /// manager. Use `Cache.put`, `Cache.get`, etc. from anywhere in the codebase.
 class Cache {
+  Cache._();
   static ICacheManager get _instance => Khadem.make<ICacheManager>();
 
   static Future<void> put(String key, dynamic value, Duration ttl) =>

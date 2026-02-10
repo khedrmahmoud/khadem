@@ -3,7 +3,6 @@ import 'package:khadem/khadem.dart' show Khadem;
 // Import individual config files
 import 'auth.dart';
 import 'cache.dart';
-import 'cors.dart';
 import 'mail.dart';
 import 'queue.dart';
 import 'scheduler.dart';
@@ -19,8 +18,12 @@ class AppConfig {
           'url': env.getOrDefault('APP_URL', 'http://localhost:9000'),
           'env': env.getOrDefault('APP_ENV', 'production'),
           'locale': env.getOrDefault('APP_LOCALE', 'en'),
-          'name': env.getOrDefault('APP_NAME', 'Khadem Video Streaming'),
-          'http_port': env.getInt('HTTP_PORT', defaultValue: 9000),
+          'name': env.getOrDefault('APP_NAME', 'Khadem App'),
+          // Prefer APP_PORT (matches generated .env.example), fallback to HTTP_PORT.
+          'http_port': env.getInt(
+            'APP_PORT',
+            defaultValue: env.getInt('HTTP_PORT', defaultValue: 9000),
+          ),
           'socket_port': env.getInt('SOCKET_PORT', defaultValue: 8080),
         },
 
@@ -51,9 +54,5 @@ class AppConfig {
         /// Mail configuration
         /// See: lib/config/mail.dart
         'mail': MailConfig.config,
-
-        /// CORS configuration
-        /// See: lib/config/cors.dart
-        'cors': CorsConfig.config,
       };
 }

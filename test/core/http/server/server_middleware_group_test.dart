@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:http/http.dart' as http;
-import 'package:khadem/khadem.dart';
+import 'package:khadem/container.dart';
+import 'package:khadem/contracts.dart';
+import 'package:khadem/http.dart' show  Server;
+import 'package:khadem/logging.dart';
+
 import 'package:test/test.dart';
 
 class FakeEnv implements EnvInterface {

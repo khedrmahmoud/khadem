@@ -2,6 +2,11 @@ import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
 /// Validates that the field under validation is a string.
+///
+/// Signature: `string`
+///
+/// Examples:
+/// - `string`
 class StringRule extends Rule {
   @override
   String get signature => 'string';
@@ -18,6 +23,11 @@ class StringRule extends Rule {
 /// Validates that the field contains only alphabetic characters.
 ///
 /// Supports Unicode characters if [unicode] is enabled (default behavior here).
+///
+/// Signature: `alpha`
+///
+/// Examples:
+/// - `alpha`
 class AlphaRule extends Rule {
   @override
   String get signature => 'alpha';
@@ -35,6 +45,11 @@ class AlphaRule extends Rule {
 }
 
 /// Validates that the field contains only alphabetic characters and numbers.
+///
+/// Signature: `alpha_num`
+///
+/// Examples:
+/// - `alpha_num`
 class AlphaNumRule extends Rule {
   @override
   String get signature => 'alpha_num';
@@ -52,6 +67,11 @@ class AlphaNumRule extends Rule {
 }
 
 /// Validates that the field contains only alpha-numeric characters, dashes, and underscores.
+///
+/// Signature: `alpha_dash`
+///
+/// Examples:
+/// - `alpha_dash`
 class AlphaDashRule extends Rule {
   @override
   String get signature => 'alpha_dash';
@@ -69,7 +89,12 @@ class AlphaDashRule extends Rule {
 }
 
 /// Validates that the field starts with one of the given values.
-class StartsWithRule extends Rule {
+///
+/// Signature: `starts_with:prefix1,prefix2,...`
+///
+/// Examples:
+/// - `starts_with:Mr,Ms,Dr`
+class StartsWithRule extends Rule implements RuleMessageParametersProvider {
   @override
   String get signature => 'starts_with';
 
@@ -86,10 +111,22 @@ class StartsWithRule extends Rule {
 
   @override
   String message(ValidationContext context) => 'starts_with_validation';
+
+  @override
+  Map<String, dynamic> messageParameters(ValidationContext context) {
+    return {
+      'values': context.parameters.join(', '),
+    };
+  }
 }
 
 /// Validates that the field ends with one of the given values.
-class EndsWithRule extends Rule {
+///
+/// Signature: `ends_with:suffix1,suffix2,...`
+///
+/// Examples:
+/// - `ends_with:.jpg,.png,.webp`
+class EndsWithRule extends Rule implements RuleMessageParametersProvider {
   @override
   String get signature => 'ends_with';
 
@@ -106,6 +143,13 @@ class EndsWithRule extends Rule {
 
   @override
   String message(ValidationContext context) => 'ends_with_validation';
+
+  @override
+  Map<String, dynamic> messageParameters(ValidationContext context) {
+    return {
+      'values': context.parameters.join(', '),
+    };
+  }
 }
 
 /// Validates that the field is a strong password.
@@ -116,6 +160,11 @@ class EndsWithRule extends Rule {
 /// - lowercase
 /// - numbers
 /// - symbols
+///
+/// Signature: `password`
+///
+/// Examples:
+/// - `password`
 class PasswordRule extends Rule {
   final int minLength;
   final bool requireUppercase;
@@ -174,6 +223,11 @@ class PasswordRule extends Rule {
 }
 
 /// Validates that the field is numeric and has an exact length of digits.
+///
+/// Signature: `digits:length`
+///
+/// Examples:
+/// - `digits:10`
 class DigitsRule extends Rule {
   @override
   String get signature => 'digits';
@@ -200,6 +254,11 @@ class DigitsRule extends Rule {
 }
 
 /// Validates that the field is numeric and its length is between [min] and [max].
+///
+/// Signature: `digits_between:min,max`
+///
+/// Examples:
+/// - `digits_between:6,12`
 class DigitsBetweenRule extends Rule {
   @override
   String get signature => 'digits_between';

@@ -1,4 +1,4 @@
-import '../bus/command.dart';
+import '../../contracts/cli/command.dart';
 
 class CommandsCommand extends KhademCommand {
   final List<({String name, String description})> _commands;

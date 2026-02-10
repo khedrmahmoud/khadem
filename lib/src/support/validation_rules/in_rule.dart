@@ -2,7 +2,13 @@ import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
 /// Validates that the field is contained in the given list of values.
-class InRule extends Rule {
+///
+/// Signature: `in:val1,val2,...`
+///
+/// Examples:
+/// - `in:admin,user`
+/// - `in:pending,approved,rejected`
+class InRule extends Rule implements RuleMessageParametersProvider {
   final List<dynamic>? _values;
   InRule([this._values]);
 
@@ -22,4 +28,13 @@ class InRule extends Rule {
 
   @override
   String message(ValidationContext context) => 'in_validation';
+
+  @override
+  Map<String, dynamic> messageParameters(ValidationContext context) {
+    final options =
+        _values?.map((e) => e.toString()).toList() ?? context.parameters;
+    return {
+      'values': options.join(', '),
+    };
+  }
 }

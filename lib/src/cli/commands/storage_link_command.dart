@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../bus/command.dart';
+import '../../contracts/cli/command.dart';
 
 class StorageLinkCommand extends KhademCommand {
   StorageLinkCommand({required super.logger});

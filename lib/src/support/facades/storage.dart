@@ -8,6 +8,7 @@ import 'package:khadem/src/core/storage/storage_manager.dart';
 /// and a short-hand to the default or named disks. Use `Storage.put(...)`,
 /// `Storage.disk('s3')`, or `Storage.temporaryUrl(...)` from anywhere.
 class Storage {
+  Storage._();
   static StorageManager get _instance => Khadem.make<StorageManager>();
 
   /// Returns a disk instance by name or uses the default.

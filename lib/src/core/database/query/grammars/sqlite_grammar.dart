@@ -98,7 +98,6 @@ class SQLiteGrammar extends Grammar {
   }
 
   @override
-  @override
   String compileJoins(List<Map<String, dynamic>> joins) {
     return joins.map((join) {
       final table = wrapTable(join['table']);
@@ -137,6 +136,15 @@ class SQLiteGrammar extends Grammar {
             segment = '${wrap(where['column'])} BETWEEN ? AND ?';
           } else if (type == 'NotBetween') {
             segment = '${wrap(where['column'])} NOT BETWEEN ? AND ?';
+          } else if (type == 'Column') {
+            segment =
+                '${wrap(where['first'])} ${where['operator']} ${wrap(where['second'])}';
+          } else if (type == 'BetweenColumns') {
+            segment =
+                '${wrap(where['column'])} BETWEEN ${wrap(where['start'])} AND ${wrap(where['end'])}';
+          } else if (type == 'NotBetweenColumns') {
+            segment =
+                '${wrap(where['column'])} NOT BETWEEN ${wrap(where['start'])} AND ${wrap(where['end'])}';
           } else if (type == 'Date') {
             segment = 'DATE(${wrap(where['column'])}) ${where['operator']} ?';
           } else if (type == 'Year') {
@@ -220,7 +228,9 @@ class SQLiteGrammar extends Grammar {
 
   @override
   String compileInsert(
-      Map<String, dynamic> query, Map<String, dynamic> values,) {
+    Map<String, dynamic> query,
+    Map<String, dynamic> values,
+  ) {
     final table = wrapTable(query['table']);
     final columns = values.keys.map(wrap).join(', ');
     final placeholders = values.keys.map((_) => '?').join(', ');
@@ -264,7 +274,9 @@ class SQLiteGrammar extends Grammar {
 
   @override
   String compileUpdate(
-      Map<String, dynamic> query, Map<String, dynamic> values,) {
+    Map<String, dynamic> query,
+    Map<String, dynamic> values,
+  ) {
     final table = wrapTable(query['table']);
     final columns = values.keys.map((key) => '${wrap(key)} = ?').join(', ');
     final wheres = compileWheres(query['wheres'] ?? []);
@@ -282,7 +294,10 @@ class SQLiteGrammar extends Grammar {
 
   @override
   String compileIncrement(
-      Map<String, dynamic> query, String column, int amount,) {
+    Map<String, dynamic> query,
+    String column,
+    int amount,
+  ) {
     final table = wrapTable(query['table']);
     final wrappedCol = wrap(column);
     final wheres = compileWheres(query['wheres'] ?? []);
@@ -319,7 +334,9 @@ class SQLiteGrammar extends Grammar {
   }
 
   String compileInsertOrIgnore(
-      Map<String, dynamic> query, Map<String, dynamic> values,) {
+    Map<String, dynamic> query,
+    Map<String, dynamic> values,
+  ) {
     final table = wrapTable(query['table']);
     final columns = values.keys.map(wrap).join(', ');
     final placeholders = values.keys.map((_) => '?').join(', ');

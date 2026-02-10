@@ -1,10 +1,9 @@
-import 'package:khadem/khadem.dart' show MigrationFile;
+import 'package:khadem/contracts.dart' show MigrationFile, SchemaBuilder;
 
 class CreatePersonalAccessTokenTable extends MigrationFile {
   @override
-  Future<void> up(schema) async {
-    schema.create('personal_access_tokens', (table) {
-      // Define columns
+  Future<void> up(SchemaBuilder builder) async {
+    builder.create('personal_access_tokens', (table) {
       table.id();
       table.foreignId('tokenable_id');
       table.text("token");
@@ -16,7 +15,7 @@ class CreatePersonalAccessTokenTable extends MigrationFile {
   }
 
   @override
-  Future<void> down(schema) async {
-    schema.drop('personal_access_tokens');
+  Future<void> down(SchemaBuilder builder) async {
+    builder.drop('personal_access_tokens');
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeMailCommand extends KhademCommand {
@@ -53,7 +53,7 @@ class MakeMailCommand extends KhademCommand {
 
   String _stub(String className) {
     return '''
-import 'package:khadem/khadem.dart';
+import 'package:khadem/mail.dart';
 
 class $className extends Mailable {
   final String name;

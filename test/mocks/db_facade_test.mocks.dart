@@ -1,6 +1,9 @@
-import 'package:khadem/khadem.dart';
+import 'package:khadem/contracts.dart' show ConfigInterface, DatabaseConnection, QueryBuilderInterface, SchemaBuilder;
+import 'package:khadem/database/drivers.dart';
+import 'package:khadem/database/query.dart';
+ 
 import 'package:mockito/mockito.dart';
-
+ 
 // Mocks
 class MockConfig extends Mock implements ConfigInterface {}
 

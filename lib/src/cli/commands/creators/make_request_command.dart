@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeRequestCommand extends KhademCommand {
@@ -57,14 +57,24 @@ class MakeRequestCommand extends KhademCommand {
 
   String _stub(String className) {
     return '''
-import 'package:khadem/khadem.dart';
+import 'package:khadem/http.dart';
 
-class $className {
-  static Future<Map<String, dynamic>> validate(Request request) {
-    return request.validate({
-      // 'email': 'required|email',
-      // 'password': 'required|min:6',
-    });
+class $className extends FormRequest {
+  @override
+  bool authorize(Request request) => true;
+
+  @override
+  Map<String, dynamic> rules() {
+    return {
+      // 'field_name': ['required', 'email'],
+    };
+  }
+
+  @override
+  Future<void> prepareForValidation(Request request) async {
+    // TODO: Prepare data before validation
+    // e.g., trim strings, convert types, etc.
+    // request.merge({'field_name': request.input('field_name')?.trim()});
   }
 }
 ''';

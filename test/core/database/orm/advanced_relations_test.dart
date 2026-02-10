@@ -5,6 +5,8 @@ import 'package:khadem/src/contracts/database/schema_builder.dart';
 import 'package:khadem/src/core/database/model_base/khadem_model.dart';
 import 'package:khadem/src/core/database/orm/relations/has_many_through.dart';
 import 'package:khadem/src/core/database/orm/relations/has_one_through.dart';
+import 'package:khadem/src/core/database/orm/relations/belongs_to_many.dart';
+import 'package:khadem/src/core/database/orm/relations/morph_to.dart';
 import 'package:khadem/src/core/database/orm/relations/morph_to_many.dart';
 import 'package:khadem/src/core/database/orm/relations/morphed_by_many.dart';
 import 'package:khadem/src/core/database/query/grammars/mysql_grammar.dart';
@@ -86,6 +88,16 @@ class Post extends KhademModel<Post> {
 class Tag extends KhademModel<Tag> {
   @override
   Tag newFactory(Map<String, dynamic> data) => Tag()..fromJson(data);
+}
+
+class Role extends KhademModel<Role> {
+  @override
+  Role newFactory(Map<String, dynamic> data) => Role()..fromJson(data);
+}
+
+class Comment extends KhademModel<Comment> {
+  @override
+  Comment newFactory(Map<String, dynamic> data) => Comment()..fromJson(data);
 }
 
 void main() {
@@ -250,6 +262,92 @@ void main() {
       expect(sql, contains('WHERE `taggables`.`tag_id` = ?'));
       expect(sql, contains('AND `taggables`.`taggable_type` = ?'));
       expect(relation.getQuery().bindings, equals([1, 'posts']));
+    });
+  });
+
+  group('BelongsToMany', () {
+    test('selects pivot keys and matches results back to parents', () {
+      final user = User()..setAttribute('id', 1);
+      final query = QueryBuilder<Role>(mockConnection, MySQLGrammar(), 'roles');
+
+      final relation = BelongsToMany<Role, User>(
+        query,
+        user,
+        () => Role(),
+        'user_roles',
+        'user_id',
+        'role_id',
+        'id',
+        'id',
+      );
+
+      relation.addEagerConstraints([user]);
+
+      final sql = relation.getQuery().toSql();
+      expect(sql, contains('user_roles.user_id as khadem_pivot_foreign_key'));
+      expect(sql, contains('user_roles.role_id as khadem_pivot_related_key'));
+
+      final role = Role()
+        ..setAttribute('id', 10)
+        ..setAttribute('khadem_pivot_foreign_key', 1);
+
+      relation.initRelation([user], 'roles');
+      relation.match([user], [role], 'roles');
+
+      final loaded = user.getRelation('roles') as List<Role>;
+      expect(loaded.length, 1);
+      expect(loaded.first.getAttribute('id'), 10);
+    });
+  });
+
+  group('MorphTo', () {
+    test('adds constraints when morph type matches', () {
+      final comment = Comment()
+        ..setAttribute('commentable_id', 5)
+        ..setAttribute('commentable_type', 'Post');
+
+      final query = QueryBuilder<Post>(mockConnection, MySQLGrammar(), 'posts');
+
+      final relation = MorphTo<Post, Comment>(
+        query,
+        comment,
+        () => Post(),
+        'commentable_type',
+        'commentable_id',
+        'Post',
+        'id',
+        'commentable',
+      );
+
+      relation.addConstraints();
+
+      final sql = relation.getQuery().toSql();
+      expect(sql, contains('WHERE `id` = ?'));
+      expect(relation.getQuery().bindings, equals([5]));
+    });
+
+    test('adds no-match constraint when morph type mismatches', () {
+      final comment = Comment()
+        ..setAttribute('commentable_id', 5)
+        ..setAttribute('commentable_type', 'User');
+
+      final query = QueryBuilder<Post>(mockConnection, MySQLGrammar(), 'posts');
+
+      final relation = MorphTo<Post, Comment>(
+        query,
+        comment,
+        () => Post(),
+        'commentable_type',
+        'commentable_id',
+        'Post',
+        'id',
+        'commentable',
+      );
+
+      relation.addConstraints();
+
+      final sql = relation.getQuery().toSql();
+      expect(sql, contains('WHERE 1 = 0'));
     });
   });
 }

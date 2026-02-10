@@ -111,10 +111,7 @@ export 'services/hash_password_verifier.dart';
 // 📦 Secure_token_generator.dart
 // ========================
 export 'services/secure_token_generator.dart';
-// ========================
-// 📦 Web_auth_service.dart
-// ========================
-export 'services/web_auth_service.dart';
+
 // ========================
 // 📦 Logout_strategies.dart
 // ========================

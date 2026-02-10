@@ -71,12 +71,13 @@ mixin HasRelations<T> {
     required String foreignKey,
     required String relatedTable,
     required R Function() factory,
-    String localKey = 'id',
+    String? localKey,
     Function(QueryBuilderInterface)? query,
   }) {
+    final resolvedLocalKey = localKey ?? (this as KhademModel).primaryKey;
     return RelationDefinition<R>(
       type: RelationType.hasOne,
-      localKey: localKey,
+      localKey: resolvedLocalKey,
       foreignKey: foreignKey,
       relatedTable: relatedTable,
       factory: factory,
@@ -92,12 +93,13 @@ mixin HasRelations<T> {
     required String foreignKey,
     required String relatedTable,
     required R Function() factory,
-    String localKey = 'id',
+    String? localKey,
     Function(QueryBuilderInterface)? query,
   }) {
+    final resolvedLocalKey = localKey ?? (this as KhademModel).primaryKey;
     return RelationDefinition<R>(
       type: RelationType.hasMany,
-      localKey: localKey,
+      localKey: resolvedLocalKey,
       foreignKey: foreignKey,
       relatedTable: relatedTable,
       factory: factory,
@@ -113,14 +115,15 @@ mixin HasRelations<T> {
     required String relatedTable,
     required R Function() factory,
     required String foreignKey,
-    String ownerKey = 'id',
+    String? ownerKey,
     Function(QueryBuilderInterface)? query,
   }) {
+    final resolvedOwnerKey = ownerKey ?? factory().primaryKey;
     return RelationDefinition<R>(
       type: RelationType.belongsTo,
       localKey: '', // Not used for belongsTo in new definition
       foreignKey: foreignKey,
-      ownerKey: ownerKey,
+      ownerKey: resolvedOwnerKey,
       relatedTable: relatedTable,
       factory: factory,
       query: query,
@@ -140,13 +143,14 @@ mixin HasRelations<T> {
     required String relatedPivotKey,
     required String relatedTable,
     required R Function() factory,
-    String parentKey = 'id',
+    String? parentKey,
     String relatedKey = 'id',
     Function(QueryBuilderInterface)? query,
   }) {
+    final resolvedParentKey = parentKey ?? (this as KhademModel).primaryKey;
     return RelationDefinition<R>(
       type: RelationType.belongsToMany,
-      localKey: parentKey,
+      localKey: resolvedParentKey,
       foreignKey:
           'id', // Not directly used in belongsToMany logic in definition
       relatedKey: relatedKey,
@@ -163,12 +167,13 @@ mixin HasRelations<T> {
     required String morphName,
     required String relatedTable,
     required R Function() factory,
-    String localKey = 'id',
+    String? localKey,
     Function(QueryBuilderInterface)? query,
   }) {
+    final resolvedLocalKey = localKey ?? (this as KhademModel).primaryKey;
     return RelationDefinition<R>(
       type: RelationType.morphOne,
-      localKey: localKey,
+      localKey: resolvedLocalKey,
       foreignKey: '${morphName}_id',
       relatedTable: relatedTable,
       factory: factory,
@@ -182,13 +187,161 @@ mixin HasRelations<T> {
     required String morphName,
     required String relatedTable,
     required R Function() factory,
-    String localKey = 'id',
+    String? localKey,
+    Function(QueryBuilderInterface)? query,
+  }) {
+    final resolvedLocalKey = localKey ?? (this as KhademModel).primaryKey;
+    return RelationDefinition<R>(
+      type: RelationType.morphMany,
+      localKey: resolvedLocalKey,
+      foreignKey: '${morphName}_id',
+      relatedTable: relatedTable,
+      factory: factory,
+      morphIdField: '${morphName}_id',
+      morphTypeField: '${morphName}_type',
+      query: query,
+    );
+  }
+
+  /// Define a "has one through" relationship with clearer parameter names.
+  ///
+  /// Key meanings:
+  /// - [throughForeignKey]: column on the *through table* that points to the parent.
+  ///   Example: `users.country_id`.
+  /// - [relatedForeignKey]: column on the *related table* that points to the through table.
+  ///   Example: `posts.user_id`.
+  /// - [parentLocalKey]: column on the parent model used for matching (default: `id`).
+  ///   Example: `countries.id`.
+  /// - [throughLocalKey]: column on the through table used in the JOIN (default: `id`).
+  ///   Example: `users.id`.
+  RelationDefinition hasOneThrough<R extends KhademModel<R>>({
+    required String throughTable,
+    required String throughForeignKey,
+    required String relatedForeignKey,
+    required String relatedTable,
+    required R Function() factory,
+    String? parentLocalKey,
+    String throughLocalKey = 'id',
+    Function(QueryBuilderInterface)? query,
+  }) {
+    final resolvedParentLocalKey =
+        parentLocalKey ?? (this as KhademModel).primaryKey;
+    return RelationDefinition<R>(
+      type: RelationType.hasOneThrough,
+      localKey: resolvedParentLocalKey,
+      foreignKey: '',
+      relatedTable: relatedTable,
+      factory: factory,
+      throughTable: throughTable,
+      firstKey: throughForeignKey,
+      secondKey: relatedForeignKey,
+      secondLocalKey: throughLocalKey,
+      query: query,
+    );
+  }
+
+  /// Define a "has many through" relationship with clearer parameter names.
+  ///
+  /// See [hasOneThroughVia] for the key meanings; the mapping is identical,
+  /// but this relation returns a list of related models.
+  RelationDefinition hasManyThrough<R extends KhademModel<R>>({
+    required String throughTable,
+    required String throughForeignKey,
+    required String relatedForeignKey,
+    required String relatedTable,
+    required R Function() factory,
+    String? parentLocalKey,
+    String throughLocalKey = 'id',
+    Function(QueryBuilderInterface)? query,
+  }) {
+    final resolvedParentLocalKey =
+        parentLocalKey ?? (this as KhademModel).primaryKey;
+    return RelationDefinition<R>(
+      type: RelationType.hasManyThrough,
+      localKey: resolvedParentLocalKey,
+      foreignKey: '',
+      relatedTable: relatedTable,
+      factory: factory,
+      throughTable: throughTable,
+      firstKey: throughForeignKey,
+      secondKey: relatedForeignKey,
+      secondLocalKey: throughLocalKey,
+      query: query,
+    );
+  }
+
+  /// Define a polymorphic many-to-many relationship.
+  ///
+  /// [morphName] is the base name used for the type column on the pivot table.
+  RelationDefinition morphToMany<R extends KhademModel<R>>({
+    required String morphName,
+    required String pivotTable,
+    required String foreignPivotKey,
+    required String relatedPivotKey,
+    required String relatedTable,
+    required R Function() factory,
+    String parentKey = 'id',
+    String relatedKey = 'id',
     Function(QueryBuilderInterface)? query,
   }) {
     return RelationDefinition<R>(
-      type: RelationType.morphMany,
-      localKey: localKey,
+      type: RelationType.morphToMany,
+      localKey: parentKey,
+      foreignKey: '',
+      relatedKey: relatedKey,
+      relatedTable: relatedTable,
+      factory: factory,
+      pivotTable: pivotTable,
+      foreignPivotKey: foreignPivotKey,
+      relatedPivotKey: relatedPivotKey,
+      morphTypeField: '${morphName}_type',
+      query: query,
+    );
+  }
+
+  /// Define the inverse of a polymorphic many-to-many relationship.
+  RelationDefinition morphedByMany<R extends KhademModel<R>>({
+    required String morphName,
+    required String pivotTable,
+    required String foreignPivotKey,
+    required String relatedPivotKey,
+    required String relatedTable,
+    required R Function() factory,
+    String parentKey = 'id',
+    String relatedKey = 'id',
+    Function(QueryBuilderInterface)? query,
+  }) {
+    return RelationDefinition<R>(
+      type: RelationType.morphedByMany,
+      localKey: parentKey,
+      foreignKey: '',
+      relatedKey: relatedKey,
+      relatedTable: relatedTable,
+      factory: factory,
+      pivotTable: pivotTable,
+      foreignPivotKey: foreignPivotKey,
+      relatedPivotKey: relatedPivotKey,
+      morphTypeField: '${morphName}_type',
+      query: query,
+    );
+  }
+
+  /// Define a polymorphic inverse relationship (fixed target type).
+  ///
+  /// This is like `belongsTo`, but it only loads if the `[morphName]_type`
+  /// matches the target model type.
+  RelationDefinition morphTo<R extends KhademModel<R>>({
+    required String morphName,
+    required String relatedTable,
+    required R Function() factory,
+    String ownerKey = 'id',
+    Function(QueryBuilderInterface)? query,
+  }) {
+    return RelationDefinition<R>(
+      type: RelationType.morphTo,
+      localKey: '',
       foreignKey: '${morphName}_id',
+      ownerKey: ownerKey,
       relatedTable: relatedTable,
       factory: factory,
       morphIdField: '${morphName}_id',

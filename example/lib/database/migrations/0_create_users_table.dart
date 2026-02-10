@@ -1,8 +1,8 @@
-import 'package:khadem/khadem.dart' show MigrationFile;
+import 'package:khadem/contracts.dart' show MigrationFile, SchemaBuilder;
 
 class CreateUsersTable extends MigrationFile {
   @override
-  Future<void> up(builder) async {
+  Future<void> up(SchemaBuilder builder) async {
     builder.create('users', (table) {
       table.id();
       table.string('name');
@@ -13,7 +13,7 @@ class CreateUsersTable extends MigrationFile {
   }
 
   @override
-  Future<void> down(builder) async {
+  Future<void> down(SchemaBuilder builder) async {
     builder.dropIfExists('users');
   }
 }

@@ -7,7 +7,7 @@ class DatabaseConfig {
         'driver': env.getOrDefault('DB_CONNECTION', 'mysql'),
         'host': env.getOrDefault('DB_HOST', 'localhost'),
         'port': env.getInt('DB_PORT'),
-        'database': env.get('DB_NAME'),
+        'database': env.get('DB_DATABASE'),
         'username': env.get('DB_USER'),
         'password': env.get('DB_PASSWORD'),
         'run_migrations': true,

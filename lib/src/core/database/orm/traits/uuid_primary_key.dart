@@ -1,5 +1,8 @@
 import 'package:uuid/uuid.dart';
 
+import '../../model_base/concerns/has_attributes.dart';
+import '../../model_base/concerns/interacts_with_database.dart';
+
 /// Mixin that adds UUID primary key support to models
 ///
 /// Automatically generates a UUID when creating a new model.
@@ -24,9 +27,13 @@ import 'package:uuid/uuid.dart';
 /// user.generateUuid();
 /// print(user.uuid); // "550e8400-e29b-41d4-a716-446655440000"
 /// ```
-mixin UuidPrimaryKey {
+mixin UuidPrimaryKey<T> on InteractsWithDatabase<T>, HasAttributes<T> {
+  /// The UUID column name
+  String get uuidColumn => 'uuid';
+
   /// The UUID value
-  String? uuid;
+  String? get uuid => getAttribute(uuidColumn);
+  set uuid(String? value) => setAttribute(uuidColumn, value);
 
   /// UUID generator instance
   static const Uuid _uuidGenerator = Uuid();
@@ -57,5 +64,14 @@ mixin UuidPrimaryKey {
   String getOrGenerateUuid() {
     ensureUuidGenerated();
     return uuid!;
+  }
+
+  /// Auto-generate UUID on create
+  @override
+  Future<bool> save() async {
+    if (!exists) {
+      ensureUuidGenerated();
+    }
+    return super.save();
   }
 }

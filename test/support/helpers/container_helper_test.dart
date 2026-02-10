@@ -1,4 +1,6 @@
-import 'package:khadem/khadem.dart';
+import 'package:khadem/container.dart';
+import 'package:khadem/contracts.dart';
+import 'package:khadem/support.dart';
 import 'package:test/test.dart';
 
 void main() {

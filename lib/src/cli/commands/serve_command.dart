@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:vm_service/vm_service.dart' as vm;
 import 'package:vm_service/vm_service_io.dart';
 import 'package:watcher/watcher.dart';
-import '../bus/command.dart';
+import '../../contracts/cli/command.dart';
 
 class ServeCommand extends KhademCommand {
   Process? _serverProcess;
@@ -149,28 +149,9 @@ class ServeCommand extends KhademCommand {
 
     logger.info('💡 Commands: [r] reload | [f] full restart | [q] quit');
 
-    // Always allow Ctrl+C to stop, even when stdin isn't usable.
-    ProcessSignal.sigint.watch().listen((_) {
-      _shutdown();
-    });
-
-    // When running without a real TTY (common on Windows or when piped),
-    // touching stdin lineMode/echoMode can throw (handle is invalid).
-    if (!stdin.hasTerminal) {
-      logger.info('ℹ️ Interactive stdin disabled (no terminal detected).');
-      logger.info('   Use Ctrl+C to stop the server.');
-      return;
-    }
-
-    // Use line-based input (press Enter after command)
-    try {
-      stdin.lineMode = true;
-      stdin.echoMode = true;
-    } on StdinException catch (e) {
-      logger.warning('⚠️ Interactive stdin disabled: $e');
-      logger.info('   Use Ctrl+C to stop the server.');
-      return;
-    }
+    // Use line-based input (works everywhere, just press Enter after command)
+    stdin.lineMode = true;
+    stdin.echoMode = true;
 
     _stdinSubscription = stdin
         .transform(utf8.decoder)

@@ -4,6 +4,11 @@ import '../../contracts/validation/rule.dart';
 /// Validates that the field under validation is a boolean.
 ///
 /// Accepts `true`, `false`, `1`, `0`, "true", "false", "1", "0".
+///
+/// Signature: `bool`
+///
+/// Examples:
+/// - `bool`
 class BoolRule extends Rule {
   @override
   String get signature => 'bool';

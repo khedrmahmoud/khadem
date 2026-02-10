@@ -1,8 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:khadem/khadem.dart';
+import 'package:khadem/contracts.dart' show ExceptionHandlerContract;
+import 'package:khadem/support.dart' show Log, resolve;
 
+import '../../routing/router.dart';
+import '../context/server_context.dart';
+import '../middleware/middleware_pipeline.dart';
+import '../request/request.dart';
+import '../response/response.dart';
+import 'core/http_request_processor.dart';
+import 'server_middleware.dart';
+import 'server_static.dart';
+
+ 
 class ServerLifecycle {
   final Router _router;
   final ServerMiddleware _middleware;
@@ -49,14 +60,13 @@ class ServerLifecycle {
     server.autoCompress = autoCompress;
     server.idleTimeout = idleTimeout;
 
-    Khadem.logger
-        .info('🟢 HTTP Server started on http://${host ?? 'localhost'}:$port');
+    Log.info('🟢 HTTP Server started on http://${host ?? 'localhost'}:$port');
 
     // Handle graceful shutdown
     _signalSubscription = ProcessSignal.sigint.watch().listen((signal) {
-      Khadem.logger.info('🛑 Received signal $signal. Shutting down...');
+      Log.info('🛑 Received signal $signal. Shutting down...');
       stop().then((_) {
-        Khadem.logger.info('👋 Server closed.');
+        Log.info('👋 Server closed.');
         exit(0);
       });
     });
@@ -91,7 +101,7 @@ class ServerLifecycle {
               },
             );
           } catch (e, stackTrace) {
-            final exceptionHandler = Khadem.make<ExceptionHandlerContract>();
+            final exceptionHandler = resolve<ExceptionHandlerContract>();
             final result = await exceptionHandler.handle(e, stackTrace);
 
             if (!res.sent) {

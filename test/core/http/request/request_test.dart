@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:khadem/src/core/index.dart';
-import 'package:khadem/src/modules/index.dart';
+import 'package:khadem/auth.dart' show RequestAuth;
+import 'package:khadem/http.dart'
+  show BodyParser, Request, RequestHeaders, RequestParams, RequestValidator;
 import 'package:test/test.dart';
 
 class FakeHttpRequest extends Stream<Uint8List> implements HttpRequest {

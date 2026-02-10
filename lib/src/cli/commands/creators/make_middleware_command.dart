@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeMiddlewareCommand extends KhademCommand {
@@ -72,7 +72,7 @@ class MakeMiddlewareCommand extends KhademCommand {
   String _template(String className, String middlewareName, String folder) {
     final namespace = folder.isEmpty ? '' : '$folder/';
     return '''
-import 'package:khadem/khadem.dart';
+import 'package:khadem/contracts.dart' show Middleware, MiddlewareHandler, MiddlewarePriority;
 
 class $className implements Middleware {
   @override
@@ -86,7 +86,7 @@ class $className implements Middleware {
   String get name => '$className';
 
   @override
-  MiddlewarePriority get priority => MiddlewarePriority.normal;
+  MiddlewarePriority get priority => MiddlewarePriority.global;
 }
 ''';
   }

@@ -25,12 +25,12 @@ mixin SoftDeletes<T>
   bool get trashed => deletedAt != null;
 
   /// Soft delete the model (set deleted_at timestamp)
-  Future<bool> softDelete() async {
+  Future<bool> softDelete({DateTime? at}) async {
     if (trashed) return false;
 
     if (await fireModelEvent(ModelLifecycle.deleting) == false) return false;
 
-    deletedAt = DateTime.now().toUtc();
+    deletedAt = (at ?? DateTime.now()).toUtc();
     await save();
 
     await fireModelEvent(ModelLifecycle.deleted, halt: false);
@@ -38,13 +38,18 @@ mixin SoftDeletes<T>
   }
 
   /// Restore a soft-deleted model
-  Future<bool> restore() async {
+  Future<bool> restore({bool touch = true}) async {
     if (!trashed) return false;
 
     if (await fireModelEvent(ModelLifecycle.restoring) == false) return false;
 
     deletedAt = null;
-    await save();
+    if (touch) {
+      await save();
+    } else {
+      await query.where(primaryKey, '=', getKey()).update({deletedAtColumn: null});
+      (this as HasAttributes).syncOriginal();
+    }
 
     await fireModelEvent(ModelLifecycle.restored, halt: false);
     return true;

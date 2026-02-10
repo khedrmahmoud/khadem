@@ -179,8 +179,8 @@ class JWTDriver implements AuthDriver {
       throw AuthException('Token has expired');
     } on JWTException catch (e) {
       throw AuthException('Invalid token: ${e.message}');
-    } catch (e) {
-      throw AuthException('Token verification failed: $e');
+    }  catch (e) {
+      rethrow;
     }
   }
 

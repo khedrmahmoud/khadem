@@ -1,5 +1,8 @@
+import 'package:khadem/contracts.dart' show ConfigInterface, ContainerInterface, ServiceProvider;
 import 'package:khadem/khadem.dart';
+import 'package:khadem/queue.dart' show QueueManager;
 
+import '../../../../mail.dart';
 import '../config/mail_config.dart';
 
 /// Service provider for the mail module.

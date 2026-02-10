@@ -1,5 +1,15 @@
-import 'package:khadem/khadem.dart';
+import 'package:khadem/contracts.dart'
+    show
+        DatabaseConnection,
+        DatabaseResponse,
+        QueryBuilderInterface,
+        SchemaBuilder;
+import 'package:khadem/support.dart' show Log, DatabaseException;
 import 'package:mysql1/mysql1.dart';
+
+import '../../query/grammars/mysql_grammar.dart';
+import '../../query/query_builder.dart';
+import 'mysql_schema_builder.dart';
 
 /// Concrete implementation of [DatabaseConnection] for MySQL using `mysql1` package.
 class MySQLConnection implements DatabaseConnection {
@@ -59,14 +69,14 @@ class MySQLConnection implements DatabaseConnection {
     } catch (_) {
       // If USE fails, try to create it
       try {
-        Khadem.logger.info('Database $dbName does not exist. Creating...');
+        Log.info('Database $dbName does not exist. Creating...');
         await execute(
           'CREATE DATABASE IF NOT EXISTS `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci',
         );
         await execute('USE `$dbName`');
-        Khadem.logger.info('Database $dbName created and selected.');
+        Log.info('Database $dbName created and selected.');
       } catch (e) {
-        Khadem.logger.info(
+        Log.info(
           'ERROR: Failed to create or select database $dbName: $e',
         );
         rethrow;
@@ -92,7 +102,7 @@ class MySQLConnection implements DatabaseConnection {
     } catch (e) {
       // Check if it's a connection error and retry once
       if (_isConnectionError(e)) {
-        Khadem.logger.warning('Database connection lost. Reconnecting...');
+        Log.warning('Database connection lost. Reconnecting...');
         try {
           await disconnect();
           await connect();
@@ -107,7 +117,7 @@ class MySQLConnection implements DatabaseConnection {
         }
       }
 
-      Khadem.logger.info('SQL Error: $e\nQuery: $sql\nBindings: $bindings');
+      Log.info('SQL Error: $e\nQuery: $sql\nBindings: $bindings');
       throw DatabaseException(
         'SQL Execution Error: $e',
         details: e,
@@ -184,7 +194,6 @@ class MySQLConnection implements DatabaseConnection {
   @override
   Future<T> transaction<T>(
     Future<T> Function() callback, {
-    int maxRetries = 3,
     Duration retryDelay = const Duration(milliseconds: 100),
     Future<void> Function(T result)? onSuccess,
     Future<void> Function(dynamic error)? onFailure,
@@ -195,43 +204,30 @@ class MySQLConnection implements DatabaseConnection {
       await connect();
     }
 
-    int attempt = 0;
-    while (attempt < maxRetries) {
-      try {
-        if (isolationLevel != null) {
-          await execute('SET TRANSACTION ISOLATION LEVEL $isolationLevel');
-        }
-        await execute('START TRANSACTION');
-        final result = await callback();
-        await execute('COMMIT');
-
-        if (onSuccess != null) {
-          await onSuccess(result);
-        }
-
-        return result;
-      } catch (e) {
-        try {
-          await execute('ROLLBACK');
-        } catch (_) {
-          // Ignore rollback errors if connection is lost
-        }
-
-        attempt++;
-        if (attempt >= maxRetries) {
-          if (onFailure != null) await onFailure(e);
-          throw DatabaseException(
-            'Transaction failed after $maxRetries retries: $e',
-            details: e,
-          );
-        }
-
-        await Future.delayed(retryDelay * attempt);
-      } finally {
-        if (onFinally != null) await onFinally();
+    try {
+      if (isolationLevel != null) {
+        await execute('SET TRANSACTION ISOLATION LEVEL $isolationLevel');
       }
-    }
+      await execute('START TRANSACTION');
+      final result = await callback();
+      await execute('COMMIT');
 
-    throw DatabaseException('Transaction could not be completed');
+      if (onSuccess != null) {
+        await onSuccess(result);
+      }
+
+      return result;
+    } catch (e) {
+      try {
+        await execute('ROLLBACK');
+      } catch (_) {
+        // Ignore rollback errors if connection is lost
+      }
+
+      if (onFailure != null) await onFailure(e);
+      rethrow;
+    } finally {
+      if (onFinally != null) await onFinally();
+    }
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeObserverCommand extends KhademCommand {
@@ -107,7 +107,7 @@ class MakeObserverCommand extends KhademCommand {
     required String modelImport,
   }) {
     return '''
-import 'package:khadem/khadem.dart' show ModelObserver;
+import 'package:khadem/database/orm.dart' show ModelObserver;
 import '$modelImport';
 
 class $observerClassName extends ModelObserver<$modelClassName> {

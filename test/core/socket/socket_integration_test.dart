@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:khadem/src/contracts/index.dart';
-import 'package:khadem/src/core/container/container_provider.dart';
-import 'package:khadem/src/core/exception/exception_handler.dart';
-import 'package:khadem/src/core/logging/logger.dart';
-import 'package:khadem/src/core/socket/server.dart';
-import 'package:khadem/src/core/socket/socket_config.dart';
-import 'package:khadem/src/core/socket/socket_manager.dart';
+import 'package:khadem/container.dart';
+import 'package:khadem/contracts.dart'
+  show EnvInterface, ExceptionHandlerContract;
+import 'package:khadem/exception.dart';
+import 'package:khadem/logging.dart';
+ 
+import 'package:khadem/socket.dart'
+  show SocketConfig, SocketManager, SocketServer;
 import 'package:test/test.dart';
 
 class DummyLogger implements Logger {

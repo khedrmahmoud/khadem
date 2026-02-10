@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:sqlite3/sqlite3.dart';
 
@@ -29,9 +30,24 @@ class SQLiteConnection implements DatabaseConnection {
   @override
   Future<void> connect() async {
     try {
+      await _ensureDatabaseFileExists(_path);
       _db = sqlite3.open(_path);
     } catch (e) {
       throw DatabaseException('Failed to open SQLite database at $_path: $e');
+    }
+  }
+
+  Future<void> _ensureDatabaseFileExists(String path) async {
+    // Special SQLite path that does not correspond to a file.
+    if (path.trim().isEmpty || path == ':memory:') return;
+
+    final file = File(path);
+    // Ensure parent directories exist (e.g. storage/database/).
+    await file.parent.create(recursive: true);
+
+    // Create empty file if missing so sqlite3 can open it.
+    if (!await file.exists()) {
+      await file.create(recursive: true);
     }
   }
 
@@ -159,7 +175,6 @@ class SQLiteConnection implements DatabaseConnection {
   @override
   Future<T> transaction<T>(
     Future<T> Function() callback, {
-    int maxRetries = 3,
     Duration retryDelay = const Duration(milliseconds: 100),
     Future<void> Function(T result)? onSuccess,
     Future<void> Function(dynamic error)? onFailure,
@@ -170,47 +185,34 @@ class SQLiteConnection implements DatabaseConnection {
       await connect();
     }
 
-    int attempt = 0;
-    while (attempt < maxRetries) {
-      try {
-        // SQLite isolation levels are handled differently (DEFERRED, IMMEDIATE, EXCLUSIVE)
-        // We can map standard levels or just use BEGIN
-        if (isolationLevel != null) {
-          // SQLite doesn't support SET TRANSACTION ISOLATION LEVEL standard syntax easily
-          // We'll ignore for now or map 'SERIALIZABLE' to 'BEGIN EXCLUSIVE' etc.
-        }
-
-        await beginTransaction();
-        final result = await callback();
-        await commit();
-
-        if (onSuccess != null) {
-          await onSuccess(result);
-        }
-
-        return result;
-      } catch (e) {
-        try {
-          await rollBack();
-        } catch (_) {
-          // Ignore rollback errors
-        }
-
-        attempt++;
-        if (attempt >= maxRetries) {
-          if (onFailure != null) await onFailure(e);
-          throw DatabaseException(
-            'Transaction failed after $maxRetries retries: $e',
-            details: e,
-          );
-        }
-
-        await Future.delayed(retryDelay * attempt);
-      } finally {
-        if (onFinally != null) await onFinally();
+    try {
+      // SQLite isolation levels are handled differently (DEFERRED, IMMEDIATE, EXCLUSIVE)
+      // We can map standard levels or just use BEGIN
+      if (isolationLevel != null) {
+        // SQLite doesn't support SET TRANSACTION ISOLATION LEVEL standard syntax easily
+        // We'll ignore for now or map 'SERIALIZABLE' to 'BEGIN EXCLUSIVE' etc.
       }
-    }
 
-    throw DatabaseException('Transaction could not be completed');
+      await beginTransaction();
+      final result = await callback();
+      await commit();
+
+      if (onSuccess != null) {
+        await onSuccess(result);
+      }
+
+      return result;
+    } catch (e) {
+      try {
+        await rollBack();
+      } catch (_) {
+        // Ignore rollback errors
+      }
+
+      if (onFailure != null) await onFailure(e);
+      rethrow;
+    } finally {
+      if (onFinally != null) await onFinally();
+    }
   }
 }

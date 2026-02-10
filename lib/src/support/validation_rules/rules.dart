@@ -4,6 +4,7 @@ export 'array_rules.dart';
 export 'bool_rule.dart';
 export 'comparison_rules.dart';
 export 'confirmed.dart';
+export 'database_rules.dart';
 export 'date_rules.dart';
 export 'email.dart';
 export 'file_rules.dart';

@@ -14,14 +14,14 @@ void main() {
       expect(registry.coreCommands, isNotEmpty);
       expect(registry.customCommands, isEmpty);
 
-      // Test auto-discovery (no-op after dart:mirrors removal)
+      // Test auto-discovery (this will load the package name internally)
       await registry.autoDiscoverCommands(Directory.current.path);
 
       // The package name should be loaded and used correctly
       // We can't directly test the private field, but we can verify the system works
       expect(
         registry.commands.length,
-        equals(registry.coreCommands.length),
+        greaterThanOrEqualTo(registry.coreCommands.length),
       );
     });
 

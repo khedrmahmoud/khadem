@@ -2,6 +2,11 @@ import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
 /// Validates that the field under validation is numeric.
+///
+/// Signature: `numeric`
+///
+/// Examples:
+/// - `numeric`
 class NumericRule extends Rule {
   @override
   String get signature => 'numeric';

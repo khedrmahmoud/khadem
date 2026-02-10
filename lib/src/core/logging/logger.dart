@@ -1,4 +1,4 @@
-import 'package:khadem/khadem.dart'
+import 'package:khadem/contracts.dart'
     show LoggerContract, ConfigInterface, LogHandler, LogLevel;
 
 import 'log_channel_manager.dart';

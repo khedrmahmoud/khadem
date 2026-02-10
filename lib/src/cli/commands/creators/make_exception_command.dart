@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeExceptionCommand extends KhademCommand {
@@ -58,7 +58,8 @@ class MakeExceptionCommand extends KhademCommand {
 
   String _stub(String className) {
     return '''
-import 'package:khadem/khadem.dart';
+import 'package:khadem/contracts.dart' show AppException;
+
 
 class $className extends AppException {
   $className([

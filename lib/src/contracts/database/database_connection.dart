@@ -46,7 +46,6 @@ abstract class DatabaseConnection {
   /// Executes a transactional block with retry, success/failure hooks.
   ///
   /// - [callback] is the block of code to run inside a transaction.
-  /// - [maxRetries] sets the number of retries if transaction fails.
   /// - [retryDelay] sets the delay between retries.
   ///
   /// Hooks:
@@ -55,8 +54,7 @@ abstract class DatabaseConnection {
   /// - [onFinally] always called after transaction completes.
   Future<T> transaction<T>(
     Future<T> Function() callback, {
-    int maxRetries = 3,
-    Duration retryDelay = const Duration(milliseconds: 100),
+     Duration retryDelay = const Duration(milliseconds: 100),
     Future<void> Function(T result)? onSuccess,
     Future<void> Function(dynamic error)? onFailure,
     Future<void> Function()? onFinally,

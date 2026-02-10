@@ -43,3 +43,25 @@ abstract class Rule {
   /// Returns the validation error message.
   String message(ValidationContext context);
 }
+
+/// Optional contract for rules that want to provide extra localization
+/// parameters for their error messages.
+///
+/// Example: the `in` rule can provide a `values` parameter used by
+/// translations like `Allowed values: :values`.
+abstract interface class RuleMessageParametersProvider {
+  Map<String, dynamic> messageParameters(ValidationContext context);
+}
+
+/// Wrapper type to indicate that a message parameter is a reference
+/// to another field name.
+///
+/// The validator can then localize it using the fields translation file.
+class FieldName {
+  final String name;
+
+  const FieldName(this.name);
+
+  @override
+  String toString() => name;
+}

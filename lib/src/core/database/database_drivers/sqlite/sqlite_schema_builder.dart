@@ -14,7 +14,7 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
     callback(blueprint);
 
     final columnSQLs = blueprint.columns.map(_columnToSQL).toList();
-    final constraints = _generateTableConstraints(blueprint.columns, tableName);
+    final constraints = _generateTableConstraints(blueprint, tableName);
 
     final fullSQL = [
       ...columnSQLs,
@@ -30,6 +30,12 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
             'CREATE INDEX "${tableName}_${column.name}_index" ON "$tableName" ("${column.name}");',);
       }
     }
+
+    for (final idx in blueprint.indexes) {
+      final name = idx.name ?? '${tableName}_${idx.columns.join('_')}_index';
+      final cols = idx.columns.map((c) => '"$c"').join(', ');
+      _queries.add('CREATE INDEX "$name" ON "$tableName" ($cols);');
+    }
   }
 
   @override
@@ -41,7 +47,7 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
     callback(blueprint);
 
     final columnSQLs = blueprint.columns.map(_columnToSQL).toList();
-    final constraints = _generateTableConstraints(blueprint.columns, tableName);
+    final constraints = _generateTableConstraints(blueprint, tableName);
 
     final fullSQL = [
       ...columnSQLs,
@@ -56,6 +62,12 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
         _queries.add(
             'CREATE INDEX IF NOT EXISTS "${tableName}_${column.name}_index" ON "$tableName" ("${column.name}");',);
       }
+    }
+
+    for (final idx in blueprint.indexes) {
+      final name = idx.name ?? '${tableName}_${idx.columns.join('_')}_index';
+      final cols = idx.columns.map((c) => '"$c"').join(', ');
+      _queries.add('CREATE INDEX IF NOT EXISTS "$name" ON "$tableName" ($cols);');
     }
   }
 
@@ -171,6 +183,7 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
         return 'BLOB';
 
       case 'JSON':
+      case 'JSONB':
       case 'ARRAY':
         // JSON is stored as TEXT
         return 'TEXT';
@@ -178,6 +191,7 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
       case 'VARCHAR':
       case 'CHAR':
       case 'TEXT':
+      case 'TINYTEXT':
       case 'MEDIUMTEXT':
       case 'LONGTEXT':
       case 'ENUM':
@@ -228,10 +242,10 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
   // ===========================================================================
 
   List<String> _generateTableConstraints(
-      List<ColumnDefinition> columns, String tableName,) {
+      Blueprint blueprint, String tableName,) {
     final constraints = <String>[];
 
-    for (final column in columns) {
+    for (final column in blueprint.columns) {
       // Foreign Keys
       if (column.foreignTable != null && column.foreignKey != null) {
         final onDelete = column.onDeleteAction != null
@@ -245,6 +259,16 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
           'FOREIGN KEY ("${column.name}") REFERENCES "${column.foreignTable}" ("${column.foreignKey}")$onDelete$onUpdate',
         );
       }
+    }
+
+    if (blueprint.primaryKey != null) {
+      final cols = blueprint.primaryKey!.columns.map((c) => '"$c"').join(', ');
+      constraints.add('PRIMARY KEY ($cols)');
+    }
+
+    for (final idx in blueprint.uniques) {
+      final cols = idx.columns.map((c) => '"$c"').join(', ');
+      constraints.add('UNIQUE ($cols)');
     }
 
     return constraints;

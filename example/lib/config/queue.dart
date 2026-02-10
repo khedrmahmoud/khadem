@@ -18,9 +18,6 @@ class QueueConfig {
             'track_metrics': true,
             'use_dlq': true,
           },
-          'sync': {
-            'driver': 'sync',
-          },
           'redis': {
             'driver': 'redis',
             'host': env.getOrDefault('REDIS_HOST', '127.0.0.1'),

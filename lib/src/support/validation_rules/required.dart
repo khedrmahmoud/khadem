@@ -4,6 +4,11 @@ import '../../contracts/validation/rule.dart';
 /// Validates that the field under validation is present and not empty.
 ///
 /// Checks for null, empty strings (after trim), empty lists, and empty maps.
+///
+/// Signature: `required`
+///
+/// Examples:
+/// - `required`
 class RequiredRule extends Rule {
   @override
   String get signature => 'required';

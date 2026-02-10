@@ -9,6 +9,8 @@ import '../../core/database/database.dart';
 /// Provides quick access to database connections, query builders and
 /// transaction helpers via static methods, e.g. `DB.table('users')`.
 class DB {
+  DB._();
+
   /// Gets the database manager instance.
   static DatabaseManager get _manager => Khadem.make<DatabaseManager>();
 
@@ -65,7 +67,6 @@ class DB {
   /// Runs a transaction.
   static Future<T> transaction<T>(
     Future<T> Function() callback, {
-    int maxRetries = 3,
     Duration retryDelay = const Duration(milliseconds: 100),
     Future<void> Function(T result)? onSuccess,
     Future<void> Function(dynamic error)? onFailure,
@@ -74,7 +75,6 @@ class DB {
   }) {
     return connection().transaction(
       callback,
-      maxRetries: maxRetries,
       retryDelay: retryDelay,
       onSuccess: onSuccess,
       onFailure: onFailure,

@@ -1,4 +1,4 @@
-import 'package:khadem/khadem.dart';
+import 'package:khadem/support.dart' show jsonSafe;
 
 /// Unified authentication response
 ///

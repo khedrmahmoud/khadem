@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeProviderCommand extends KhademCommand {
@@ -46,7 +46,7 @@ class MakeProviderCommand extends KhademCommand {
     await file.create(recursive: true);
 
     await file.writeAsString('''
-import 'package:khadem/khadem.dart' show ServiceProvider, ContainerInterface;
+import 'package:khadem/contracts.dart' show ServiceProvider, ContainerInterface;
 
 class $className extends ServiceProvider {
   @override

@@ -1,4 +1,6 @@
-import 'package:khadem/khadem.dart';
+
+import '../model_base/khadem_model.dart';
+import 'relation_meta.dart';
 
 /// A utility class for eager loading database relations in the Khadem ORM.
 ///

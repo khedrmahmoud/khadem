@@ -1,30 +1,17 @@
 // ignore_for_file: deprecated_member_use_from_same_package
-import 'package:khadem/khadem.dart'
-    show
-        AssetService,
-        ConfigInterface,
-        ConfigSystem,
-        ContainerInterface,
-        EnvInterface,
-        EnvSystem,
-        EventSystem,
-        EventSystemInterface,
-        Dispatcher,
-        EventDispatcher,
-        FileLangProvider,
-        Lang,
-        LangProvider,
-        Logger,
-        MiddlewarePipeline,
-        ServiceProvider,
-        SocketManager,
-        StorageManager,
-        UrlService,
-        Router;
-import 'package:khadem/src/application/khadem.dart';
+import 'package:khadem/config.dart';
+import 'package:khadem/contracts.dart';
+import 'package:khadem/events.dart';
+import 'package:khadem/http.dart' show MiddlewarePipeline;
+import 'package:khadem/khadem.dart';
+import 'package:khadem/lang.dart';
+import 'package:khadem/logging.dart';
+import 'package:khadem/routing.dart' show Router;
+import 'package:khadem/socket.dart' show SocketManager;
+import 'package:khadem/storage.dart' show StorageManager;
+import 'package:khadem/support.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
-import '../../contracts/exceptions/exception_handler_contract.dart';
 import '../../core/exception/exception_handler.dart';
 
 /// Registers all core services of the Khadem framework,
@@ -80,8 +67,8 @@ class CoreServiceProvider extends ServiceProvider {
 
       final assetUrl =
           appConfig['asset_url'] as String? ?? env.get('ASSET_URL');
-      final forceHttps = appConfig['force_https'] as bool? ??
-          env.getBool('FORCE_HTTPS');
+      final forceHttps =
+          appConfig['force_https'] as bool? ?? env.getBool('FORCE_HTTPS');
 
       final urlService = UrlService(
         assetBaseUrl: assetUrl,

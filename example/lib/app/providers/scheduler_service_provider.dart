@@ -1,12 +1,15 @@
-import 'package:khadem/khadem.dart' show ServiceProvider, startSchedulers;
+import 'package:khadem/contracts.dart' show ContainerInterface, ServiceProvider;
+import 'package:khadem/scheduler.dart' show startSchedulers;
 
 class SchedulerServiceProvider extends ServiceProvider {
   @override
-  void register(container) {}
+  void register(ContainerInterface container) {}
 
   @override
-  Future<void> boot(container) async {
+  Future<void> boot(ContainerInterface container) async {
     // ✅ Start schedulers here
-    startSchedulers();
+    startSchedulers(
+      tasks: [], // You can provide scheduled tasks here
+    );
   }
 }

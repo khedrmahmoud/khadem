@@ -1,4 +1,4 @@
-import 'package:khadem/khadem.dart' show QueueJob;
+import 'package:khadem/contracts.dart' show QueueJob;
 
 class SendUserNotificationJob extends QueueJob {
   final String event;

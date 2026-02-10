@@ -21,7 +21,24 @@ abstract class KhademModel<T>
 
   /// The table associated with the model.
   @override
-  String get table => '${runtimeType.toString().toLowerCase()}s';
+  String get table {
+    final name = runtimeType.toString();
+
+    final snake = name
+        // Handle "HTTPServer" -> "HTTP_Server"
+        .replaceAllMapped(
+          RegExp(r'([A-Z]+)([A-Z][a-z])'),
+          (m) => '${m.group(1)}_${m.group(2)}',
+        )
+        // Handle "EducationStage" -> "Education_Stage"
+        .replaceAllMapped(
+          RegExp(r'([a-z0-9])([A-Z])'),
+          (m) => '${m.group(1)}_${m.group(2)}',
+        )
+        .toLowerCase();
+
+    return '${snake}s';
+  }
 
   /// Alias for table.
   @override

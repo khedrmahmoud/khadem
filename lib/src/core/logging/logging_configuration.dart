@@ -1,4 +1,4 @@
-import 'package:khadem/khadem.dart' show ConfigInterface, LogLevel, LogHandler;
+import 'package:khadem/contracts.dart' show ConfigInterface, LogLevel, LogHandler;
 
 import 'logging_writers/console_writer.dart';
 import 'logging_writers/file_writer.dart';

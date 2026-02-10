@@ -1,4 +1,5 @@
-import 'package:khadem/khadem.dart' show QueryBuilderInterface, Khadem;
+import 'package:khadem/contracts.dart' show QueryBuilderInterface;
+import 'package:khadem/khadem.dart';
 
 import '../model_base/khadem_model.dart';
 import 'relation_type.dart';
@@ -10,6 +11,7 @@ import 'relations/has_one.dart';
 import 'relations/has_one_through.dart';
 import 'relations/morph_many.dart';
 import 'relations/morph_one.dart';
+import 'relations/morph_to.dart';
 import 'relations/morph_to_many.dart';
 import 'relations/morphed_by_many.dart';
 import 'relations/relation.dart';
@@ -166,9 +168,17 @@ class RelationDefinition<T extends KhademModel<T>> {
           morphTypeField!,
           q.table,
         );
-      default:
-        throw UnimplementedError(
-          'Relation type $type not implemented in toRelation',
+      case RelationType.morphTo:
+        final morphClass = factory().runtimeType.toString();
+        return MorphTo<T, KhademModel>(
+          q,
+          parent,
+          factory,
+          morphTypeField!,
+          morphIdField!,
+          morphClass,
+          ownerKey ?? 'id',
+          relationName,
         );
     }
   }

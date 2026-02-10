@@ -2,6 +2,11 @@ import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
 /// Validates that the field matches the value of `{field}_confirmation`.
+///
+/// Signature: `confirmed`
+///
+/// Examples:
+/// - `confirmed`
 class ConfirmedRule extends Rule {
   @override
   String get signature => 'confirmed';

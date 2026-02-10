@@ -21,9 +21,19 @@ class BelongsToMany<Related extends KhademModel<Related>, Parent>
     this.relatedKey,
   );
 
+  void _addPivotSelects() {
+    if (query.columns.isEmpty ||
+        (query.columns.length == 1 && query.columns.first == '*')) {
+      query.select(['${query.table}.*']);
+    }
+    query.selectRaw('$table.$foreignPivotKey as khadem_pivot_foreign_key');
+    query.selectRaw('$table.$relatedPivotKey as khadem_pivot_related_key');
+  }
+
   @override
   void addConstraints() {
     _performJoin();
+    _addPivotSelects();
     if ((parent as KhademModel).getAttribute(parentKey) != null) {
       query.where(
         '$table.$foreignPivotKey',
@@ -48,6 +58,7 @@ class BelongsToMany<Related extends KhademModel<Related>, Parent>
   @override
   void addEagerConstraints(List<KhademModel> models) {
     _performJoin();
+    _addPivotSelects();
     final keys = models
         .map((model) => model.getAttribute(parentKey))
         .where((key) => key != null)
@@ -92,13 +103,24 @@ class BelongsToMany<Related extends KhademModel<Related>, Parent>
     List<Related> results,
     String relation,
   ) {
-    // This is tricky because we need the pivot data to match.
-    // In a real implementation, we would select the pivot columns as well.
-    // For now, we assume the pivot data is available or we re-query (which is inefficient).
-    // A better way is to select pivot fields in the query.
+    final dictionary = <dynamic, List<Related>>{};
 
-    // TODO: Implement proper matching with pivot data.
-    // For now, this is a placeholder that might not work correctly without pivot data in results.
+    for (final result in results) {
+      final key = result.getAttribute('khadem_pivot_foreign_key');
+      if (key != null) {
+        (dictionary[key] ??= <Related>[]).add(result);
+      }
+    }
+
+    for (final model in models) {
+      final key = model.getAttribute(parentKey);
+      if (dictionary.containsKey(key)) {
+        model.setRelation(relation, dictionary[key]);
+      } else {
+        model.setRelation(relation, <Related>[]);
+      }
+    }
+
     return models;
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeSeederCommand extends KhademCommand {
@@ -53,18 +53,21 @@ class MakeSeederCommand extends KhademCommand {
 
     await file.create(recursive: true);
 
-    await file.writeAsString('''
-import 'package:khadem/khadem.dart';
+    await file.writeAsString(
+      '''
+import 'package:khadem/contracts.dart' show Seeder;
 
 class $classBase extends Seeder {
   @override
   Future<void> run() async {
     // TODO: implement seeding logic
-    Khadem.logger.info('🌱 Running $classBase...');
+    Log.info('🌱 Running $classBase...');
+
   }
 }
 '''
-        .trim(),);
+          .trim(),
+    );
 
     logger.info('✅ Seeder "$classBase" created successfully at $filePath');
 
@@ -90,7 +93,7 @@ class $classBase extends Seeder {
       ..sort((a, b) => a.path.compareTo(b.path));
 
     final buffer = StringBuffer();
-    buffer.writeln("import 'package:khadem/khadem.dart';\n");
+    buffer.writeln("import 'package:khadem/contracts.dart' show Seeder;\n");
 
     final classNames = <String>[];
 
@@ -110,7 +113,8 @@ class $classBase extends Seeder {
     }
 
     buffer.writeln(
-        '\n// Seeder registry - automatically maintained by the seeder generator',);
+      '\n// Seeder registry - automatically maintained by the seeder generator',
+    );
     buffer.writeln(
       "// This file is used by the 'khadem db:seed' command to discover and run seeders",
     );

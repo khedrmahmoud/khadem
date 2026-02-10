@@ -110,7 +110,7 @@ mixin HasAttributes<T> {
     if (hasCast(key)) {
       final caster = casts[key];
       if (caster is AttributeCaster) {
-        value = caster.set(value);
+        value = caster.get(value);
       }
     }
 
@@ -336,8 +336,76 @@ mixin HasAttributes<T> {
     return map;
   }
 
+  Map<String, dynamic> _toJsonEncodableMap(Map<String, dynamic> map) {
+    final seen = <int>{};
+    final result = <String, dynamic>{};
+    for (final entry in map.entries) {
+      if (hasCast(entry.key)) {
+        final caster = casts[entry.key];
+        if (caster is AttributeCaster) {
+          result[entry.key] =
+              _toJsonEncodableValue(caster.set(entry.value), seen);
+          continue;
+        }
+      }
+      result[entry.key] = _toJsonEncodableValue(entry.value, seen);
+    }
+    return result;
+  }
+
+  dynamic _toJsonEncodableValue(dynamic value, Set<int> seen) {
+    if (value == null) return null;
+
+    if (value is String || value is num || value is bool) return value;
+
+    if (value is DateTime) {
+      return value.toUtc().toIso8601String();
+    }
+
+    if (value is Enum) {
+      return value.name;
+    }
+
+    if (value is BigInt) {
+      return value.toString();
+    }
+
+    if (value is Duration) {
+      return value.inMicroseconds;
+    }
+
+    if (value is Blob) {
+      // mysql1.Blob isn't directly JSON-encodable.
+      return value.toString();
+    }
+
+    if (value is HasAttributes) {
+      final id = identityHashCode(value);
+      if (seen.contains(id)) return null;
+      seen.add(id);
+      return _toJsonEncodableValue(value.toMap(), seen);
+    }
+
+    if (value is List) {
+      return value.map((e) => _toJsonEncodableValue(e, seen)).toList();
+    }
+
+    if (value is Map) {
+      final out = <String, dynamic>{};
+      for (final entry in value.entries) {
+        out[entry.key.toString()] = _toJsonEncodableValue(entry.value, seen);
+      }
+      return out;
+    }
+
+    // Last resort: avoid breaking JSON encoding for custom objects.
+    return value.toString();
+  }
+
   /// Convert the model instance to JSON.
-  Map<String, dynamic> toJson() => toMap();
+  ///
+  /// This returns a map that is safe to pass to `jsonEncode()`.
+  Map<String, dynamic> toJson() => _toJsonEncodableMap(toMap());
 
   /// Convert the model instance to a map, resolving any Future values.
   Future<Map<String, dynamic>> toMapAsync() async {
@@ -352,12 +420,42 @@ mixin HasAttributes<T> {
     return map;
   }
 
-  Future<Map<String, dynamic>> toJsonAsync() => toMapAsync();
+  Future<dynamic> _resolveFuturesDeep(dynamic value) async {
+    if (value is Future) {
+      return _resolveFuturesDeep(await value);
+    }
+
+    if (value is HasAttributes) {
+      return _resolveFuturesDeep(value.toMap());
+    }
+
+    if (value is List) {
+      final resolved = <dynamic>[];
+      for (final item in value) {
+        resolved.add(await _resolveFuturesDeep(item));
+      }
+      return resolved;
+    }
+
+    if (value is Map) {
+      final resolved = <dynamic, dynamic>{};
+      for (final entry in value.entries) {
+        resolved[entry.key] = await _resolveFuturesDeep(entry.value);
+      }
+      return resolved;
+    }
+
+    return value;
+  }
+
+  Future<Map<String, dynamic>> toJsonAsync() async {
+    final resolved = await _resolveFuturesDeep(toMap());
+    return _toJsonEncodableMap(Map<String, dynamic>.from(resolved as Map));
+  }
 
   /// Prepare the model for database insertion/update.
   Map<String, dynamic> toDatabaseMap() {
     final map = <String, dynamic>{};
-
     for (final key in _attributes.keys) {
       var value = _attributes[key];
 

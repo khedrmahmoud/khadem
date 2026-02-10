@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeModelCommand extends KhademCommand {
@@ -46,8 +46,7 @@ class MakeModelCommand extends KhademCommand {
     await file.create(recursive: true);
 
     final classCode = '''
-import 'package:khadem/khadem.dart'
-    show KhademModel, RelationDefinition, Timestamps;
+import 'package:khadem/database/orm.dart';
 
 class $className extends KhademModel<$className> with Timestamps {
   // Example attribute getters:

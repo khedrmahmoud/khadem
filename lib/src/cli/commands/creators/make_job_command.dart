@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeJobCommand extends KhademCommand {
@@ -58,7 +58,8 @@ class MakeJobCommand extends KhademCommand {
   String _jobStub(String className, String jobName, String folder) {
     final namespace = folder.isEmpty ? '' : '$folder/';
     return '''
-import 'package:khadem/khadem.dart' show QueueJob;
+import 'package:khadem/contracts.dart';
+
 
 class $className extends QueueJob {
   final String value;

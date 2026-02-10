@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeCommandCommand extends KhademCommand {
@@ -61,8 +61,7 @@ class MakeCommandCommand extends KhademCommand {
     await file.create(recursive: true);
 
     await file.writeAsString('''
-import 'package:khadem/src/cli/bus/command.dart';
-import 'package:khadem/src/core/logging/logger.dart';
+import 'package:khadem/contracts.dart' show KhademCommand, LoggerContract;
 
 class $className extends KhademCommand {
   @override
@@ -71,7 +70,7 @@ class $className extends KhademCommand {
   @override
   String get description => 'Describe what this command does.';
 
-  $className({required Logger logger}) : super(logger: logger);
+  $className({required LoggerContract logger}) : super(logger: logger);
 
   @override
   Future<void> handle(List<String> args) async {

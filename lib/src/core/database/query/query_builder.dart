@@ -54,6 +54,8 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   final List<String> _without = [];
   final List<String> _withOnly = [];
 
+  bool _defaultWithCountApplied = false;
+
   QueryBuilder(
     this.connection,
     this.grammar,
@@ -235,8 +237,27 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   // Execution Methods
 
+  void _applyDefaultWithCountIfNeeded() {
+    if (_defaultWithCountApplied) return;
+    _defaultWithCountApplied = true;
+
+    if (modelFactory == null) return;
+
+    final model = modelFactory!({});
+    if (model is HasRelations) {
+      final defaults = model.withCount;
+      if (defaults.isNotEmpty) {
+        // Apply model-level default counts.
+        // This mirrors how default withRelations are applied, but must be
+        // done before compiling the SELECT.
+        withCount(defaults);
+      }
+    }
+  }
+
   @override
   Future<List<T>> get() async {
+    _applyDefaultWithCountIfNeeded();
     final sql = grammar.compileSelect(_getQueryComponents());
     final result = await connection.execute(sql, bindings);
 
@@ -1078,7 +1099,10 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   @override
-  String toSql() => grammar.compileSelect(_getQueryComponents());
+  String toSql() {
+    _applyDefaultWithCountIfNeeded();
+    return grammar.compileSelect(_getQueryComponents());
+  }
 
   @override
   QueryBuilderInterface<T> union(QueryBuilderInterface<T> query) {

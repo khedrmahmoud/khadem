@@ -2,6 +2,12 @@ import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
 /// Validates that the field matches the given regex pattern.
+///
+/// Signature: `regex:pattern`
+///
+/// Examples:
+/// - `regex:^\\d+$`
+/// - `regex:^[A-Z]{3}-\\d{4}$`
 class RegexRule extends Rule {
   final String? _pattern;
   RegexRule([this._pattern]);

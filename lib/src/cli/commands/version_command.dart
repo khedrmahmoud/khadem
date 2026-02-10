@@ -1,4 +1,4 @@
-import 'package:khadem/src/cli/bus/command.dart';
+import 'package:khadem/src/contracts/cli/command.dart';
 
 import '../../support/utils/package_metadata.dart';
 

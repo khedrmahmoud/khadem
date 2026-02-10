@@ -2,6 +2,11 @@ import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
 /// Validates that the field under validation is a [List].
+///
+/// Signature: `array`
+///
+/// Examples:
+/// - `array`
 class ArrayRule extends Rule {
   @override
   String get signature => 'array';
@@ -18,12 +23,22 @@ class ArrayRule extends Rule {
 
 /// Validates that the field under validation is a [List].
 /// Alias for [ArrayRule].
+///
+/// Signature: `list`
+///
+/// Examples:
+/// - `list`
 class ListRule extends ArrayRule {
   @override
   String get signature => 'list';
 }
 
 /// Validates that the field under validation is a [Map].
+///
+/// Signature: `map`
+///
+/// Examples:
+/// - `map`
 class MapRule extends Rule {
   @override
   String get signature => 'map';
@@ -41,6 +56,11 @@ class MapRule extends Rule {
 /// Validates that the array under validation has distinct (unique) values.
 ///
 /// Duplicate values are considered a failure.
+///
+/// Signature: `distinct`
+///
+/// Examples:
+/// - `distinct`
 class DistinctRule extends Rule {
   @override
   String get signature => 'distinct';
@@ -63,6 +83,11 @@ class DistinctRule extends Rule {
 }
 
 /// Validates that the array has at least [minCount] items.
+///
+/// Signature: `min_items:count`
+///
+/// Examples:
+/// - `min_items:1`
 class MinItemsRule extends Rule {
   @override
   String get signature => 'min_items';
@@ -85,6 +110,11 @@ class MinItemsRule extends Rule {
 }
 
 /// Validates that the array has at most [maxCount] items.
+///
+/// Signature: `max_items:count`
+///
+/// Examples:
+/// - `max_items:10`
 class MaxItemsRule extends Rule {
   @override
   String get signature => 'max_items';
@@ -107,7 +137,12 @@ class MaxItemsRule extends Rule {
 }
 
 /// Validates that the field's value exists in another field's array.
-class InArrayRule extends Rule {
+///
+/// Signature: `in_array:otherField`
+///
+/// Examples:
+/// - `in_array:allowed_ids`
+class InArrayRule extends Rule implements RuleMessageParametersProvider {
   @override
   String get signature => 'in_array';
 
@@ -128,10 +163,22 @@ class InArrayRule extends Rule {
 
   @override
   String message(ValidationContext context) => 'in_array_validation';
+
+  @override
+  Map<String, dynamic> messageParameters(ValidationContext context) {
+    final args = context.parameters;
+    if (args.isEmpty) return const {};
+    return {'other': FieldName(args[0])};
+  }
 }
 
 /// Validates that the field's value does not exist in another field's array.
-class NotInArrayRule extends Rule {
+///
+/// Signature: `not_in_array:otherField`
+///
+/// Examples:
+/// - `not_in_array:banned_ids`
+class NotInArrayRule extends Rule implements RuleMessageParametersProvider {
   @override
   String get signature => 'not_in_array';
 
@@ -152,9 +199,21 @@ class NotInArrayRule extends Rule {
 
   @override
   String message(ValidationContext context) => 'not_in_array_validation';
+
+  @override
+  Map<String, dynamic> messageParameters(ValidationContext context) {
+    final args = context.parameters;
+    if (args.isEmpty) return const {};
+    return {'other': FieldName(args[0])};
+  }
 }
 
 /// Validates that all items in the array field are present in the given allowed list.
+///
+/// Signature: `subset:val1,val2,...`
+///
+/// Examples:
+/// - `subset:admin,user,guest`
 class SubsetRule extends Rule {
   @override
   String get signature => 'subset';

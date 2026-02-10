@@ -6,6 +6,7 @@ import 'package:khadem/src/contracts/config/config_contract.dart';
 /// Use `Config.get`, `Config.section`, and related helpers to access
 /// configuration values without resolving the config service manually.
 class Config {
+  Config._();
   static ConfigInterface get _instance => Khadem.make<ConfigInterface>();
 
   static T? get<T>(String key, [T? defaultValue]) =>

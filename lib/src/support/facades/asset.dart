@@ -6,6 +6,7 @@ import 'package:khadem/src/support/services/url/asset_service.dart';
 /// Use `Asset.url`, `Asset.storeFile`, and related helpers to manage
 /// assets without resolving the underlying `AssetService`.
 class Asset {
+  Asset._();
   static AssetService get _instance => Khadem.make<AssetService>();
 
   static String url(String path, {Map<String, dynamic>? query}) =>

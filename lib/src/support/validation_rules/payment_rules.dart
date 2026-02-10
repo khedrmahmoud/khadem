@@ -2,6 +2,11 @@ import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
 /// Validates that the field is a valid credit card number using the Luhn algorithm.
+///
+/// Signature: `credit_card`
+///
+/// Examples:
+/// - `credit_card`
 class CreditCardRule extends Rule {
   @override
   String get signature => 'credit_card';

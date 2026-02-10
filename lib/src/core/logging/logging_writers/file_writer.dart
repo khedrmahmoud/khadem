@@ -77,7 +77,9 @@ class FileLogHandler implements LogHandler {
         ? _formatJsonLog(level, message, context, stackTrace)
         : _formatTextLog(level, message, context, stackTrace);
 
-    final bytes = utf8.encode('$logEntry\n');
+    // On Windows (and in general), a String can contain malformed UTF-16
+    // (e.g. from decoding arbitrary bytes). Ensure logging never throws.
+    final bytes = _safeUtf8Encode('$logEntry\n');
 
     if (_isRotating) {
       _buffer.add(bytes);
@@ -224,5 +226,48 @@ class FileLogHandler implements LogHandler {
   void close() {
     _sink?.close();
     _sink = null;
+  }
+
+  List<int> _safeUtf8Encode(String input) {
+    try {
+      return utf8.encode(input);
+    } catch (_) {
+      return utf8.encode(_sanitizeUtf16(input));
+    }
+  }
+
+  String _sanitizeUtf16(String input) {
+    final buffer = StringBuffer();
+    final units = input.codeUnits;
+
+    for (var i = 0; i < units.length; i++) {
+      final unit = units[i];
+
+      // High surrogate
+      if (unit >= 0xD800 && unit <= 0xDBFF) {
+        if (i + 1 < units.length) {
+          final next = units[i + 1];
+          // Valid low surrogate
+          if (next >= 0xDC00 && next <= 0xDFFF) {
+            buffer.writeCharCode(unit);
+            buffer.writeCharCode(next);
+            i++;
+            continue;
+          }
+        }
+        buffer.write('\uFFFD');
+        continue;
+      }
+
+      // Low surrogate without a preceding high surrogate
+      if (unit >= 0xDC00 && unit <= 0xDFFF) {
+        buffer.write('\uFFFD');
+        continue;
+      }
+
+      buffer.writeCharCode(unit);
+    }
+
+    return buffer.toString();
   }
 }

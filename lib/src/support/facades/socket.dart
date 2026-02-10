@@ -8,6 +8,7 @@ import '../../core/socket/socket_manager.dart';
 /// (broadcasts, room management, client lookup). Useful in jobs, controllers
 /// and background tasks where dependency injection isn't available.
 class Socket {
+  Socket._();
   /// Gets the socket manager instance.
   static SocketManager get _manager => Khadem.make<SocketManager>();
 

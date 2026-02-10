@@ -30,11 +30,11 @@ class ResponseBody {
   void sendText(String text) {
     if (_sent) return;
 
-    _headers.setContentType(ContentType.text);
+    _headers.setContentType(ContentType('text', 'plain', charset: 'utf-8'));
     if (_compression) {
-      _response.add(gzip.encode(utf8.encode(text)));
+      _response.add(gzip.encode(_safeUtf8Encode(text)));
     } else {
-      _response.write(text);
+      _response.add(_safeUtf8Encode(text));
     }
     _closeResponse();
   }
@@ -43,11 +43,11 @@ class ResponseBody {
   void sendHtml(String html) {
     if (_sent) return;
 
-    _headers.setContentType(ContentType.html);
+    _headers.setContentType(ContentType('text', 'html', charset: 'utf-8'));
     if (_compression) {
-      _response.add(gzip.encode(utf8.encode(html)));
+      _response.add(gzip.encode(_safeUtf8Encode(html)));
     } else {
-      _response.write(html);
+      _response.add(_safeUtf8Encode(html));
     }
     _closeResponse();
   }
@@ -56,13 +56,14 @@ class ResponseBody {
   void sendJson(dynamic data, {String? contentType}) {
     if (_sent) return;
 
-    _headers.setContentTypeString(contentType ?? 'application/json');
+    _headers
+        .setContentTypeString(contentType ?? 'application/json; charset=utf-8');
     final jsonString =
         data is String ? data : JsonEncoder(_defaultToEncodable).convert(data);
     if (_compression) {
-      _response.add(gzip.encode(utf8.encode(jsonString)));
+      _response.add(gzip.encode(_safeUtf8Encode(jsonString)));
     } else {
-      _response.write(jsonString);
+      _response.add(_safeUtf8Encode(jsonString));
     }
     _closeResponse();
   }
@@ -71,13 +72,13 @@ class ResponseBody {
   void sendJsonPretty(dynamic data, {int indent = 2}) {
     if (_sent) return;
 
-    _headers.setContentType(ContentType.json);
+    _headers.setContentTypeString('application/json; charset=utf-8');
     final encoder = JsonEncoder.withIndent(' ' * indent, _defaultToEncodable);
     final jsonString = encoder.convert(data);
     if (_compression) {
-      _response.add(gzip.encode(utf8.encode(jsonString)));
+      _response.add(gzip.encode(_safeUtf8Encode(jsonString)));
     } else {
-      _response.write(jsonString);
+      _response.add(_safeUtf8Encode(jsonString));
     }
     _closeResponse();
   }
@@ -178,7 +179,7 @@ class ResponseBody {
     final converter = toBytes ??
         (T data) {
           if (data is List<int>) return data;
-          if (data is String) return utf8.encode(data);
+          if (data is String) return _safeUtf8Encode(data);
           throw ArgumentError(
             'Unsupported type: ${data.runtimeType}. Provide a custom toBytes converter.',
           );
@@ -194,7 +195,7 @@ class ResponseBody {
   void sendChunked(String data) {
     if (_sent) return;
 
-    _response.write(data);
+    _response.add(_safeUtf8Encode(data));
     // Don't close - allow more chunks
   }
 
@@ -242,8 +243,51 @@ class ResponseBody {
       _headers.setHeader(key, value);
     });
 
-    _response.write(content);
+    _response.add(_safeUtf8Encode(content));
     _closeResponse();
+  }
+
+  List<int> _safeUtf8Encode(String input) {
+    try {
+      return utf8.encode(input);
+    } catch (_) {
+      return utf8.encode(_sanitizeUtf16(input));
+    }
+  }
+
+  String _sanitizeUtf16(String input) {
+    final buffer = StringBuffer();
+    final units = input.codeUnits;
+
+    for (var i = 0; i < units.length; i++) {
+      final unit = units[i];
+
+      // High surrogate
+      if (unit >= 0xD800 && unit <= 0xDBFF) {
+        if (i + 1 < units.length) {
+          final next = units[i + 1];
+          // Valid low surrogate
+          if (next >= 0xDC00 && next <= 0xDFFF) {
+            buffer.writeCharCode(unit);
+            buffer.writeCharCode(next);
+            i++;
+            continue;
+          }
+        }
+        buffer.write('\uFFFD');
+        continue;
+      }
+
+      // Low surrogate without a preceding high surrogate
+      if (unit >= 0xDC00 && unit <= 0xDFFF) {
+        buffer.write('\uFFFD');
+        continue;
+      }
+
+      buffer.writeCharCode(unit);
+    }
+
+    return buffer.toString();
   }
 
   /// Helper method to close the response and mark as sent.

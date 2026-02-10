@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:khadem/khadem.dart';
-import 'package:path/path.dart' as p;
+ import 'package:path/path.dart' as p;
+import 'package:khadem/src/contracts/views/directive_contract.dart';
 
 class IncludeDirective implements ViewDirective {
   static final _includeRegex = RegExp(r"""@include\(['\"](.*?)['\"]\)""");

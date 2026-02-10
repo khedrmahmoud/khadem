@@ -9,72 +9,113 @@ class ColumnDefinition {
   // ---------------------------------------------------------------------------
   // Modifiers
   // ---------------------------------------------------------------------------
-  bool isNullable = false;
-  bool isUnsigned = false;
-  bool isAutoIncrement = false;
-  bool isPrimary = false;
-  bool isUnique = false;
-  bool isIndexed = false;
-  bool isInvisible = false;
+  bool _isNullable = false;
+  bool _isUnsigned = false;
+  bool _isAutoIncrement = false;
+  bool _isPrimary = false;
+  bool _isUnique = false;
+  bool _isIndexed = false;
+  bool _isInvisible = false;
 
   // ---------------------------------------------------------------------------
   // Default Value
   // ---------------------------------------------------------------------------
-  dynamic defaultValue;
-  bool isDefaultRaw = false;
+  dynamic _defaultValue;
+  bool _isDefaultRaw = false;
 
   // ---------------------------------------------------------------------------
   // String / Text Options
   // ---------------------------------------------------------------------------
-  int? lengthValue;
-  String? charsetValue;
-  String? collationValue;
+  int? _lengthValue;
+  String? _charsetValue;
+  String? _collationValue;
 
   // ---------------------------------------------------------------------------
   // Numeric Options (Decimal, Float)
   // ---------------------------------------------------------------------------
-  int? precisionValue;
-  int? scaleValue;
+  int? _precisionValue;
+  int? _scaleValue;
 
   // ---------------------------------------------------------------------------
   // Foreign Key Options
   // ---------------------------------------------------------------------------
-  String? foreignTable;
-  String? foreignKey;
-  String? onDeleteAction;
-  String? onUpdateAction;
+  String? _foreignTable;
+  String? _foreignKey;
+  String? _onDeleteAction;
+  String? _onUpdateAction;
 
   // ---------------------------------------------------------------------------
   // Generated Columns / Expressions
   // ---------------------------------------------------------------------------
-  String? generatedExpression;
-  bool isStoredGenerated = false;
+  String? _generatedExpression;
+  bool _isStoredGenerated = false;
 
   // ---------------------------------------------------------------------------
   // Timestamp Options
   // ---------------------------------------------------------------------------
-  bool useCurrentOnUpdateValue = false;
+  bool _useCurrentOnUpdateValue = false;
 
   // ---------------------------------------------------------------------------
   // Positioning (MySQL)
   // ---------------------------------------------------------------------------
-  String? afterColumn;
-  bool isFirst = false;
+  String? _afterColumn;
+  bool _isFirst = false;
 
   // ---------------------------------------------------------------------------
   // Metadata & Constraints
   // ---------------------------------------------------------------------------
-  String? commentValue;
-  String? checkConstraint;
-  List<String>? enumValues;
+  String? _commentValue;
+  String? _checkConstraint;
+  List<String>? _enumValues;
 
   // ---------------------------------------------------------------------------
   // Migration / Schema Change Options
   // ---------------------------------------------------------------------------
-  String? oldName;
+  String? _oldName;
 
   /// Creates a new column definition.
   ColumnDefinition(this.name, this.type);
+
+  // ===========================================================================
+  // Readonly Accessors
+  // ===========================================================================
+
+  bool get isNullable => _isNullable;
+  bool get isUnsigned => _isUnsigned;
+  bool get isAutoIncrement => _isAutoIncrement;
+  bool get isPrimary => _isPrimary;
+  bool get isUnique => _isUnique;
+  bool get isIndexed => _isIndexed;
+  bool get isInvisible => _isInvisible;
+
+  dynamic get defaultValue => _defaultValue;
+  bool get isDefaultRaw => _isDefaultRaw;
+
+  int? get lengthValue => _lengthValue;
+  String? get charsetValue => _charsetValue;
+  String? get collationValue => _collationValue;
+
+  int? get precisionValue => _precisionValue;
+  int? get scaleValue => _scaleValue;
+
+  String? get foreignTable => _foreignTable;
+  String? get foreignKey => _foreignKey;
+  String? get onDeleteAction => _onDeleteAction;
+  String? get onUpdateAction => _onUpdateAction;
+
+  String? get generatedExpression => _generatedExpression;
+  bool get isStoredGenerated => _isStoredGenerated;
+
+  bool get useCurrentOnUpdateValue => _useCurrentOnUpdateValue;
+
+  String? get afterColumn => _afterColumn;
+  bool get isFirst => _isFirst;
+
+  String? get commentValue => _commentValue;
+  String? get checkConstraint => _checkConstraint;
+  List<String>? get enumValues => _enumValues;
+
+  String? get oldName => _oldName;
 
   // ===========================================================================
   // Modifier Methods
@@ -82,43 +123,52 @@ class ColumnDefinition {
 
   /// Specifies the column as nullable.
   ColumnDefinition nullable([bool value = true]) {
-    isNullable = value;
+    _isNullable = value;
     return this;
   }
 
+  /// Specifies the column as NOT NULL.
+  ColumnDefinition required() => nullable(false);
+
   /// Specifies the column as an unsigned integer.
   ColumnDefinition unsigned() {
-    isUnsigned = true;
+    _isUnsigned = true;
+    return this;
+  }
+
+  /// Specifies the column as signed (removes UNSIGNED).
+  ColumnDefinition signed() {
+    _isUnsigned = false;
     return this;
   }
 
   /// Specifies the column as auto-incrementing.
   ColumnDefinition autoIncrement() {
-    isAutoIncrement = true;
+    _isAutoIncrement = true;
     return this;
   }
 
   /// Specifies the column as a primary key.
   ColumnDefinition primary() {
-    isPrimary = true;
+    _isPrimary = true;
     return this;
   }
 
   /// Specifies the column as unique.
   ColumnDefinition unique() {
-    isUnique = true;
+    _isUnique = true;
     return this;
   }
 
   /// Specifies an index for the column.
   ColumnDefinition index() {
-    isIndexed = true;
+    _isIndexed = true;
     return this;
   }
 
   /// Specifies the column as invisible (MySQL 8.0+).
   ColumnDefinition invisible() {
-    isInvisible = true;
+    _isInvisible = true;
     return this;
   }
 
@@ -130,8 +180,8 @@ class ColumnDefinition {
   ///
   /// [value] can be a String, num, bool, or DateTime.
   ColumnDefinition defaultsTo(dynamic value) {
-    defaultValue = value;
-    isDefaultRaw = false;
+    _defaultValue = value;
+    _isDefaultRaw = false;
     return this;
   }
 
@@ -142,10 +192,22 @@ class ColumnDefinition {
   ///
   /// Example: `defaultRaw('CURRENT_TIMESTAMP')`
   ColumnDefinition defaultRaw(String sql) {
-    defaultValue = sql;
-    isDefaultRaw = true;
+    _defaultValue = sql;
+    _isDefaultRaw = true;
     return this;
   }
+
+  /// Default to NULL.
+  ColumnDefinition defaultNull() => defaultsTo(null);
+
+  /// Default to TRUE.
+  ColumnDefinition defaultTrue() => defaultsTo(true);
+
+  /// Default to FALSE.
+  ColumnDefinition defaultFalse() => defaultsTo(false);
+
+  /// Default to CURRENT_TIMESTAMP.
+  ColumnDefinition defaultNow() => defaultRaw('CURRENT_TIMESTAMP');
 
   // ===========================================================================
   // String / Text Methods
@@ -153,19 +215,19 @@ class ColumnDefinition {
 
   /// Specifies the length of the column (for string types).
   ColumnDefinition length(int len) {
-    lengthValue = len;
+    _lengthValue = len;
     return this;
   }
 
   /// Specifies the character set for the column.
   ColumnDefinition charset(String charset) {
-    charsetValue = charset;
+    _charsetValue = charset;
     return this;
   }
 
   /// Specifies the collation for the column.
   ColumnDefinition collation(String collation) {
-    collationValue = collation;
+    _collationValue = collation;
     return this;
   }
 
@@ -175,8 +237,8 @@ class ColumnDefinition {
 
   /// Specifies the precision and scale for decimal columns.
   ColumnDefinition total(int total, [int places = 0]) {
-    precisionValue = total;
-    scaleValue = places;
+    _precisionValue = total;
+    _scaleValue = places;
     return this;
   }
 
@@ -186,20 +248,24 @@ class ColumnDefinition {
 
   /// Specifies a foreign key constraint.
   ColumnDefinition foreign(String table, {String key = 'id'}) {
-    foreignTable = table;
-    foreignKey = key;
+    _foreignTable = table;
+    _foreignKey = key;
     return this;
   }
 
+  /// Alias for [foreign].
+  ColumnDefinition references(String table, {String key = 'id'}) =>
+      foreign(table, key: key);
+
   /// Specifies the action to take when the foreign key is deleted.
   ColumnDefinition onDelete(String action) {
-    onDeleteAction = action;
+    _onDeleteAction = action;
     return this;
   }
 
   /// Specifies the action to take when the foreign key is updated.
   ColumnDefinition onUpdate(String action) {
-    onUpdateAction = action;
+    _onUpdateAction = action;
     return this;
   }
 
@@ -221,15 +287,15 @@ class ColumnDefinition {
 
   /// Create a virtual generated column.
   ColumnDefinition virtualAs(String expression) {
-    generatedExpression = expression;
-    isStoredGenerated = false;
+    _generatedExpression = expression;
+    _isStoredGenerated = false;
     return this;
   }
 
   /// Create a stored generated column.
   ColumnDefinition storedAs(String expression) {
-    generatedExpression = expression;
-    isStoredGenerated = true;
+    _generatedExpression = expression;
+    _isStoredGenerated = true;
     return this;
   }
 
@@ -244,7 +310,7 @@ class ColumnDefinition {
 
   /// Set the TIMESTAMP column to use CURRENT_TIMESTAMP on update.
   ColumnDefinition useCurrentOnUpdate() {
-    useCurrentOnUpdateValue = true;
+    _useCurrentOnUpdateValue = true;
     return this;
   }
 
@@ -257,13 +323,13 @@ class ColumnDefinition {
 
   /// Place the column "after" another column.
   ColumnDefinition after(String column) {
-    afterColumn = column;
+    _afterColumn = column;
     return this;
   }
 
   /// Place the column "first" in the table.
   ColumnDefinition first() {
-    isFirst = true;
+    _isFirst = true;
     return this;
   }
 
@@ -273,25 +339,33 @@ class ColumnDefinition {
 
   /// Specifies a comment for the column.
   ColumnDefinition comment(String text) {
-    commentValue = text;
+    _commentValue = text;
+    return this;
+  }
+
+  /// Conditionally set a comment.
+  ColumnDefinition commentIf(bool condition, String text) {
+    if (condition) {
+      comment(text);
+    }
     return this;
   }
 
   /// Specifies a check constraint for the column.
   ColumnDefinition check(String condition) {
-    checkConstraint = condition;
+    _checkConstraint = condition;
     return this;
   }
 
   /// Specifies the values for an ENUM column.
   ColumnDefinition enumVal(List<String> values) {
-    enumValues = values;
+    _enumValues = values;
     return this;
   }
 
   /// Rename the column from an old name (used in migrations).
   ColumnDefinition from(String oldName) {
-    this.oldName = oldName;
+    _oldName = oldName;
     return this;
   }
 }

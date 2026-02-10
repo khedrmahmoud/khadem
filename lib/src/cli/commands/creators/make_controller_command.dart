@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeControllerCommand extends KhademCommand {
@@ -55,7 +55,7 @@ class MakeControllerCommand extends KhademCommand {
   String _controllerStub(String className, String fileName, String folder) {
     final namespace = folder.isEmpty ? '' : '$folder/';
     return '''
-import 'package:khadem/khadem.dart' show Request, Response;
+import 'package:khadem/http.dart' show Request, Response;
 
 class $className {
   Future index(Request req, Response res) async {

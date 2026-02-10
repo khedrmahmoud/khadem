@@ -4,6 +4,11 @@ import '../../contracts/validation/rule.dart';
 /// Validates that the field is a valid date string.
 ///
 /// Uses [DateTime.parse] to validate ISO-8601 formatted dates.
+///
+/// Signature: `date`
+///
+/// Examples:
+/// - `date`
 class DateRule extends Rule {
   @override
   String get signature => 'date';
@@ -30,6 +35,11 @@ class DateRule extends Rule {
 ///
 /// Supports basic formats like `Y-m-d` (YYYY-MM-DD).
 /// For other formats, it falls back to standard [DateTime.parse].
+///
+/// Signature: `date_format:format`
+///
+/// Examples:
+/// - `date_format:Y-m-d`
 class DateFormatRule extends Rule {
   @override
   String get signature => 'date_format';
@@ -73,6 +83,12 @@ class DateFormatRule extends Rule {
 /// - 'today', 'tomorrow', 'yesterday'
 /// - another field in the data
 /// - a specific date string
+///
+/// Signature: `before:dateOrField`
+///
+/// Examples:
+/// - `before:today`
+/// - `before:start_date`
 class BeforeRule extends Rule {
   @override
   String get signature => 'before';
@@ -125,6 +141,12 @@ class BeforeRule extends Rule {
 /// - 'today', 'tomorrow', 'yesterday'
 /// - another field in the data
 /// - a specific date string
+///
+/// Signature: `after:dateOrField`
+///
+/// Examples:
+/// - `after:today`
+/// - `after:start_date`
 class AfterRule extends Rule {
   @override
   String get signature => 'after';

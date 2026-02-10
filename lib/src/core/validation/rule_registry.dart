@@ -1,5 +1,7 @@
-import '../../contracts/validation/rule.dart';
-import '../../support/validation_rules/rules.dart';
+ 
+
+import 'package:khadem/contracts.dart' show Rule;
+import 'package:khadem/src/support/validation_rules/rules.dart';
 
 class ValidationRuleRepository {
   static final _rules = <String, Rule>{
@@ -71,6 +73,10 @@ class ValidationRuleRepository {
     'same': SameRule(),
     'accepted': AcceptedRule(),
     'credit_card': CreditCardRule(),
+
+    // database-related validation rules
+    'unique': UniqueRule(),
+    'exists': ExistsRule(),
   };
 
   static Rule? resolve(String name) {

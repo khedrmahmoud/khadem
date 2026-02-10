@@ -1,4 +1,5 @@
-import 'package:khadem/khadem.dart' show LogLevel;
+ import 'package:khadem/contracts.dart' show LogLevel;
+
 import '../../application/khadem.dart';
 
 /// Facade for application logging.
@@ -13,6 +14,7 @@ import '../../application/khadem.dart';
 /// Log.channel('audit').warning('Unauthorized access');
 /// ```
 class Log {
+  Log._();
   /// Logs a debug message.
   static void debug(
     String message, {

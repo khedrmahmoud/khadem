@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:khadem/khadem.dart' show LogHandler, LogLevel;
+import 'package:khadem/contracts.dart' show LogHandler, LogLevel;
 
 /// A log handler that writes log entries to a Stream.
 /// Useful for real-time log monitoring or piping logs to other systems.

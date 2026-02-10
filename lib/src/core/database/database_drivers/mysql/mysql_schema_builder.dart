@@ -12,7 +12,7 @@ class MySQLSchemaBuilder implements SchemaBuilder {
     callback(blueprint);
 
     final columnSQLs = blueprint.columns.map(_columnToSQL).toList();
-    final constraints = _generateConstraints(blueprint.columns, tableName);
+    final constraints = _generateConstraints(blueprint, tableName);
     final fullSQL = [
       ...columnSQLs,
       ...constraints,
@@ -144,12 +144,12 @@ class MySQLSchemaBuilder implements SchemaBuilder {
 
   /// Handles indexes and foreign keys separately
   List<String> _generateConstraints(
-    List<ColumnDefinition> columns,
+    Blueprint blueprint,
     String tableName,
   ) {
     final constraints = <String>[];
 
-    for (final column in columns) {
+    for (final column in blueprint.columns) {
       // Index
       if (column.isIndexed && !column.isPrimary && !column.isUnique) {
         constraints.add('INDEX `${column.name}_idx` (`${column.name}`)');
@@ -169,6 +169,24 @@ class MySQLSchemaBuilder implements SchemaBuilder {
           'CONSTRAINT `$fkName` FOREIGN KEY (`${column.name}`) REFERENCES `${column.foreignTable}`(`${column.foreignKey}`)$onDelete$onUpdate',
         );
       }
+    }
+
+    if (blueprint.primaryKey != null) {
+      final name = blueprint.primaryKey!.name ?? '${tableName}_primary';
+      final cols = blueprint.primaryKey!.columns.map((c) => '`$c`').join(', ');
+      constraints.add('CONSTRAINT `$name` PRIMARY KEY ($cols)');
+    }
+
+    for (final idx in blueprint.indexes) {
+      final name = idx.name ?? '${tableName}_${idx.columns.join('_')}_idx';
+      final cols = idx.columns.map((c) => '`$c`').join(', ');
+      constraints.add('INDEX `$name` ($cols)');
+    }
+
+    for (final idx in blueprint.uniques) {
+      final name = idx.name ?? '${tableName}_${idx.columns.join('_')}_unique';
+      final cols = idx.columns.map((c) => '`$c`').join(', ');
+      constraints.add('UNIQUE `$name` ($cols)');
     }
 
     return constraints;
@@ -213,10 +231,13 @@ class MySQLSchemaBuilder implements SchemaBuilder {
       case 'BOOL':
         return 'TINYINT(1)';
       case 'JSON':
+      case 'JSONB':
       case 'ARRAY':
         return 'JSON';
       case 'TEXT':
         return 'TEXT';
+      case 'TINYTEXT':
+        return 'TINYTEXT';
       case 'LONGTEXT':
         return 'LONGTEXT';
       case 'MEDIUMTEXT':
@@ -260,7 +281,7 @@ class MySQLSchemaBuilder implements SchemaBuilder {
     callback(blueprint);
 
     final columnSQLs = blueprint.columns.map(_columnToSQL).toList();
-    final constraints = _generateConstraints(blueprint.columns, tableName);
+    final constraints = _generateConstraints(blueprint, tableName);
     final fullSQL = [
       ...columnSQLs,
       ...constraints,

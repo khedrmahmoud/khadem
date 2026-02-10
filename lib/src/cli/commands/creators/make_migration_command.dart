@@ -1,5 +1,5 @@
 import 'dart:io';
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeMigrationCommand extends KhademCommand {
@@ -43,7 +43,7 @@ class MakeMigrationCommand extends KhademCommand {
 
   String _migrationStub(String className, String tableName) {
     return '''
-import 'package:khadem/khadem.dart' show MigrationFile;
+import 'package:khadem/contracts.dart' show MigrationFile;
 
 class $className extends MigrationFile {
   @override
@@ -76,7 +76,7 @@ class $className extends MigrationFile {
       ..sort((a, b) => a.path.compareTo(b.path));
 
     final buffer = StringBuffer();
-    buffer.writeln("import 'package:khadem/khadem.dart';\n");
+    buffer.writeln("import 'package:khadem/contracts.dart' show MigrationFile;\n");
 
     final classNames = <String>[];
 

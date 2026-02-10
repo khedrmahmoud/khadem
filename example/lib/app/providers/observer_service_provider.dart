@@ -1,5 +1,6 @@
-import 'package:khadem/khadem.dart';
-import '../models/user.dart';
+import 'package:khadem/contracts.dart' show ContainerInterface, ServiceProvider;
+import 'package:khadem/database/orm.dart';
+ import '../models/user.dart';
 import '../observers/user_observer.dart';
 
 /// Service provider for registering model observers.
@@ -10,7 +11,7 @@ class ObserverServiceProvider extends ServiceProvider {
   @override
   void register(ContainerInterface container) {
     // Register UserObserver for User model
-    HasEvents.observe<User>(UserObserver());
+    ObserverRegistry.instance.register<User>(UserObserver());
   }
 
   @override

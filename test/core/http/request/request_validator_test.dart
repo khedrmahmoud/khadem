@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:khadem/khadem.dart'
-    show BodyParser, UploadedFile, RequestValidator;
+import 'package:khadem/http.dart'
+  show BodyParser, RequestValidator, UploadedFile;
 import 'package:test/test.dart';
 
 class FakeBodyParser implements BodyParser {

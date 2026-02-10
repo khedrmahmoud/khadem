@@ -1,15 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:khadem/khadem.dart'
-    show
-        Request,
-        BodyParser,
-        UploadedFile,
-        FormRequest,
-        ValidationException,
-        UnauthorizedException,
-        InputValidator;
+import 'package:khadem/validation.dart' show InputValidator;
+import 'package:khadem/http.dart'
+    show Request, BodyParser, UploadedFile, FormRequest;
+import 'package:khadem/support.dart' show
+     ValidationException,
+        UnauthorizedException;
 import 'package:test/test.dart';
 
 // Fake HttpRequest for testing

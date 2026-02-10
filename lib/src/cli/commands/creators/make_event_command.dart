@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../bus/command.dart';
+import '../../../contracts/cli/command.dart';
 import '../../utils/cli_naming.dart';
 
 class MakeEventCommand extends KhademCommand {
@@ -59,7 +59,7 @@ class MakeEventCommand extends KhademCommand {
 
   String _stub(String className) {
     return '''
-import 'package:khadem/khadem.dart' show Event;
+import 'package:khadem/contracts.dart' show Event;
 
 class $className extends Event {
   final Map<String, dynamic> data;

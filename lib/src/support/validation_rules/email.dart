@@ -2,6 +2,11 @@ import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
 /// Validates that the field is a valid email address.
+///
+/// Signature: `email`
+///
+/// Examples:
+/// - `email`
 class EmailRule extends Rule {
   @override
   String get signature => 'email';

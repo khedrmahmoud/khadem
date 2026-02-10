@@ -5,6 +5,11 @@ import '../../contracts/validation/rule.dart';
 /// Validates that the field is a valid URL.
 ///
 /// Checks protocol (http/https), domain, and format.
+///
+/// Signature: `url`
+///
+/// Examples:
+/// - `url`
 class UrlRule extends Rule {
   @override
   String get signature => 'url';
@@ -34,6 +39,11 @@ class UrlRule extends Rule {
 /// Validates that the field is a valid active URL by checking DNS records.
 ///
 /// Performs a real [InternetAddress.lookup] to verify the host exists.
+///
+/// Signature: `active_url`
+///
+/// Examples:
+/// - `active_url`
 class ActiveUrlRule extends Rule {
   @override
   String get signature => 'active_url';
@@ -63,6 +73,11 @@ class ActiveUrlRule extends Rule {
 }
 
 /// Validates that the field is a valid IP address (IPv4 or IPv6).
+///
+/// Signature: `ip`
+///
+/// Examples:
+/// - `ip`
 class IpRule extends Rule {
   @override
   String get signature => 'ip';
@@ -105,6 +120,11 @@ class IpRule extends Rule {
 }
 
 /// Validates that the field is a valid IPv4 address.
+///
+/// Signature: `ipv4`
+///
+/// Examples:
+/// - `ipv4`
 class Ipv4Rule extends Rule {
   @override
   String get signature => 'ipv4';
@@ -128,6 +148,11 @@ class Ipv4Rule extends Rule {
 }
 
 /// Validates that the field is a valid IPv6 address.
+///
+/// Signature: `ipv6`
+///
+/// Examples:
+/// - `ipv6`
 class Ipv6Rule extends Rule {
   @override
   String get signature => 'ipv6';
@@ -167,6 +192,11 @@ class Ipv6Rule extends Rule {
 /// Validates that the field is a valid MAC address.
 ///
 /// Supports standard formats like `00:1A:2B:3C:4D:5E`.
+///
+/// Signature: `mac_address`
+///
+/// Examples:
+/// - `mac_address`
 class MacAddressRule extends Rule {
   @override
   String get signature => 'mac_address';

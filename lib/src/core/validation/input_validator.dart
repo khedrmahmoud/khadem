@@ -91,6 +91,8 @@ class InputValidator {
             item.args,
             value,
             item.name,
+            item.rule,
+            context,
           ),
         );
 
@@ -111,7 +113,9 @@ class InputValidator {
   }
 
   Future<void> _validateNestedField(
-      String fieldPattern, dynamic ruleDefinition,) async {
+    String fieldPattern,
+    dynamic ruleDefinition,
+  ) async {
     // Convert pattern like "attachments.*" to actual field paths
     final fieldPaths = _expandFieldPattern(fieldPattern);
     final futures = <Future<void>>[];
@@ -175,58 +179,43 @@ class InputValidator {
   }
 
   List<String> _expandFieldPattern(String pattern) {
-    final paths = <String>[];
+    // Recursively expand patterns containing '.*' into concrete field paths.
+    final results = <String>[];
 
-    if (pattern.endsWith('.*')) {
-      // Handle array validation like "attachments.*"
-      final baseField = pattern.substring(0, pattern.length - 2);
-      final baseValue = _getFieldValue(baseField);
-
-      if (baseValue is List) {
-        for (int i = 0; i < baseValue.length; i++) {
-          paths.add('$baseField.$i');
-        }
-      } else if (baseValue is Map) {
-        for (final key in baseValue.keys) {
-          paths.add('$baseField.$key');
-        }
-      }
-    } else if (pattern.contains('*')) {
-      // Handle more complex patterns (can be extended)
-      paths.addAll(_expandComplexPattern(pattern));
+    // If there's no wildcard, return the pattern as-is (caller will validate it).
+    if (!pattern.contains('.*')) {
+      return [pattern];
     }
 
-    return paths;
-  }
-
-  List<String> _expandComplexPattern(String pattern) {
-    final paths = <String>[];
-
-    // Handle patterns like "documents.*.title" or "users.*.profile.email"
+    // Find the first '.*' occurrence and split into base and remaining parts.
     final parts = pattern.split('.*');
-    if (parts.length >= 2) {
-      final basePattern = parts[0]; // e.g., "documents"
-      final remainingPath = parts.sublist(1).join('.*'); // e.g., ".title"
+    final base = parts[0];
+    final remaining = parts.sublist(1).join('.*');
 
-      final baseValue = _getFieldValue(basePattern);
+    final baseValue = _getFieldValue(base);
 
-      if (baseValue is List) {
-        for (int i = 0; i < baseValue.length; i++) {
-          final expandedPath = '$basePattern.$i$remainingPath';
-          paths.add(expandedPath);
-        }
-      } else if (baseValue is Map) {
-        for (final key in baseValue.keys) {
-          final expandedPath = '$basePattern.$key$remainingPath';
-          paths.add(expandedPath);
+    if (baseValue is List) {
+      for (int i = 0; i < baseValue.length; i++) {
+        final nextPattern = '$base.$i${remaining.isNotEmpty ? remaining : ''}';
+        if (nextPattern.contains('.*')) {
+          results.addAll(_expandFieldPattern(nextPattern));
+        } else {
+          results.add(nextPattern);
         }
       }
-    } else {
-      // Fallback: return pattern as-is for unsupported patterns
-      paths.add(pattern);
+    } else if (baseValue is Map) {
+      for (final key in baseValue.keys) {
+        final nextPattern =
+            '$base.$key${remaining.isNotEmpty ? remaining : ''}';
+        if (nextPattern.contains('.*')) {
+          results.addAll(_expandFieldPattern(nextPattern));
+        } else {
+          results.add(nextPattern);
+        }
+      }
     }
 
-    return paths;
+    return results;
   }
 
   dynamic _getFieldValue(String fieldPath) {
@@ -262,6 +251,8 @@ class InputValidator {
     List<String> args,
     dynamic value, [
     String? ruleName,
+    Rule? rule,
+    ValidationContext? context,
   ]) {
     // Check if there's a custom message for this field and rule
     if (ruleName != null) {
@@ -286,7 +277,37 @@ class InputValidator {
       _addFileValidationParameters(parameters, messageKey, value, args);
     }
 
+    // Allow rules to provide their own localization parameters.
+    // This keeps the validator generic and lets each rule control its message.
+    if (context != null && rule is RuleMessageParametersProvider) {
+      final provider = rule as RuleMessageParametersProvider;
+      parameters.addAll(provider.messageParameters(context));
+    }
+
+    _normalizeLocalizationParameters(parameters);
+
     return Lang.t(messageKey, parameters: parameters, namespace: 'validation');
+  }
+
+  void _normalizeLocalizationParameters(Map<String, dynamic> parameters) {
+    // Allow rules to pass special wrapper types (e.g., FieldName)
+    // without hard-coding rule-specific keys in the validator.
+    parameters.updateAll((_, value) => _normalizeLocalizationValue(value));
+  }
+
+  dynamic _normalizeLocalizationValue(dynamic value) {
+    if (value is FieldName) {
+      return Lang.getField(value.name);
+    }
+    if (value is List) {
+      return value.map(_normalizeLocalizationValue).toList();
+    }
+    if (value is Map) {
+      return value.map(
+        (k, v) => MapEntry(k, _normalizeLocalizationValue(v)),
+      );
+    }
+    return value;
   }
 
   bool _isFileValidationContext(String messageKey, dynamic value) {

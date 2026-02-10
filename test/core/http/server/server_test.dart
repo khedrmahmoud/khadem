@@ -1,5 +1,4 @@
-import 'package:khadem/khadem.dart';
-import 'package:khadem/src/core/http/server/server.dart';
+import 'package:khadem/http.dart' show Server;
 import 'package:test/test.dart';
 
 void main() {

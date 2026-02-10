@@ -6,6 +6,7 @@ import 'package:khadem/src/contracts/env/env_interface.dart';
 /// Shortcuts for `Env` operations such as `Env.get`, `Env.set` and
 /// type-safe helpers. This facade delegates to the global `EnvSystem`.
 class Env {
+  Env._();
   static EnvInterface get _instance => Khadem.make<EnvInterface>();
 
   static String? get(String key) => _instance.get(key);

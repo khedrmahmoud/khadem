@@ -1,5 +1,6 @@
 import 'package:khadem/khadem.dart';
 
+import 'package:khadem/src/contracts/views/directive_contract.dart';
 class SectionDirective implements ViewDirective {
   final Map<String, String> sections = {};
 

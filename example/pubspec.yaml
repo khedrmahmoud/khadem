@@ -9,5 +9,6 @@ dependencies:
   khadem: 
    path: ../
 dev_dependencies:
+  test: ^1.29.0
   lints: ^6.0.0
   build_runner: ^2.4.6

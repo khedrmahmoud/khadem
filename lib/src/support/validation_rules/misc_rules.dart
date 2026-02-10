@@ -6,6 +6,11 @@ import '../../contracts/validation/rule.dart';
 ///
 /// Supports UUID versions 1, 3, 4, and 5.
 /// Matches strict RFC 4122 format.
+///
+/// Signature: `uuid`
+///
+/// Examples:
+/// - `uuid`
 class UuidRule extends Rule {
   @override
   String get signature => 'uuid';
@@ -34,6 +39,11 @@ class UuidRule extends Rule {
 /// Validates that a value is a valid JSON string.
 ///
 /// Uses [jsonDecode] to verify the string structure.
+///
+/// Signature: `json`
+///
+/// Examples:
+/// - `json`
 class JsonRule extends Rule {
   @override
   String get signature => 'json';
@@ -60,6 +70,11 @@ class JsonRule extends Rule {
 ///
 /// Checks against E.164 standard format (up to 15 digits).
 /// Allows optional leading `+` and sanitized separators like spaces, dashes, and parentheses.
+///
+/// Signature: `phone`
+///
+/// Examples:
+/// - `phone`
 class PhoneRule extends Rule {
   @override
   String get signature => 'phone';
@@ -87,6 +102,11 @@ class PhoneRule extends Rule {
 ///
 /// This rule is a marker for the validator to skip other rules if the value is null.
 /// It always passes validation itself.
+///
+/// Signature: `nullable`
+///
+/// Examples:
+/// - `nullable`
 class NullableRule extends Rule {
   @override
   String get signature => 'nullable';
@@ -105,6 +125,11 @@ class NullableRule extends Rule {
 ///
 /// If the field is present, it will be validated against other rules.
 /// If absent, other rules are skipped.
+///
+/// Signature: `sometimes`
+///
+/// Examples:
+/// - `sometimes`
 class SometimesRule extends Rule {
   @override
   String get signature => 'sometimes';
@@ -121,6 +146,11 @@ class SometimesRule extends Rule {
 /// Validates that the field must be missing or empty.
 ///
 /// Fails if the field is present and not empty (not null, not empty string, not empty list/map).
+///
+/// Signature: `prohibited`
+///
+/// Examples:
+/// - `prohibited`
 class ProhibitedRule extends Rule {
   @override
   String get signature => 'prohibited';
@@ -148,7 +178,12 @@ class ProhibitedRule extends Rule {
 }
 
 /// Validates that the field must be missing or empty if another field is equal to a value.
-class ProhibitedIfRule extends Rule {
+///
+/// Signature: `prohibited_if:otherField,value`
+///
+/// Examples:
+/// - `prohibited_if:is_admin,true`
+class ProhibitedIfRule extends Rule implements RuleMessageParametersProvider {
   @override
   String get signature => 'prohibited_if';
 
@@ -179,10 +214,26 @@ class ProhibitedIfRule extends Rule {
 
   @override
   String message(ValidationContext context) => 'prohibited_if_validation';
+
+  @override
+  Map<String, dynamic> messageParameters(ValidationContext context) {
+    final args = context.parameters;
+    if (args.length < 2) return const {};
+
+    return {
+      'other': FieldName(args[0]),
+      'value': args[1],
+    };
+  }
 }
 
 /// Validates that the field is required if another field is equal to a value.
-class RequiredIfRule extends Rule {
+///
+/// Signature: `required_if:otherField,value`
+///
+/// Examples:
+/// - `required_if:country,EG`
+class RequiredIfRule extends Rule implements RuleMessageParametersProvider {
   @override
   String get signature => 'required_if';
 
@@ -210,4 +261,15 @@ class RequiredIfRule extends Rule {
 
   @override
   String message(ValidationContext context) => 'required_if_validation';
+
+  @override
+  Map<String, dynamic> messageParameters(ValidationContext context) {
+    final args = context.parameters;
+    if (args.length < 2) return const {};
+
+    return {
+      'other': FieldName(args[0]),
+      'value': args[1],
+    };
+  }
 }

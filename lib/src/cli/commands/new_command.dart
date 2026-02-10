@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:path/path.dart' as p;
 
-import '../bus/command.dart';
+import '../../contracts/cli/command.dart';
 
 class NewCommand extends KhademCommand {
   @override

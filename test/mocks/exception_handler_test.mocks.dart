@@ -3,7 +3,8 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:khadem/khadem.dart' as _i2;
+import 'package:khadem/contracts.dart' as _i2;
+import 'package:khadem/logging.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i3;
 
@@ -24,7 +25,7 @@ import 'package:mockito/src/dummies.dart' as _i3;
 /// A class which mocks [Logger].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLogger extends _i1.Mock implements _i2.Logger {
+class MockLogger extends _i1.Mock implements _i4.Logger {
   MockLogger() {
     _i1.throwOnMissingStub(this);
   }

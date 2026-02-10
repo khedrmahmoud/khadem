@@ -7,7 +7,7 @@ import '../facades/db.dart';
 ///
 /// Signature: `unique:table,column,except,idColumn,extraCol,extraVal...`
 ///
-/// Example:
+/// Examples:
 /// - `unique:users,email` - Email must be unique in users table.
 /// - `unique:users,email,1` - Email unique, ignoring id 1.
 /// - `unique:users,email,1,user_id` - Email unique, ignoring user_id 1.
@@ -18,8 +18,12 @@ class UniqueRule extends Rule {
   final dynamic _ignoreId;
   final String _ignoreColumn;
 
-  UniqueRule(
-      [this._table, this._column, this._ignoreId, this._ignoreColumn = 'id',]);
+  UniqueRule([
+    this._table,
+    this._column,
+    this._ignoreId,
+    this._ignoreColumn = 'id',
+  ]);
 
   @override
   String get signature => 'unique';
@@ -109,7 +113,7 @@ class UniqueRule extends Rule {
 ///
 /// Signature: `exists:table,column,extraCol,extraVal...`
 ///
-/// Example:
+/// Examples:
 /// - `exists:states,code` - Value must exist in states table, code column.
 /// - `exists:users,email,role,admin` - Value must exist in users table where email=value AND role=admin.
 class ExistsRule extends Rule {

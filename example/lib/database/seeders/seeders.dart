@@ -1,4 +1,4 @@
-import 'package:khadem/khadem.dart';
+import 'package:khadem/contracts.dart' show Seeder;
 
 import 'user_seeder.dart';
 

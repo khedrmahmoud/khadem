@@ -1,4 +1,5 @@
-import 'package:khadem/khadem.dart';
+import 'package:khadem/contracts.dart' show Seeder;
+import 'package:khadem/khadem.dart' show Khadem;
 
 class UserSeeder extends Seeder {
   @override

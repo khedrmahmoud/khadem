@@ -1,19 +1,14 @@
 import 'dart:io';
+import 'dart:mirrors';
 
-import 'package:khadem/khadem.dart'
-    show
-        ServiceProvider,
-        ContainerInterface,
-        EnvInterface,
-        EnvSystem,
-        ConfigInterface,
-        ConfigSystem,
-        Logger,
-        DatabaseManager,
-        Migrator,
-        SeederManager,
-        QueueManager,
-        ConsoleLogHandler;
+import 'package:khadem/config.dart';
+import 'package:khadem/contracts.dart'
+  show ConfigInterface, ContainerInterface, EnvInterface, ServiceProvider;
+import 'package:khadem/database/drivers.dart';
+import 'package:khadem/database/migrations.dart';
+ 
+ import 'package:khadem/logging.dart';
+import 'package:khadem/queue.dart' show QueueManager;
 
 /// A lightweight service provider for CLI-only context.
 /// Does not start servers or workers, just logging + database + migrator.
@@ -60,6 +55,7 @@ class CliServiceProvider extends ServiceProvider {
     final logger = container.resolve<Logger>();
     final queue = container.resolve<QueueManager>();
 
+    await _loadConfigsFromAppConfig(config, logger);
     _ensureDatabaseConfigFromEnv(envSystem, config);
 
     try {
@@ -127,5 +123,52 @@ class CliServiceProvider extends ServiceProvider {
     }
 
     return primary;
+  }
+
+  Future<void> _loadConfigsFromAppConfig(
+    ConfigSystem config,
+    Logger logger,
+  ) async {
+    final candidates = <String>[
+      'lib/config/app.dart',
+      'example/lib/config/app.dart',
+    ];
+
+    for (final relative in candidates) {
+      final file = File(relative);
+      if (!file.existsSync()) continue;
+
+      final uri = file.absolute.uri;
+
+      try {
+        final lib = await currentMirrorSystem().isolate.loadUri(uri);
+        final appConfigSym = const Symbol('AppConfig');
+        final configsSym = const Symbol('configs');
+
+        final decl = lib.declarations[appConfigSym];
+        if (decl is! ClassMirror) {
+          continue;
+        }
+
+        final configsValue = decl.getField(configsSym).reflectee;
+        if (configsValue is Map) {
+          final registry = <String, Map<String, dynamic>>{};
+          configsValue.forEach((key, value) {
+            if (key is String && value is Map) {
+              registry[key] = Map<String, dynamic>.from(value);
+            }
+          });
+
+          if (registry.isNotEmpty) {
+            config.loadFromRegistry(registry);
+            logger.info('✅ Loaded configs via mirrors from $relative');
+            return;
+          }
+        }
+      } catch (e) {
+        logger.warning(
+            '⚠️ Failed to load configs via mirrors from $relative ($e)');
+      }
+    }
   }
 }

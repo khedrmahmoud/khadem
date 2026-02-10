@@ -2,7 +2,12 @@ import 'dart:async';
 import '../../contracts/validation/rule.dart';
 
 /// Validates that the field is different from another field.
-class DifferentRule extends Rule {
+///
+/// Signature: `different:otherField`
+///
+/// Examples:
+/// - `different:email`
+class DifferentRule extends Rule implements RuleMessageParametersProvider {
   @override
   String get signature => 'different';
 
@@ -28,10 +33,22 @@ class DifferentRule extends Rule {
 
   @override
   String message(ValidationContext context) => 'different_validation';
+
+  @override
+  Map<String, dynamic> messageParameters(ValidationContext context) {
+    final args = context.parameters;
+    if (args.isEmpty) return const {};
+    return {'other': FieldName(args[0])};
+  }
 }
 
 /// Validates that the field is the same as another field.
-class SameRule extends Rule {
+///
+/// Signature: `same:otherField`
+///
+/// Examples:
+/// - `same:password_confirmation`
+class SameRule extends Rule implements RuleMessageParametersProvider {
   @override
   String get signature => 'same';
 
@@ -50,11 +67,23 @@ class SameRule extends Rule {
 
   @override
   String message(ValidationContext context) => 'same_validation';
+
+  @override
+  Map<String, dynamic> messageParameters(ValidationContext context) {
+    final args = context.parameters;
+    if (args.isEmpty) return const {};
+    return {'other': FieldName(args[0])};
+  }
 }
 
 /// Validates that the field is "accepted".
 ///
 /// checks for: 'yes', 'on', '1', 1, true, 'true'.
+///
+/// Signature: `accepted`
+///
+/// Examples:
+/// - `accepted`
 class AcceptedRule extends Rule {
   @override
   String get signature => 'accepted';

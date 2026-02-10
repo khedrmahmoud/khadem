@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../bus/command.dart';
+import '../../contracts/cli/command.dart';
 
 class BuildCommand extends KhademCommand {
   BuildCommand({required super.logger}) {
