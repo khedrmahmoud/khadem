@@ -196,7 +196,7 @@ void main() {
       expect(summary, equals('2 posts'));
     });
 
-    test('toJson uses sync version and returns Future for async properties',
+    test('toMap uses sync version and returns Future for async properties',
         () {
       final user = TestUser()
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
@@ -204,11 +204,11 @@ void main() {
       // Set empty relation to avoid database call
       user.setRelation('posts', <TestPost>[]);
 
-      final json = user.toJson();
+      final map = user.toMap();
 
-      expect(json['full_name'], equals('John Doe')); // Sync works
-      expect(json['greeting'], isA<Future>()); // Async returns Future
-      expect(json['post_summary'], isA<Future>()); // Async returns Future
+      expect(map['full_name'], equals('John Doe')); // Sync works
+      expect(map['greeting'], isA<Future>()); // Async returns Future
+      expect(map['post_summary'], isA<Future>()); // Async returns Future
     });
 
     test('toJsonAsync properly resolves all async computed properties',
@@ -272,16 +272,16 @@ void main() {
       expect(value2, equals(0));
     });
 
-    test('appends with async properties requires toJsonAsync', () async {
+    test('toMap with async properties requires toJsonAsync', () async {
       final user = TestUser()
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
       user.setRelation('posts', <TestPost>[]);
 
-      // Regular toJson() returns Futures for async
-      final syncJson = user.toJson();
-      expect(syncJson['greeting'], isA<Future>());
-      expect(syncJson['post_summary'], isA<Future>());
+      // Regular toMap() returns Futures for async
+      final syncMap = user.toMap();
+      expect(syncMap['greeting'], isA<Future>());
+      expect(syncMap['post_summary'], isA<Future>());
 
       // toJsonAsync() resolves them
       final asyncJson = await user.toJsonAsync();

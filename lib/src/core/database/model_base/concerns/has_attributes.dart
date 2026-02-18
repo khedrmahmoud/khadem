@@ -340,6 +340,9 @@ mixin HasAttributes<T> {
     final seen = <int>{};
     final result = <String, dynamic>{};
     for (final entry in map.entries) {
+      // Skip Futures as they are not JSON encodable
+      if (entry.value is Future) continue;
+
       if (hasCast(entry.key)) {
         final caster = casts[entry.key];
         if (caster is AttributeCaster) {

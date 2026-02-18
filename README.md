@@ -3,8 +3,8 @@
 </div>
 
 <div align="center">
-  <img src="https://img.shields.io/badge/status-beta-yellow" alt="Status">
-  <img src="https://img.shields.io/badge/version-1.2.0--beta-blue" alt="Version">
+  <img src="https://img.shields.io/badge/status-stable-green" alt="Status">
+  <img src="https://img.shields.io/badge/version-2.0.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/dart-%3E%3D3.0.0-blue" alt="Dart">
   <img src="https://img.shields.io/badge/license-Apache--2.0-green" alt="License">
 </div>
@@ -14,6 +14,8 @@
 ⚡ **A powerful, modern Dart backend framework for building scalable web applications**
 
 Khadem is a comprehensive backend framework built with Dart, designed for developers who demand performance, elegance, and full control. It provides a complete toolkit for building robust web applications with features like dependency injection, modular architecture, built-in CLI tools with **automatic command discovery**, database management, caching, authentication, and production-ready deployment capabilities.
+
+> **🎉 Khadem 2.0.0 is now stable!** This major release includes a complete framework overhaul with significant improvements and new features. See the [migration guide](https://khadem-framework.github.io/khadem-docs/migration-guide) if upgrading from 1.x.
 
 ---
 

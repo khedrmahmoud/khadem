@@ -3,19 +3,15 @@
 // ========================
 // 📦 Build_command.dart
 // ========================
+// ========================
+// 📦 Root
+// ========================
+export 'command_registry.dart';
 export 'commands/build_command.dart';
-
-// ========================
-// 📦 Cli_naming.dart
-// ========================
-export 'utils/cli_naming.dart';
- 
-
 // ========================
 // 📦 Commands_command.dart
 // ========================
 export 'commands/commands_command.dart';
-
 // ========================
 // 📦 Creators
 // ========================
@@ -36,29 +32,24 @@ export 'commands/creators/make_rule_command.dart';
 export 'commands/creators/make_seeder_command.dart';
 export 'commands/creators/make_test_command.dart';
 export 'commands/creators/make_view_command.dart';
-
 // ========================
 // 📦 New_command.dart
 // ========================
 export 'commands/new_command.dart';
-
-// ========================
-// 📦 Root
-// ========================
-export 'command_registry.dart';
-
 // ========================
 // 📦 Serve_command.dart
 // ========================
 export 'commands/serve_command.dart';
-
 // ========================
 // 📦 Storage_link_command.dart
 // ========================
 export 'commands/storage_link_command.dart';
-
 // ========================
 // 📦 Version_command.dart
 // ========================
 export 'commands/version_command.dart';
+// ========================
+// 📦 Cli_naming.dart
+// ========================
+export 'utils/cli_naming.dart';
 

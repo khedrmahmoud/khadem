@@ -1,5 +1,6 @@
-﻿ import '../models/user.dart';
-import 'package:khadem/database/orm.dart';
+ import 'package:khadem/database/orm.dart';
+
+import '../models/user.dart';
 
 class UserObserver extends ModelObserver<User> {
   @override

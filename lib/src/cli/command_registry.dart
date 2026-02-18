@@ -4,8 +4,8 @@ import 'dart:mirrors';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
-import '../core/logging/logger.dart';
 import '../contracts/cli/command.dart';
+import '../core/logging/logger.dart';
 import 'commands/build_command.dart';
 import 'commands/creators/make_command_command.dart';
 import 'commands/creators/make_controller_command.dart';
@@ -18,15 +18,13 @@ import 'commands/creators/make_middleware_command.dart';
 import 'commands/creators/make_migration_command.dart';
 import 'commands/creators/make_model_command.dart';
 import 'commands/creators/make_observer_command.dart';
- import 'commands/creators/make_provider_command.dart';
+import 'commands/creators/make_provider_command.dart';
 import 'commands/creators/make_request_command.dart';
 import 'commands/creators/make_rule_command.dart';
 import 'commands/creators/make_seeder_command.dart';
 import 'commands/creators/make_test_command.dart';
 import 'commands/creators/make_view_command.dart';
-
 import 'commands/new_command.dart';
-
 import 'commands/serve_command.dart';
 import 'commands/storage_link_command.dart';
 import 'commands/version_command.dart';
@@ -60,7 +58,7 @@ class CommandRegistry {
       MakeObserverCommand(logger: logger),
       MakeSeederCommand(logger: logger),
       MakeViewCommand(logger: logger),
-       MakeRequestCommand(logger: logger),
+      MakeRequestCommand(logger: logger),
       MakeExceptionCommand(logger: logger),
       MakeMailCommand(logger: logger),
       MakeTestCommand(logger: logger),

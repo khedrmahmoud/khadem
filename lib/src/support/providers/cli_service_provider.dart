@@ -142,8 +142,8 @@ class CliServiceProvider extends ServiceProvider {
 
       try {
         final lib = await currentMirrorSystem().isolate.loadUri(uri);
-        final appConfigSym = const Symbol('AppConfig');
-        final configsSym = const Symbol('configs');
+        const appConfigSym = Symbol('AppConfig');
+        const configsSym = Symbol('configs');
 
         final decl = lib.declarations[appConfigSym];
         if (decl is! ClassMirror) {
@@ -167,7 +167,7 @@ class CliServiceProvider extends ServiceProvider {
         }
       } catch (e) {
         logger.warning(
-            '⚠️ Failed to load configs via mirrors from $relative ($e)');
+            '⚠️ Failed to load configs via mirrors from $relative ($e)',);
       }
     }
   }

@@ -1,6 +1,29 @@
-## 1.2.0-beta
+## 2.0.0
+
+### 🎉 Major Release: Complete Framework Overhaul
+- **Stable Release**: Khadem 2.0.0 is now stable after extensive testing and optimization.
+- **Framework Rewrite**: Complete rewrite of the framework with improved architecture, performance, and features.
+- **Breaking Changes**: This version includes significant breaking changes from previous versions. See migration guide for details.
+- **New Features**: Enhanced ORM, improved queue system, advanced mail support, and more.
+- **Performance Improvements**: Optimized middleware, cached routing, and resource management.
+- **Bug Fixes**: Resolved all known issues and improved stability.
 
 ### 🚀 Performance & Stability
+- **Zero-Allocation Middleware**: Optimized middleware pipeline execution to reduce memory allocation per request.
+- **Cached Route Matching**: Implemented O(1) lookup for static routes and cached matching for dynamic routes.
+- **Smart Static Serving**: Added support for `If-Modified-Since` headers and `304 Not Modified` responses for static files.
+- **Auto-Healing Cluster**: Added supervisor logic to `ServerCluster` to automatically restart crashed worker isolates.
+- **Concurrent Body Parsing**: Optimized `RequestBodyParser` to handle concurrent parsing requests efficiently using Futures.
+- **Resource Cleanup**: Implemented automatic cleanup of temporary files (uploads) after request completion.
+
+### ✨ New Features
+- **Log Facade**: Added `Log` class for easy static access to logging (e.g., `Log.info()`, `Log.time()`).
+- **Non-Blocking Logging**: `FileLogHandler` now uses `IOSink` for non-blocking asynchronous file writing.
+- **Stream & Callback Logging**: Added `StreamLogHandler` and `CallbackLogHandler` for flexible log processing.
+- **Security Middleware**: Added `SecurityHeadersMiddleware` and `RateLimitMiddleware` for enhanced security.
+- **Streaming Uploads**: Large file uploads are now streamed directly to disk to minimize memory usage.
+
+## 1.2.0-beta
 - **Zero-Allocation Middleware**: Optimized middleware pipeline execution to reduce memory allocation per request.
 - **Cached Route Matching**: Implemented O(1) lookup for static routes and cached matching for dynamic routes.
 - **Smart Static Serving**: Added support for `If-Modified-Since` headers and `304 Not Modified` responses for static files.

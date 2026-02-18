@@ -1,5 +1,4 @@
 import 'package:khadem/contracts.dart';
-import 'package:khadem/khadem.dart';
 import 'package:khadem/logging.dart';
 import 'package:test/test.dart';
 
