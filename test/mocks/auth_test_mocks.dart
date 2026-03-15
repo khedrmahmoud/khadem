@@ -21,7 +21,10 @@ class MockEnv extends Mock implements EnvInterface {}
 
 class MockConfig extends Mock implements ConfigInterface {}
 
-class MockAuthConfig extends Mock implements AuthConfig {}
+class MockAuthConfig extends Mock implements AuthConfig {
+  @override
+  Map<String, dynamic> getDriver(String driverName) => {};
+}
 
 class MockDatabaseManager extends Mock implements DatabaseManager {}
 

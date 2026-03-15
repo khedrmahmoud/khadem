@@ -44,7 +44,9 @@ void main() {
       final registryB = CommandRegistry(logger);
 
       expect(
-          registryA.coreCommands.length, equals(registryB.coreCommands.length),);
+        registryA.coreCommands.length,
+        equals(registryB.coreCommands.length),
+      );
       expect(
         registryA.coreCommands.map((c) => c.name).toSet().length,
         equals(registryA.coreCommands.length),

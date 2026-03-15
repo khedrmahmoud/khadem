@@ -7,7 +7,6 @@ repository: https://github.com/khedrmahmoud/khadem
 issue_tracker: https://github.com/khedrmahmoud/khadem/issues
 license: Apache-2.0
 release_date: "2026-02-18"
-status: "stable"
 
 topics:
   - web-framework

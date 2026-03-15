@@ -196,8 +196,7 @@ void main() {
       expect(summary, equals('2 posts'));
     });
 
-    test('toMap uses sync version and returns Future for async properties',
-        () {
+    test('toMap uses sync version and returns Future for async properties', () {
       final user = TestUser()
         ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 

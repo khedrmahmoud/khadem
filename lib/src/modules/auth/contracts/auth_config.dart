@@ -29,6 +29,12 @@ abstract class AuthConfig {
   /// Throws [AuthException] if guard is not found
   Map<String, dynamic> getGuard(String guardName);
 
+  /// Gets the driver configuration
+  ///
+  /// [driverName] The driver name to retrieve
+  /// Returns the driver configuration or an empty map if not set
+  Map<String, dynamic> getDriver(String driverName);
+
   /// Gets the default guard name
   ///
   /// Returns the default guard name

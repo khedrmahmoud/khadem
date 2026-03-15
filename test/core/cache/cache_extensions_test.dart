@@ -11,7 +11,9 @@ void main() {
 
     test('add should store value only if key does not exist', () async {
       expect(
-          await driver.add('key', 'value', const Duration(minutes: 1)), isTrue,);
+        await driver.add('key', 'value', const Duration(minutes: 1)),
+        isTrue,
+      );
       expect(await driver.get('key'), equals('value'));
 
       expect(

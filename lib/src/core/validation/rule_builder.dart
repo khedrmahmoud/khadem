@@ -133,8 +133,12 @@ class RuleBuilder {
 
   // --- Database Rules ---
 
-  RuleBuilder unique(String table,
-      {String? column, dynamic ignoreId, String ignoreColumn = 'id',}) {
+  RuleBuilder unique(
+    String table, {
+    String? column,
+    dynamic ignoreId,
+    String ignoreColumn = 'id',
+  }) {
     _rules.add(UniqueRule(table, column, ignoreId, ignoreColumn));
     return this;
   }

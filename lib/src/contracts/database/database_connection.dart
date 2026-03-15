@@ -54,7 +54,7 @@ abstract class DatabaseConnection {
   /// - [onFinally] always called after transaction completes.
   Future<T> transaction<T>(
     Future<T> Function() callback, {
-     Duration retryDelay = const Duration(milliseconds: 100),
+    Duration retryDelay = const Duration(milliseconds: 100),
     Future<void> Function(T result)? onSuccess,
     Future<void> Function(dynamic error)? onFailure,
     Future<void> Function()? onFinally,

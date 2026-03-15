@@ -77,7 +77,9 @@ class JWTDriver implements AuthDriver {
     TokenInvalidationStrategyFactory? strategyFactory,
   }) {
     final provider = config.getProvider(providerKey);
-    final secret = provider['jwt_secret'] as String?;
+    final driverConfig = config.getDriver('jwt');
+    final secret =
+        (provider['jwt_secret'] ?? driverConfig['jwt_secret']) as String?;
 
     if (secret == null || secret.isEmpty || secret == 'default-secret-key') {
       throw const FormatException(
@@ -86,13 +88,13 @@ class JWTDriver implements AuthDriver {
       );
     }
 
-    final accessExpiry = Duration(
-      seconds: provider['access_token_expiry'] as int? ?? 3600,
-    );
+    final accessSeconds = (provider['access_token_expiry'] ??
+        driverConfig['access_token_expiry']) as int?;
+    final accessExpiry = Duration(seconds: accessSeconds ?? 3600);
 
-    final refreshExpiry = Duration(
-      seconds: provider['refresh_token_expiry'] as int? ?? 604800,
-    );
+    final refreshSeconds = (provider['refresh_token_expiry'] ??
+        driverConfig['refresh_token_expiry']) as int?;
+    final refreshExpiry = Duration(seconds: refreshSeconds ?? 604800);
 
     // Create token service instance first to ensure it's not null
     late final TokenService tokenServiceInstance;
@@ -179,7 +181,7 @@ class JWTDriver implements AuthDriver {
       throw AuthException('Token has expired');
     } on JWTException catch (e) {
       throw AuthException('Invalid token: ${e.message}');
-    }  catch (e) {
+    } catch (e) {
       rethrow;
     }
   }

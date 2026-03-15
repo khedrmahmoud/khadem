@@ -1,6 +1,6 @@
 import 'package:khadem/contracts.dart' show ContainerInterface, ServiceProvider;
 import 'package:khadem/database/orm.dart';
- import '../models/user.dart';
+import '../models/user.dart';
 import '../observers/user_observer.dart';
 
 /// Service provider for registering model observers.

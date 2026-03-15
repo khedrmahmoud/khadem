@@ -34,12 +34,14 @@ class StorageLinkCommand extends KhademCommand {
       // Note: On Windows, this requires Developer Mode or Admin privileges
       await publicLink.create(storageDir.absolute.path);
       logger.info(
-          '✅ The [public/storage] link has been connected to [storage/app/public].',);
+        '✅ The [public/storage] link has been connected to [storage/app/public].',
+      );
       exitCode = 0;
     } catch (e) {
       logger.error('❌ Failed to create symbolic link: $e');
       logger.info(
-          '💡 On Windows, you may need to run this command as Administrator or enable Developer Mode.',);
+        '💡 On Windows, you may need to run this command as Administrator or enable Developer Mode.',
+      );
       exitCode = 1;
     }
   }

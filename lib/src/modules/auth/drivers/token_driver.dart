@@ -77,13 +77,17 @@ class TokenDriver implements AuthDriver {
     TokenInvalidationStrategyFactory? strategyFactory,
   }) {
     final provider = config.getProvider(providerKey);
+    final driverConfig = config.getDriver('token');
 
-    final tokenExpiry = provider['access_token_expiry'] != null
-        ? Duration(seconds: provider['access_token_expiry'] as int)
-        : null;
-    final refreshTokenExpiry = provider['refresh_token_expiry'] != null
-        ? Duration(seconds: provider['refresh_token_expiry'] as int)
-        : null;
+    final accessSeconds = (provider['access_token_expiry'] ??
+        driverConfig['access_token_expiry']) as int?;
+    final refreshSeconds = (provider['refresh_token_expiry'] ??
+        driverConfig['refresh_token_expiry']) as int?;
+
+    final tokenExpiry =
+        accessSeconds != null ? Duration(seconds: accessSeconds) : null;
+    final refreshTokenExpiry =
+        refreshSeconds != null ? Duration(seconds: refreshSeconds) : null;
 
     final tokenServiceInstance = tokenService ?? DatabaseTokenService();
 

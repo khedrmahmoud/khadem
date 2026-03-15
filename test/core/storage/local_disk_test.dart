@@ -63,7 +63,9 @@ void main() {
     test('temporaryUrl should return path', () async {
       await disk.writeString('file.txt', 'content');
       final url = await disk.temporaryUrl(
-          'file.txt', DateTime.now().add(const Duration(hours: 1)),);
+        'file.txt',
+        DateTime.now().add(const Duration(hours: 1)),
+      );
       // Since LocalDisk just returns the resolved path
       expect(url, contains('file.txt'));
     });

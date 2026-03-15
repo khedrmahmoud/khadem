@@ -33,6 +33,15 @@ class MockAuthConfig extends _i1.Mock implements _i2.AuthConfig {
   }
 
   @override
+  Map<String, dynamic> getDriver(String driverName) => (super.noSuchMethod(
+        Invocation.method(
+          #getDriver,
+          [driverName],
+        ),
+        returnValue: <String, dynamic>{},
+      ) as Map<String, dynamic>);
+
+  @override
   Map<String, dynamic> getProvider(String? providerKey) => (super.noSuchMethod(
         Invocation.method(
           #getProvider,

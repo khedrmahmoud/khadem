@@ -142,7 +142,8 @@ class Migrator {
     Khadem.logger.info('\n📊 Migration Status:');
     Khadem.logger.info('--------------------------------------------------');
     Khadem.logger.info(
-        '| Status   | Migration Name                           | Batch |',);
+      '| Status   | Migration Name                           | Batch |',
+    );
     Khadem.logger.info('--------------------------------------------------');
 
     for (final migration in _migrations) {
@@ -155,7 +156,8 @@ class Migrator {
           : '-';
 
       Khadem.logger.info(
-          '| $status | ${migration.name.padRight(36)} | ${batch.padRight(5)} |',);
+        '| $status | ${migration.name.padRight(36)} | ${batch.padRight(5)} |',
+      );
     }
     Khadem.logger.info('--------------------------------------------------\n');
   }

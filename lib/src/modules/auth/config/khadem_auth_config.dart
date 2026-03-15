@@ -71,6 +71,23 @@ class KhademAuthConfig implements AuthConfig {
   }
 
   @override
+  Map<String, dynamic> getDriver(String driverName) {
+    final config = _getAuthConfig();
+    final drivers = config['drivers'] as Map<String, dynamic>?;
+
+    if (drivers == null) {
+      return {};
+    }
+
+    final driver = drivers[driverName];
+    if (driver is Map<String, dynamic>) {
+      return driver;
+    }
+
+    return {};
+  }
+
+  @override
   String getDefaultGuard() {
     final config = _getAuthConfig();
     final defaults = config['defaults'] as Map<String, dynamic>?;

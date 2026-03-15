@@ -46,7 +46,6 @@ mixin Timestamps<T> on InteractsWithDatabase<T>, HasAttributes<T> {
     if (!timestamps) return;
 
     final now = DateTime.now().toUtc();
- 
 
     if (isCreating) {
       // Set created_at only on creation

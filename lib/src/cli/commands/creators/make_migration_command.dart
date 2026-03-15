@@ -76,7 +76,9 @@ class $className extends MigrationFile {
       ..sort((a, b) => a.path.compareTo(b.path));
 
     final buffer = StringBuffer();
-    buffer.writeln("import 'package:khadem/contracts.dart' show MigrationFile;\n");
+    buffer.writeln(
+      "import 'package:khadem/contracts.dart' show MigrationFile;\n",
+    );
 
     final classNames = <String>[];
 

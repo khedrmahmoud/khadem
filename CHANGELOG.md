@@ -4,6 +4,7 @@
 - **Stable Release**: Khadem 2.0.0 is now stable after extensive testing and optimization.
 - **Framework Rewrite**: Complete rewrite of the framework with improved architecture, performance, and features.
 - **Breaking Changes**: This version includes significant breaking changes from previous versions. See migration guide for details.
+- **Auth Config Update**: Added driver-level defaults under `auth.drivers` and a new `AuthConfig.getDriver()` API; provider-specific driver keys are now optional.
 - **New Features**: Enhanced ORM, improved queue system, advanced mail support, and more.
 - **Performance Improvements**: Optimized middleware, cached routing, and resource management.
 - **Bug Fixes**: Resolved all known issues and improved stability.

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:khadem/http.dart'
-  show BodyParser, RequestValidator, UploadedFile;
+    show BodyParser, RequestValidator, UploadedFile;
 import 'package:test/test.dart';
 
 class FakeBodyParser implements BodyParser {
@@ -76,7 +76,9 @@ void main() {
         final rules = {'name': 'required', 'email': 'required|email'};
 
         await expectLater(
-            () => validator.validateData(data, rules), throwsException,);
+          () => validator.validateData(data, rules),
+          throwsException,
+        );
       });
 
       test('should validate required fields', () async {
@@ -84,7 +86,9 @@ void main() {
         final rules = {'name': 'required', 'email': 'required'};
 
         await expectLater(
-            () => validator.validateData(data, rules), throwsException,);
+          () => validator.validateData(data, rules),
+          throwsException,
+        );
       });
 
       test('should validate email format', () async {
@@ -92,7 +96,9 @@ void main() {
         final rules = {'email': 'email'};
 
         await expectLater(
-            () => validator.validateData(data, rules), throwsException,);
+          () => validator.validateData(data, rules),
+          throwsException,
+        );
       });
 
       test('should validate email format correctly', () async {
@@ -109,7 +115,9 @@ void main() {
         final rules = {'name': 'min:3'};
 
         await expectLater(
-            () => validator.validateData(data, rules), throwsException,);
+          () => validator.validateData(data, rules),
+          throwsException,
+        );
       });
 
       test('should validate maximum length', () async {
@@ -117,7 +125,9 @@ void main() {
         final rules = {'name': 'max:5'};
 
         await expectLater(
-            () => validator.validateData(data, rules), throwsException,);
+          () => validator.validateData(data, rules),
+          throwsException,
+        );
       });
 
       test('should validate integer type', () async {
@@ -134,7 +144,9 @@ void main() {
         final rules = {'age': 'min:18'};
 
         await expectLater(
-            () => validator.validateData(data, rules), throwsException,);
+          () => validator.validateData(data, rules),
+          throwsException,
+        );
       });
 
       test('should validate maximum value', () async {
@@ -142,7 +154,9 @@ void main() {
         final rules = {'score': 'max:100'};
 
         await expectLater(
-            () => validator.validateData(data, rules), throwsException,);
+          () => validator.validateData(data, rules),
+          throwsException,
+        );
       });
     });
 
@@ -152,7 +166,9 @@ void main() {
         final rules = {'name': 'required'};
 
         await expectLater(
-            () => validator.validateData(data, rules), throwsException,);
+          () => validator.validateData(data, rules),
+          throwsException,
+        );
       });
 
       test('should handle null values', () async {
@@ -160,7 +176,9 @@ void main() {
         final rules = {'name': 'required'};
 
         await expectLater(
-            () => validator.validateData(data, rules), throwsException,);
+          () => validator.validateData(data, rules),
+          throwsException,
+        );
       });
 
       test('should handle empty rules', () async {

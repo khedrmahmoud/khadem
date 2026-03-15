@@ -1,4 +1,4 @@
- import 'package:khadem/contracts.dart' show LogLevel;
+import 'package:khadem/contracts.dart' show LogLevel;
 
 import '../../application/khadem.dart';
 
@@ -15,6 +15,7 @@ import '../../application/khadem.dart';
 /// ```
 class Log {
   Log._();
+
   /// Logs a debug message.
   static void debug(
     String message, {

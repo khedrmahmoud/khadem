@@ -18,13 +18,21 @@ abstract class SocketAdapter {
   void leave(String room, SocketClient client);
 
   /// Broadcast an event to all clients in a room.
-  void broadcastToRoom(String room, String event, dynamic data,
-      {String? namespace,});
+  void broadcastToRoom(
+    String room,
+    String event,
+    dynamic data, {
+    String? namespace,
+  });
 
   /// Broadcast an event to all clients in a room except specific ones.
   void broadcastToRoomExcept(
-      String room, String event, dynamic data, Set<String> excludedClientIds,
-      {String? namespace,});
+    String room,
+    String event,
+    dynamic data,
+    Set<String> excludedClientIds, {
+    String? namespace,
+  });
 
   /// Broadcast an event to all clients subscribed to that event.
   void broadcast(String event, dynamic data, {String? namespace});

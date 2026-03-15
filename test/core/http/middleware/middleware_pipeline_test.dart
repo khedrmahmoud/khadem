@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:khadem/contracts.dart';
-import 'package:khadem/http.dart'
-  show MiddlewarePipeline;
+import 'package:khadem/http.dart' show MiddlewarePipeline;
 import 'package:khadem/support.dart' show MiddlewareNotFoundException;
 import 'package:test/test.dart';
 

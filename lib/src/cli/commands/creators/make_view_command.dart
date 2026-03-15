@@ -45,13 +45,15 @@ class MakeViewCommand extends KhademCommand {
     }
 
     await file.create(recursive: true);
-    await file.writeAsString('''
+    await file.writeAsString(
+      '''
 <!-- Khadem view: $viewName -->
 <div>
   <h1>$viewName</h1>
 </div>
 '''
-        .trim(),);
+          .trim(),
+    );
 
     logger.info('✅ View "$viewName" created at $filePath');
     exitCode = 0;

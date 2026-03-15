@@ -15,9 +15,6 @@
 
 Khadem is a comprehensive backend framework built with Dart, designed for developers who demand performance, elegance, and full control. It provides a complete toolkit for building robust web applications with features like dependency injection, modular architecture, built-in CLI tools with **automatic command discovery**, database management, caching, authentication, and production-ready deployment capabilities.
 
-> **🎉 Khadem 2.0.0 is now stable!** This major release includes a complete framework overhaul with significant improvements and new features. See the [migration guide](https://khadem-framework.github.io/khadem-docs/migration-guide) if upgrading from 1.x.
-
----
 
 ## 🚀 Key Features
 
@@ -88,11 +85,11 @@ dart run lib/main.dart
 khadem serve
 ```
 
-Your application will be running at `http://localhost:3000` with hot reload enabled!
+Your application will be running at `http://localhost:9000` with hot reload enabled!
 
 ---
 
-## �📞 Support & Community
+## 📞 Support & Community
 
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/khedrmahmoud/khadem/issues)
 - 💡 **Feature Requests**: [GitHub Discussions](https://github.com/khedrmahmoud/khadem/discussions)

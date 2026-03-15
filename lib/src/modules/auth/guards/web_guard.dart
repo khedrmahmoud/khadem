@@ -64,7 +64,9 @@ class WebGuard extends Guard {
     final driverName = guardConfig['driver'] as String;
 
     // Use provided provider key, or get default provider
-    final effectiveProviderKey = providerKey ?? _getDefaultProviderKey(config);
+    final effectiveProviderKey = providerKey ??
+        guardConfig['provider'] as String? ??
+        _getDefaultProviderKey(config);
 
     final driver = _createDriver(driverName, config, effectiveProviderKey);
 

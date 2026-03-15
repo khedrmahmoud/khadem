@@ -76,13 +76,18 @@ class SocketContext {
   /// Validate the payload against rules.
   ///
   /// Throws [ValidationException] if validation fails.
-  Future<void> validate(Map<String, dynamic> rules,
-      {Map<String, String> messages = const {},}) async {
+  Future<void> validate(
+    Map<String, dynamic> rules, {
+    Map<String, String> messages = const {},
+  }) async {
     if (data is! Map<String, dynamic>) {
       throw const FormatException('Payload must be a Map to be validated');
     }
-    final validator = InputValidator(data as Map<String, dynamic>, rules,
-        customMessages: messages,);
+    final validator = InputValidator(
+      data as Map<String, dynamic>,
+      rules,
+      customMessages: messages,
+    );
     await validator.validate();
   }
 

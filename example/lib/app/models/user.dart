@@ -1,5 +1,3 @@
- 
-
 import 'package:khadem/database/orm.dart';
 
 class User extends KhademModel<User> with Timestamps {

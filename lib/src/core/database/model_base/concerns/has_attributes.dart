@@ -106,14 +106,10 @@ mixin HasAttributes<T> {
   }
 
   /// Set a given attribute on the model.
+  ///
+  /// Values are stored as-is; casting to Dart types happens lazily in
+  /// [getAttribute] and serialization to DB format happens in [toDatabaseMap].
   void setAttribute(String key, dynamic value) {
-    if (hasCast(key)) {
-      final caster = casts[key];
-      if (caster is AttributeCaster) {
-        value = caster.get(value);
-      }
-    }
-
     _attributes[key] = value;
     _computedCache.clear();
   }
@@ -163,63 +159,79 @@ mixin HasAttributes<T> {
   /// Determine if an attribute has a cast.
   bool hasCast(String key) => casts.containsKey(key);
 
-  /// Cast an attribute to a native Dart type.
+  /// Cast an attribute to its declared Dart type.
   dynamic castAttribute(String key, dynamic value) {
     if (value == null) return null;
 
     final castType = casts[key];
 
-    if (castType is AttributeCaster) {
-      return castType.get(value);
+    // Custom AttributeCaster instances take priority.
+    if (castType is AttributeCaster) return castType.get(value);
+
+    // Non-generic types: use fast identity comparisons.
+    if (castType == int) {
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      if (value is bool) return value ? 1 : 0;
+      return int.tryParse(value.toString());
+    }
+    if (castType == double) {
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      return double.tryParse(value.toString());
+    }
+    if (castType == String) {
+      if (value is String) return value;
+      return value.toString();
+    }
+    if (castType == bool) {
+      if (value is bool) return value;
+      if (value is int) return value != 0;
+      final s = value.toString().toLowerCase();
+      return s == 'true' || s == '1';
+    }
+    if (castType == DateTime) {
+      if (value is DateTime) return value;
+      return DateTime.tryParse(value.toString());
     }
 
+    // Generic types: Dart's `==` operator can't parse `castType == List<X>`
+    // directly (ambiguous with `<`), so use const-pattern switch.
     switch (castType) {
-      case const (int):
-        return int.tryParse(value.toString());
-      case const (double):
-        return double.tryParse(value.toString());
-      case const (String):
-        return value.toString();
-      case const (bool):
-        if (value is bool) return value;
-        if (value is int) return value == 1;
-        return value.toString().toLowerCase() == 'true';
-      case const (DateTime):
-        if (value is DateTime) return value;
-        return DateTime.tryParse(value.toString());
       case const (List<String>):
+        if (value is List<String>) return value;
         if (value is List) return value.map((e) => e.toString()).toList();
         if (value is String) {
           try {
-            return (jsonDecode(value) as List)
-                .map((e) => e.toString())
-                .toList();
-          } catch (_) {
-            return <String>[];
-          }
+            final decoded = jsonDecode(value);
+            if (decoded is List) {
+              return decoded.map((e) => e.toString()).toList();
+            }
+          } catch (_) {}
         }
         return <String>[];
+
       case const (List<dynamic>):
         if (value is List) return value;
         if (value is String) {
           try {
             return jsonDecode(value) as List;
-          } catch (_) {
-            return [];
-          }
+          } catch (_) {}
         }
-        return [];
+        return <dynamic>[];
+
       case const (Map<String, dynamic>):
       case const (Map):
-        if (value is Map) return value;
+        if (value is Map<String, dynamic>) return value;
+        if (value is Map) return Map<String, dynamic>.from(value);
         if (value is String) {
           try {
-            return jsonDecode(value) as Map<String, dynamic>;
-          } catch (_) {
-            return {};
-          }
+            final decoded = jsonDecode(value);
+            if (decoded is Map) return Map<String, dynamic>.from(decoded);
+          } catch (_) {}
         }
-        return {};
+        return <String, dynamic>{};
+
       default:
         return value;
     }
@@ -340,17 +352,11 @@ mixin HasAttributes<T> {
     final seen = <int>{};
     final result = <String, dynamic>{};
     for (final entry in map.entries) {
-      // Skip Futures as they are not JSON encodable
+      // Skip Futures as they are not JSON encodable.
       if (entry.value is Future) continue;
-
-      if (hasCast(entry.key)) {
-        final caster = casts[entry.key];
-        if (caster is AttributeCaster) {
-          result[entry.key] =
-              _toJsonEncodableValue(caster.set(entry.value), seen);
-          continue;
-        }
-      }
+      // Values from toMap() are already Dart-typed (via getAttribute/castAttribute).
+      // _toJsonEncodableValue handles JSON-safety (DateTime→string, Enum→name, etc.).
+      // Do NOT call caster.set() here — that is for DB serialization only.
       result[entry.key] = _toJsonEncodableValue(entry.value, seen);
     }
     return result;
@@ -457,36 +463,73 @@ mixin HasAttributes<T> {
   }
 
   /// Prepare the model for database insertion/update.
+  ///
+  /// Serializes each attribute to its DB-storable form:
+  /// - [AttributeCaster]: `get()` to normalise the Dart type, then `set()` for DB.
+  /// - Type-based casts (`bool`, `DateTime`, `List`, `Map`): converted inline.
   Map<String, dynamic> toDatabaseMap() {
     final map = <String, dynamic>{};
     for (final key in _attributes.keys) {
-      var value = _attributes[key];
+      map[key] = _serializeForDatabase(key, _attributes[key]);
+    }
+    return map;
+  }
 
-      // Handle casting for database
-      if (hasCast(key)) {
-        final caster = casts[key];
-        if (caster is AttributeCaster) {
-          value = caster.set(value);
-        } else if (value is DateTime) {
-          value = value.toUtc().toIso8601String();
-        } else if (value is bool) {
-          value = value ? 1 : 0;
-        } else if (value is Map || value is List) {
-          if (caster.toString().contains('Map') ||
-              caster.toString().contains('List') ||
-              caster == Map ||
-              caster == List) {
-            if (value != null) {
-              value = jsonEncode(value);
-            }
-          }
-        }
-      }
+  /// Converts a single attribute value to its DB-storable form.
+  ///
+  /// For [AttributeCaster] types the value is first normalised via `get()` so
+  /// that both raw DB strings (loaded via [fromJson]) and already-typed Dart
+  /// values (set via [setAttribute]) are handled correctly before calling
+  /// `set()`.  This prevents double-serialisation (e.g. JSON-string → JSON
+  /// string again).
+  dynamic _serializeForDatabase(String key, dynamic value) {
+    if (value == null || !hasCast(key)) return value;
 
-      map[key] = value;
+    final castType = casts[key];
+
+    if (castType is AttributeCaster) {
+      // Normalise to Dart type first (idempotent), then serialise for DB.
+      return castType.set(castType.get(value));
     }
 
-    return map;
+    if (castType == bool) {
+      if (value is bool) return value ? 1 : 0;
+      if (value is int) return value == 0 ? 0 : 1;
+      return null;
+    }
+
+    if (castType == DateTime) {
+      DateTime? dt;
+      if (value is DateTime) {
+        dt = value;
+      } else if (value is String) {
+        dt = DateTime.tryParse(value);
+      }
+      // MySQL-compatible format: YYYY-MM-DD HH:MM:SS
+      return dt
+          ?.toUtc()
+          .toIso8601String()
+          .replaceAll('T', ' ')
+          .substring(0, 19);
+    }
+
+    // Generic types: use const-pattern switch to avoid `<` ambiguity.
+    switch (castType) {
+      case const (List<String>):
+      case const (List<dynamic>):
+        if (value is List) return jsonEncode(value);
+        if (value is String) return value; // already serialised from DB
+        return null;
+
+      case const (Map<String, dynamic>):
+      case const (Map):
+        if (value is Map) return jsonEncode(value);
+        if (value is String) return value; // already serialised from DB
+        return null;
+
+      default:
+        return value;
+    }
   }
 
   /// Initialize from database record

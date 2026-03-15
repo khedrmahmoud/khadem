@@ -1,5 +1,3 @@
- 
-
 import 'package:khadem/contracts.dart' show Rule;
 import 'package:khadem/src/support/validation_rules/rules.dart';
 

@@ -1,5 +1,5 @@
- import 'package:khadem/database/orm.dart';
- import 'package:test/test.dart';
+import 'package:khadem/database/orm.dart';
+import 'package:test/test.dart';
 
 class TestModel extends KhademModel<TestModel> {
   String? name;

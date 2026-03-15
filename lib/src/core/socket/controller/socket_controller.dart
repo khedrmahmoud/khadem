@@ -41,8 +41,10 @@ abstract class SocketController {
   /// Register a typed event handler.
   ///
   /// [T] is the expected type of the data payload.
-  void onData<T>(String event,
-      FutureOr<void> Function(SocketContext context, T data) handler,) {
+  void onData<T>(
+    String event,
+    FutureOr<void> Function(SocketContext context, T data) handler,
+  ) {
     _channel.on(event, (context) => handler(context, context.payload<T>()));
   }
 
@@ -72,8 +74,10 @@ abstract class SocketController {
   }
 
   /// Validate the payload against rules.
-  void validate(Map<String, String> rules,
-      {Map<String, String> messages = const {},}) {
+  void validate(
+    Map<String, String> rules, {
+    Map<String, String> messages = const {},
+  }) {
     context.validate(rules, messages: messages);
   }
 }

@@ -1,4 +1,3 @@
- 
 import 'package:khadem/contracts.dart' show LogHandler, LogLevel;
 
 /// A log handler that delegates logging to a callback function.

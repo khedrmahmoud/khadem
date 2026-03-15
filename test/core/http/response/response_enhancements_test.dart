@@ -111,8 +111,14 @@ void main() {
 
       expect(response.statusCode, 404);
       expect(headers.contentType?.mimeType, 'application/problem+json');
-      expect(utf8.decode(response._writes.first as List<int>), contains('"title":"Not Found"'));
-      expect(utf8.decode(response._writes.first as List<int>), contains('"detail":"User not found"'));
+      expect(
+        utf8.decode(response._writes.first as List<int>),
+        contains('"title":"Not Found"'),
+      );
+      expect(
+        utf8.decode(response._writes.first as List<int>),
+        contains('"detail":"User not found"'),
+      );
     });
 
     test('back() redirects to referer', () async {

@@ -8,7 +8,10 @@ import '../../core/http/request/request.dart';
 /// A global middleware to catch and handle all uncaught exceptions.
 class ExceptionMiddleware implements Middleware {
   Future<void> handle(
-      Request req, ResponseContract res, NextFunction next,) async {
+    Request req,
+    ResponseContract res,
+    NextFunction next,
+  ) async {
     try {
       await next();
     } catch (error, stackTrace) {

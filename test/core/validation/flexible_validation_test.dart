@@ -11,7 +11,8 @@ class AsyncTestRule extends Rule {
   @override
   FutureOr<bool> passes(ValidationContext context) async {
     await Future.delayed(
-        const Duration(milliseconds: 10),); // Simulate async work
+      const Duration(milliseconds: 10),
+    ); // Simulate async work
     return context.value != 'invalid';
   }
 
@@ -53,8 +54,10 @@ void main() {
 
       expect(await validator.passes(), isFalse);
       expect(validator.errors, contains('age'));
-      expect(validator.errors['age'],
-          contains('max_error'),); // Assuming default formatting uses key
+      expect(
+        validator.errors['age'],
+        contains('max_error'),
+      ); // Assuming default formatting uses key
       expect(validator.errors, isNot(contains('name')));
     });
 

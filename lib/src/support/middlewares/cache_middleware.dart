@@ -10,7 +10,10 @@ class CacheMiddleware implements Middleware {
   CacheMiddleware({this.duration = const Duration(seconds: 10)});
 
   Future<void> handle(
-      Request req, ResponseContract res, NextFunction next,) async {
+    Request req,
+    ResponseContract res,
+    NextFunction next,
+  ) async {
     if (req.method != 'GET') return next();
 
     final key = req.uri.toString();

@@ -3,9 +3,10 @@ import '../../contracts/cli/command.dart';
 class CommandsCommand extends KhademCommand {
   final List<({String name, String description})> _commands;
 
-  CommandsCommand(
-      {required super.logger, required List<KhademCommand> commands,})
-      : _commands = commands
+  CommandsCommand({
+    required super.logger,
+    required List<KhademCommand> commands,
+  }) : _commands = commands
             .map((c) => (name: c.name, description: c.description))
             .toList();
 

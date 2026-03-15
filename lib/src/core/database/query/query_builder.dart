@@ -497,6 +497,8 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
       if (relationQuery is QueryBuilder) {
         relationQuery._columns = [];
+        // Prevent nested withCount from adding extra columns to this scalar subquery
+        relationQuery._defaultWithCountApplied = true;
       }
 
       relationQuery.selectRaw('COUNT(*)');
@@ -1091,7 +1093,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     String alias,
   ) {
     final subSql = (query as dynamic).toSql();
-    _columns.add('($subSql) as $alias');
+    _columns.add({'type': 'Raw', 'sql': '($subSql) as $alias'});
     if (query is QueryBuilder) {
       _selectBindings.addAll(query.bindings);
     }

@@ -22,8 +22,10 @@ void main() {
       final sql = queries.first;
 
       expect(sql, contains('CREATE TABLE IF NOT EXISTS `users`'));
-      expect(sql,
-          contains('`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY'),);
+      expect(
+        sql,
+        contains('`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY'),
+      );
       expect(sql, contains('`name` VARCHAR(255) NOT NULL'));
       expect(sql, contains('`email` VARCHAR(255) NOT NULL UNIQUE'));
       expect(sql, contains('`created_at` TIMESTAMP NOT NULL'));
@@ -47,8 +49,10 @@ void main() {
       expect(sql, contains('`title` VARCHAR(255) NULL'));
       expect(sql, contains('`is_published` TINYINT(1) NOT NULL DEFAULT 0'));
       expect(sql, contains('`views` INT NOT NULL DEFAULT 0'));
-      expect(sql,
-          contains('`published_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP'),);
+      expect(
+        sql,
+        contains('`published_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP'),
+      );
     });
 
     test('handles text', () {
@@ -71,23 +75,29 @@ void main() {
       final sql = builder.queries.first;
       expect(sql, contains('`user_id` BIGINT UNSIGNED NOT NULL'));
       expect(
-          sql,
-          contains(
-              'CONSTRAINT `comments_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE',),);
+        sql,
+        contains(
+          'CONSTRAINT `comments_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE',
+        ),
+      );
     });
 
     test('handles enums', () {
       builder.createIfNotExists('orders', (table) {
         table.id();
         table.enumColumn(
-            'status', ['pending', 'completed', 'failed'],).defaultsTo('pending');
+          'status',
+          ['pending', 'completed', 'failed'],
+        ).defaultsTo('pending');
       });
 
       final sql = builder.queries.first;
       expect(
-          sql,
-          contains(
-              "`status` ENUM('pending', 'completed', 'failed') NOT NULL DEFAULT 'pending'",),);
+        sql,
+        contains(
+          "`status` ENUM('pending', 'completed', 'failed') NOT NULL DEFAULT 'pending'",
+        ),
+      );
     });
 
     test('handles charset and collation', () {
@@ -98,9 +108,11 @@ void main() {
 
       final sql = builder.queries.first;
       expect(
-          sql,
-          contains(
-              "`name` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL",),);
+        sql,
+        contains(
+          "`name` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL",
+        ),
+      );
     });
   });
 }

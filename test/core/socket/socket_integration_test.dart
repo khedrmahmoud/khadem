@@ -4,12 +4,12 @@ import 'dart:io';
 
 import 'package:khadem/container.dart';
 import 'package:khadem/contracts.dart'
-  show EnvInterface, ExceptionHandlerContract;
+    show EnvInterface, ExceptionHandlerContract;
 import 'package:khadem/exception.dart';
 import 'package:khadem/logging.dart';
- 
+
 import 'package:khadem/socket.dart'
-  show SocketConfig, SocketManager, SocketServer;
+    show SocketConfig, SocketManager, SocketServer;
 import 'package:test/test.dart';
 
 class DummyLogger implements Logger {
@@ -81,7 +81,10 @@ void main() {
           context.client.joinRoom('test_room');
           // Broadcast to everyone in the room
           manager.broadcastToRoom(
-              'test_room', 'new_user', {'id': context.client.id},);
+            'test_room',
+            'new_user',
+            {'id': context.client.id},
+          );
         });
       });
 
@@ -91,7 +94,7 @@ void main() {
       final ws1Completer = Completer<Map>();
       ws1.listen((data) {
         final msg = jsonDecode(data);
-        if (msg['event'] == 'new_user') {
+        if (msg['event'] == 'new_user' && !ws1Completer.isCompleted) {
           ws1Completer.complete(msg);
         }
       });
@@ -129,10 +132,12 @@ void main() {
       });
 
       // Send a large message
-      ws.add(jsonEncode({
-        'event': 'large',
-        'data': 'this is definitely larger than 10 bytes',
-      }),);
+      ws.add(
+        jsonEncode({
+          'event': 'large',
+          'data': 'this is definitely larger than 10 bytes',
+        }),
+      );
 
       final response =
           await completer.future.timeout(const Duration(seconds: 2));

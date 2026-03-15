@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:khadem/auth.dart' show RequestAuth, Authenticatable;
 import 'package:khadem/http.dart';
 import 'package:khadem/khadem.dart';
- 
+
 import 'socket_manager.dart';
 import 'socket_packet.dart';
 

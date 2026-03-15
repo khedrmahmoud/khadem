@@ -7,4 +7,3 @@ export 'event_method.dart';
 export 'event_registration.dart';
 export 'event_system.dart';
 export 'subscriber_scanner.dart';
-

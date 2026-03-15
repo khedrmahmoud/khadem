@@ -194,8 +194,10 @@ class UrlService {
       final value = e.value;
       if (value is List) {
         return value
-            .map((v) =>
-                '${Uri.encodeComponent(e.key)}[]=${Uri.encodeComponent(v.toString())}',)
+            .map(
+              (v) =>
+                  '${Uri.encodeComponent(e.key)}[]=${Uri.encodeComponent(v.toString())}',
+            )
             .join('&');
       }
       return '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(value.toString())}';

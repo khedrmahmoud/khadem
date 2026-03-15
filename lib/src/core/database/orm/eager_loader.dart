@@ -1,4 +1,3 @@
-
 import '../model_base/khadem_model.dart';
 import 'relation_meta.dart';
 

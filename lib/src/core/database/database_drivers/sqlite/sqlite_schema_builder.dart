@@ -27,7 +27,8 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
     for (final column in blueprint.columns) {
       if (column.isIndexed) {
         _queries.add(
-            'CREATE INDEX "${tableName}_${column.name}_index" ON "$tableName" ("${column.name}");',);
+          'CREATE INDEX "${tableName}_${column.name}_index" ON "$tableName" ("${column.name}");',
+        );
       }
     }
 
@@ -60,14 +61,16 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
     for (final column in blueprint.columns) {
       if (column.isIndexed) {
         _queries.add(
-            'CREATE INDEX IF NOT EXISTS "${tableName}_${column.name}_index" ON "$tableName" ("${column.name}");',);
+          'CREATE INDEX IF NOT EXISTS "${tableName}_${column.name}_index" ON "$tableName" ("${column.name}");',
+        );
       }
     }
 
     for (final idx in blueprint.indexes) {
       final name = idx.name ?? '${tableName}_${idx.columns.join('_')}_index';
       final cols = idx.columns.map((c) => '"$c"').join(', ');
-      _queries.add('CREATE INDEX IF NOT EXISTS "$name" ON "$tableName" ($cols);');
+      _queries
+          .add('CREATE INDEX IF NOT EXISTS "$name" ON "$tableName" ($cols);');
     }
   }
 
@@ -242,7 +245,9 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
   // ===========================================================================
 
   List<String> _generateTableConstraints(
-      Blueprint blueprint, String tableName,) {
+    Blueprint blueprint,
+    String tableName,
+  ) {
     final constraints = <String>[];
 
     for (final column in blueprint.columns) {

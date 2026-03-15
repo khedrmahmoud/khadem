@@ -1,4 +1,5 @@
-import 'package:khadem/contracts.dart' show ConfigInterface, ContainerInterface, ServiceProvider;
+import 'package:khadem/contracts.dart'
+    show ConfigInterface, ContainerInterface, ServiceProvider;
 import 'package:khadem/khadem.dart';
 import 'package:khadem/queue.dart' show QueueManager;
 

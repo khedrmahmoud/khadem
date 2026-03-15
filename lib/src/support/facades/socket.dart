@@ -9,6 +9,7 @@ import '../../core/socket/socket_manager.dart';
 /// and background tasks where dependency injection isn't available.
 class Socket {
   Socket._();
+
   /// Gets the socket manager instance.
   static SocketManager get _manager => Khadem.make<SocketManager>();
 

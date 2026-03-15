@@ -35,6 +35,11 @@ class TestAuthConfig implements AuthConfig {
   }
 
   @override
+  Map<String, dynamic> getDriver(String driverName) {
+    return {};
+  }
+
+  @override
   String getDefaultGuard() => 'api';
 
   @override

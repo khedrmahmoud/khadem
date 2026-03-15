@@ -3,11 +3,11 @@ import 'dart:mirrors';
 
 import 'package:khadem/config.dart';
 import 'package:khadem/contracts.dart'
-  show ConfigInterface, ContainerInterface, EnvInterface, ServiceProvider;
+    show ConfigInterface, ContainerInterface, EnvInterface, ServiceProvider;
 import 'package:khadem/database/drivers.dart';
 import 'package:khadem/database/migrations.dart';
- 
- import 'package:khadem/logging.dart';
+
+import 'package:khadem/logging.dart';
 import 'package:khadem/queue.dart' show QueueManager;
 
 /// A lightweight service provider for CLI-only context.
@@ -167,7 +167,8 @@ class CliServiceProvider extends ServiceProvider {
         }
       } catch (e) {
         logger.warning(
-            '⚠️ Failed to load configs via mirrors from $relative ($e)',);
+          '⚠️ Failed to load configs via mirrors from $relative ($e)',
+        );
       }
     }
   }

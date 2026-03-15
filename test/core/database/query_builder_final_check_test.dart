@@ -10,8 +10,10 @@ class FakeConnection implements DatabaseConnection {
   List<List<dynamic>> executedBindings = [];
 
   @override
-  Future<DatabaseResponse> execute(String sql,
-      [List<dynamic>? bindings = const [],]) async {
+  Future<DatabaseResponse> execute(
+    String sql, [
+    List<dynamic>? bindings = const [],
+  ]) async {
     executedSql.add(sql);
     executedBindings.add(bindings ?? []);
     return DatabaseResponse(affectedRows: 1, insertId: 1, data: []);

@@ -6,3 +6,4 @@ khadem_docs/
 packages/
 extensions/
 build/
+*.log

@@ -13,7 +13,6 @@ import 'core/http_request_processor.dart';
 import 'server_middleware.dart';
 import 'server_static.dart';
 
- 
 class ServerLifecycle {
   final Router _router;
   final ServerMiddleware _middleware;

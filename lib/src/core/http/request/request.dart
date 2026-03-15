@@ -87,10 +87,16 @@ class Request {
   /// Gets a query parameter as list of strings.
   ///
   /// Splits by comma and trims whitespace by default.
-  List<String>? queryList(String key,
-          {String separator = ',', List<String>? defaultValue,}) =>
-      _metadata.queryList(key,
-          separator: separator, defaultValue: defaultValue,);
+  List<String>? queryList(
+    String key, {
+    String separator = ',',
+    List<String>? defaultValue,
+  }) =>
+      _metadata.queryList(
+        key,
+        separator: separator,
+        defaultValue: defaultValue,
+      );
 
   /// Gets a query parameter with custom parsing function.
   T? queryWith<T>(String key, T? Function(String) parser, {T? defaultValue}) =>

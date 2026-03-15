@@ -68,7 +68,18 @@ class InputValidator {
       return;
     }
 
+    // If the field is absent from the data, only run presence-checking rules
+    // (required, required_if, etc.). Skip format/type rules like numeric,
+    // string, exists, etc. This prevents false validation errors when a
+    // conditional field (e.g. required_if:type,onsite) is simply not sent
+    // because the condition is not met.
+    final fieldPresent = _isFieldPresent(field);
+
     for (final item in ruleItems) {
+      if (!fieldPresent && !_isPresenceRule(item.name)) {
+        continue;
+      }
+
       final context = ValidationContext(
         attribute: field,
         value: value,
@@ -243,6 +254,47 @@ class InputValidator {
   bool _isNullableAndNull(List<_RuleItem> items, dynamic value) {
     final hasNullable = items.any((item) => item.name == 'nullable');
     return hasNullable && value == null;
+  }
+
+  /// Returns true if the field key path actually exists in [data], regardless
+  /// of whether the value is null.
+  bool _isFieldPresent(String fieldPath) {
+    final parts = fieldPath.split('.');
+    dynamic current = data;
+    for (final part in parts) {
+      if (current is Map) {
+        if (!current.containsKey(part)) return false;
+        current = current[part];
+      } else if (current is List) {
+        final index = int.tryParse(part);
+        if (index == null || index < 0 || index >= current.length) {
+          return false;
+        }
+        current = current[index];
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Returns true for rules whose sole purpose is checking field presence.
+  /// These rules must always run, even when the field is absent.
+  static const _presenceRuleNames = {
+    'required',
+    'required_if',
+    'required_unless',
+    'required_with',
+    'required_without',
+    'required_with_all',
+    'required_without_all',
+    'prohibited',
+    'prohibited_if',
+    'sometimes',
+  };
+
+  bool _isPresenceRule(String ruleName) {
+    return _presenceRuleNames.contains(ruleName);
   }
 
   String _formatErrorMessage(

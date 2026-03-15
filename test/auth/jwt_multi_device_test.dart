@@ -163,12 +163,21 @@ class TestAuthConfig implements AuthConfig {
   @override
   Map<String, dynamic> getProvider(String providerKey) {
     return {
-      'jwt_secret': 'test-secret-key-for-jwt-testing-purposes-only',
-      'access_token_expiry': 3600, // 1 hour
-      'refresh_token_expiry': 604800, // 7 days
       'table': 'users',
       'primary_key': 'id',
     };
+  }
+
+  @override
+  Map<String, dynamic> getDriver(String driverName) {
+    if (driverName == 'jwt') {
+      return {
+        'jwt_secret': 'test-secret-key-for-jwt-testing-purposes-only',
+        'access_token_expiry': 3600,
+        'refresh_token_expiry': 604800,
+      };
+    }
+    return {};
   }
 
   @override
