@@ -209,52 +209,76 @@ class NewCommand extends KhademCommand {
     return '''# Application Configuration
 APP_NAME=$projectName
 APP_ENV=development
+APP_DEBUG=true
 APP_LOCALE=en
 APP_PORT=9000
 SOCKET_PORT=8080
-APP_URL=http://localhost:9000
+# APP_URL=http://localhost:9000
 
 # Database Configuration (configure based on your database choice)
+DB_CONNECTION=sqlite
+DB_DATABASE=storage/database/database.sqlite
 # For MySQL
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=${projectName.toLowerCase()}_db
-DB_USER=${projectName.toLowerCase()}_user
-DB_PASSWORD=your_password
+# DB_CONNECTION=mysql
+# DB_HOST=localhost
+# DB_PORT=3306
+# DB_DATABASE=khadem_db
+# DB_USER=khadem_user
+# DB_PASSWORD=your_password
+
 
 # For JWT Authentication
-JWT_SECRET="$jwtSecret"
-JWT_ACCESS_EXPIRY_MINUTES=60
-JWT_REFRESH_EXPIRY_DAYS=30
+AUTH_GUARD=api
+AUTH_PROVIDER=users
 
-# For MongoDB (uncomment and comment others above)
-# MONGO_CONNECTION=mongodb://localhost:27017/${projectName.toLowerCase()}_db
+# Global JWT secret for the JWT driver
+JWT_SECRET="$jwtSecret"
+
+# Token expiry in seconds
+JWT_ACCESS_EXPIRY_SECONDS=3600
+JWT_REFRESH_EXPIRY_SECONDS=2592000
+
+# Token driver expiry overrides (seconds)
+TOKEN_ACCESS_EXPIRY_SECONDS=3600
+TOKEN_REFRESH_EXPIRY_SECONDS=2592000
+
+# Legacy fallback keys (still supported by config for backward compatibility)
+ACCESS_TOKEN_EXPIRY=3600
+REFRESH_TOKEN_EXPIRY=2592000
+
 
 # Redis Configuration
 REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=
 
-# Session Configuration
-SESSION_DRIVER=file
-SESSION_LIFETIME=7200
 
-# Cache Configuration
-CACHE_DRIVER=file
-CACHE_PREFIX=${projectName.toLowerCase()}
+# Mail Configuration
+MAIL_DRIVER=log
+MAIL_FROM_ADDRESS=noreply@example.com
+MAIL_FROM_NAME="Khadem Framework"
 
-# Logging
-LOG_CHANNEL=stack
-LOG_LEVEL=debug
+# SMTP Configuration (for production email sending)
+SMTP_HOST=smtp.mailtrap.io
+SMTP_PORT=2525
+SMTP_USERNAME=your_username
+SMTP_PASSWORD=your_password
+SMTP_ENCRYPTION=tls
+SMTP_TIMEOUT=30
 
-# File Storage
-FILESYSTEM_DISK=local
+# Mailgun Configuration (optional)
+MAILGUN_DOMAIN=
+MAILGUN_API_KEY=
+MAILGUN_ENDPOINT=https://api.mailgun.net
 
-# Production Docker overrides (these will be overridden in docker-compose.yml)
-# APP_ENV will be set to 'production' in Docker
-# DB_HOST will be set to 'database' for Docker services
-# REDIS_HOST will be set to 'redis' for Docker services
+# Amazon SES Configuration (optional)
+SES_ACCESS_KEY_ID=
+SES_SECRET_ACCESS_KEY=
+SES_REGION=us-east-1
+
+# Postmark Configuration (optional)
+POSTMARK_SERVER_TOKEN=
+POSTMARK_MESSAGE_STREAM=outbound
 ''';
   }
 
