@@ -25,7 +25,7 @@ class Cookies {
   /// Gets a cookie value from the request.
   String? get(String name) {
     if (_request == null) return null;
-    for (final cookie in _request!.cookies) {
+    for (final cookie in _request.cookies) {
       if (cookie.name == name) return cookie.value;
     }
     return null;
@@ -34,7 +34,7 @@ class Cookies {
   /// Gets a cookie object from the request.
   Cookie? getCookie(String name) {
     if (_request == null) return null;
-    for (final cookie in _request!.cookies) {
+    for (final cookie in _request.cookies) {
       if (cookie.name == name) return cookie;
     }
     return null;
@@ -44,14 +44,14 @@ class Cookies {
   Map<String, String> get all {
     if (_request == null) return {};
     return Map.fromEntries(
-      _request!.cookies.map((cookie) => MapEntry(cookie.name, cookie.value)),
+      _request.cookies.map((cookie) => MapEntry(cookie.name, cookie.value)),
     );
   }
 
   /// Checks if a cookie exists in the request.
   bool has(String name) {
     if (_request == null) return false;
-    for (final cookie in _request!.cookies) {
+    for (final cookie in _request.cookies) {
       if (cookie.name == name) return true;
     }
     return false;
@@ -98,7 +98,7 @@ class Cookies {
       }
     }
 
-    _response!.cookies.add(cookie);
+    _response.cookies.add(cookie);
   }
 
   /// Sets multiple cookies at once.

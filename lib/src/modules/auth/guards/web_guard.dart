@@ -226,7 +226,7 @@ class WebGuard extends Guard {
   Future<dynamic> _getUserIdFromSession(String sessionId) async {
     if (_sessionManager == null) return null;
 
-    final sessionData = await _sessionManager!.getSession(sessionId);
+    final sessionData = await _sessionManager.getSession(sessionId);
     if (sessionData == null) return null;
 
     final data = sessionData['data'] as Map<String, dynamic>?;
@@ -237,7 +237,7 @@ class WebGuard extends Guard {
   Future<void> _storeUserInSessionById(String sessionId, dynamic userId) async {
     if (_sessionManager == null) return;
 
-    await _sessionManager!.setSessionValue(sessionId, _sessionUserKey, userId);
+    await _sessionManager.setSessionValue(sessionId, _sessionUserKey, userId);
   }
 
   /// Stores remember token in specific session
@@ -247,16 +247,16 @@ class WebGuard extends Guard {
   ) async {
     if (_sessionManager == null) return;
 
-    await _sessionManager!
-        .setSessionValue(sessionId, _sessionRememberKey, token);
+    await _sessionManager.setSessionValue(
+        sessionId, _sessionRememberKey, token);
   }
 
   /// Clears user from session
   Future<void> _clearUserFromSession(String sessionId) async {
     if (_sessionManager == null) return;
 
-    await _sessionManager!.removeSessionValue(sessionId, _sessionUserKey);
-    await _sessionManager!.removeSessionValue(sessionId, _sessionRememberKey);
+    await _sessionManager.removeSessionValue(sessionId, _sessionUserKey);
+    await _sessionManager.removeSessionValue(sessionId, _sessionRememberKey);
   }
 
   /// Generates remember me token

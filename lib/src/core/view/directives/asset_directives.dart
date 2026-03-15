@@ -19,7 +19,7 @@ class AssetDirective implements ViewDirective {
 
       // Use URL service if available, otherwise fallback to basic path
       if (_urlService != null) {
-        return _urlService!.asset(cleanPath);
+        return _urlService.asset(cleanPath);
       } else {
         return '/assets/$cleanPath';
       }
@@ -43,7 +43,7 @@ class CssDirective implements ViewDirective {
       final cleanPath = path.replaceAll('"', '').replaceAll("'", '');
 
       if (_urlService != null) {
-        return '<link rel="stylesheet" href="${_urlService!.css(cleanPath)}">';
+        return '<link rel="stylesheet" href="${_urlService.css(cleanPath)}">';
       } else {
         return '<link rel="stylesheet" href="/assets/css/$cleanPath">';
       }
@@ -67,7 +67,7 @@ class JsDirective implements ViewDirective {
       final cleanPath = path.replaceAll('"', '').replaceAll("'", '');
 
       if (_urlService != null) {
-        return '<script src="${_urlService!.js(cleanPath)}"></script>';
+        return '<script src="${_urlService.js(cleanPath)}"></script>';
       } else {
         return '<script src="/assets/js/$cleanPath"></script>';
       }
@@ -125,7 +125,7 @@ class UrlRouteDirective implements ViewDirective {
 
       try {
         if (_urlService != null) {
-          return _urlService!.route(routeName, parameters: parameters);
+          return _urlService.route(routeName, parameters: parameters);
         } else {
           // Fallback: return the route path directly
           return '/$routeName';

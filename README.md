@@ -3,7 +3,6 @@
 </div>
 
 <div align="center">
-  <img src="https://img.shields.io/badge/status-stable-green" alt="Status">
   <img src="https://img.shields.io/badge/version-2.0.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/dart-%3E%3D3.0.0-blue" alt="Dart">
   <img src="https://img.shields.io/badge/license-Apache--2.0-green" alt="License">

@@ -94,7 +94,8 @@ class NewCommand extends KhademCommand {
 
     if (result.exitCode != 0) {
       throw Exception(
-          'Failed to clone template (branch: $branchName): ${result.stderr}');
+        'Failed to clone template (branch: $branchName): ${result.stderr}',
+      );
     }
   }
 
@@ -198,7 +199,9 @@ class NewCommand extends KhademCommand {
     final regex = RegExp(r'^(\s*${RegExp.escape(key)}\s*=).*', multiLine: true);
     if (regex.hasMatch(content)) {
       return content.replaceAllMapped(
-          regex, (match) => '${match.group(1)}$value');
+        regex,
+        (match) => '${match.group(1)}$value',
+      );
     }
 
     // If the key does not exist, append it.

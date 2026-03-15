@@ -166,7 +166,7 @@ class TokenDriver implements AuthDriver {
 
     if (_tokenExpiry != null) {
       tokenData['expires_at'] =
-          DateTime.now().add(_tokenExpiry!).toIso8601String();
+          DateTime.now().add(_tokenExpiry).toIso8601String();
     }
 
     await _tokenService.storeToken(tokenData);
@@ -183,8 +183,7 @@ class TokenDriver implements AuthDriver {
         'guard': _providerKey,
         'type': 'refresh',
         'created_at': DateTime.now().toIso8601String(),
-        'expires_at':
-            DateTime.now().add(_refreshTokenExpiry!).toIso8601String(),
+        'expires_at': DateTime.now().add(_refreshTokenExpiry).toIso8601String(),
       };
 
       await _tokenService.storeToken(refreshTokenData);
@@ -255,7 +254,7 @@ class TokenDriver implements AuthDriver {
 
     if (_tokenExpiry != null) {
       accessTokenData['expires_at'] =
-          DateTime.now().add(_tokenExpiry!).toIso8601String();
+          DateTime.now().add(_tokenExpiry).toIso8601String();
     }
 
     await _tokenService.storeToken(accessTokenData);

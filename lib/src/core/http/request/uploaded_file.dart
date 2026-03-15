@@ -25,16 +25,16 @@ class UploadedFile {
 
   /// Gets the file size in bytes.
   int get size {
-    if (_memoryData != null) return _memoryData!.length;
-    if (_tempFilePath != null) return File(_tempFilePath!).lengthSync();
+    if (_memoryData != null) return _memoryData.length;
+    if (_tempFilePath != null) return File(_tempFilePath).lengthSync();
     return 0;
   }
 
   /// Gets the file content as bytes.
   /// Warning: This reads the entire file into memory if it's stored on disk.
   List<int> get data {
-    if (_memoryData != null) return _memoryData!;
-    if (_tempFilePath != null) return File(_tempFilePath!).readAsBytesSync();
+    if (_memoryData != null) return _memoryData;
+    if (_tempFilePath != null) return File(_tempFilePath).readAsBytesSync();
     return [];
   }
 
@@ -71,7 +71,7 @@ class UploadedFile {
   /// Efficiently moves the temp file if available, otherwise writes bytes.
   Future<String> saveTo(String path) async {
     if (_tempFilePath != null) {
-      final tempFile = File(_tempFilePath!);
+      final tempFile = File(_tempFilePath);
       if (await tempFile.exists()) {
         await tempFile.rename(path);
         return path;
@@ -101,7 +101,7 @@ class UploadedFile {
   /// Deletes the temporary file if it exists.
   Future<void> deleteTempFile() async {
     if (_tempFilePath != null) {
-      final file = File(_tempFilePath!);
+      final file = File(_tempFilePath);
       if (await file.exists()) {
         await file.delete();
       }
@@ -111,7 +111,7 @@ class UploadedFile {
   /// Copies the file to a new location.
   Future<String> copyTo(String path) async {
     if (_tempFilePath != null) {
-      final tempFile = File(_tempFilePath!);
+      final tempFile = File(_tempFilePath);
       if (await tempFile.exists()) {
         await tempFile.copy(path);
         return path;

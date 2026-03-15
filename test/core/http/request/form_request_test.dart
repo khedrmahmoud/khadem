@@ -33,7 +33,7 @@ class FakeBodyParser implements BodyParser {
   @override
   Map<String, UploadedFile>? get files {
     if (_files == null) return null;
-    return _files!.map((key, value) => MapEntry(key, value as UploadedFile));
+    return _files.map((key, value) => MapEntry(key, value as UploadedFile));
   }
 
   @override

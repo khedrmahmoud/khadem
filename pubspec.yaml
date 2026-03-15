@@ -16,7 +16,7 @@ topics:
   - database
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.5.0 <4.0.0'
 
 dependencies:
   args: ^2.4.2
@@ -38,15 +38,15 @@ dependencies:
   crypto: ^3.0.3
   path: ^1.9.0
   http: ^1.2.0
-  sqlite3: ^2.4.0
+  sqlite3: ^2.9.4
 
 dev_dependencies:
   very_good_analysis: ^5.1.0
   test: ^1.24.0
   mockito: ^5.5.0
   build_runner: ^2.4.6
-  coverage: ^1.7.0
-  lints: ^3.0.0
+  coverage: ^1.15.0
+  lints: ^6.0.0
  
 
 executables:

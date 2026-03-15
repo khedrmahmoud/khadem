@@ -412,7 +412,6 @@ class FakeResponse implements Response {
   Cookies get cookieHandler => Cookies(FakeHttpRequest() as dynamic);
 
   @override
-  // TODO: implement statusCode
   int get statusCode => throw UnimplementedError();
 }
 

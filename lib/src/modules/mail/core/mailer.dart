@@ -27,7 +27,7 @@ class Mailer implements MailerInterface {
         _defaultFrom = defaultFrom {
     // Set default from address if provided
     if (_defaultFrom != null) {
-      _message.setFrom(_defaultFrom!.email, _defaultFrom!.name);
+      _message.setFrom(_defaultFrom.email, _defaultFrom.name);
     }
   }
 
@@ -169,7 +169,7 @@ class Mailer implements MailerInterface {
       _message.reset();
       // Restore default from address if configured
       if (_defaultFrom != null) {
-        _message.setFrom(_defaultFrom!.email, _defaultFrom!.name);
+        _message.setFrom(_defaultFrom.email, _defaultFrom.name);
       }
 
       return result;
@@ -193,7 +193,7 @@ class Mailer implements MailerInterface {
     // Create a queue job for this email
     final job = _MailJob(_message.copy(), _transport);
 
-    await _queueManager!.dispatch(job, delay: delay);
+    await _queueManager.dispatch(job, delay: delay);
   }
 
   @override
@@ -233,7 +233,7 @@ class Mailer implements MailerInterface {
     // Create a queue job for this mailable
     final job = _MailableJob(mailable, _message.copy(), _transport);
 
-    await _queueManager!.dispatch(job, delay: delay);
+    await _queueManager.dispatch(job, delay: delay);
   }
 
   @override
