@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:path/path.dart' as p;
 
 import '../../contracts/cli/command.dart';
+import '../../support/utils/package_metadata.dart';
 
 class NewCommand extends KhademCommand {
   @override
@@ -69,18 +70,29 @@ class NewCommand extends KhademCommand {
   }
 
   Future<void> _cloneTemplate(String targetPath) async {
+    final frameworkVersion = KhademPackageMetadataLoader.loadSync().version;
+    // We target a branch or tag that matches the framework version, or fallback if unknown.
+    // E.g., if version is 2.0.0, we try to clone branch/tag 'v2.0.0'.
+    final branchName = frameworkVersion != 'unknown' ? 'v$frameworkVersion' : 'main';
+
+    logger.debug('Cloning template version: $branchName');
+
     // Clone the template repository
     final result = await Process.run(
       'git',
       [
         'clone',
+        '-b',
+        branchName,
+        '--depth',
+        '1',
         'https://github.com/khadem-framework/khadem-template.git',
         targetPath,
       ],
     );
 
     if (result.exitCode != 0) {
-      throw Exception('Failed to clone template: ${result.stderr}');
+      throw Exception('Failed to clone template (branch: $branchName): ${result.stderr}');
     }
   }
 
