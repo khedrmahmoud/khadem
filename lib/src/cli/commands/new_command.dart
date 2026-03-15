@@ -159,15 +159,23 @@ class NewCommand extends KhademCommand {
 
   Future<void> _updateEnvFile(String projectPath, String projectName) async {
     final envPath = p.join(projectPath, '.env');
-    final examplePath = p.join(projectPath, '.env.example');
     final envFile = File(envPath);
 
     final jwtSecret = _generateJwtSecret();
 
-    // Use the template's env file when available; otherwise create one.
-    if (!envFile.existsSync() && File(examplePath).existsSync()) {
-      await File(examplePath).copy(envPath);
-      logger.info('✅ Copied .env.example to .env');
+    // Prefer a real .env in the template if it exists (keeps the intended structure).
+    // Fall back to .env.example if .env is not present.
+    final templateEnv = p.join(projectPath, '.env');
+    final templateEnvExample = p.join(projectPath, '.env.example');
+
+    if (!envFile.existsSync()) {
+      if (File(templateEnv).existsSync()) {
+        await File(templateEnv).copy(envPath);
+        logger.info('✅ Copied template .env to project .env');
+      } else if (File(templateEnvExample).existsSync()) {
+        await File(templateEnvExample).copy(envPath);
+        logger.info('✅ Copied .env.example to project .env');
+      }
     }
 
     if (envFile.existsSync()) {
