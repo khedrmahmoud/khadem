@@ -73,7 +73,8 @@ class NewCommand extends KhademCommand {
     final frameworkVersion = KhademPackageMetadataLoader.loadSync().version;
     // We target a branch or tag that matches the framework version, or fallback if unknown.
     // E.g., if version is 2.0.0, we try to clone branch/tag 'v2.0.0'.
-    final branchName = frameworkVersion != 'unknown' ? 'v$frameworkVersion' : 'main';
+    final branchName =
+        frameworkVersion != 'unknown' ? 'v$frameworkVersion' : 'main';
 
     logger.debug('Cloning template version: $branchName');
 
@@ -92,7 +93,8 @@ class NewCommand extends KhademCommand {
     );
 
     if (result.exitCode != 0) {
-      throw Exception('Failed to clone template (branch: $branchName): ${result.stderr}');
+      throw Exception(
+          'Failed to clone template (branch: $branchName): ${result.stderr}');
     }
   }
 
@@ -157,27 +159,42 @@ class NewCommand extends KhademCommand {
 
   Future<void> _updateEnvFile(String projectPath, String projectName) async {
     final envPath = p.join(projectPath, '.env');
+    final examplePath = p.join(projectPath, '.env.example');
     final envFile = File(envPath);
 
-    String content;
-    if (envFile.existsSync()) {
-      // If .env exists, read and update it
-      content = await envFile.readAsString();
+    final jwtSecret = _generateJwtSecret();
 
-      final jwtSecret = _generateJwtSecret();
-      content = content.replaceAll(RegExp(r'(?<=APP_NAME=).*'), projectName);
-      content = content.replaceAll(
-        RegExp(r'(?<=JWT_SECRET=).*'),
-        '"$jwtSecret"',
-      );
-    } else {
-      // Create a new .env file with default content
-      final jwtSecret = _generateJwtSecret();
-      content = _getDefaultEnvContent(projectName, jwtSecret);
+    // Use the template's env file when available; otherwise create one.
+    if (!envFile.existsSync() && File(examplePath).existsSync()) {
+      await File(examplePath).copy(envPath);
+      logger.info('✅ Copied .env.example to .env');
     }
 
-    await envFile.writeAsString(content);
-    logger.info('🔐 .env file configured with app name and new JWT secret');
+    if (envFile.existsSync()) {
+      // Keep the template's .env structure intact and only update specific values.
+      var content = await envFile.readAsString();
+      content = _replaceEnvValue(content, 'APP_NAME', projectName);
+      content = _replaceEnvValue(content, 'JWT_SECRET', '"$jwtSecret"');
+
+      await envFile.writeAsString(content);
+      logger.info('✅ Updated .env with project name and generated JWT secret');
+      return;
+    }
+
+    // Fallback: create a simple default .env file if the template didn't provide one.
+    await envFile.writeAsString(_getDefaultEnvContent(projectName, jwtSecret));
+    logger.info('✅ Created .env file with default configuration');
+  }
+
+  String _replaceEnvValue(String content, String key, String value) {
+    final regex = RegExp(r'^(\s*${RegExp.escape(key)}\s*=).*', multiLine: true);
+    if (regex.hasMatch(content)) {
+      return content.replaceAllMapped(
+          regex, (match) => '${match.group(1)}$value');
+    }
+
+    // If the key does not exist, append it.
+    return '$content\n$key=$value\n';
   }
 
   String _getDefaultEnvContent(String projectName, String jwtSecret) {
