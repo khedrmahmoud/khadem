@@ -16,7 +16,7 @@ jobs:
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
-          sdk: '3.5.0' # Testing against the minimum supported version specified in pubspec.yaml
+          sdk: '3.6.0' # Testing against the minimum supported version specified in pubspec.yaml
 
       - name: Install dependencies
         run: dart pub get
