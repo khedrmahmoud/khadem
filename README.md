@@ -57,7 +57,7 @@ dart pub global activate khadem
 ```
 
 ### Requirements
-- **Dart SDK**: >=3.0.0
+- **Dart SDK**: >=3.8.0
 - **Supported Platforms**: Windows, macOS, Linux
 - **Database**: MySQL (optional)
 - **Cache**: Redis (optional)
