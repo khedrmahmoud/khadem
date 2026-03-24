@@ -3,6 +3,7 @@ import '../../../contracts/database/query_builder_interface.dart';
 import '../model_base/khadem_model.dart';
 import '../orm/eager_loader.dart';
 import '../orm/paginated_result.dart';
+import '../orm/with.dart';
 import 'grammar.dart';
 
 /// Generic Query Builder.
@@ -34,14 +35,13 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   List<dynamic> get bindings => [
-        ..._selectBindings,
-        ..._fromBindings,
-        ..._joinBindings,
-        ..._whereBindings,
-        ..._havingBindings,
-        ..._unions
-            .expand((u) => (u['query'] as QueryBuilderInterface).bindings),
-      ];
+    ..._selectBindings,
+    ..._fromBindings,
+    ..._joinBindings,
+    ..._whereBindings,
+    ..._havingBindings,
+    ..._unions.expand((u) => (u['query'] as QueryBuilderInterface).bindings),
+  ];
 
   final List<Map<String, dynamic>> _joins = [];
   final List<String> _groups = [];
@@ -50,18 +50,14 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   String? _lock;
 
   // Eager Loading
-  final List<String> _with = [];
+  final List<dynamic> _with = [];
   final List<String> _without = [];
   final List<String> _withOnly = [];
 
   bool _defaultWithCountApplied = false;
 
-  QueryBuilder(
-    this.connection,
-    this.grammar,
-    String table, {
-    this.modelFactory,
-  }) : _table = table;
+  QueryBuilder(this.connection, this.grammar, String table, {this.modelFactory})
+    : _table = table;
 
   @override
   QueryBuilderInterface<T> select(List<String> columns) {
@@ -134,46 +130,32 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> whereIn(String column, List<dynamic> values) {
-    return _addWhere(
-      {
-        'type': 'In',
-        'column': column,
-        'values': values,
-        'boolean': 'AND',
-      },
-      values,
-    );
+    return _addWhere({
+      'type': 'In',
+      'column': column,
+      'values': values,
+      'boolean': 'AND',
+    }, values);
   }
 
   @override
   QueryBuilderInterface<T> whereNotIn(String column, List<dynamic> values) {
-    return _addWhere(
-      {
-        'type': 'NotIn',
-        'column': column,
-        'values': values,
-        'boolean': 'AND',
-      },
-      values,
-    );
+    return _addWhere({
+      'type': 'NotIn',
+      'column': column,
+      'values': values,
+      'boolean': 'AND',
+    }, values);
   }
 
   @override
   QueryBuilderInterface<T> whereNull(String column) {
-    return _addWhere({
-      'type': 'Null',
-      'column': column,
-      'boolean': 'AND',
-    });
+    return _addWhere({'type': 'Null', 'column': column, 'boolean': 'AND'});
   }
 
   @override
   QueryBuilderInterface<T> whereNotNull(String column) {
-    return _addWhere({
-      'type': 'NotNull',
-      'column': column,
-      'boolean': 'AND',
-    });
+    return _addWhere({'type': 'NotNull', 'column': column, 'boolean': 'AND'});
   }
 
   @override
@@ -182,14 +164,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     List bindings = const [],
     String boolean = 'AND',
   ]) {
-    return _addWhere(
-      {
-        'type': 'Raw',
-        'sql': sql,
-        'boolean': boolean,
-      },
-      bindings,
-    );
+    return _addWhere({'type': 'Raw', 'sql': sql, 'boolean': boolean}, bindings);
   }
 
   @override
@@ -228,10 +203,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> orderBy(String column, {String direction = 'ASC'}) {
-    _orders.add({
-      'column': column,
-      'direction': direction,
-    });
+    _orders.add({'column': column, 'direction': direction});
     return this;
   }
 
@@ -283,9 +255,19 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
         // Add requested relations
         relations.addAll(_with);
         // Remove excluded relations
-        // Note: This simple removal only works for string matches.
-        // Complex relation definitions might need more robust handling.
-        relations.removeWhere((r) => _without.contains(r.toString()));
+        relations.removeWhere((r) {
+          if (r is String) {
+            final key = r.split(':').first.split('.').first;
+            return _without.contains(r) || _without.contains(key);
+          }
+          if (r is With) {
+            return _without.contains(r.relation);
+          }
+          if (r is Map) {
+            return r.keys.any((k) => _without.contains(k.toString()));
+          }
+          return _without.contains(r.toString());
+        });
       }
 
       if (relations.isNotEmpty) {
@@ -328,21 +310,14 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   @override
   Future<void> update(Map<String, dynamic> values) async {
     final sql = grammar.compileUpdate(_getQueryComponents(), values);
-    final bindings = [
-      ..._fromBindings,
-      ...values.values,
-      ..._whereBindings,
-    ];
+    final bindings = [..._fromBindings, ...values.values, ..._whereBindings];
     await connection.execute(sql, bindings);
   }
 
   @override
   Future<void> delete() async {
     final sql = grammar.compileDelete(_getQueryComponents());
-    final bindings = [
-      ..._fromBindings,
-      ..._whereBindings,
-    ];
+    final bindings = [..._fromBindings, ..._whereBindings];
     await connection.execute(sql, bindings);
   }
 
@@ -441,7 +416,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> withRelations(List relations) {
-    _with.addAll(relations.map((e) => e.toString()));
+    _with.addAll(relations);
     return this;
   }
 
@@ -468,7 +443,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     }
 
     final Map<String, void Function(QueryBuilderInterface<dynamic>)>
-        normalized = {};
+    normalized = {};
 
     if (relations is String) {
       normalized[relations] = (q) {};
@@ -510,10 +485,10 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   Future<int> count() async {
-    final sql = grammar.compileAggregate(
-      _getQueryComponents(),
-      {'function': 'COUNT', 'column': '*'},
-    );
+    final sql = grammar.compileAggregate(_getQueryComponents(), {
+      'function': 'COUNT',
+      'column': '*',
+    });
     final aggregateBindings = [
       ..._fromBindings,
       ..._joinBindings,
@@ -549,10 +524,10 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   Future<dynamic> _aggregate(String function, String column) async {
-    final sql = grammar.compileAggregate(
-      _getQueryComponents(),
-      {'function': function, 'column': column},
-    );
+    final sql = grammar.compileAggregate(_getQueryComponents(), {
+      'function': function,
+      'column': column,
+    });
     final aggregateBindings = [
       ..._fromBindings,
       ..._joinBindings,
@@ -725,8 +700,12 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> clone() {
-    final q =
-        QueryBuilder<T>(connection, grammar, table, modelFactory: modelFactory);
+    final q = QueryBuilder<T>(
+      connection,
+      grammar,
+      table,
+      modelFactory: modelFactory,
+    );
     q._columns = List.from(_columns);
     q._wheres.addAll(_wheres.map((e) => Map<String, dynamic>.from(e)));
     q._orders.addAll(_orders.map((e) => Map<String, dynamic>.from(e)));
@@ -813,10 +792,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
       );
     }
     final sql = grammar.compileIncrement(_getQueryComponents(), column, amount);
-    final bindings = [
-      ..._fromBindings,
-      ..._whereBindings,
-    ];
+    final bindings = [..._fromBindings, ..._whereBindings];
     final result = await connection.execute(sql, bindings);
     return result.affectedRows ?? 0;
   }
@@ -845,14 +821,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> orWhereRaw(String sql, [List bindings = const []]) {
-    return _addWhere(
-      {
-        'type': 'Raw',
-        'sql': sql,
-        'boolean': 'OR',
-      },
-      bindings,
-    );
+    return _addWhere({'type': 'Raw', 'sql': sql, 'boolean': 'OR'}, bindings);
   }
 
   QueryBuilderInterface<T> _has(
@@ -894,11 +863,10 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
     relationQuery.selectRaw('COUNT(*)');
     final sql = relationQuery.toSql();
-    return whereRaw(
-      '($sql) $operator ?',
-      [...relationQuery.bindings, count],
-      boolean,
-    );
+    return whereRaw('($sql) $operator ?', [
+      ...relationQuery.bindings,
+      count,
+    ], boolean);
   }
 
   @override
@@ -956,10 +924,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   }
 
   QueryBuilderInterface<T> orderByRaw(String sql) {
-    _orders.add({
-      'type': 'Raw',
-      'sql': sql,
-    });
+    _orders.add({'type': 'Raw', 'sql': sql});
     return this;
   }
 
@@ -988,9 +953,14 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     List<String>? update,
   }) async {
     if (values.isEmpty) return 0;
-    final sql =
-        grammar.compileUpsert(_getQueryComponents(), values, uniqueBy, update);
-    final bindings = values.expand((e) => e.values).toList() +
+    final sql = grammar.compileUpsert(
+      _getQueryComponents(),
+      values,
+      uniqueBy,
+      update,
+    );
+    final bindings =
+        values.expand((e) => e.values).toList() +
         (update != null
             ? values.expand((e) => update.map((c) => e[c])).toList()
             : []);
@@ -1008,13 +978,12 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
         'IncrementEach requires a WHERE clause to prevent mass updates.',
       );
     }
-    final sql =
-        grammar.compileIncrementEach(_getQueryComponents(), columns, extras);
-    final bindings = [
-      ..._fromBindings,
-      ...extras.values,
-      ..._whereBindings,
-    ];
+    final sql = grammar.compileIncrementEach(
+      _getQueryComponents(),
+      columns,
+      extras,
+    );
+    final bindings = [..._fromBindings, ...extras.values, ..._whereBindings];
     await connection.execute(sql, bindings);
   }
 
@@ -1034,46 +1003,32 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> orWhereIn(String column, List values) {
-    return _addWhere(
-      {
-        'type': 'In',
-        'column': column,
-        'values': values,
-        'boolean': 'OR',
-      },
-      values,
-    );
+    return _addWhere({
+      'type': 'In',
+      'column': column,
+      'values': values,
+      'boolean': 'OR',
+    }, values);
   }
 
   @override
   QueryBuilderInterface<T> orWhereNotIn(String column, List values) {
-    return _addWhere(
-      {
-        'type': 'NotIn',
-        'column': column,
-        'values': values,
-        'boolean': 'OR',
-      },
-      values,
-    );
+    return _addWhere({
+      'type': 'NotIn',
+      'column': column,
+      'values': values,
+      'boolean': 'OR',
+    }, values);
   }
 
   @override
   QueryBuilderInterface<T> orWhereNull(String column) {
-    return _addWhere({
-      'type': 'Null',
-      'column': column,
-      'boolean': 'OR',
-    });
+    return _addWhere({'type': 'Null', 'column': column, 'boolean': 'OR'});
   }
 
   @override
   QueryBuilderInterface<T> orWhereNotNull(String column) {
-    return _addWhere({
-      'type': 'NotNull',
-      'column': column,
-      'boolean': 'OR',
-    });
+    return _addWhere({'type': 'NotNull', 'column': column, 'boolean': 'OR'});
   }
 
   @override
@@ -1108,19 +1063,13 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
 
   @override
   QueryBuilderInterface<T> union(QueryBuilderInterface<T> query) {
-    _unions.add({
-      'query': query,
-      'all': false,
-    });
+    _unions.add({'query': query, 'all': false});
     return this;
   }
 
   @override
   QueryBuilderInterface<T> unionAll(QueryBuilderInterface<T> query) {
-    _unions.add({
-      'query': query,
-      'all': true,
-    });
+    _unions.add({'query': query, 'all': true});
     return this;
   }
 
@@ -1267,11 +1216,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   ) {
     final query = QueryBuilder<dynamic>(connection, grammar, '');
     callback(query);
-    _wheres.add({
-      'type': 'Exists',
-      'query': query,
-      'boolean': 'AND',
-    });
+    _wheres.add({'type': 'Exists', 'query': query, 'boolean': 'AND'});
     _whereBindings.addAll(query.bindings);
     return this;
   }
@@ -1282,11 +1227,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   ) {
     final query = QueryBuilder<dynamic>(connection, grammar, '');
     callback(query);
-    _wheres.add({
-      'type': 'NotExists',
-      'query': query,
-      'boolean': 'AND',
-    });
+    _wheres.add({'type': 'NotExists', 'query': query, 'boolean': 'AND'});
     _whereBindings.addAll(query.bindings);
     return this;
   }
@@ -1415,14 +1356,14 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   QueryBuilderInterface<T> whereNested(
     void Function(QueryBuilderInterface<T> query) callback,
   ) {
-    final query =
-        QueryBuilder<T>(connection, grammar, table, modelFactory: modelFactory);
+    final query = QueryBuilder<T>(
+      connection,
+      grammar,
+      table,
+      modelFactory: modelFactory,
+    );
     callback(query);
-    _wheres.add({
-      'type': 'Nested',
-      'query': query,
-      'boolean': 'AND',
-    });
+    _wheres.add({'type': 'Nested', 'query': query, 'boolean': 'AND'});
     _whereBindings.addAll(query.bindings);
     return this;
   }
@@ -1438,14 +1379,14 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   QueryBuilderInterface<T> orWhereNested(
     void Function(QueryBuilderInterface<T> query) callback,
   ) {
-    final query =
-        QueryBuilder<T>(connection, grammar, table, modelFactory: modelFactory);
+    final query = QueryBuilder<T>(
+      connection,
+      grammar,
+      table,
+      modelFactory: modelFactory,
+    );
     callback(query);
-    _wheres.add({
-      'type': 'Nested',
-      'query': query,
-      'boolean': 'OR',
-    });
+    _wheres.add({'type': 'Nested', 'query': query, 'boolean': 'OR'});
     _whereBindings.addAll(query.bindings);
     return this;
   }
@@ -1603,11 +1544,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   ) {
     final query = QueryBuilder<dynamic>(connection, grammar, '');
     callback(query);
-    _wheres.add({
-      'type': 'Exists',
-      'query': query,
-      'boolean': 'OR',
-    });
+    _wheres.add({'type': 'Exists', 'query': query, 'boolean': 'OR'});
     _whereBindings.addAll(query.bindings);
     return this;
   }
@@ -1618,11 +1555,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   ) {
     final query = QueryBuilder<dynamic>(connection, grammar, '');
     callback(query);
-    _wheres.add({
-      'type': 'NotExists',
-      'query': query,
-      'boolean': 'OR',
-    });
+    _wheres.add({'type': 'NotExists', 'query': query, 'boolean': 'OR'});
     _whereBindings.addAll(query.bindings);
     return this;
   }

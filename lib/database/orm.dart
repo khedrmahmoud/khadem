@@ -20,6 +20,7 @@ export '../src/core/database/orm/paginated_result.dart';
 export '../src/core/database/orm/relation_definition.dart';
 export '../src/core/database/orm/relation_meta.dart';
 export '../src/core/database/orm/relation_type.dart';
+export '../src/core/database/orm/with.dart';
 // Relations
 export '../src/core/database/orm/relations/belongs_to.dart';
 export '../src/core/database/orm/relations/belongs_to_many.dart';

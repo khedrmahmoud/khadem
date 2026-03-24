@@ -11,7 +11,7 @@ class RelationMeta {
     this.paginate = false,
     this.page,
     this.perPage,
-    this.nested = const [],
+    List<dynamic>? nested,
     this.query,
-  });
+  }) : nested = nested ?? [];
 }
