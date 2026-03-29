@@ -9,7 +9,7 @@ class BuildCommand extends KhademCommand {
       'services',
       abbr: 'e',
       help:
-          'Specify external services to include (mysql,redis,nginx,postgres,mongo,none)',
+          'Specify external services to include (mysql,redis,nginx,postgres,mongo,sqlite,none)',
       defaultsTo: 'none',
     );
     argParser.addFlag(
@@ -21,8 +21,16 @@ class BuildCommand extends KhademCommand {
     argParser.addFlag('verbose', abbr: 'v', help: 'Enable verbose logging');
   }
 
-  Future<void> _generateDockerfile() async {
-    const dockerfileContent = '''
+  Future<void> _generateDockerfile(String services) async {
+    final serviceList = services
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .toList();
+    final hasSqlite = serviceList.contains('sqlite');
+    final sqlitePackage = hasSqlite ? ' libsqlite3-dev' : '';
+
+    final dockerfileContent =
+        '''
 # Multi-stage Docker build for Khadem Dart application
 FROM dart:stable AS build
 
@@ -36,14 +44,15 @@ RUN dart pub get --offline
 # Ensure required directories exist so COPY doesn't fail
 RUN mkdir -p config public storage/database storage/logs lang resources bin
 
-# Compile to kernel snapshot (AOT does not support dart:mirrors)       
+# Compile to kernel snapshot   
 RUN dart compile kernel lib/main.dart -o bin/server.dill
 
 # Production stage
 FROM dart:stable
 
-# Install ca-certificates and curl for HTTPS connections and health checks, and libsqlite3-dev for SQLite support
-RUN apt-get update && apt-get install -y ca-certificates curl libsqlite3-dev && rm -rf /var/lib/apt/lists/* || true
+# Install ca-certificates and curl for HTTPS connections and health checks${hasSqlite ? ', and libsqlite3-dev for SQLite support' : ''}
+RUN apt-get update && apt-get install -y ca-certificates curl$sqlitePackage && rm -rf /var/lib/apt/lists/* || true
+
 
 
 # Create non-root user
@@ -80,13 +89,6 @@ CMD ["dart", "run", "/app/bin/server.dill"]
     const dockerfilePath = 'Dockerfile';
     await File(dockerfilePath).writeAsString(dockerfileContent);
     logger.info('🐳 Generated production-ready Dockerfile');
-
-    // Generate docker-compose.yml based on selected services
-    final services = argResults?['services'] as String? ?? 'none';
-    final dockerCompose = await _generateDockerCompose(services);
-
-    await File('docker-compose.yml').writeAsString(dockerCompose);
-    logger.info('📝 Generated docker-compose.yml for external services');
 
     // Also generate .dockerignore
     const dockerignore = '''
@@ -291,19 +293,25 @@ docker-compose*
     }
 
     // Add volumes section
-    buffer.writeln();
-    buffer.writeln('volumes:');
-    if (serviceList.contains('mysql')) {
-      buffer.writeln('  mysql_data:');
-    }
-    if (serviceList.contains('postgres')) {
-      buffer.writeln('  postgres_data:');
-    }
-    if (serviceList.contains('mongo')) {
-      buffer.writeln('  mongo_data:');
-    }
-    if (serviceList.contains('redis')) {
-      buffer.writeln('  redis_data:');
+    final needsVolumes = serviceList.any(
+      (s) => ['mysql', 'postgres', 'mongo', 'redis'].contains(s),
+    );
+
+    if (needsVolumes) {
+      buffer.writeln();
+      buffer.writeln('volumes:');
+      if (serviceList.contains('mysql')) {
+        buffer.writeln('  mysql_data:');
+      }
+      if (serviceList.contains('postgres')) {
+        buffer.writeln('  postgres_data:');
+      }
+      if (serviceList.contains('mongo')) {
+        buffer.writeln('  mongo_data:');
+      }
+      if (serviceList.contains('redis')) {
+        buffer.writeln('  redis_data:');
+      }
     }
 
     // Add networks section
@@ -317,8 +325,14 @@ docker-compose*
 
   @override
   Future<void> handle(List<String> args) async {
-    await _generateDockerfile();
     final services = argResults?['services'] as String? ?? 'none';
+
+    await _generateDockerfile(services);
+
+    final dockerCompose = await _generateDockerCompose(services);
+    await File('docker-compose.yml').writeAsString(dockerCompose);
+    logger.info('📝 Generated docker-compose.yml for external services');
+
     if (services != 'none') {
       logger.info(' Docker setup complete! Run: docker-compose up -d');
       logger.info(' Services included: $services');
