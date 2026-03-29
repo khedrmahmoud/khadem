@@ -51,8 +51,9 @@ class EagerLoader {
       if (entry is String) {
         final nestedSplit = entry.split('.');
         final mainPart = nestedSplit.first;
-        final nested =
-            nestedSplit.length > 1 ? [nestedSplit.sublist(1).join('.')] : [];
+        final nested = nestedSplit.length > 1
+            ? [nestedSplit.sublist(1).join('.')]
+            : [];
 
         final segments = mainPart.split(':');
 
@@ -71,40 +72,46 @@ class EagerLoader {
           }
         }
 
-        addOrMergeMeta(RelationMeta(
-          key: key,
-          paginate: paginate,
-          page: page,
-          perPage: perPage,
-          nested: nested,
-        ));
+        addOrMergeMeta(
+          RelationMeta(
+            key: key,
+            paginate: paginate,
+            page: page,
+            perPage: perPage,
+            nested: nested,
+          ),
+        );
       } else if (entry is Map || entry is Map<String, dynamic>) {
         if (entry is Map) {
           entry.forEach((key, val) {
             if (val is Map) {
               final nested = val['with'] ?? [];
               final nestedList = nested is List ? nested : [nested];
-              
-              addOrMergeMeta(RelationMeta(
-                key: key.toString(),
-                paginate: val['paginate'] ?? false,
-                page: val['page'],
-                perPage: val['perPage'],
-                nested: List<dynamic>.from(nestedList),
-                query: val['query'],
-              ));
+
+              addOrMergeMeta(
+                RelationMeta(
+                  key: key.toString(),
+                  paginate: val['paginate'] ?? false,
+                  page: val['page'],
+                  perPage: val['perPage'],
+                  nested: List<dynamic>.from(nestedList),
+                  query: val['query'],
+                ),
+              );
             }
           });
         }
       } else if (entry is With) {
-        addOrMergeMeta(RelationMeta(
-          key: entry.relation,
-          paginate: entry.paginate,
-          page: entry.page,
-          perPage: entry.perPage,
-          nested: List<dynamic>.from(entry.nested),
-          query: entry.query,
-        ));
+        addOrMergeMeta(
+          RelationMeta(
+            key: entry.relation,
+            paginate: entry.paginate,
+            page: entry.page,
+            perPage: entry.perPage,
+            nested: List<dynamic>.from(entry.nested),
+            query: entry.query,
+          ),
+        );
       }
     }
 
