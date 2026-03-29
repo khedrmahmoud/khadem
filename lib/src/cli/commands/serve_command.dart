@@ -286,7 +286,7 @@ class ServeCommand extends KhademCommand {
     if (_done != null && !_done!.isCompleted) {
       _done!.complete();
     }
-    
+
     // Force exit to ensure no hanging isolates keep the CLI alive
     exit(0);
   }
