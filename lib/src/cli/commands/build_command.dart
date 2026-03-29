@@ -34,17 +34,17 @@ COPY . .
 RUN dart pub get --offline
 
 # Ensure required directories exist so COPY doesn't fail
-RUN mkdir -p config public storage/database storage/logs lang resources
-RUN touch .env
+RUN mkdir -p config public storage/database storage/logs lang resources bin
 
-# Build AOT executable for production
-RUN dart compile exe lib/main.dart -o bin/server
+# Compile to kernel snapshot (AOT does not support dart:mirrors)       
+RUN dart compile kernel lib/main.dart -o bin/server.dill
 
 # Production stage
-FROM debian:bookworm-slim
+FROM dart:stable
 
-# Install ca-certificates and curl for HTTPS connections and health checks
-RUN apt-get update && apt-get install -y ca-certificates curl && rm -rf /var/lib/apt/lists/*
+# Install ca-certificates and curl for HTTPS connections and health checks, and libsqlite3-dev for SQLite support
+RUN apt-get update && apt-get install -y ca-certificates curl libsqlite3-dev && rm -rf /var/lib/apt/lists/* || true
+
 
 # Create non-root user
 RUN groupadd -r appgroup && useradd -m -r -g appgroup -s /bin/bash app
@@ -57,8 +57,8 @@ RUN mkdir -p config public storage/database storage/logs lang resources && chown
 # Switch to the non-root user
 USER app
 
-# Copy application binary
-COPY --from=build --chown=app:appgroup /app/bin/server /app/bin/server
+# Copy application kernel snapshot
+COPY --from=build --chown=app:appgroup /app/bin/server.dill /app/bin/server.dill
 
 # Copy application files (directories only, inject env via docker run/compose)
 COPY --from=build --chown=app:appgroup /app/config/ ./config/
@@ -74,7 +74,7 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\
   CMD curl -f http://localhost:9000/health || exit 1
 
-CMD ["/app/bin/server"]
+CMD ["dart", "run", "/app/bin/server.dill"]
 ''';
 
     const dockerfilePath = 'Dockerfile';
