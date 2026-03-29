@@ -18,11 +18,7 @@ class BuildCommand extends KhademCommand {
       defaultsTo: true,
       help: 'Delete temporary files after build',
     );
-    argParser.addFlag(
-      'verbose',
-      abbr: 'v',
-      help: 'Enable verbose logging',
-    );
+    argParser.addFlag('verbose', abbr: 'v', help: 'Enable verbose logging');
   }
 
   Future<void> _generateDockerfile() async {
@@ -37,14 +33,18 @@ RUN dart pub get
 COPY . .
 RUN dart pub get --offline
 
+# Ensure required directories exist so COPY doesn't fail
+RUN mkdir -p config public storage lang resources
+RUN touch .env
+
 # Build AOT executable for production
 RUN dart compile exe lib/main.dart -o bin/server
 
 # Production stage
 FROM debian:bookworm-slim
 
-# Install ca-certificates for HTTPS connections
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+# Install ca-certificates and curl for HTTPS connections and health checks
+RUN apt-get update && apt-get install -y ca-certificates curl && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app
@@ -56,11 +56,12 @@ WORKDIR /app
 COPY --from=build /runtime/ /
 COPY --from=build /app/bin/server /app/bin/server
 
-# Copy application files
-COPY --from=build /app/.env* /app/
-COPY --from=build /app/lib/config/ /app/lib/config/
+# Copy application files (directories only, inject env via docker run/compose)
+COPY --from=build /app/config/ /app/config/
 COPY --from=build /app/public/ /app/public/
 COPY --from=build /app/storage/ /app/storage/
+COPY --from=build /app/lang/ /app/lang/
+COPY --from=build /app/resources/ /app/resources/
 
 EXPOSE 9000
 EXPOSE 8080
@@ -100,6 +101,7 @@ coverage/
 *.tar.gz
 Dockerfile*
 docker-compose*
+.env
 ''';
 
     await File('.dockerignore').writeAsString(dockerignore);
@@ -164,8 +166,10 @@ FILESYSTEM_DISK=local
   }
 
   Future<String> _generateDockerCompose(String services) async {
-    final serviceList =
-        services.split(',').map((s) => s.trim().toLowerCase()).toList();
+    final serviceList = services
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .toList();
     final buffer = StringBuffer();
     buffer.writeln('services:');
 
@@ -264,8 +268,9 @@ FILESYSTEM_DISK=local
       buffer.writeln('      - .env');
       buffer.writeln('    environment:');
       buffer.writeln('      # Database service configuration');
-      buffer
-          .writeln('      - MONGO_INITDB_DATABASE=${r'$'}{DB_NAME:-khadem_db}');
+      buffer.writeln(
+        '      - MONGO_INITDB_DATABASE=${r'$'}{DB_NAME:-khadem_db}',
+      );
       buffer.writeln('    ports:');
       buffer.writeln('      - "${r'$'}{DB_PORT:-27017}:27017"');
       buffer.writeln('    volumes:');
