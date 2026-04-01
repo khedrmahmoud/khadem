@@ -52,11 +52,31 @@ class ServeCommand extends KhademCommand {
       _setupFileWatcher();
     }
 
-    // Set up keyboard commands
+    // Set up keyboard commands and signal handlers
     _setupStdinListener();
+    _setupSignalHandlers();
 
     // Keep the command alive
     await _done!.future;
+  }
+
+  void _setupSignalHandlers() {
+    try {
+      ProcessSignal.sigint.watch().listen((_) {
+        logger.info('\nReceived SIGINT (Ctrl+C). Shutting down...');
+        _shutdown();
+      });
+
+      if (!Platform.isWindows) {
+        ProcessSignal.sigterm.watch().listen((_) {
+          logger.info('\nReceived SIGTERM. Shutting down...');
+          _shutdown();
+        });
+      }
+    } catch (e) {
+      // Some environments might not support signal watching
+      logger.warning('Could not attach signal handlers: $e');
+    }
   }
 
   Future<void> _startServer() async {
@@ -115,8 +135,9 @@ class ServeCommand extends KhademCommand {
         logger.warning('⚠️ Hot reload unavailable (no isolates found)');
       }
     } catch (e) {
-      logger
-          .warning('⚠️ Hot reload unavailable (VM Service connection failed)');
+      logger.warning(
+        '⚠️ Hot reload unavailable (VM Service connection failed)',
+      );
       _vmService = null;
       _mainIsolate = null;
     }
@@ -149,18 +170,20 @@ class ServeCommand extends KhademCommand {
 
     logger.info('💡 Commands: [r] reload | [f] full restart | [q] quit');
 
-    // Use line-based input (works everywhere, just press Enter after command)
-    stdin.lineMode = true;
-    stdin.echoMode = true;
+    try {
+      if (stdin.hasTerminal) {
+        stdin.lineMode = false;
+        stdin.echoMode = false;
+      }
+    } catch (_) {
+      // Ignore if terminal doesn't support changing modes
+    }
 
-    _stdinSubscription = stdin
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen((line) {
-      final input = line.trim().toLowerCase();
-      if (input.isEmpty) return;
+    _stdinSubscription = stdin.transform(utf8.decoder).listen((String input) {
+      final key = input.trim().toLowerCase();
+      if (key.isEmpty) return;
 
-      switch (input[0]) {
+      switch (key) {
         case 'r':
           _hotReload();
           break;
@@ -170,12 +193,13 @@ class ServeCommand extends KhademCommand {
         case 'q':
         case 'quit':
         case 'exit':
+        case '\x03': // Ctrl+C
+          logger.info('\nQuit command received.');
           _shutdown();
           break;
         default:
-          logger.info(
-            'Unknown command. Use: r (reload), f (full restart), q (quit)',
-          );
+          // Ignore other keys or handle specifically if needed
+          break;
       }
     });
   }
@@ -214,8 +238,10 @@ class ServeCommand extends KhademCommand {
     // Kill and restart server process
     if (_serverProcess != null) {
       _serverProcess!.kill();
-      await _serverProcess!.exitCode
-          .timeout(const Duration(seconds: 3), onTimeout: () => -1);
+      await _serverProcess!.exitCode.timeout(
+        const Duration(seconds: 3),
+        onTimeout: () => -1,
+      );
     }
 
     await _startServer();
@@ -244,12 +270,24 @@ class ServeCommand extends KhademCommand {
     _debounceTimer?.cancel();
     _watcherSubscription?.cancel();
     _stdinSubscription?.cancel();
+
+    try {
+      if (stdin.hasTerminal) {
+        stdin.lineMode = true;
+        stdin.echoMode = true;
+      }
+    } catch (_) {
+      // Ignore
+    }
+
     _vmService?.dispose();
     _serverProcess?.kill();
 
-    exitCode = 0;
     if (_done != null && !_done!.isCompleted) {
       _done!.complete();
     }
+
+    // Force exit to ensure no hanging isolates keep the CLI alive
+    exit(0);
   }
 }

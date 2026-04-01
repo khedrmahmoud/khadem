@@ -9,7 +9,7 @@ class BuildCommand extends KhademCommand {
       'services',
       abbr: 'e',
       help:
-          'Specify external services to include (mysql,redis,nginx,postgres,mongo,none)',
+          'Specify external services to include (mysql,redis,nginx,postgres,mongo,sqlite,none)',
       defaultsTo: 'none',
     );
     argParser.addFlag(
@@ -18,15 +18,19 @@ class BuildCommand extends KhademCommand {
       defaultsTo: true,
       help: 'Delete temporary files after build',
     );
-    argParser.addFlag(
-      'verbose',
-      abbr: 'v',
-      help: 'Enable verbose logging',
-    );
+    argParser.addFlag('verbose', abbr: 'v', help: 'Enable verbose logging');
   }
 
-  Future<void> _generateDockerfile() async {
-    const dockerfileContent = '''
+  Future<void> _generateDockerfile(String services) async {
+    final serviceList = services
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .toList();
+    final hasSqlite = serviceList.contains('sqlite');
+    final sqlitePackage = hasSqlite ? ' libsqlite3-dev' : '';
+
+    final dockerfileContent =
+        '''
 # Multi-stage Docker build for Khadem Dart application
 FROM dart:stable AS build
 
@@ -37,30 +41,40 @@ RUN dart pub get
 COPY . .
 RUN dart pub get --offline
 
+# Ensure required directories exist so COPY doesn't fail
+RUN mkdir -p config public storage/database storage/logs lang resources bin
+
 # Build AOT executable for production
 RUN dart compile exe lib/main.dart -o bin/server
 
 # Production stage
 FROM debian:bookworm-slim
 
-# Install ca-certificates for HTTPS connections
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+# Install ca-certificates and curl for HTTPS connections and health checks${hasSqlite ? ', and libsqlite3-dev for SQLite support' : ''}
+RUN apt-get update && apt-get install -y ca-certificates curl$sqlitePackage && rm -rf /var/lib/apt/lists/* || true
+
+
 
 # Create non-root user
-RUN useradd --create-home --shell /bin/bash app
-USER app
+RUN groupadd -r appgroup && useradd -m -r -g appgroup -s /bin/bash app
 
 WORKDIR /app
 
-# Copy runtime and application
-COPY --from=build /runtime/ /
-COPY --from=build /app/bin/server /app/bin/server
+# Ensure directories exist and are owned by app user
+RUN mkdir -p config public storage/database storage/logs lang resources && chown -R app:appgroup /app
 
-# Copy application files
-COPY --from=build /app/.env* /app/
-COPY --from=build /app/lib/config/ /app/lib/config/
-COPY --from=build /app/public/ /app/public/
-COPY --from=build /app/storage/ /app/storage/
+# Switch to the non-root user
+USER app
+
+# Copy application binary
+COPY --from=build --chown=app:appgroup /app/bin/server /app/bin/server
+
+# Copy application files (directories only, inject env via docker run/compose)
+COPY --from=build --chown=app:appgroup /app/config/ ./config/
+COPY --from=build --chown=app:appgroup /app/public/ ./public/
+COPY --from=build --chown=app:appgroup /app/storage/ ./storage/
+COPY --from=build --chown=app:appgroup /app/lang/ ./lang/
+COPY --from=build --chown=app:appgroup /app/resources/ ./resources/
 
 EXPOSE 9000
 EXPOSE 8080
@@ -75,13 +89,6 @@ CMD ["/app/bin/server"]
     const dockerfilePath = 'Dockerfile';
     await File(dockerfilePath).writeAsString(dockerfileContent);
     logger.info('🐳 Generated production-ready Dockerfile');
-
-    // Generate docker-compose.yml based on selected services
-    final services = argResults?['services'] as String? ?? 'none';
-    final dockerCompose = await _generateDockerCompose(services);
-
-    await File('docker-compose.yml').writeAsString(dockerCompose);
-    logger.info('📝 Generated docker-compose.yml for external services');
 
     // Also generate .dockerignore
     const dockerignore = '''
@@ -100,72 +107,18 @@ coverage/
 *.tar.gz
 Dockerfile*
 docker-compose*
+.env
 ''';
 
     await File('.dockerignore').writeAsString(dockerignore);
     logger.info('📝 Generated .dockerignore file');
-
-    // Generate environment template
-    const envTemplate = '''
-# Application Configuration
-APP_ENV=development
-APP_PORT=9000
-SOCKET_PORT=8080
-APP_URL=http://localhost:9000
-
-# Database Configuration (configure based on your database choice)
-# For MySQL
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=khadem_db
-DB_USER=khadem_user
-DB_PASSWORD=your_password
-
-# For PostgreSQL (uncomment and comment MySQL above)
-# DB_CONNECTION=postgresql
-# DB_HOST=localhost
-# DB_PORT=5432
-# DB_NAME=khadem_db
-# DB_USER=khadem_user
-# DB_PASSWORD=your_password
-
-# For MongoDB (uncomment and comment others above)
-# MONGO_CONNECTION=mongodb://localhost:27017/khadem_db
-
-# Redis Configuration
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-
-# Session Configuration
-SESSION_DRIVER=file
-SESSION_LIFETIME=7200
-
-# Cache Configuration
-CACHE_DRIVER=file
-CACHE_PREFIX=khadem
-
-# Logging
-LOG_CHANNEL=stack
-LOG_LEVEL=debug
-
-# File Storage
-FILESYSTEM_DISK=local
-
-# Production Docker overrides (these will be overridden in docker-compose.yml)
-# APP_ENV will be set to 'production' in Docker
-# DB_HOST will be set to 'database' for Docker services
-# REDIS_HOST will be set to 'redis' for Docker services
-''';
-
-    await File('.env.example').writeAsString(envTemplate);
-    logger.info('📝 Generated .env.example template');
   }
 
   Future<String> _generateDockerCompose(String services) async {
-    final serviceList =
-        services.split(',').map((s) => s.trim().toLowerCase()).toList();
+    final serviceList = services
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .toList();
     final buffer = StringBuffer();
     buffer.writeln('services:');
 
@@ -197,7 +150,8 @@ FILESYSTEM_DISK=local
     if (dependsOn.isNotEmpty) {
       buffer.writeln('    depends_on:');
       for (final dep in dependsOn) {
-        buffer.writeln('      - $dep');
+        buffer.writeln('      $dep:');
+        buffer.writeln('        condition: service_healthy');
       }
     }
 
@@ -217,7 +171,7 @@ FILESYSTEM_DISK=local
       buffer.writeln(
         '      - MYSQL_ROOT_PASSWORD=${r'$'}{DB_PASSWORD:-root_password}',
       );
-      buffer.writeln('      - MYSQL_DATABASE=${r'$'}{DB_NAME:-khadem_db}');
+      buffer.writeln('      - MYSQL_DATABASE=${r'$'}{DB_DATABASE:-khadem_db}');
       buffer.writeln('      - MYSQL_USER=${r'$'}{DB_USER:-khadem_user}');
       buffer.writeln(
         '      - MYSQL_PASSWORD=${r'$'}{DB_PASSWORD:-your_password}',
@@ -229,6 +183,12 @@ FILESYSTEM_DISK=local
       buffer.writeln(
         '    command: --default-authentication-plugin=mysql_native_password',
       );
+      buffer.writeln('    healthcheck:');
+      buffer.writeln(
+        '      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]',
+      );
+      buffer.writeln('      timeout: 20s');
+      buffer.writeln('      retries: 5');
       buffer.writeln('    networks:');
       buffer.writeln('      - khadem-network');
       buffer.writeln('    restart: unless-stopped');
@@ -242,7 +202,7 @@ FILESYSTEM_DISK=local
       buffer.writeln('      - .env');
       buffer.writeln('    environment:');
       buffer.writeln('      # Database service configuration');
-      buffer.writeln('      - POSTGRES_DB=${r'$'}{DB_NAME:-khadem_db}');
+      buffer.writeln('      - POSTGRES_DB=${r'$'}{DB_DATABASE:-khadem_db}');
       buffer.writeln('      - POSTGRES_USER=${r'$'}{DB_USER:-khadem_user}');
       buffer.writeln(
         '      - POSTGRES_PASSWORD=${r'$'}{DB_PASSWORD:-your_password}',
@@ -251,6 +211,13 @@ FILESYSTEM_DISK=local
       buffer.writeln('      - "${r'$'}{DB_PORT:-5432}:5432"');
       buffer.writeln('    volumes:');
       buffer.writeln('      - postgres_data:/var/lib/postgresql/data');
+      buffer.writeln('    healthcheck:');
+      buffer.writeln(
+        '      test: ["CMD-SHELL", "pg_isready -U ${r'$'}{DB_USER:-khadem_user} -d ${r'$'}{DB_DATABASE:-khadem_db}"]',
+      );
+      buffer.writeln('      interval: 10s');
+      buffer.writeln('      timeout: 5s');
+      buffer.writeln('      retries: 5');
       buffer.writeln('    networks:');
       buffer.writeln('      - khadem-network');
       buffer.writeln('    restart: unless-stopped');
@@ -264,12 +231,20 @@ FILESYSTEM_DISK=local
       buffer.writeln('      - .env');
       buffer.writeln('    environment:');
       buffer.writeln('      # Database service configuration');
-      buffer
-          .writeln('      - MONGO_INITDB_DATABASE=${r'$'}{DB_NAME:-khadem_db}');
+      buffer.writeln(
+        '      - MONGO_INITDB_DATABASE=${r'$'}{DB_DATABASE:-khadem_db}',
+      );
       buffer.writeln('    ports:');
       buffer.writeln('      - "${r'$'}{DB_PORT:-27017}:27017"');
       buffer.writeln('    volumes:');
       buffer.writeln('      - mongo_data:/data/db');
+      buffer.writeln('    healthcheck:');
+      buffer.writeln(
+        '      test: echo "db.runCommand(\\"ping\\").ok" | mongosh localhost:27017/test --quiet',
+      );
+      buffer.writeln('      interval: 10s');
+      buffer.writeln('      timeout: 5s');
+      buffer.writeln('      retries: 5');
       buffer.writeln('    networks:');
       buffer.writeln('      - khadem-network');
       buffer.writeln('    restart: unless-stopped');
@@ -289,6 +264,11 @@ FILESYSTEM_DISK=local
       buffer.writeln(
         '    command: redis-server --requirepass ${r'$'}{REDIS_PASSWORD:-}',
       );
+      buffer.writeln('    healthcheck:');
+      buffer.writeln('      test: ["CMD", "redis-cli", "ping"]');
+      buffer.writeln('      interval: 10s');
+      buffer.writeln('      timeout: 5s');
+      buffer.writeln('      retries: 5');
       buffer.writeln('    networks:');
       buffer.writeln('      - khadem-network');
       buffer.writeln('    restart: unless-stopped');
@@ -313,19 +293,25 @@ FILESYSTEM_DISK=local
     }
 
     // Add volumes section
-    buffer.writeln();
-    buffer.writeln('volumes:');
-    if (serviceList.contains('mysql')) {
-      buffer.writeln('  mysql_data:');
-    }
-    if (serviceList.contains('postgres')) {
-      buffer.writeln('  postgres_data:');
-    }
-    if (serviceList.contains('mongo')) {
-      buffer.writeln('  mongo_data:');
-    }
-    if (serviceList.contains('redis')) {
-      buffer.writeln('  redis_data:');
+    final needsVolumes = serviceList.any(
+      (s) => ['mysql', 'postgres', 'mongo', 'redis'].contains(s),
+    );
+
+    if (needsVolumes) {
+      buffer.writeln();
+      buffer.writeln('volumes:');
+      if (serviceList.contains('mysql')) {
+        buffer.writeln('  mysql_data:');
+      }
+      if (serviceList.contains('postgres')) {
+        buffer.writeln('  postgres_data:');
+      }
+      if (serviceList.contains('mongo')) {
+        buffer.writeln('  mongo_data:');
+      }
+      if (serviceList.contains('redis')) {
+        buffer.writeln('  redis_data:');
+      }
     }
 
     // Add networks section
@@ -339,8 +325,14 @@ FILESYSTEM_DISK=local
 
   @override
   Future<void> handle(List<String> args) async {
-    await _generateDockerfile();
     final services = argResults?['services'] as String? ?? 'none';
+
+    await _generateDockerfile(services);
+
+    final dockerCompose = await _generateDockerCompose(services);
+    await File('docker-compose.yml').writeAsString(dockerCompose);
+    logger.info('📝 Generated docker-compose.yml for external services');
+
     if (services != 'none') {
       logger.info(' Docker setup complete! Run: docker-compose up -d');
       logger.info(' Services included: $services');
