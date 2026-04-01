@@ -80,9 +80,9 @@ class KhademPackageMetadataLoader {
     }
 
     final khadem = packages.cast<dynamic>().whereType<Map>().firstWhere(
-          (p) => p['name'] == 'khadem',
-          orElse: () => const {},
-        );
+      (p) => p['name'] == 'khadem',
+      orElse: () => const {},
+    );
 
     final rootUriValue = khadem['rootUri'];
     if (rootUriValue is! String) {
@@ -97,8 +97,9 @@ class KhademPackageMetadataLoader {
     Directory current = Directory.current;
 
     while (true) {
-      final candidate =
-          File('${current.path}${Platform.pathSeparator}$relativePath');
+      final candidate = File(
+        '${current.path}${Platform.pathSeparator}$relativePath',
+      );
       if (candidate.existsSync()) {
         return candidate;
       }
@@ -113,8 +114,9 @@ class KhademPackageMetadataLoader {
 
   static String _joinUriPath(Uri base, String path) {
     // Ensure directory-like base.
-    final normalizedBase =
-        base.toString().endsWith('/') ? base : Uri.parse('${base.toString()}/');
+    final normalizedBase = base.toString().endsWith('/')
+        ? base
+        : Uri.parse('${base.toString()}/');
     return normalizedBase.resolve(path).toFilePath();
   }
 
