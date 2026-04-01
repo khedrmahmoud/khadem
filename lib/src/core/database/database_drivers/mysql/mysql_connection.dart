@@ -64,6 +64,12 @@ class MySQLConnection implements DatabaseConnection {
   Future<void> _ensureDatabaseSelected(String? dbName) async {
     if (dbName == null || dbName.isEmpty) return;
 
+    // Validate database name to prevent SQL injection
+    // Database names must be alphanumeric with underscores only
+    _validateDatabaseName(dbName);
+
+    // Use the validated name with backtick quoting
+    // Note: We already validated the name doesn't contain backticks
     try {
       await execute('USE `$dbName`');
     } catch (_) {
@@ -76,11 +82,38 @@ class MySQLConnection implements DatabaseConnection {
         await execute('USE `$dbName`');
         Log.info('Database $dbName created and selected.');
       } catch (e) {
-        Log.info(
-          'ERROR: Failed to create or select database $dbName: $e',
-        );
+        Log.info('ERROR: Failed to create or select database $dbName: $e');
         rethrow;
       }
+    }
+  }
+
+  /// Validates database name to prevent SQL injection.
+  ///
+  /// MySQL identifiers can contain alphanumeric characters,
+  /// underscores, and dollar signs. They cannot start with a digit.
+  ///
+  /// Throws [DatabaseException] if the name is invalid.
+  void _validateDatabaseName(String dbName) {
+    // Check for empty or too long (MySQL limit is 64 characters)
+    if (dbName.isEmpty || dbName.length > 64) {
+      throw DatabaseException('Invalid database name: must be 1-64 characters');
+    }
+
+    // Check for valid characters: alphanumeric, underscore, dollar sign
+    // Must not start with a digit
+    final validPattern = RegExp(r'^[a-zA-Z_$][a-zA-Z0-9_$]*$');
+    if (!validPattern.hasMatch(dbName)) {
+      throw DatabaseException(
+        'Invalid database name: must contain only alphanumeric characters, underscores, and dollar signs, and cannot start with a digit',
+      );
+    }
+
+    // Explicitly check for backticks which could break out of quoting
+    if (dbName.contains('`')) {
+      throw DatabaseException(
+        'Invalid database name: cannot contain backtick characters',
+      );
     }
   }
 
