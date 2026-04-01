@@ -27,7 +27,7 @@ class BuildCommand extends KhademCommand {
         .map((s) => s.trim().toLowerCase())
         .toList();
     final hasSqlite = serviceList.contains('sqlite');
-    final sqlitePackage = hasSqlite ? ' libsqlite3-0' : '';
+    final sqlitePackage = hasSqlite ? ' libsqlite3-dev' : '';
 
     final dockerfileContent =
         '''
@@ -50,7 +50,7 @@ RUN dart compile exe lib/main.dart -o bin/server
 # Production stage
 FROM debian:bookworm-slim
 
-# Install ca-certificates and curl for HTTPS connections and health checks${hasSqlite ? ', and libsqlite3-0 for SQLite support' : ''}
+# Install ca-certificates and curl for HTTPS connections and health checks${hasSqlite ? ', and libsqlite3-dev for SQLite support' : ''}
 RUN apt-get update && apt-get install -y ca-certificates curl$sqlitePackage && rm -rf /var/lib/apt/lists/* || true
 
 
