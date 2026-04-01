@@ -4,7 +4,7 @@
 // ========================
 // 📦 Root
 // ========================
-export 'command_registry.dart';
+
 export 'commands/build_command.dart';
 // ========================
 // 📦 Commands_command.dart

@@ -168,7 +168,7 @@ export 'providers/cache_service_provider.dart';
 // ========================
 // 📦 Cli_service_provider.dart
 // ========================
-export 'providers/cli_service_provider.dart';
+
 // ========================
 // 📦 Core_service_provider.dart
 // ========================

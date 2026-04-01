@@ -27,7 +27,7 @@ class BuildCommand extends KhademCommand {
         .map((s) => s.trim().toLowerCase())
         .toList();
     final hasSqlite = serviceList.contains('sqlite');
-    final sqlitePackage = hasSqlite ? ' libsqlite3-dev' : '';
+    final sqlitePackage = hasSqlite ? ' libsqlite3-0' : '';
 
     final dockerfileContent =
         '''
@@ -44,13 +44,13 @@ RUN dart pub get --offline
 # Ensure required directories exist so COPY doesn't fail
 RUN mkdir -p config public storage/database storage/logs lang resources bin
 
-# Compile to kernel snapshot   
-RUN dart compile kernel lib/main.dart -o bin/server.dill
+# Build AOT executable for production
+RUN dart compile exe lib/main.dart -o bin/server
 
 # Production stage
-FROM dart:stable
+FROM debian:bookworm-slim
 
-# Install ca-certificates and curl for HTTPS connections and health checks${hasSqlite ? ', and libsqlite3-dev for SQLite support' : ''}
+# Install ca-certificates and curl for HTTPS connections and health checks${hasSqlite ? ', and libsqlite3-0 for SQLite support' : ''}
 RUN apt-get update && apt-get install -y ca-certificates curl$sqlitePackage && rm -rf /var/lib/apt/lists/* || true
 
 
@@ -66,8 +66,8 @@ RUN mkdir -p config public storage/database storage/logs lang resources && chown
 # Switch to the non-root user
 USER app
 
-# Copy application kernel snapshot
-COPY --from=build --chown=app:appgroup /app/bin/server.dill /app/bin/server.dill
+# Copy application binary
+COPY --from=build --chown=app:appgroup /app/bin/server /app/bin/server
 
 # Copy application files (directories only, inject env via docker run/compose)
 COPY --from=build --chown=app:appgroup /app/config/ ./config/
@@ -83,7 +83,7 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\
   CMD curl -f http://localhost:9000/health || exit 1
 
-CMD ["dart", "run", "/app/bin/server.dill"]
+CMD ["/app/bin/server"]
 ''';
 
     const dockerfilePath = 'Dockerfile';
