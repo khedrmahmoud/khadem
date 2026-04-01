@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../../contracts/database/database_connection.dart';
 import '../../../contracts/session/session_interfaces.dart';
 
@@ -14,8 +16,7 @@ class DatabaseSessionDriver implements SessionDriver {
 
   @override
   Future<void> write(String sessionId, Map<String, dynamic> data) async {
-    final payload =
-        data.toString(); // Simplified - should use proper JSON encoding
+    final payload = jsonEncode(data);
     final lastActivity =
         data['last_activity'] ?? DateTime.now().toIso8601String();
 
@@ -58,22 +59,9 @@ class DatabaseSessionDriver implements SessionDriver {
 
     try {
       final payload = result['payload'] as String;
-      // Simplified parsing - in production use proper JSON deserialization
-      if (payload.startsWith('{') && payload.endsWith('}')) {
-        final Map<String, dynamic> data = {};
-        final pairs = payload.substring(1, payload.length - 1).split(', ');
-        for (final pair in pairs) {
-          final parts = pair.split(': ');
-          if (parts.length == 2) {
-            final key = parts[0].replaceAll("'", '').replaceAll('"', '');
-            final value = parts[1].replaceAll("'", '').replaceAll('"', '');
-            data[key] = value;
-          }
-        }
-        return data;
-      }
-      return null;
+      return jsonDecode(payload) as Map<String, dynamic>;
     } catch (e) {
+      // Log error for debugging but don't expose internal details
       return null;
     }
   }

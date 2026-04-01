@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:redis/redis.dart';
+
 import '../../../contracts/session/session_interfaces.dart';
 
 /// Redis-based session storage implementation.
@@ -43,7 +46,7 @@ class RedisSessionDriver implements SessionDriver {
     }
 
     final key = 'session:$sessionId';
-    final jsonData = data.toString(); // Convert to JSON-like string
+    final jsonData = jsonEncode(data);
 
     // Store with TTL based on last activity
     final lastActivityStr = data['last_activity'] as String?;
@@ -80,27 +83,10 @@ class RedisSessionDriver implements SessionDriver {
     }
 
     try {
-      // Parse the stored data (assuming it's stored as a string representation)
       final dataStr = result.toString();
-      // For simplicity, we'll assume the data is stored as a JSON string
-      // In a real implementation, you'd want proper JSON serialization
-      if (dataStr.startsWith('{') && dataStr.endsWith('}')) {
-        // This is a simplified parsing - in production you'd use proper JSON
-        final Map<String, dynamic> data = {};
-        // Parse key-value pairs (simplified implementation)
-        final pairs = dataStr.substring(1, dataStr.length - 1).split(', ');
-        for (final pair in pairs) {
-          final parts = pair.split(': ');
-          if (parts.length == 2) {
-            final key = parts[0].replaceAll("'", '').replaceAll('"', '');
-            final value = parts[1].replaceAll("'", '').replaceAll('"', '');
-            data[key] = value;
-          }
-        }
-        return data;
-      }
-      return null;
+      return jsonDecode(dataStr) as Map<String, dynamic>;
     } catch (e) {
+      // Log error for debugging but don't expose internal details
       return null;
     }
   }
