@@ -18,6 +18,15 @@ class FileSessionDriver implements SessionDriver {
     final file = File('${_directory.path}/$sessionId.session');
     final jsonData = jsonEncode(data);
     await file.writeAsString(jsonData);
+
+    // Set file permissions to 0600 (owner read/write only) on Unix-like systems
+    if (!Platform.isWindows) {
+      try {
+        await Process.run('chmod', ['600', file.path]);
+      } catch (e) {
+        // Ignore errors - best effort security on supported platforms
+      }
+    }
   }
 
   @override

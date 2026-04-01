@@ -15,11 +15,11 @@ class SessionCookieHandler {
   SessionCookieHandler({
     this.cookieName = defaultCookieName,
     this.defaultMaxAge = const Duration(hours: 24),
-    this.secure = false,
+    bool? secure,
     this.httpOnly = true,
     this.sameSite = 'lax',
     this.domain,
-  });
+  }) : secure = secure ?? _getSecureDefault();
 
   /// Extract session ID from request cookies
   String? getSessionIdFromRequest(HttpRequest request) {
@@ -73,5 +73,12 @@ class SessionCookieHandler {
       cookie.domain = domain;
     }
     response.cookies.add(cookie);
+  }
+
+  /// Determines secure cookie default based on environment
+  /// Defaults to true for production safety, can be overridden for local dev
+  static bool _getSecureDefault() {
+    final env = Platform.environment['KHADEM_ENV'] ?? 'production';
+    return env.toLowerCase() != 'local' && env.toLowerCase() != 'development';
   }
 }
