@@ -35,9 +35,22 @@ class Route {
   }
 
   static RegExp _createMatcher(String path) {
-    final regex =
-        path.replaceAllMapped(RegExp(r':(\w+)'), (m) => '(?<_${m[1]}>[^/]+)');
-    return RegExp('^$regex\$');
+    // Escape literal parts of the path to prevent RegExp DoS
+    final buffer = StringBuffer();
+    final paramRegex = RegExp(r':(\w+)');
+    
+    int lastEnd = 0;
+    for (final match in paramRegex.allMatches(path)) {
+      final literalPart = path.substring(lastEnd, match.start);
+      buffer.write(RegExp.escape(literalPart));
+      buffer.write('(?<_${match.group(1)}>[^/]+)');
+      lastEnd = match.end;
+    }
+    
+    final finalLiteralPart = path.substring(lastEnd);
+    buffer.write(RegExp.escape(finalLiteralPart));
+    
+    return RegExp('^${buffer.toString()}\$');
   }
 
   static List<String> _extractParamNames(String path) {
