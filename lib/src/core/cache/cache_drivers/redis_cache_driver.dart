@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:khadem/src/support/exceptions/cache_exceptions.dart';
 import 'package:redis/redis.dart';
 import '../../../contracts/cache/cache_driver.dart';
+import '../../../support/utils/mutex.dart';
 import '../cache_stats.dart';
 
 /// Redis-based cache driver implementation for the Khadem framework.
@@ -113,7 +114,7 @@ class RedisCacheDriver implements CacheDriver {
   Command? _command;
 
   /// Connection mutex to prevent concurrent connection attempts
-  bool _connecting = false;
+  final Mutex _connectionLock = Mutex();
 
   /// Creates a new RedisCacheDriver instance.
   ///
@@ -137,22 +138,11 @@ class RedisCacheDriver implements CacheDriver {
   /// This method handles connection creation, authentication, and database selection.
   /// It includes retry logic for connection failures.
   Future<Command> _getCommand() async {
-    if (_command != null) {
-      return _command!;
-    }
-
-    if (_connecting) {
-      // Wait for another connection attempt to complete
-      while (_connecting) {
-        await Future.delayed(const Duration(milliseconds: 10));
-      }
+    return _connectionLock.protect(() async {
       if (_command != null) {
         return _command!;
       }
-    }
 
-    _connecting = true;
-    try {
       for (int attempt = 0; attempt <= maxRetries; attempt++) {
         try {
           final conn = RedisConnection();
@@ -163,24 +153,24 @@ class RedisCacheDriver implements CacheDriver {
             await _command!.send_object(['AUTH', password]);
           }
 
-          // Select database
+          // Select database if not 0
           if (database != 0) {
-            await _command!.send_object(['SELECT', database]);
+            await _command!.send_object(['SELECT', database.toString()]);
           }
 
           return _command!;
         } catch (e) {
           if (attempt == maxRetries) {
-            rethrow;
+            _command = null;
+            throw CacheException(
+                'Failed to connect to Redis after $maxRetries attempts: $e');
           }
           await Future.delayed(retryDelay * (attempt + 1));
         }
       }
-    } finally {
-      _connecting = false;
-    }
 
-    throw StateError('Failed to connect to Redis after $maxRetries attempts');
+      throw StateError('Failed to connect to Redis after $maxRetries attempts');
+    });
   }
 
   /// Executes a Redis command with error handling and retry logic.
