@@ -84,26 +84,28 @@ class SQLiteConnection implements DatabaseConnection {
     try {
       final stmt = _db!.prepare(sql);
 
-      // Simple heuristic: check if it starts with SELECT (case insensitive)
-      final isSelect = sql.trim().toUpperCase().startsWith('SELECT') ||
-          sql.trim().toUpperCase().startsWith('PRAGMA');
+      try {
+        // Simple heuristic: check if it starts with SELECT (case insensitive)
+        final isSelect = sql.trim().toUpperCase().startsWith('SELECT') ||
+            sql.trim().toUpperCase().startsWith('PRAGMA');
 
-      if (isSelect) {
-        final result = stmt.select(preparedBindings);
+        if (isSelect) {
+          final result = stmt.select(preparedBindings);
+          
+          final data =
+              result.map((row) => Map<String, dynamic>.from(row)).toList();
+          return DatabaseResponse(data: data);
+        } else {
+          stmt.execute(preparedBindings);
+          
+          return DatabaseResponse(
+            data: [],
+            insertId: _db!.lastInsertRowId,
+            affectedRows: _db!.updatedRows,
+          );
+        }
+      } finally {
         stmt.dispose();
-
-        final data =
-            result.map((row) => Map<String, dynamic>.from(row)).toList();
-        return DatabaseResponse(data: data);
-      } else {
-        stmt.execute(preparedBindings);
-        stmt.dispose();
-
-        return DatabaseResponse(
-          data: [],
-          insertId: _db!.lastInsertRowId,
-          affectedRows: _db!.updatedRows,
-        );
       }
     } catch (e) {
       throw DatabaseException(
