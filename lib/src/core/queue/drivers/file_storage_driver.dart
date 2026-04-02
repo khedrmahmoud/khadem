@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../../contracts/queue/queue_job.dart';
+import '../../../support/utils/mutex.dart';
 import '../registry/index.dart';
 import 'base_driver.dart';
 
@@ -49,6 +50,7 @@ class FileStorageDriver extends BaseQueueDriver {
   final String _jobsFileName = 'jobs.json';
   final List<JobContext> _memoryCache = [];
   bool _isLoaded = false;
+  final Mutex _lock = Mutex();
 
   FileStorageDriver({
     required super.config,
@@ -64,42 +66,54 @@ class FileStorageDriver extends BaseQueueDriver {
 
   @override
   Future<void> push(QueueJob job, {Duration? delay}) async {
-    await _ensureLoaded();
+    await _lock.protect(() async {
+      await _ensureLoaded();
 
-    final context = createJobContext(job, delay: delay);
+      final context = createJobContext(job, delay: delay);
 
-    // Track metrics
-    if (metrics != null) {
-      metrics!.jobQueued(job.runtimeType.toString());
-      metrics!.recordQueueDepth(_memoryCache.length + 1);
-    }
+      // Track metrics
+      if (metrics != null) {
+        metrics!.jobQueued(job.runtimeType.toString());
+        metrics!.recordQueueDepth(_memoryCache.length + 1);
+      }
 
-    _memoryCache.add(context);
-    await _persistToFile();
+      _memoryCache.add(context);
+      await _persistToFile();
+    });
   }
 
   @override
   Future<void> process() async {
-    await _ensureLoaded();
+    JobContext? readyJob;
+    
+    await _lock.protect(() async {
+      await _ensureLoaded();
+      readyJob = _findNextReadyJob();
+      if (readyJob != null) {
+         // Mark as processing in memory to prevent other workers from grabbing
+         readyJob!.status = JobStatus.processing;
+         await _persistToFile();
+      }
+    });
 
-    // Find next ready job
-    final readyJob = _findNextReadyJob();
     if (readyJob == null) return;
 
     try {
-      await executeJob(readyJob);
+      await executeJob(readyJob!);
     } finally {
-      // Remove completed/failed job
-      if (readyJob.status == JobStatus.completed ||
-          readyJob.status == JobStatus.deadLettered) {
-        _memoryCache.remove(readyJob);
-        await _persistToFile();
-      }
+      await _lock.protect(() async {
+        // Remove completed/failed job
+        if (readyJob!.status == JobStatus.completed ||
+            readyJob!.status == JobStatus.deadLettered) {
+          _memoryCache.remove(readyJob);
+          await _persistToFile();
+        }
 
-      // Update metrics
-      if (metrics != null) {
-        metrics!.recordQueueDepth(_memoryCache.length);
-      }
+        // Update metrics
+        if (metrics != null) {
+          metrics!.recordQueueDepth(_memoryCache.length);
+        }
+      });
     }
   }
 
