@@ -68,18 +68,18 @@ class MySQLConnection implements DatabaseConnection {
     // Database names must be alphanumeric with underscores only
     _validateDatabaseName(dbName);
 
-    // Use the validated name with backtick quoting
-    // Note: We already validated the name doesn't contain backticks
+    // Use parameterization for database name
     try {
-      await execute('USE `$dbName`');
+      await execute('USE ?', [dbName]);
     } catch (_) {
       // If USE fails, try to create it
       try {
         Log.info('Database $dbName does not exist. Creating...');
         await execute(
-          'CREATE DATABASE IF NOT EXISTS `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci',
+          'CREATE DATABASE IF NOT EXISTS ? CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci',
+          [dbName],
         );
-        await execute('USE `$dbName`');
+        await execute('USE ?', [dbName]);
         Log.info('Database $dbName created and selected.');
       } catch (e) {
         Log.info('ERROR: Failed to create or select database $dbName: $e');
