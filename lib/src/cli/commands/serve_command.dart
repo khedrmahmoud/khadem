@@ -18,7 +18,7 @@ class ServeCommand extends KhademCommand {
   bool _isRestarting = false;
   bool _isShuttingDown = false;
   String? _vmServiceUri;
-  static const int _vmServicePort = 8181;
+  static int get _vmServicePort => int.tryParse(Platform.environment['VM_SERVICE_PORT'] ?? '') ?? 8181;
 
   @override
   String get name => 'serve';

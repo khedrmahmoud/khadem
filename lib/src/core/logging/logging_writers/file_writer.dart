@@ -20,6 +20,7 @@ class FileLogHandler implements LogHandler {
   int _currentFileSize = 0;
   DateTime _lastRotationDate;
   bool _isRotating = false;
+  final Mutex _rotationLock = Mutex();
   final Queue<List<int>> _buffer = Queue<List<int>>();
 
   FileLogHandler({
@@ -118,6 +119,7 @@ class FileLogHandler implements LogHandler {
   }
 
   Future<void> _rotate(List<int> pendingBytes) async {
+    await _rotationLock.acquire();
     _isRotating = true;
     _buffer.add(pendingBytes);
 
