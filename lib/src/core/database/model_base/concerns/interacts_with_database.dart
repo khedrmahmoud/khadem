@@ -1,3 +1,4 @@
+import '../../../../support/exceptions/database_exception.dart';
 import '../../../../application/khadem.dart';
 import '../../../../contracts/database/query_builder_interface.dart';
 import '../../orm/model_lifecycle.dart';
@@ -188,7 +189,7 @@ mixin InteractsWithDatabase<T> {
   Future<T> findOrFail(dynamic id) async {
     final result = await find(id);
     if (result == null) {
-      throw Exception('Model not found');
+      throw DatabaseException('Model not found');
     }
     return result;
   }

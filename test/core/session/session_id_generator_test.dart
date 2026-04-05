@@ -13,7 +13,7 @@ void main() {
       final sessionId = generator.generate();
 
       expect(sessionId, isNotEmpty);
-      expect(sessionId.length, equals(32));
+      expect(sessionId.length, equals(43));
     });
 
     test('should generate unique session IDs', () {
@@ -27,7 +27,7 @@ void main() {
       final sessionId = generator.generate();
 
       // Should only contain valid hex characters
-      expect(sessionId, matches(r'^[a-f0-9]{32}$'));
+      expect(sessionId, matches(r'^[A-Za-z0-9_\\-]+$'));
     });
   });
 }

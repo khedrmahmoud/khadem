@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:khadem/src/contracts/logging/log_handler.dart';
 import 'package:khadem/src/contracts/logging/log_level.dart';
+import 'package:khadem/src/support/utils/mutex.dart';
 
 /// File-based log handler with non-blocking I/O and buffering.
 class FileLogHandler implements LogHandler {

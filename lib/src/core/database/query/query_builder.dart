@@ -1,3 +1,4 @@
+import '../../../support/exceptions/database_exception.dart';
 import '../../../contracts/database/database_connection.dart';
 import '../../../contracts/database/query_builder_interface.dart';
 import '../model_base/khadem_model.dart';
@@ -294,7 +295,7 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   Future<T> findOrFail(dynamic id, [String column = 'id']) async {
     final result = await find(id, column);
     if (result == null) {
-      throw Exception('Record not found');
+      throw DatabaseException('Record not found');
     }
     return result;
   }
@@ -435,11 +436,11 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
   @override
   QueryBuilderInterface<T> withCount(dynamic relations) {
     if (modelFactory == null) {
-      throw Exception('withCount requires a model factory');
+      throw DatabaseException('withCount requires a model factory');
     }
     final model = modelFactory!({});
     if (model is! HasRelations) {
-      throw Exception('Model does not use HasRelations trait');
+      throw DatabaseException('Model does not use HasRelations trait');
     }
 
     final Map<String, void Function(QueryBuilderInterface<dynamic>)>
@@ -832,12 +833,12 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     int count = 1,
   ]) {
     if (modelFactory == null) {
-      throw Exception('whereHas requires a model factory');
+      throw DatabaseException('whereHas requires a model factory');
     }
 
     final model = modelFactory!({});
     if (model is! HasRelations) {
-      throw Exception('Model does not use HasRelations trait');
+      throw DatabaseException('Model does not use HasRelations trait');
     }
 
     // Use the new Relation object system
@@ -1445,11 +1446,11 @@ class QueryBuilder<T> implements QueryBuilderInterface<T> {
     String column,
   ) {
     if (modelFactory == null) {
-      throw Exception('withAggregate requires a model factory');
+      throw DatabaseException('withAggregate requires a model factory');
     }
     final model = modelFactory!({});
     if (model is! HasRelations) {
-      throw Exception('Model does not use HasRelations trait');
+      throw DatabaseException('Model does not use HasRelations trait');
     }
 
     final relationObj = (model as HasRelations).relation(relationName);

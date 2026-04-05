@@ -1,3 +1,4 @@
+import '../exceptions/validation_exception.dart';
 import 'dart:async';
 
 import '../../contracts/validation/rule.dart';
@@ -70,7 +71,7 @@ class UniqueRule extends Rule {
     }
 
     if (tableName == null) {
-      throw Exception("UniqueRule requires a table name.");
+      throw ValidationException({'general': ["UniqueRule requires a table name."]});
     }
 
     final db = DB.table(tableName);
@@ -157,7 +158,7 @@ class ExistsRule extends Rule {
     }
 
     if (tableName == null) {
-      throw Exception("ExistsRule requires a table name.");
+      throw ValidationException({'general': ["ExistsRule requires a table name."]});
     }
 
     final db = DB.table(tableName);

@@ -181,7 +181,7 @@ class InputValidator {
       // But better to be strict.
       // We can't throw easily here without breaking flow, but let's assume it exists.
       // If not found, we might want to throw an exception to the developer.
-      throw Exception("Validation rule '$ruleName' not found.");
+      throw ValidationException({'general': ["Validation rule '$ruleName' not found."]});
     }
     return _RuleItem(rule, ruleName, ruleArgs);
   }
