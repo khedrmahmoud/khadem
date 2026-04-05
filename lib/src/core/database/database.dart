@@ -10,6 +10,8 @@ import 'database_drivers/sqlite/sqlite_connection.dart';
 class DatabaseManager {
   final ConfigInterface _config;
   final Map<String, DatabaseConnection> _connections = {};
+  final Map<String, List<DatabaseConnection>> _pools = {};
+  final Map<String, int> _poolIndexes = {};
 
   DatabaseManager(this._config);
 
@@ -27,24 +29,65 @@ class DatabaseManager {
     T Function(Map<String, dynamic>)? modelFactory,
     String? connectionName,
   }) {
-    return connection(connectionName)
-        .queryBuilder<T>(tableName, modelFactory: modelFactory);
+    return connection(
+      connectionName,
+    ).queryBuilder<T>(tableName, modelFactory: modelFactory);
   }
 
   /// Gets the current connection.
   DatabaseConnection connection([String? name]) {
-    name ??= _config.get('database.default', 'mysql');
+    final connectionName = name ?? _config.get('database.default', 'mysql')!;
 
-    if (!_connections.containsKey(name)) {
-      _connections[name!] = _resolveConnection(name);
+    if (!_pools.containsKey(connectionName)) {
+      _initializePool(connectionName);
     }
 
-    return _connections[name]!;
+    final pool = _pools[connectionName]!;
+    if (pool.length == 1) {
+      return pool.first;
+    }
+
+    final currentIndex = _poolIndexes[connectionName] ?? 0;
+    final selected = pool[currentIndex % pool.length];
+    _poolIndexes[connectionName] = (currentIndex + 1) % pool.length;
+    return selected;
   }
 
-  DatabaseConnection _resolveConnection(String name) {
-    var config =
-        _config.get<Map<String, dynamic>>('database.connections.' + name);
+  void _initializePool(String name) {
+    final config = _resolveConnectionConfig(name);
+    final poolSize = _resolvePoolSize(config);
+
+    final pool = List<DatabaseConnection>.generate(
+      poolSize,
+      (_) => _buildConnection(config),
+    );
+
+    _pools[name] = pool;
+    _connections[name] = pool.first;
+    _poolIndexes[name] = 0;
+  }
+
+  int _resolvePoolSize(Map<String, dynamic> config) {
+    final configured = config['pool_size'] ?? config['poolSize'];
+
+    if (configured is int && configured > 0) {
+      return configured;
+    }
+
+    if (configured is String) {
+      final parsed = int.tryParse(configured);
+      if (parsed != null && parsed > 0) {
+        return parsed;
+      }
+    }
+
+    return 1;
+  }
+
+  Map<String, dynamic> _resolveConnectionConfig(String name) {
+    var config = _config.get<Map<String, dynamic>>(
+      'database.connections.' + name,
+    );
 
     // Fallback for legacy single-connection config
     if (config == null && name == _config.get('database.default', 'mysql')) {
@@ -60,18 +103,22 @@ class DatabaseManager {
       );
     }
 
-    final driver = config['driver'] as String?;
+    return config;
+  }
+
+  DatabaseConnection _buildConnection(Map<String, dynamic> config) {
+    final normalizedConfig = Map<String, dynamic>.from(config);
+
+    final driver = normalizedConfig['driver'] as String?;
     if (driver == null) {
-      throw DatabaseException(
-        'Driver not specified for connection [' + name + ']',
-      );
+      throw DatabaseException('Driver not specified for database connection');
     }
 
     switch (driver) {
       case 'mysql':
-        return MySQLConnection(config);
+        return MySQLConnection(normalizedConfig);
       case 'sqlite':
-        return SQLiteConnection(config);
+        return SQLiteConnection(normalizedConfig);
       default:
         throw DatabaseException('Unsupported database driver: $driver');
     }
@@ -84,9 +131,24 @@ class DatabaseManager {
 
   /// Closes all active connections.
   Future<void> close() async {
-    for (final conn in _connections.values) {
-      await conn.disconnect();
+    final disconnected = <DatabaseConnection>{};
+
+    for (final pool in _pools.values) {
+      for (final conn in pool) {
+        if (disconnected.add(conn)) {
+          await conn.disconnect();
+        }
+      }
     }
+
+    for (final conn in _connections.values) {
+      if (disconnected.add(conn)) {
+        await conn.disconnect();
+      }
+    }
+
+    _pools.clear();
+    _poolIndexes.clear();
     _connections.clear();
   }
 }
