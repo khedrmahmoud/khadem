@@ -1,0 +1,38 @@
+# 🚨 Khadem Framework v2.0.1 Security Remediation Plan
+
+This document outlines the structured remediation plan for the 12 newly discovered CRITICAL vulnerabilities. All fixes should be developed on dedicated branches stemming from `dev` and merged back using pull requests.
+
+## 🔴 Phase 1: Critical Injections & Traversals (High Priority)
+*Targeting the most severe vulnerabilities that allow unauthorized reads, writes, or code injections.*
+* **Branch Prefix:** `security/`
+
+- [ ] **SQL Injection (Database Selection)**: MySQL database identifier handling is now validated and safely quoted. PostgreSQL selection hardening remains pending (driver implementation is currently empty in this repo).
+- [x] **Path Traversal (Storage LocalDisk)**: Sanitize relative paths securely to ensure `LocalDisk` operations cannot escape the intended storage root constraint.
+- [x] **Path Traversal (Cache File Driver)**: Hash or aggressively sanitize cache keys to prevent directory traversal via crafted keys (e.g., `../../`).
+- [x] **Path Traversal (HTTP Static Files)**: Restrict file serving middleware to securely resolve against the designated public directory, dropping any requests exceeding the root.
+
+## 🟠 Phase 2: Input Handling & XSS
+*Targeting view boundaries and payload executions.*
+* **Branch Prefix:** `security/`
+
+- [ ] **XSS Vulnerability (View Templates)**: Ensure `{{{ }}}` or default templating blocks aggressively run HTML entity escaping, unless explicitly marked raw.
+- [ ] **ReDoS (Email Regex)**: Replace complex/catastrophic backtracking email validation regex with a linear-time safe equivalent or built-in validator.
+- [ ] **Queue Job Deserialization**: Restrict polymorphic deserialization in queue workers so that arbitrary/untrusted payloads cannot invoke unintended code paths or classes.
+
+## 🟡 Phase 3: Auth, Sessions, & Logs
+*Targeting data leaks and session persistence.*
+* **Branch Prefix:** `fix/`
+
+- [ ] **Session Fixation**: Introduce session ID regeneration upon privilege changes (e.g., login, logout) to prevent fixation hijacking.
+- [ ] **Sensitive Data in Logs**: Implement a log sanitizer/masker array to strip `Authorization` headers, `password`, `token`, and secret fields before flushing logs to disk or terminal.
+
+## 🟢 Phase 4: Core Stability & Container Logic
+*Targeting broken state engines and asynchronous startup.*
+* **Branch Prefix:** `fix/`
+
+- [ ] **Fire-and-Forget Async Boot**: Refactor DI container initializations and service provider boots to ensure the main server block awaits full readiness instead of orphaned async executions.
+- [ ] **`resolveAll<T>()` Broken**: Fix the service container logic bug where `resolveAll` fails to fetch multiple tagged implementations correctly.
+- [ ] **Statistics Corruption (Redis)**: Fix the cache driver decrement logic to cleanly atomicise operations and stop stats from drifting.
+
+---
+**Status:** In Progress
