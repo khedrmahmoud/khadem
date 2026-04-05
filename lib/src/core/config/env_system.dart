@@ -74,6 +74,9 @@ class EnvSystem implements EnvInterface {
   /// Whether to load process environment variables.
   final bool _useProcessEnv;
 
+  /// List of allowed variables for substitution (whitelisting).
+  final List<String>? _allowedVariables;
+
   /// Creates a new environment system.
   ///
   /// [useProcessEnv] determines whether to load system environment variables
@@ -85,7 +88,9 @@ class EnvSystem implements EnvInterface {
   /// final env = EnvSystem(); // Loads process env + .env
   /// final env = EnvSystem(useProcessEnv: false); // Only .env
   /// ```
-  EnvSystem({bool useProcessEnv = true}) : _useProcessEnv = useProcessEnv {
+  EnvSystem({bool useProcessEnv = true, List<String>? allowedVariables})
+    : _useProcessEnv = useProcessEnv,
+      _allowedVariables = allowedVariables {
     if (_useProcessEnv) {
       _loadFromProcessEnv();
     }
