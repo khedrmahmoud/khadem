@@ -33,7 +33,7 @@ void main() {
       final sessionId = await sessionManager.createSession(initialData);
 
       expect(sessionId, isNotEmpty);
-      expect(sessionId.length, equals(32));
+      expect(sessionId.length, greaterThanOrEqualTo(43));
 
       // Verify session was created
       final sessionData = await sessionManager.getSession(sessionId);

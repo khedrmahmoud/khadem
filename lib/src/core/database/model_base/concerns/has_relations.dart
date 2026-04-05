@@ -1,3 +1,4 @@
+import '../../../../support/exceptions/database_exception.dart';
 import '../../../../contracts/database/query_builder_interface.dart';
 import '../../orm/eager_loader.dart';
 import '../../orm/relation_definition.dart';
@@ -12,7 +13,7 @@ mixin HasRelations<T> {
   /// Get a relation instance.
   Relation<dynamic, dynamic> relation(String name) {
     if (!definedRelations.containsKey(name)) {
-      throw Exception('Relation $name not defined');
+      throw DatabaseException('Relation $name not defined');
     }
     return definedRelations[name]!.toRelation(this as KhademModel, name);
   }

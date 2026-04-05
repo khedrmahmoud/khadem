@@ -1,3 +1,4 @@
+import '../../support/exceptions/config_exception.dart';
 import 'dart:io';
 
 import '../../contracts/env/env_interface.dart';
@@ -280,7 +281,7 @@ class EnvSystem implements EnvInterface {
   String getOrFail(String key) {
     final value = _env[key];
     if (value == null) {
-      throw Exception('Environment variable "$key" is not set.');
+      throw ConfigException('Environment variable "$key" is not set.');
     }
     return value;
   }
