@@ -4,9 +4,10 @@ import '../../../contracts/queue/middleware/queue_middleware_contract.dart';
 /// Prevents duplicate job execution within time window
 class DeduplicationMiddleware implements QueueMiddleware {
   final Duration window;
+  final int maxEntries;
   final Map<String, DateTime> _processedJobs = {};
 
-  DeduplicationMiddleware({required this.window});
+  DeduplicationMiddleware({required this.window, this.maxEntries = 10000});
 
   @override
   Future<void> handle(QueueJobContext context, Next next) async {
@@ -24,14 +25,36 @@ class DeduplicationMiddleware implements QueueMiddleware {
       return;
     }
 
+    _cleanExpiredEntries(now);
+    _ensureCapacity(jobId);
     _processedJobs[jobId] = now;
 
-    // Clean old entries
-    _processedJobs.removeWhere(
-      (key, value) => now.difference(value) > window,
-    );
-
     await next();
+  }
+
+  void _cleanExpiredEntries(DateTime now) {
+    _processedJobs.removeWhere((_, value) => now.difference(value) > window);
+  }
+
+  void _ensureCapacity(String incomingJobId) {
+    if (_processedJobs.length < maxEntries ||
+        _processedJobs.containsKey(incomingJobId)) {
+      return;
+    }
+
+    String? oldestKey;
+    DateTime? oldestTime;
+
+    for (final entry in _processedJobs.entries) {
+      if (oldestTime == null || entry.value.isBefore(oldestTime)) {
+        oldestTime = entry.value;
+        oldestKey = entry.key;
+      }
+    }
+
+    if (oldestKey != null) {
+      _processedJobs.remove(oldestKey);
+    }
   }
 
   @override
