@@ -69,5 +69,21 @@ void main() {
       // Since LocalDisk just returns the resolved path
       expect(url, contains('file.txt'));
     });
+
+    test('should reject traversal paths', () async {
+      await expectLater(
+        disk.writeString('../outside.txt', 'blocked'),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('should reject absolute paths', () async {
+      final absolute = File('${tempDir.path}/absolute.txt').absolute.path;
+
+      await expectLater(
+        disk.writeString(absolute, 'blocked'),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
   });
 }
