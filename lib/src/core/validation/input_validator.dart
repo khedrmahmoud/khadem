@@ -20,11 +20,7 @@ class InputValidator {
   final Map<String, String> customMessages;
   final Map<String, List<String>> errors = {};
 
-  InputValidator(
-    this.data,
-    this.rules, {
-    this.customMessages = const {},
-  });
+  InputValidator(this.data, this.rules, {this.customMessages = const {}});
 
   Future<bool> passes() async {
     errors.clear();
@@ -39,8 +35,9 @@ class InputValidator {
 
       if (fieldPattern.contains('*')) {
         // Handle nested/wildcard validation (e.g., attachments.*)
-        validationFutures
-            .add(_validateNestedField(fieldPattern, ruleDefinition));
+        validationFutures.add(
+          _validateNestedField(fieldPattern, ruleDefinition),
+        );
       } else {
         // Handle regular field validation
         validationFutures.add(_validateField(fieldPattern, ruleDefinition));
@@ -189,7 +186,11 @@ class InputValidator {
     return _RuleItem(rule, ruleName, ruleArgs);
   }
 
-  List<String> _expandFieldPattern(String pattern) {
+  List<String> _expandFieldPattern(String pattern, [int depth = 0]) {
+    if (depth > 10)
+      throw ValidationException({
+        pattern: ['Maximum payload recursion depth exceeded.'],
+      });
     // Recursively expand patterns containing '.*' into concrete field paths.
     final results = <String>[];
 
@@ -209,7 +210,7 @@ class InputValidator {
       for (int i = 0; i < baseValue.length; i++) {
         final nextPattern = '$base.$i${remaining.isNotEmpty ? remaining : ''}';
         if (nextPattern.contains('.*')) {
-          results.addAll(_expandFieldPattern(nextPattern));
+          results.addAll(_expandFieldPattern(nextPattern, depth + 1));
         } else {
           results.add(nextPattern);
         }
@@ -219,7 +220,7 @@ class InputValidator {
         final nextPattern =
             '$base.$key${remaining.isNotEmpty ? remaining : ''}';
         if (nextPattern.contains('.*')) {
-          results.addAll(_expandFieldPattern(nextPattern));
+          results.addAll(_expandFieldPattern(nextPattern, depth + 1));
         } else {
           results.add(nextPattern);
         }
@@ -355,9 +356,7 @@ class InputValidator {
       return value.map(_normalizeLocalizationValue).toList();
     }
     if (value is Map) {
-      return value.map(
-        (k, v) => MapEntry(k, _normalizeLocalizationValue(v)),
-      );
+      return value.map((k, v) => MapEntry(k, _normalizeLocalizationValue(v)));
     }
     return value;
   }
@@ -452,9 +451,6 @@ extension ValidatorHelpers on InputValidator {
     if (minItems != null) rules.add('min_items:$minItems');
     if (maxItems != null) rules.add('max_items:$maxItems');
 
-    return {
-      fieldName: rules.join('|'),
-      '$fieldName.*': itemRules,
-    };
+    return {fieldName: rules.join('|'), '$fieldName.*': itemRules};
   }
 }
