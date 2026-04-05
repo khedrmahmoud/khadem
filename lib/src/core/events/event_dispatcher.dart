@@ -26,26 +26,41 @@ class EventDispatcher implements Dispatcher {
   /// The registered listeners.
   final Map<Type, List<dynamic>> _listeners = {};
 
+  /// Tracks currently dispatching event types to prevent circular dispatch.
+  final List<Type> _dispatchStack = <Type>[];
+
   /// Create a new event dispatcher instance.
   EventDispatcher(this.container);
 
   @override
   Future<void> dispatch(Event event) async {
-    // 1. Handle Broadcasting
-    if (event is ShouldBroadcast) {
-      await _broadcastEvent(event as ShouldBroadcast);
+    final eventType = event.runtimeType;
+    if (_dispatchStack.contains(eventType)) {
+      throw StateError(
+        'Circular event dispatch detected for $eventType. '
+        'Dispatch stack: ${_dispatchStack.join(' -> ')}',
+      );
     }
 
-    // 2. Handle Listeners
-    final eventType = event.runtimeType;
-    final listeners = _listeners[eventType] ?? [];
-
-    for (final listenerDefinition in listeners) {
-      if (event is StoppableEvent && event.isPropagationStopped) {
-        break;
+    _dispatchStack.add(eventType);
+    try {
+      // 1. Handle Broadcasting
+      if (event is ShouldBroadcast) {
+        await _broadcastEvent(event as ShouldBroadcast);
       }
 
-      await _dispatchToListener(event, listenerDefinition);
+      // 2. Handle Listeners
+      final listeners = _listeners[eventType] ?? [];
+
+      for (final listenerDefinition in listeners) {
+        if (event is StoppableEvent && event.isPropagationStopped) {
+          break;
+        }
+
+        await _dispatchToListener(event, listenerDefinition);
+      }
+    } finally {
+      _dispatchStack.remove(eventType);
     }
   }
 
@@ -74,28 +89,33 @@ class EventDispatcher implements Dispatcher {
     Event event,
     dynamic listenerDefinition,
   ) async {
-    dynamic listener;
+    try {
+      dynamic listener;
 
-    if (listenerDefinition is Function) {
-      // If it's a closure, execute it.
-      final result = listenerDefinition(event);
-      if (result is Future) {
-        await result;
-      }
-      return;
-    } else if (listenerDefinition is Type) {
-      // Resolve listener from container
-      listener = container.resolveType(listenerDefinition);
-    } else {
-      listener = listenerDefinition;
-    }
-
-    if (listener is Listener) {
-      if (listener is ShouldQueue) {
-        await _dispatchToQueue(listener as ShouldQueue, event);
+      if (listenerDefinition is Function) {
+        // If it's a closure, execute it.
+        final result = listenerDefinition(event);
+        if (result is Future) {
+          await result;
+        }
+        return;
+      } else if (listenerDefinition is Type) {
+        // Resolve listener from container
+        listener = container.resolveType(listenerDefinition);
       } else {
-        await listener.handle(event);
+        listener = listenerDefinition;
       }
+
+      if (listener is Listener) {
+        if (listener is ShouldQueue) {
+          await _dispatchToQueue(listener as ShouldQueue, event);
+        } else {
+          await listener.handle(event);
+        }
+      }
+    } catch (e) {
+      // Listener errors should not stop remaining listeners.
+      print('Failed to dispatch ${event.runtimeType} listener: $e');
     }
   }
 
@@ -126,6 +146,46 @@ class EventDispatcher implements Dispatcher {
       _listeners[eventType] = [];
     }
     _listeners[eventType]!.add(listener);
+  }
+
+  /// Removes a specific listener from an event type.
+  void unlistenType(Type eventType, dynamic listener) {
+    final listeners = _listeners[eventType];
+    if (listeners == null) {
+      return;
+    }
+
+    listeners.removeWhere(
+      (registered) => _isSameListener(registered, listener),
+    );
+    if (listeners.isEmpty) {
+      _listeners.remove(eventType);
+    }
+  }
+
+  /// Removes a specific listener from an event type.
+  void unlisten<T extends Event>(dynamic listener) {
+    unlistenType(T, listener);
+  }
+
+  bool _isSameListener(dynamic registered, dynamic target) {
+    if (identical(registered, target)) {
+      return true;
+    }
+
+    if (registered is Type && target is Type) {
+      return registered == target;
+    }
+
+    if (registered is Type) {
+      return target.runtimeType == registered;
+    }
+
+    if (target is Type) {
+      return registered.runtimeType == target;
+    }
+
+    return false;
   }
 
   @override

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:redis/redis.dart';
 
 import '../../../contracts/queue/queue_job.dart';
+import '../../../support/exceptions/queue_exception.dart';
 import '../registry/index.dart';
 import 'base_driver.dart';
 
@@ -77,15 +78,17 @@ class RedisStorageDriver extends BaseQueueDriver {
     int? port,
     String? password,
     String? queueName,
-  })  : host = host ??
-            config.driverSpecificConfig['host'] as String? ??
-            'localhost',
-        port = port ?? config.driverSpecificConfig['port'] as int? ?? 6379,
-        password =
-            password ?? config.driverSpecificConfig['password'] as String?,
-        queueName = queueName ??
-            config.driverSpecificConfig['queueName'] as String? ??
-            'default';
+  }) : host =
+           host ??
+           config.driverSpecificConfig['host'] as String? ??
+           'localhost',
+       port = port ?? config.driverSpecificConfig['port'] as int? ?? 6379,
+       password =
+           password ?? config.driverSpecificConfig['password'] as String?,
+       queueName =
+           queueName ??
+           config.driverSpecificConfig['queueName'] as String? ??
+           'default';
 
   Future<Command> _getConnection() async {
     if (_command != null && _isConnected) {
@@ -113,10 +116,7 @@ class RedisStorageDriver extends BaseQueueDriver {
     final context = createJobContext(job, delay: delay);
     final command = await _getConnection();
 
-    final jobData = {
-      ...context.toJson(),
-      'payload': job.toJson(),
-    };
+    final jobData = {...context.toJson(), 'payload': job.toJson()};
 
     // Track metrics
     if (metrics != null) {
@@ -135,11 +135,7 @@ class RedisStorageDriver extends BaseQueueDriver {
         ]);
       } else {
         // Push to main queue
-        await command.send_object([
-          'LPUSH',
-          _mainQueue,
-          jsonEncode(jobData),
-        ]);
+        await command.send_object(['LPUSH', _mainQueue, jsonEncode(jobData)]);
       }
 
       // Update queue depth metrics
@@ -202,21 +198,35 @@ class RedisStorageDriver extends BaseQueueDriver {
 
       if (result is! List || result.length < 2) return;
 
-      final jobJson = result[1] as String;
-      final jobData = jsonDecode(jobJson) as Map<String, dynamic>;
+      final jobJson = _asString(result[1]);
+      if (jobJson == null || jobJson.isEmpty) {
+        throw QueueException('Invalid Redis queue payload: empty job data');
+      }
+
+      final decoded = jsonDecode(jobJson);
+      if (decoded is! Map) {
+        throw QueueException('Invalid Redis queue payload: expected JSON map');
+      }
+
+      final jobData = _asMap(decoded) ?? <String, dynamic>{};
+      final jobId = _asString(jobData['id']);
+      if (jobId == null || jobId.isEmpty) {
+        throw QueueException('Invalid Redis queue payload: missing job id');
+      }
 
       // Store in processing hash
-      await command.send_object([
-        'HSET',
-        _processingHash,
-        jobData['id'],
-        jobJson,
-      ]);
+      await command.send_object(['HSET', _processingHash, jobId, jobJson]);
 
       try {
         // Recreate job from registry
-        final jobType = jobData['jobType'] as String;
-        final payload = jobData['payload'] as Map<String, dynamic>;
+        final jobType = _asString(jobData['jobType']);
+        final payload = _asMap(jobData['payload']);
+
+        if (jobType == null || payload == null) {
+          throw QueueException(
+            'Invalid Redis queue payload: missing jobType or payload',
+          );
+        }
 
         if (!QueueJobRegistry.isRegistered(jobType)) {
           throw Exception(
@@ -230,14 +240,19 @@ class RedisStorageDriver extends BaseQueueDriver {
         await executeJob(context);
 
         // Remove from processing hash
-        await command.send_object(['HDEL', _processingHash, jobData['id']]);
+        await command.send_object(['HDEL', _processingHash, jobId]);
       } catch (e, stack) {
+        final fallbackJobType = _asString(jobData['jobType']);
+        final fallbackPayload = _asMap(jobData['payload']);
+        if (fallbackJobType == null || fallbackPayload == null) {
+          throw QueueException(
+            'Invalid Redis queue payload during failure handling',
+          );
+        }
+
         // Handle failure
         final context = _createContextFromData(
-          QueueJobRegistry.create(
-            jobData['jobType'] as String,
-            jobData['payload'] as Map<String, dynamic>,
-          ),
+          QueueJobRegistry.create(fallbackJobType, fallbackPayload),
           jobData,
         );
         context.error = e;
@@ -246,7 +261,7 @@ class RedisStorageDriver extends BaseQueueDriver {
         await handleJobFailure(context);
 
         // Remove from processing hash
-        await command.send_object(['HDEL', _processingHash, jobData['id']]);
+        await command.send_object(['HDEL', _processingHash, jobId]);
       }
 
       // Update metrics
@@ -259,23 +274,26 @@ class RedisStorageDriver extends BaseQueueDriver {
     }
   }
 
-  JobContext _createContextFromData(
-    QueueJob job,
-    Map<String, dynamic> data,
-  ) {
+  JobContext _createContextFromData(QueueJob job, Map<String, dynamic> data) {
+    final id =
+        _asString(data['id']) ??
+        DateTime.now().microsecondsSinceEpoch.toString();
+    final queuedAt = _asDateTime(data['queuedAt']) ?? DateTime.now();
+    final scheduledFor = _asDateTime(data['scheduledFor']);
+    final attempts = _asInt(data['attempts']);
+    final statusName = _asString(data['status']);
+
     return JobContext(
-      id: data['id'] as String,
+      id: id,
       job: job,
-      queuedAt: DateTime.parse(data['queuedAt'] as String),
-      scheduledFor: data['scheduledFor'] != null
-          ? DateTime.parse(data['scheduledFor'] as String)
-          : null,
-      attempts: data['attempts'] as int? ?? 0,
+      queuedAt: queuedAt,
+      scheduledFor: scheduledFor,
+      attempts: attempts,
       status: JobStatus.values.firstWhere(
-        (s) => s.name == data['status'],
+        (s) => s.name == statusName,
         orElse: () => JobStatus.pending,
       ),
-      metadata: data['metadata'] as Map<String, dynamic>? ?? {},
+      metadata: _asMap(data['metadata']) ?? <String, dynamic>{},
     );
   }
 
@@ -283,10 +301,7 @@ class RedisStorageDriver extends BaseQueueDriver {
   Future<void> retryJob(JobContext context, {required Duration delay}) async {
     final command = await _getConnection();
 
-    final jobData = {
-      ...context.toJson(),
-      'payload': context.job.toJson(),
-    };
+    final jobData = {...context.toJson(), 'payload': context.job.toJson()};
 
     // Schedule retry
     final retryTime = DateTime.now().add(delay);
@@ -311,11 +326,7 @@ class RedisStorageDriver extends BaseQueueDriver {
       'failedAt': DateTime.now().toIso8601String(),
     };
 
-    await command.send_object([
-      'LPUSH',
-      _failedQueue,
-      jsonEncode(jobData),
-    ]);
+    await command.send_object(['LPUSH', _failedQueue, jsonEncode(jobData)]);
   }
 
   Future<int> _getQueueDepth() async {
@@ -324,7 +335,7 @@ class RedisStorageDriver extends BaseQueueDriver {
     final mainCount = await command.send_object(['LLEN', _mainQueue]);
     final delayedCount = await command.send_object(['ZCARD', _delayedQueue]);
 
-    return (mainCount as int? ?? 0) + (delayedCount as int? ?? 0);
+    return _asInt(mainCount) + _asInt(delayedCount);
   }
 
   @override
@@ -346,7 +357,7 @@ class RedisStorageDriver extends BaseQueueDriver {
     try {
       final command = await _getConnection();
       final result = await command.send_object(['PING']);
-      return result == 'PONG';
+      return _asString(result) == 'PONG';
     } catch (e) {
       _isConnected = false;
       return false;
@@ -362,8 +373,10 @@ class RedisStorageDriver extends BaseQueueDriver {
 
       final mainCount = await command.send_object(['LLEN', _mainQueue]);
       final delayedCount = await command.send_object(['ZCARD', _delayedQueue]);
-      final processingCount =
-          await command.send_object(['HLEN', _processingHash]);
+      final processingCount = await command.send_object([
+        'HLEN',
+        _processingHash,
+      ]);
       final failedCount = await command.send_object(['LLEN', _failedQueue]);
 
       return {
@@ -375,18 +388,15 @@ class RedisStorageDriver extends BaseQueueDriver {
           'queue_name': queueName,
         },
         'queue': {
-          'main_jobs': mainCount ?? 0,
-          'delayed_jobs': delayedCount ?? 0,
-          'processing_jobs': processingCount ?? 0,
-          'failed_jobs': failedCount ?? 0,
-          'total_jobs': (mainCount ?? 0) + (delayedCount ?? 0),
+          'main_jobs': _asInt(mainCount),
+          'delayed_jobs': _asInt(delayedCount),
+          'processing_jobs': _asInt(processingCount),
+          'failed_jobs': _asInt(failedCount),
+          'total_jobs': _asInt(mainCount) + _asInt(delayedCount),
         },
       };
     } catch (e) {
-      return {
-        ...baseStats,
-        'error': e.toString(),
-      };
+      return {...baseStats, 'error': e.toString()};
     }
   }
 
@@ -395,5 +405,54 @@ class RedisStorageDriver extends BaseQueueDriver {
     _isConnected = false;
     _command = null;
     await super.dispose();
+  }
+
+  String? _asString(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+
+    if (value is String) {
+      return value;
+    }
+
+    if (value is List<int>) {
+      return utf8.decode(value);
+    }
+
+    return value.toString();
+  }
+
+  Map<String, dynamic>? _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+
+    if (value is Map) {
+      return value.map((key, val) => MapEntry(key.toString(), val));
+    }
+
+    return null;
+  }
+
+  int _asInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+
+    if (value is String) {
+      return int.tryParse(value) ?? 0;
+    }
+
+    return 0;
+  }
+
+  DateTime? _asDateTime(dynamic value) {
+    final text = _asString(value);
+    if (text == null || text.isEmpty) {
+      return null;
+    }
+
+    return DateTime.tryParse(text);
   }
 }

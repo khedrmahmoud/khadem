@@ -246,21 +246,32 @@ class ServiceContainer implements ContainerInterface {
   /// properly resolve all implementations that are assignable to T.
   @override
   List<T> resolveAll<T>() {
-    final List<T> result = [];
+    final result = <T>[];
+
+    void addIfMissing(T value) {
+      if (!result.contains(value)) {
+        result.add(value);
+      }
+    }
+
+    final directInstance = _instances[T];
+    if (directInstance is T) {
+      addIfMissing(directInstance);
+    }
 
     // Resolve the main binding if it exists
     if (_bindings.containsKey(T) || _instances.containsKey(T)) {
-      result.add(resolve<T>());
+      addIfMissing(resolve<T>());
     }
 
     // Resolve all contextual bindings for T
     for (final context in _contextualBindings.keys) {
       if (_contextualBindings[context]!.containsKey(T)) {
-        result.add(resolve<T>(context));
+        addIfMissing(resolve<T>(context));
       }
     }
 
-    return result;
+    return List<T>.unmodifiable(result);
   }
 
   /// Checks if a service is registered.
