@@ -15,9 +15,9 @@ This document outlines the structured remediation plan for the 12 newly discover
 *Targeting view boundaries and payload executions.*
 * **Branch Prefix:** `security/`
 
-- [ ] **XSS Vulnerability (View Templates)**: Ensure `{{{ }}}` or default templating blocks aggressively run HTML entity escaping, unless explicitly marked raw.
-- [ ] **ReDoS (Email Regex)**: Replace complex/catastrophic backtracking email validation regex with a linear-time safe equivalent or built-in validator.
-- [ ] **Queue Job Deserialization**: Restrict polymorphic deserialization in queue workers so that arbitrary/untrusted payloads cannot invoke unintended code paths or classes.
+- [x] **XSS Vulnerability (View Templates)**: `{{{ }}}` is now escaped by default and explicit raw output requires `{!! !!}`.
+- [x] **ReDoS (Email Regex)**: Replaced regex-heavy validation with linear-time structural email validation.
+- [x] **Queue Job Deserialization**: Added job type format validation, optional allow-list enforcement, and payload guards for file/Redis queue drivers.
 
 ## 🟡 Phase 3: Auth, Sessions, & Logs
 *Targeting data leaks and session persistence.*

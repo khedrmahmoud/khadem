@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../../contracts/queue/queue_job.dart';
+import '../../../support/exceptions/queue_exception.dart';
 import '../../../support/utils/mutex.dart';
 import '../registry/index.dart';
 import 'base_driver.dart';
@@ -47,6 +48,9 @@ import 'base_driver.dart';
 /// ```
 class FileStorageDriver extends BaseQueueDriver {
   final String storagePath;
+  final Set<String> _allowedJobTypes;
+  final int _maxPayloadDepth;
+  final int _maxPayloadNodes;
   final String _jobsFileName = 'jobs.json';
   final List<JobContext> _memoryCache = [];
   bool _isLoaded = false;
@@ -58,14 +62,47 @@ class FileStorageDriver extends BaseQueueDriver {
     super.dlqHandler,
     super.middleware,
     String? storagePath,
-  }) : storagePath = storagePath ??
-            config.driverSpecificConfig['storagePath'] as String? ??
-            './storage/queue';
+    Set<String>? allowedJobTypes,
+    int maxPayloadDepth = 10,
+    int maxPayloadNodes = 2000,
+  }) : storagePath =
+           storagePath ??
+           config.driverSpecificConfig['storagePath'] as String? ??
+           './storage/queue',
+       _allowedJobTypes =
+           allowedJobTypes ??
+           _parseAllowedJobTypes(
+             config.driverSpecificConfig['allowedJobTypes'],
+           ),
+       _maxPayloadDepth = maxPayloadDepth,
+       _maxPayloadNodes = maxPayloadNodes;
+
+  static Set<String> _parseAllowedJobTypes(dynamic raw) {
+    if (raw is Iterable) {
+      return raw
+          .map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toSet();
+    }
+
+    if (raw is String) {
+      return raw
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toSet();
+    }
+
+    return <String>{};
+  }
 
   String get _jobsFilePath => '$storagePath/$_jobsFileName';
 
   @override
   Future<void> push(QueueJob job, {Duration? delay}) async {
+    final jobType = job.runtimeType.toString();
+    _validateJobType(jobType);
+
     await _lock.protect(() async {
       await _ensureLoaded();
 
@@ -85,14 +122,14 @@ class FileStorageDriver extends BaseQueueDriver {
   @override
   Future<void> process() async {
     JobContext? readyJob;
-    
+
     await _lock.protect(() async {
       await _ensureLoaded();
       readyJob = _findNextReadyJob();
       if (readyJob != null) {
-         // Mark as processing in memory to prevent other workers from grabbing
-         readyJob!.status = JobStatus.processing;
-         await _persistToFile();
+        // Mark as processing in memory to prevent other workers from grabbing
+        readyJob!.status = JobStatus.processing;
+        await _persistToFile();
       }
     });
 
@@ -120,8 +157,9 @@ class FileStorageDriver extends BaseQueueDriver {
   @override
   Future<void> retryJob(JobContext context, {required Duration delay}) async {
     // Update scheduled time for retry
-    context.metadata['scheduledFor'] =
-        DateTime.now().add(delay).toIso8601String();
+    context.metadata['scheduledFor'] = DateTime.now()
+        .add(delay)
+        .toIso8601String();
 
     await _persistToFile();
   }
@@ -147,8 +185,9 @@ class FileStorageDriver extends BaseQueueDriver {
       final file = File(_jobsFilePath);
       await file.create(recursive: true);
 
-      final List<Map<String, dynamic>> serializedJobs =
-          _memoryCache.map((context) {
+      final List<Map<String, dynamic>> serializedJobs = _memoryCache.map((
+        context,
+      ) {
         return {
           ...context.toJson(),
           'payload': context.job.toJson(),
@@ -178,8 +217,36 @@ class FileStorageDriver extends BaseQueueDriver {
 
       for (final jobData in serializedJobs) {
         try {
-          final jobType = jobData['jobType'] as String;
-          final payload = jobData['payload'] as Map<String, dynamic>;
+          if (jobData is! Map) {
+            throw QueueException('Invalid serialized job envelope');
+          }
+
+          final normalizedJobData = jobData.map(
+            (key, value) => MapEntry(key.toString(), value),
+          );
+
+          final jobType = normalizedJobData['jobType']?.toString();
+          final payloadRaw = normalizedJobData['payload'];
+
+          if (jobType == null) {
+            throw QueueException('Missing jobType in serialized job');
+          }
+
+          _validateJobType(jobType);
+
+          if (payloadRaw is! Map) {
+            throw QueueException('Invalid job payload: expected JSON object');
+          }
+
+          final payload = payloadRaw.map(
+            (key, value) => MapEntry(key.toString(), value),
+          );
+
+          if (!_isSafePayload(payload)) {
+            throw QueueException(
+              'Rejected unsafe job payload for type $jobType',
+            );
+          }
 
           // Recreate job from registry
           if (!QueueJobRegistry.isRegistered(jobType)) {
@@ -189,18 +256,35 @@ class FileStorageDriver extends BaseQueueDriver {
 
           final job = QueueJobRegistry.create(jobType, payload);
           final context = JobContext(
-            id: jobData['id'] as String,
+            id:
+                normalizedJobData['id']?.toString() ??
+                DateTime.now().microsecondsSinceEpoch.toString(),
             job: job,
-            queuedAt: DateTime.parse(jobData['queuedAt'] as String),
-            scheduledFor: jobData['scheduledFor'] != null
-                ? DateTime.parse(jobData['scheduledFor'] as String)
+            queuedAt:
+                DateTime.tryParse(
+                  normalizedJobData['queuedAt']?.toString() ?? '',
+                ) ??
+                DateTime.now(),
+            scheduledFor: normalizedJobData['scheduledFor'] != null
+                ? DateTime.tryParse(
+                    normalizedJobData['scheduledFor']?.toString() ?? '',
+                  )
                 : null,
-            attempts: jobData['attempts'] as int? ?? 0,
+            attempts: normalizedJobData['attempts'] is int
+                ? normalizedJobData['attempts'] as int
+                : int.tryParse(
+                        normalizedJobData['attempts']?.toString() ?? '',
+                      ) ??
+                      0,
             status: JobStatus.values.firstWhere(
-              (s) => s.name == jobData['status'],
+              (s) => s.name == normalizedJobData['status']?.toString(),
               orElse: () => JobStatus.pending,
             ),
-            metadata: jobData['metadata'] as Map<String, dynamic>? ?? {},
+            metadata: normalizedJobData['metadata'] is Map
+                ? (normalizedJobData['metadata'] as Map).map(
+                    (key, value) => MapEntry(key.toString(), value),
+                  )
+                : <String, dynamic>{},
           );
 
           _memoryCache.add(context);
@@ -263,5 +347,66 @@ class FileStorageDriver extends BaseQueueDriver {
   Future<int> get pendingJobsCount async {
     await _ensureLoaded();
     return _memoryCache.length;
+  }
+
+  void _validateJobType(String jobType) {
+    final jobTypePattern = RegExp(r'^[A-Za-z][A-Za-z0-9_]{0,99}$');
+    if (!jobTypePattern.hasMatch(jobType)) {
+      throw QueueException('Invalid job type format: $jobType');
+    }
+
+    if (_allowedJobTypes.isNotEmpty && !_allowedJobTypes.contains(jobType)) {
+      throw QueueException('Job type "$jobType" is not allowed for this queue');
+    }
+  }
+
+  bool _isSafePayload(Map<String, dynamic> payload) {
+    var visitedNodes = 0;
+
+    bool validate(dynamic value, int depth) {
+      if (depth > _maxPayloadDepth) {
+        return false;
+      }
+
+      visitedNodes++;
+      if (visitedNodes > _maxPayloadNodes) {
+        return false;
+      }
+
+      if (value == null || value is num || value is bool) {
+        return true;
+      }
+
+      if (value is String) {
+        return value.length <= 100000;
+      }
+
+      if (value is List) {
+        if (value.length > 5000) return false;
+        for (final item in value) {
+          if (!validate(item, depth + 1)) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      if (value is Map) {
+        if (value.length > 5000) return false;
+        for (final entry in value.entries) {
+          if (entry.key.toString().length > 256) {
+            return false;
+          }
+          if (!validate(entry.value, depth + 1)) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      return false;
+    }
+
+    return validate(payload, 0);
   }
 }

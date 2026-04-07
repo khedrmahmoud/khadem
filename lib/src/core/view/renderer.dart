@@ -18,10 +18,10 @@ class ViewRenderer {
   ViewRenderer._internal({
     String viewsDirectory = 'resources/views',
     bool autoEscape = true,
-  })  : viewsDirectory = viewsDirectory,
-        _autoEscape = autoEscape,
-        _expressionEvaluator = ExpressionEvaluator(),
-        _htmlEscaper = HtmlEscaper();
+  }) : viewsDirectory = viewsDirectory,
+       _autoEscape = autoEscape,
+       _expressionEvaluator = ExpressionEvaluator(),
+       _htmlEscaper = HtmlEscaper();
 
   factory ViewRenderer({
     String viewsDirectory = 'resources/views',
@@ -69,6 +69,27 @@ class ViewRenderer {
     Map<String, dynamic> context,
     bool escapeOutput,
   ) {
+    // Handle explicit raw expressions {!! expression !!}
+    final rawRegex = RegExp(r'{!!\s*([^}]+?)\s*!!}');
+    template = template.replaceAllMapped(rawRegex, (match) {
+      final expression = match.group(1)!.trim();
+      final value = _expressionEvaluator.evaluate(expression, context);
+      return value?.toString() ?? '';
+    });
+
+    // Handle legacy triple-brace expressions {{{ expression }}} securely.
+    // Triple braces are now escaped by default to prevent XSS.
+    final legacyTripleRegex = RegExp(r'{{{\s*([^}]+?)\s*}}}');
+    template = template.replaceAllMapped(legacyTripleRegex, (match) {
+      final expression = match.group(1)!.trim();
+      final value = _expressionEvaluator.evaluate(expression, context);
+      final stringValue = value?.toString() ?? '';
+
+      return escapeOutput && _autoEscape
+          ? _htmlEscaper.escape(stringValue)
+          : stringValue;
+    });
+
     // Handle escaped expressions {{ expression }}
     final escapedRegex = RegExp(r'{{\s*([^}]+?)\s*}}');
     template = template.replaceAllMapped(escapedRegex, (match) {
@@ -79,14 +100,6 @@ class ViewRenderer {
       return escapeOutput && _autoEscape
           ? _htmlEscaper.escape(stringValue)
           : stringValue;
-    });
-
-    // Handle unescaped expressions {{{ expression }}}
-    final unescapedRegex = RegExp(r'{{{\s*([^}]+?)\s*}}}');
-    template = template.replaceAllMapped(unescapedRegex, (match) {
-      final expression = match.group(1)!.trim();
-      final value = _expressionEvaluator.evaluate(expression, context);
-      return value?.toString() ?? '';
     });
 
     return template;
@@ -103,5 +116,16 @@ class ViewRenderer {
   /// Public access to expression evaluator for testing
   dynamic evaluateExpression(String expression, Map<String, dynamic> context) {
     return _expressionEvaluator.evaluate(expression, context);
+  }
+
+  /// Public helper for expression rendering without directive processing.
+  ///
+  /// Useful for focused tests that validate output escaping behavior.
+  String renderExpressionsForTest(
+    String template,
+    Map<String, dynamic> context, {
+    bool escapeOutput = true,
+  }) {
+    return _renderExpressions(template, context, escapeOutput);
   }
 }
