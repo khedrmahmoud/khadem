@@ -15,6 +15,32 @@ import '../http/context/request_context.dart';
 /// The default implementation logs to the application logger, but can be
 /// extended to integrate with third-party error tracking services.
 class ExceptionReporter {
+  static const Set<String> _sensitiveHeaders = {
+    'authorization',
+    'cookie',
+    'set-cookie',
+    'x-api-key',
+    'x-auth-token',
+    'proxy-authorization',
+  };
+
+  static const Set<String> _sensitiveFields = {
+    'password',
+    'passwd',
+    'pwd',
+    'secret',
+    'token',
+    'access_token',
+    'refresh_token',
+    'api_key',
+    'apikey',
+    'client_secret',
+    'credit_card',
+    'ssn',
+  };
+
+  static const String _redactedValue = '[REDACTED]';
+
   /// Whether to include detailed stack traces in reports
   static bool _includeStackTraces = true;
 
@@ -68,11 +94,17 @@ class ExceptionReporter {
 
     // Log based on severity
     if (error.statusCode >= 500) {
-      Khadem.logger
-          .critical(logMessage, context: context, stackTrace: stackTrace);
+      Khadem.logger.critical(
+        logMessage,
+        context: context,
+        stackTrace: stackTrace,
+      );
     } else if (error.statusCode >= 400) {
-      Khadem.logger
-          .warning(logMessage, context: context, stackTrace: stackTrace);
+      Khadem.logger.warning(
+        logMessage,
+        context: context,
+        stackTrace: stackTrace,
+      );
     } else {
       Khadem.logger.error(logMessage, context: context, stackTrace: stackTrace);
     }
@@ -118,28 +150,46 @@ class ExceptionReporter {
 
     switch (level.toLowerCase()) {
       case 'critical':
-        Khadem.logger
-            .critical(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger.critical(
+          logMessage,
+          context: context,
+          stackTrace: stackTrace,
+        );
         break;
       case 'error':
-        Khadem.logger
-            .error(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger.error(
+          logMessage,
+          context: context,
+          stackTrace: stackTrace,
+        );
         break;
       case 'warning':
-        Khadem.logger
-            .warning(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger.warning(
+          logMessage,
+          context: context,
+          stackTrace: stackTrace,
+        );
         break;
       case 'info':
-        Khadem.logger
-            .info(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger.info(
+          logMessage,
+          context: context,
+          stackTrace: stackTrace,
+        );
         break;
       case 'debug':
-        Khadem.logger
-            .debug(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger.debug(
+          logMessage,
+          context: context,
+          stackTrace: stackTrace,
+        );
         break;
       default:
-        Khadem.logger
-            .error(logMessage, context: context, stackTrace: stackTrace);
+        Khadem.logger.error(
+          logMessage,
+          context: context,
+          stackTrace: stackTrace,
+        );
     }
 
     // Send to external service if configured
@@ -155,11 +205,11 @@ class ExceptionReporter {
     final context = <String, dynamic>{};
 
     // Add global context
-    context.addAll(_globalContext);
+    context.addAll(_sanitizeMap(_globalContext));
 
     // Add additional context
     if (additionalContext != null) {
-      context.addAll(additionalContext);
+      context.addAll(_sanitizeMap(additionalContext));
     }
 
     // Add exception details
@@ -195,8 +245,8 @@ class ExceptionReporter {
           final request = RequestContext.request;
           context['request'] = {
             'method': request.method,
-            'url': request.uri.toString(),
-            'headers': request.headers.toMap(),
+            'url': sanitizeUriForLogging(request.uri),
+            'headers': sanitizeHeadersForLogging(request.headers.toMap()),
             'user_agent': request.headers.get('user-agent'),
             'ip': request.ip,
           };
@@ -228,20 +278,111 @@ class ExceptionReporter {
             'ip': RequestContext.request.ip,
           };
         } else {
-          context['user'] = {
-            'id': null,
-            'ip': null,
-          };
+          context['user'] = {'id': null, 'ip': null};
         }
       } catch (_) {
-        context['user'] = {
-          'id': null,
-          'ip': null,
-        };
+        context['user'] = {'id': null, 'ip': null};
       }
     }
 
     return context;
+  }
+
+  static String sanitizeUriForLogging(Uri uri) {
+    if (uri.queryParametersAll.isEmpty) {
+      return uri.toString();
+    }
+
+    final sanitizedPairs = <String>[];
+    uri.queryParametersAll.forEach((key, values) {
+      final isSensitive = _isSensitiveKey(key);
+      final sourceValues = values.isEmpty ? const [''] : values;
+
+      for (final value in sourceValues) {
+        final safeValue = isSensitive ? _redactedValue : value;
+        sanitizedPairs.add(
+          '${Uri.encodeQueryComponent(key)}=${Uri.encodeQueryComponent(safeValue)}',
+        );
+      }
+    });
+
+    final sanitizedQuery = sanitizedPairs.join('&');
+    return uri.replace(query: sanitizedQuery).toString();
+  }
+
+  static Map<String, String> sanitizeHeadersForLogging(
+    Map<String, String> headers,
+  ) {
+    final sanitized = <String, String>{};
+
+    headers.forEach((key, value) {
+      if (_sensitiveHeaders.contains(key.toLowerCase())) {
+        sanitized[key] = _redactedValue;
+      } else {
+        sanitized[key] = value;
+      }
+    });
+
+    return sanitized;
+  }
+
+  static Map<String, dynamic> sanitizeContextForLogging(
+    Map<String, dynamic> context,
+  ) {
+    return _sanitizeMap(context);
+  }
+
+  static Map<String, dynamic> _sanitizeMap(Map<String, dynamic> input) {
+    final sanitized = <String, dynamic>{};
+
+    input.forEach((key, value) {
+      if (_isSensitiveKey(key)) {
+        sanitized[key] = _redactedValue;
+      } else {
+        sanitized[key] = _sanitizeValue(value);
+      }
+    });
+
+    return sanitized;
+  }
+
+  static dynamic _sanitizeValue(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return _sanitizeMap(value);
+    }
+
+    if (value is Map) {
+      final mapped = <String, dynamic>{};
+      value.forEach((key, val) {
+        final safeKey = key.toString();
+        if (_isSensitiveKey(safeKey)) {
+          mapped[safeKey] = _redactedValue;
+        } else {
+          mapped[safeKey] = _sanitizeValue(val);
+        }
+      });
+      return mapped;
+    }
+
+    if (value is List) {
+      return value.map(_sanitizeValue).toList();
+    }
+
+    return value;
+  }
+
+  static bool _isSensitiveKey(String key) {
+    final normalized = key.trim().toLowerCase();
+    if (normalized.isEmpty) {
+      return false;
+    }
+
+    return _sensitiveFields.any(
+      (sensitive) =>
+          normalized == sensitive ||
+          normalized.contains(sensitive) ||
+          sensitive.contains(normalized),
+    );
   }
 
   /// Format exception message for logging

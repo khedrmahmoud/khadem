@@ -4,6 +4,7 @@ import '../../../contracts/database/schema_builder.dart';
 import '../../../support/exceptions/database_exception.dart';
 import '../database.dart';
 import '../database_drivers/sqlite/sqlite_connection.dart';
+import '../utils/database_identifier.dart';
 
 class Migrator {
   final DatabaseManager manager;
@@ -11,9 +12,7 @@ class Migrator {
   late final SchemaBuilder _schemaBuilder;
   SchemaBuilder get schemaBuilder => _schemaBuilder;
 
-  Migrator(
-    this.manager,
-  ) {
+  Migrator(this.manager) {
     _schemaBuilder = manager.schemaBuilder;
   }
 
@@ -124,8 +123,9 @@ class Migrator {
 
   /// Drop all tables and re-run migrations.
   Future<void> fresh() async {
-    Khadem.logger
-        .warning('🧨 Dropping all tables and re-running migrations...');
+    Khadem.logger.warning(
+      '🧨 Dropping all tables and re-running migrations...',
+    );
     await _dropAllTables();
     await _ensureMigrationTable();
     await upAll();
@@ -151,8 +151,8 @@ class Migrator {
       final status = isRan ? '✅ Ran  ' : '❌ Pending';
       final batch = isRan
           ? ran
-              .firstWhere((m) => m['name'] == migration.name)['batch']
-              .toString()
+                .firstWhere((m) => m['name'] == migration.name)['batch']
+                .toString()
           : '-';
 
       Khadem.logger.info(
@@ -291,15 +291,17 @@ class Migrator {
       return;
     }
 
-    final dbName = Khadem.config.get('database.database') as String;
+    final configuredName = Khadem.config.get('database.database') as String;
+    final dbName = DatabaseIdentifier.validateMySqlDatabaseName(configuredName);
+    final quotedDbName = DatabaseIdentifier.quoteMySqlIdentifier(dbName);
 
     try {
-      await dbConnection.execute('USE $dbName');
+      await dbConnection.execute('USE $quotedDbName');
     } catch (_) {
       Khadem.logger.info('🔧 Auto-creating database "$dbName"...');
-      await dbConnection.execute('CREATE DATABASE IF NOT EXISTS `$dbName`');
+      await dbConnection.execute('CREATE DATABASE IF NOT EXISTS $quotedDbName');
       Khadem.logger.info('✅ Database "$dbName" created.');
-      await dbConnection.execute('USE $dbName');
+      await dbConnection.execute('USE $quotedDbName');
     }
   }
 }

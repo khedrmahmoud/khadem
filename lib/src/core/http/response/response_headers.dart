@@ -6,16 +6,21 @@ import 'dart:io';
 /// with proper case-insensitive handling and convenient shortcuts for common headers.
 class ResponseHeaders {
   final HttpResponse _response;
+  static final RegExp _headerNamePattern = RegExp(
+    r"^[!#\$%&'*+\-.\^_`|~0-9A-Za-z]+$",
+  );
 
   ResponseHeaders(this._response);
 
   /// Sets a response header.
   void setHeader(String name, String value) {
+    _validateHeader(name, value);
     _response.headers.set(name, value);
   }
 
   /// Adds a response header (allows multiple values for the same header).
   void addHeader(String name, String value) {
+    _validateHeader(name, value);
     _response.headers.add(name, value);
   }
 
@@ -157,4 +162,17 @@ class ResponseHeaders {
 
   /// Gets the raw HttpHeaders object for advanced operations.
   HttpHeaders get raw => _response.headers;
+
+  void _validateHeader(String name, String value) {
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty || !_headerNamePattern.hasMatch(trimmedName)) {
+      throw ArgumentError('Invalid header name: $name');
+    }
+
+    if (value.contains('\r') ||
+        value.contains('\n') ||
+        value.contains('\x00')) {
+      throw ArgumentError('Invalid header value: CRLF injection attempt');
+    }
+  }
 }

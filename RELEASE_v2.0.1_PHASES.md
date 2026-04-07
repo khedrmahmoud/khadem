@@ -24,7 +24,7 @@ This document outlines the structured remediation plan for the 12 newly discover
 * **Branch Prefix:** `fix/`
 
 - [x] **Session Fixation**: Introduced session ID regeneration on web guard privilege changes (login/logout).
-- [x] **Sensitive Data in Logs**: Added URI query redaction for sensitive keys (authorization/password/token/secret/api_key) in logging middleware.
+- [x] **Sensitive Data in Logs**: Added URI query redaction for sensitive keys (authorization/password/token/secret/api_key) in logging middleware and sensitive request-context redaction in exception reporting.
 
 ## 🟢 Phase 4: Core Stability & Container Logic
 *Targeting broken state engines and asynchronous startup.*

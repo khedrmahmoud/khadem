@@ -8,6 +8,7 @@ import 'dart:io';
 class Cookies {
   final HttpRequest? _request;
   final HttpResponse? _response;
+  static final RegExp _cookieNamePattern = RegExp(r'^[a-zA-Z0-9_-]+$');
 
   /// Creates a Cookies instance for a request (read-only).
   Cookies(this._request) : _response = null;
@@ -69,11 +70,26 @@ class Cookies {
     String? path = '/',
     DateTime? expires,
     Duration? maxAge,
-    bool httpOnly = false,
-    bool secure = false,
-    String? sameSite,
+    bool httpOnly = true,
+    bool secure = true,
+    String? sameSite = 'lax',
   }) {
     if (_response == null) return;
+
+    if (name.isEmpty || !_cookieNamePattern.hasMatch(name)) {
+      throw ArgumentError('Invalid cookie name: $name');
+    }
+
+    if (value.contains('\r') ||
+        value.contains('\n') ||
+        value.contains('\x00')) {
+      throw ArgumentError('Invalid cookie value');
+    }
+
+    final normalizedSameSite = sameSite?.toLowerCase();
+    if (normalizedSameSite == 'none' && !secure) {
+      throw ArgumentError('SameSite=None requires secure=true');
+    }
 
     final cookie = Cookie(name, value);
 
@@ -84,17 +100,19 @@ class Cookies {
     cookie.httpOnly = httpOnly;
     cookie.secure = secure;
 
-    if (sameSite != null) {
-      switch (sameSite.toLowerCase()) {
+    if (normalizedSameSite != null) {
+      switch (normalizedSameSite) {
         case 'strict':
           cookie.sameSite = SameSite.strict;
           break;
         case 'lax':
           cookie.sameSite = SameSite.lax;
           break;
-        default:
-          // Keep default
+        case 'none':
+          cookie.sameSite = SameSite.none;
           break;
+        default:
+          throw ArgumentError('Invalid SameSite value: $sameSite');
       }
     }
 
@@ -128,11 +146,7 @@ class Cookies {
   }
 
   /// Deletes a cookie by setting it to expire immediately.
-  void delete(
-    String name, {
-    String? domain,
-    String? path = '/',
-  }) {
+  void delete(String name, {String? domain, String? path = '/'}) {
     set(
       name,
       '',
@@ -144,11 +158,7 @@ class Cookies {
   }
 
   /// Deletes multiple cookies at once.
-  void deleteAll(
-    List<String> names, {
-    String? domain,
-    String? path = '/',
-  }) {
+  void deleteAll(List<String> names, {String? domain, String? path = '/'}) {
     for (final name in names) {
       delete(name, domain: domain, path: path);
     }
@@ -187,11 +197,7 @@ class Cookies {
   }
 
   /// Sets a flash message cookie.
-  void setFlashMessage(
-    String type,
-    String message, {
-    bool secure = false,
-  }) {
+  void setFlashMessage(String type, String message, {bool secure = false}) {
     final flashData = {'type': type, 'message': message};
     set(
       'flash_message',
@@ -238,26 +244,24 @@ class CookieManager {
     String? path,
     DateTime? expires,
     Duration? maxAge,
-    bool httpOnly = false,
-    bool secure = false,
-    String? sameSite,
-  }) =>
-      Cookies.response(response).set(
-        name,
-        value,
-        domain: domain,
-        path: path,
-        expires: expires,
-        maxAge: maxAge,
-        httpOnly: httpOnly,
-        secure: secure,
-        sameSite: sameSite,
-      );
+    bool httpOnly = true,
+    bool secure = true,
+    String? sameSite = 'lax',
+  }) => Cookies.response(response).set(
+    name,
+    value,
+    domain: domain,
+    path: path,
+    expires: expires,
+    maxAge: maxAge,
+    httpOnly: httpOnly,
+    secure: secure,
+    sameSite: sameSite,
+  );
   static void deleteCookie(
     HttpResponse response,
     String name, {
     String? domain,
     String? path,
-  }) =>
-      Cookies.response(response).delete(name, domain: domain, path: path);
+  }) => Cookies.response(response).delete(name, domain: domain, path: path);
 }
