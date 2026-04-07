@@ -30,9 +30,9 @@ This document outlines the structured remediation plan for the 12 newly discover
 *Targeting broken state engines and asynchronous startup.*
 * **Branch Prefix:** `fix/`
 
-- [ ] **Fire-and-Forget Async Boot**: Refactor DI container initializations and service provider boots to ensure the main server block awaits full readiness instead of orphaned async executions.
-- [ ] **`resolveAll<T>()` Broken**: Fix the service container logic bug where `resolveAll` fails to fetch multiple tagged implementations correctly.
-- [ ] **Statistics Corruption (Redis)**: Fix the cache driver decrement logic to cleanly atomicise operations and stop stats from drifting.
+- [x] **Fire-and-Forget Async Boot**: Refactor DI container initializations and service provider boots to ensure the main server block awaits full readiness instead of orphaned async executions.
+- [x] **`resolveAll<T>()` Broken**: Fix the service container logic bug where `resolveAll` fails to fetch multiple tagged implementations correctly.
+- [x] **Statistics Corruption (Redis)**: Fix the cache driver decrement logic to cleanly atomicise operations and stop stats from drifting.
 
 ---
 **Status:** In Progress

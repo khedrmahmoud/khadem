@@ -29,15 +29,21 @@ class ServiceProviderRegistry {
   ServiceProvider? loadDeferredProvider(Type type) {
     final provider = _deferredProviders[type];
     if (provider != null) {
-      _deferredProviders.remove(type);
-      // Remove other bindings for the same provider to avoid double loading
-      _deferredProviders.removeWhere((_, p) => p == provider);
-
-      _providers.add(provider);
-      provider.register(_container);
+      materializeDeferredProvider(provider);
       return provider;
     }
     return null;
+  }
+
+  /// Materializes a deferred provider by moving it to the active provider list
+  /// and running its register lifecycle step exactly once.
+  void materializeDeferredProvider(ServiceProvider provider) {
+    _deferredProviders.removeWhere((_, p) => p == provider);
+
+    if (!_providers.contains(provider)) {
+      _providers.add(provider);
+      provider.register(_container);
+    }
   }
 
   /// Registers multiple providers.
