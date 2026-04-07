@@ -4,6 +4,16 @@ import 'route.dart';
 
 /// Handles route registration and storage.
 class RouteRegistry {
+  static const Set<String> _validHttpMethods = {
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'HEAD',
+    'OPTIONS',
+  };
+
   final List<Route> _routes = [];
 
   /// Returns the list of registered routes.
@@ -17,8 +27,16 @@ class RouteRegistry {
     List<Middleware> middleware, {
     String? name,
   }) {
-    final route =
-        Route(method.toUpperCase(), path, handler, middleware, name: name);
+    final normalizedMethod = method.trim().toUpperCase();
+    _validateRoute(normalizedMethod, path, name);
+
+    final route = Route(
+      normalizedMethod,
+      path,
+      handler,
+      middleware,
+      name: name,
+    );
     if (route.isDynamic) {
       _routes.add(route);
     } else {
@@ -32,8 +50,7 @@ class RouteRegistry {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      register('GET', path, handler, middleware, name: name);
+  }) => register('GET', path, handler, middleware, name: name);
 
   /// Registers a POST route.
   void post(
@@ -41,8 +58,7 @@ class RouteRegistry {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      register('POST', path, handler, middleware, name: name);
+  }) => register('POST', path, handler, middleware, name: name);
 
   /// Registers a PUT route.
   void put(
@@ -50,8 +66,7 @@ class RouteRegistry {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      register('PUT', path, handler, middleware, name: name);
+  }) => register('PUT', path, handler, middleware, name: name);
 
   /// Registers a PATCH route.
   void patch(
@@ -59,8 +74,7 @@ class RouteRegistry {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      register('PATCH', path, handler, middleware, name: name);
+  }) => register('PATCH', path, handler, middleware, name: name);
 
   /// Registers a DELETE route.
   void delete(
@@ -68,8 +82,7 @@ class RouteRegistry {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      register('DELETE', path, handler, middleware, name: name);
+  }) => register('DELETE', path, handler, middleware, name: name);
 
   /// Registers a HEAD route.
   void head(
@@ -77,8 +90,7 @@ class RouteRegistry {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      register('HEAD', path, handler, middleware, name: name);
+  }) => register('HEAD', path, handler, middleware, name: name);
 
   /// Registers an OPTIONS route.
   void options(
@@ -86,8 +98,7 @@ class RouteRegistry {
     RequestHandler handler, {
     List<Middleware> middleware = const [],
     String? name,
-  }) =>
-      register('OPTIONS', path, handler, middleware, name: name);
+  }) => register('OPTIONS', path, handler, middleware, name: name);
 
   /// Registers a route for any method.
   void any(
@@ -119,5 +130,23 @@ class RouteRegistry {
       }
     }
     return namedRoutes;
+  }
+
+  void _validateRoute(String method, String path, String? name) {
+    if (!_validHttpMethods.contains(method)) {
+      throw ArgumentError('Invalid HTTP method: $method');
+    }
+
+    if (path.isEmpty || !path.startsWith('/')) {
+      throw ArgumentError('Path must start with / and not be empty');
+    }
+
+    if (path.contains('\r') || path.contains('\n') || path.contains('\x00')) {
+      throw ArgumentError('Path contains illegal characters');
+    }
+
+    if (name != null && name.isNotEmpty && getRouteByName(name) != null) {
+      throw ArgumentError('Route name already registered: $name');
+    }
   }
 }

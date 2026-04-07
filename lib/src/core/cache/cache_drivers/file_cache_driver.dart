@@ -122,6 +122,11 @@ class FileCacheDriver implements CacheDriver {
   /// Metadata file for cache statistics
   static const String _metadataFile = '.cache_metadata.json';
 
+  /// Lock file used to serialize clear operations.
+  static const String _clearLockFile = '.clear.lock';
+
+  static const Duration _clearLockMaxAge = Duration(seconds: 30);
+
   /// Creates a new FileCacheDriver instance.
   ///
   /// [cacheDir] - The directory path where cache files will be stored.
@@ -368,14 +373,16 @@ class FileCacheDriver implements CacheDriver {
     sink.write(encodedData);
     await sink.close();
 
-    // Set file permissions if supported (Unix systems)
-    try {
-      await Process.run('chmod', [
-        '${_filePermissions.toRadixString(8)}',
-        filePath,
-      ]);
-    } catch (e) {
-      // Silently fail if chmod is not available (e.g., on Windows)
+    // Set file permissions only on Unix-like platforms.
+    if (!Platform.isWindows) {
+      try {
+        await Process.run('chmod', [
+          '${_filePermissions.toRadixString(8)}',
+          filePath,
+        ]);
+      } catch (e) {
+        // Silently fail if chmod is not available.
+      }
     }
 
     // Update statistics and persist metadata
@@ -492,26 +499,19 @@ class FileCacheDriver implements CacheDriver {
       return;
     }
 
-    // Don't use locking for clear operation as it's too complex.
-    // WARNING: Without locking, concurrent cache operations (e.g., put/get/forget) during clear()
-    // may result in race conditions or inconsistent cache state. For single-threaded or
-    // single-process usage, this is generally safe, but in multi-isolate or multi-process scenarios,
-    // external synchronization should be considered.
+    final lockFile = await _acquireClearLock();
     try {
       await for (final entity in dir.list()) {
         if (entity is File &&
             entity.path.endsWith(_fileExtension) &&
             !entity.path.endsWith(_metadataFile)) {
-          try {
-            await entity.delete();
-          } catch (e) {
-            // Continue with other files if one fails
-          }
+          await _deleteFileBestEffort(entity);
         }
       }
 
       // Reset statistics
       _stats.reset();
+      _stats.clears = 1;
       await _saveMetadata();
     } catch (e) {
       // If directory listing fails, try to recreate the directory
@@ -519,10 +519,62 @@ class FileCacheDriver implements CacheDriver {
         await dir.delete(recursive: true);
         await dir.create(recursive: true);
         _stats.reset();
+        _stats.clears = 1;
         await _saveMetadata();
       } catch (e) {
         // If all else fails, just reset stats
         _stats.reset();
+      }
+    } finally {
+      try {
+        if (await lockFile.exists()) {
+          await lockFile.delete();
+        }
+      } catch (_) {
+        // Ignore lock cleanup failures.
+      }
+    }
+  }
+
+  Future<File> _acquireClearLock() async {
+    final lockFile = File('$_cacheDir/$_clearLockFile');
+
+    if (await lockFile.exists()) {
+      try {
+        final age = DateTime.now().difference(await lockFile.lastModified());
+        if (age <= _clearLockMaxAge) {
+          throw StateError('Clear operation already in progress');
+        }
+      } catch (e) {
+        if (e is StateError) {
+          rethrow;
+        }
+      }
+
+      try {
+        await lockFile.delete();
+      } catch (_) {
+        throw StateError('Clear operation lock is stale but cannot be removed');
+      }
+    }
+
+    await lockFile.create(recursive: true);
+    await lockFile.writeAsString(DateTime.now().toIso8601String(), flush: true);
+
+    return lockFile;
+  }
+
+  Future<void> _deleteFileBestEffort(File file) async {
+    try {
+      await file.delete();
+      return;
+    } catch (_) {
+      // Retry once for transient file handle contention (common on Windows).
+      await Future.delayed(const Duration(milliseconds: 50));
+      try {
+        await file.delete();
+      } catch (_) {
+        // Ignore persistent deletion failures and continue clearing other files.
       }
     }
   }

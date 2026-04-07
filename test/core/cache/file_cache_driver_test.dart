@@ -41,5 +41,35 @@ void main() {
         throwsA(isA<ArgumentError>()),
       );
     });
+
+    test('clear removes cache entries and keeps directory healthy', () async {
+      await driver.put('alpha', '1', const Duration(minutes: 1));
+      await driver.put('beta', '2', const Duration(minutes: 1));
+
+      await driver.clear();
+
+      expect(await driver.get('alpha'), isNull);
+      expect(await driver.get('beta'), isNull);
+      expect(await tempDir.exists(), isTrue);
+    });
+
+    test('clear throws when lock is active', () async {
+      final lockFile = File('${tempDir.path}/.clear.lock');
+      await lockFile.writeAsString('active', flush: true);
+
+      await expectLater(driver.clear(), throwsA(isA<StateError>()));
+    });
+
+    test('clear recovers from stale lock file', () async {
+      final lockFile = File('${tempDir.path}/.clear.lock');
+      await lockFile.writeAsString('stale', flush: true);
+      await lockFile.setLastModified(
+        DateTime.now().subtract(const Duration(minutes: 2)),
+      );
+
+      await driver.clear();
+
+      expect(await lockFile.exists(), isFalse);
+    });
   });
 }
