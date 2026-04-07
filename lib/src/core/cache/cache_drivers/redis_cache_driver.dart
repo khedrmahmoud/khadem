@@ -163,7 +163,8 @@ class RedisCacheDriver implements CacheDriver {
           if (attempt == maxRetries) {
             _command = null;
             throw CacheException(
-                'Failed to connect to Redis after $maxRetries attempts: $e');
+              'Failed to connect to Redis after $maxRetries attempts: $e',
+            );
           }
           await Future.delayed(retryDelay * (attempt + 1));
         }
@@ -177,26 +178,11 @@ class RedisCacheDriver implements CacheDriver {
   ///
   /// This method wraps Redis operations with proper error handling and
   /// updates cache statistics accordingly.
-  Future<dynamic> _executeCommand(
-    List<Object> command, {
-    bool isRead = false,
-    bool isWrite = false,
-  }) async {
+  Future<dynamic> _executeCommand(List<Object> command) async {
     try {
       final cmd = await _getCommand();
-      final result = await cmd.send_object(command);
-
-      if (isRead) {
-        _stats.hits++;
-      } else if (isWrite) {
-        _stats.sets++;
-      }
-
-      return result;
+      return await cmd.send_object(command);
     } catch (e) {
-      if (isRead) {
-        _stats.misses++;
-      }
       // Reset connection on error to force reconnection
       _command = null;
       rethrow;
@@ -211,34 +197,39 @@ class RedisCacheDriver implements CacheDriver {
     final ttlInSeconds = ttl.inSeconds;
 
     // SET key value NX EX ttl
-    final result = await _executeCommand(
-      [
-        'SET',
-        key,
-        serializedValue,
-        'NX',
-        'EX',
-        ttlInSeconds > 0 ? ttlInSeconds : 1,
-      ],
-      isWrite: true,
-    );
+    final result = await _executeCommand([
+      'SET',
+      key,
+      serializedValue,
+      'NX',
+      'EX',
+      ttlInSeconds > 0 ? ttlInSeconds : 1,
+    ]);
 
-    return result == 'OK';
+    if (result == 'OK') {
+      _stats.sets++;
+      return true;
+    }
+
+    return false;
   }
 
   @override
   Future<Map<String, dynamic>> many(List<String> keys) async {
     if (keys.isEmpty) return {};
-    final result = await _executeCommand(['MGET', ...keys], isRead: true);
+    final result = await _executeCommand(['MGET', ...keys]);
     final Map<String, dynamic> map = {};
     if (result is List) {
       for (int i = 0; i < keys.length; i++) {
         if (result[i] != null) {
+          _stats.hits++;
           try {
             map[keys[i]] = jsonDecode(result[i]);
           } catch (_) {
             map[keys[i]] = result[i];
           }
+        } else {
+          _stats.misses++;
         }
       }
     }
@@ -254,15 +245,15 @@ class RedisCacheDriver implements CacheDriver {
 
   @override
   Future<int> increment(String key, [int amount = 1]) async {
-    final result =
-        await _executeCommand(['INCRBY', key, amount], isWrite: true);
+    final result = await _executeCommand(['INCRBY', key, amount]);
+    _stats.sets++;
     return result as int;
   }
 
   @override
   Future<int> decrement(String key, [int amount = 1]) async {
-    final result =
-        await _executeCommand(['DECRBY', key, amount], isWrite: true);
+    final result = await _executeCommand(['DECRBY', key, amount]);
+    _stats.sets++;
     return result as int;
   }
 
@@ -304,7 +295,8 @@ class RedisCacheDriver implements CacheDriver {
         command = ['SET', key, serializedValue];
       }
 
-      await _executeCommand(command, isWrite: true);
+      await _executeCommand(command);
+      _stats.sets++;
     } catch (e) {
       throw CacheException('Failed to store cache item "$key": $e');
     }
@@ -317,18 +309,18 @@ class RedisCacheDriver implements CacheDriver {
     }
 
     try {
-      final result = await _executeCommand(['GET', key], isRead: true);
+      final result = await _executeCommand(['GET', key]);
 
       if (result == null) {
         _stats.misses++;
-        _stats.hits--; // Correct the hit count since it's actually a miss
         return null;
       }
+
+      _stats.hits++;
 
       return jsonDecode(result as String);
     } catch (e) {
       _stats.misses++;
-      _stats.hits--; // Correct the hit count
       throw CacheException('Failed to retrieve cache item "$key": $e');
     }
   }
@@ -340,9 +332,10 @@ class RedisCacheDriver implements CacheDriver {
     }
 
     try {
-      await _executeCommand(['DEL', key], isWrite: true);
-      _stats.deletions++;
-      _stats.sets--; // Correct the set count since DEL is not a SET operation
+      final deleted = await _executeCommand(['DEL', key]);
+      if (deleted is int && deleted > 0) {
+        _stats.deletions++;
+      }
     } catch (e) {
       throw CacheException('Failed to remove cache item "$key": $e');
     }
@@ -355,18 +348,17 @@ class RedisCacheDriver implements CacheDriver {
     }
 
     try {
-      final result = await _executeCommand(['EXISTS', key], isRead: true);
+      final result = await _executeCommand(['EXISTS', key]);
 
       if (result == 1) {
+        _stats.hits++;
         return true;
       } else {
         _stats.misses++;
-        _stats.hits--; // Correct the hit count since EXISTS returned 0
         return false;
       }
     } catch (e) {
       _stats.misses++;
-      _stats.hits--; // Correct the hit count
       throw CacheException('Failed to check cache item "$key": $e');
     }
   }

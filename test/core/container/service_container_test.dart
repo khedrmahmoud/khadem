@@ -8,6 +8,10 @@ class TestService {
   TestService(this.name);
 }
 
+class ExtendedTestService extends TestService {
+  ExtendedTestService(super.name);
+}
+
 class DependentService {
   final TestService service;
   DependentService(this.service);
@@ -175,6 +179,35 @@ void main() {
         expect(root.name, equals('root'));
         expect(dependent.service.name, equals('root'));
         expect(dependent.service, same(root));
+      });
+    });
+
+    group('resolveAll()', () {
+      test(
+        'should include default and contextual bindings for the same type',
+        () {
+          container.bind<TestService>((c) => TestService('default'));
+          container.bindWhen<TestService>('ctx1', (c) => TestService('ctx1'));
+          container.bindWhen<TestService>('ctx2', (c) => TestService('ctx2'));
+
+          final services = container.resolveAll<TestService>();
+          final names = services.map((s) => s.name).toSet();
+
+          expect(names, containsAll({'default', 'ctx1', 'ctx2'}));
+        },
+      );
+
+      test('should include assignable bindings and instances', () {
+        container.bind<ExtendedTestService>(
+          (c) => ExtendedTestService('extended'),
+        );
+        container.instance<TestService>(TestService('instance'));
+
+        final services = container.resolveAll<TestService>();
+        final names = services.map((s) => s.name).toSet();
+
+        expect(names, contains('instance'));
+        expect(names, contains('extended'));
       });
     });
 

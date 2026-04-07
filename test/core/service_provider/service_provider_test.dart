@@ -208,8 +208,8 @@ void main() {
         registry.register(testProvider);
         registry.register(deferredProvider);
 
-        final testProviders =
-            registry.getProvidersByType<TestServiceProvider>();
+        final testProviders = registry
+            .getProvidersByType<TestServiceProvider>();
         expect(testProviders.length, equals(1));
         expect(testProviders.first, equals(testProvider));
       });
@@ -420,7 +420,7 @@ void main() {
         await manager.bootAll();
 
         expect(provider1.booted, isTrue);
-        expect(provider2.booted, isFalse);
+        expect(provider2.booted, isTrue);
         expect(manager.isBooted, isTrue);
       });
 
@@ -469,6 +469,20 @@ void main() {
 
         expect(service, equals(42));
         expect(deferredProvider.registered, isTrue);
+        expect(deferredProvider.booted, isFalse);
+      });
+
+      test('should boot loaded deferred provider explicitly', () async {
+        final deferredProvider = DeferredServiceProvider();
+        manager.register(deferredProvider);
+
+        // Trigger deferred registration through missing binding handling.
+        final service = container.resolve<int>();
+        expect(service, equals(42));
+        expect(deferredProvider.registered, isTrue);
+        expect(deferredProvider.booted, isFalse);
+
+        await manager.bootDeferred();
         expect(deferredProvider.booted, isTrue);
       });
 

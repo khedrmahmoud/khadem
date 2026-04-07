@@ -254,20 +254,36 @@ class ServiceContainer implements ContainerInterface {
       }
     }
 
-    final directInstance = _instances[T];
-    if (directInstance is T) {
-      addIfMissing(directInstance);
+    for (final instance in _instances.values) {
+      if (instance is T) {
+        addIfMissing(instance);
+      }
     }
 
-    // Resolve the main binding if it exists
-    if (_bindings.containsKey(T) || _instances.containsKey(T)) {
-      addIfMissing(resolve<T>());
+    for (final type in _bindings.keys.toList()) {
+      try {
+        final resolved = resolveType(type);
+        if (resolved is T) {
+          addIfMissing(resolved);
+        }
+      } catch (_) {
+        // Skip unresolved bindings and continue collecting valid services.
+      }
     }
 
-    // Resolve all contextual bindings for T
-    for (final context in _contextualBindings.keys) {
-      if (_contextualBindings[context]!.containsKey(T)) {
-        addIfMissing(resolve<T>(context));
+    for (final entry in _contextualBindings.entries) {
+      final context = entry.key;
+      final bindings = entry.value;
+
+      for (final type in bindings.keys.toList()) {
+        try {
+          final resolved = resolveType(type, context);
+          if (resolved is T) {
+            addIfMissing(resolved);
+          }
+        } catch (_) {
+          // Skip unresolved contextual bindings.
+        }
       }
     }
 
