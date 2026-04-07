@@ -70,13 +70,44 @@ void main() {
       });
 
       test('should register route with middleware', () {
-        final middleware =
-            Middleware((req, res, next) async => await next(), name: 'auth');
+        final middleware = Middleware(
+          (req, res, next) async => await next(),
+          name: 'auth',
+        );
         registry.get('/test', (req, res) async {}, middleware: [middleware]);
 
         expect(registry.routes.length, equals(1));
         expect(registry.routes.first.middleware.length, equals(1));
         expect(registry.routes.first.middleware.first.name, equals('auth'));
+      });
+
+      test('should reject invalid HTTP method', () {
+        expect(
+          () => registry.register('TRACE', '/test', (req, res) async {}, []),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
+
+      test('should reject invalid route path', () {
+        expect(
+          () => registry.get('users', (req, res) async {}),
+          throwsA(isA<ArgumentError>()),
+        );
+
+        expect(
+          () => registry.get('/users\r\nInjected: 1', (req, res) async {}),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
+
+      test('should reject duplicate named routes', () {
+        registry.get('/users', (req, res) async {}, name: 'users.index');
+
+        expect(
+          () =>
+              registry.get('/admins', (req, res) async {}, name: 'users.index'),
+          throwsA(isA<ArgumentError>()),
+        );
       });
 
       test('should register ANY method routes', () {
@@ -257,8 +288,10 @@ void main() {
       });
 
       test('should group routes with middleware', () {
-        final middleware =
-            Middleware((req, res, next) async => await next(), name: 'auth');
+        final middleware = Middleware(
+          (req, res, next) async => await next(),
+          name: 'auth',
+        );
 
         groupManager.group(
           prefix: '/api',
@@ -274,8 +307,10 @@ void main() {
       });
 
       test('should combine group middleware with route middleware', () {
-        final groupMiddleware =
-            Middleware((req, res, next) async => await next(), name: 'auth');
+        final groupMiddleware = Middleware(
+          (req, res, next) async => await next(),
+          name: 'auth',
+        );
         final routeMiddleware = Middleware(
           (req, res, next) async => await next(),
           name: 'rate-limit',
@@ -332,8 +367,9 @@ void main() {
       test('should wrap handler with exception handling', () {
         final originalHandler = (Request req, Response res) async {};
 
-        final wrappedHandler =
-            handler.wrapWithExceptionHandler(originalHandler);
+        final wrappedHandler = handler.wrapWithExceptionHandler(
+          originalHandler,
+        );
 
         // Note: We can't easily test the exception handling without mocking
         // the ExceptionHandler, but we can verify the wrapper is created
@@ -384,8 +420,10 @@ void main() {
       });
 
       test('should register routes with middleware', () {
-        final middleware =
-            Middleware((req, res, next) async => await next(), name: 'test');
+        final middleware = Middleware(
+          (req, res, next) async => await next(),
+          name: 'test',
+        );
         router.get('/test', (req, res) async {}, middleware: [middleware]);
 
         expect(router.routes.length, equals(1));
@@ -424,8 +462,10 @@ void main() {
       });
 
       test('should group routes with middleware', () {
-        final middleware =
-            Middleware((req, res, next) async => await next(), name: 'auth');
+        final middleware = Middleware(
+          (req, res, next) async => await next(),
+          name: 'auth',
+        );
 
         router.group(
           prefix: '/api',
