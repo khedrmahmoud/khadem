@@ -176,15 +176,41 @@ void main() {
       expect(cookies.first.maxAge, 3600);
     });
 
+    test('cookie() uses secure defaults', () {
+      responseObj.cookie('session_id', 'abc123');
+
+      final cookies = request.response.cookies;
+      expect(cookies, hasLength(1));
+      expect(cookies.first.httpOnly, isTrue);
+      expect(cookies.first.secure, isTrue);
+      expect(cookies.first.sameSite, SameSite.lax);
+    });
+
+    test('cookie() rejects SameSite=None without secure', () {
+      expect(
+        () => responseObj.cookie(
+          'session_id',
+          'abc123',
+          sameSite: 'none',
+          secure: false,
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
     test('withHeaders() sets multiple headers', () {
-      responseObj.withHeaders({
-        'X-Test-1': 'Value1',
-        'X-Test-2': 'Value2',
-      });
+      responseObj.withHeaders({'X-Test-1': 'Value1', 'X-Test-2': 'Value2'});
 
       final headers = request.response.headers as MockHttpHeaders;
       expect(headers.value('X-Test-1'), 'Value1');
       expect(headers.value('X-Test-2'), 'Value2');
+    });
+
+    test('header() rejects CRLF injection in value', () {
+      expect(
+        () => responseObj.header('X-Test', 'safe\r\nInjected: value'),
+        throwsA(isA<ArgumentError>()),
+      );
     });
 
     test('gzip() enables compression', () {

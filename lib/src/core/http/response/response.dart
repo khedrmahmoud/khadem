@@ -109,9 +109,9 @@ class Response implements ResponseContract {
     String? path = '/',
     DateTime? expires,
     Duration? maxAge,
-    bool httpOnly = false,
-    bool secure = false,
-    String? sameSite,
+    bool httpOnly = true,
+    bool secure = true,
+    String? sameSite = 'lax',
   }) {
     _cookies.set(
       name,
