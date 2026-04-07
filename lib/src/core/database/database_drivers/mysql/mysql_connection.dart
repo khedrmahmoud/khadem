@@ -68,18 +68,20 @@ class MySQLConnection implements DatabaseConnection {
     // Database names must be alphanumeric with underscores only
     _validateDatabaseName(dbName);
 
-    // Use parameterization for database name
+    final quotedDbName = _quoteIdentifier(dbName);
+
+    // Identifier names cannot be bound as query parameters.
+    // We validate first, then safely quote as an identifier.
     try {
-      await execute('USE ?', [dbName]);
+      await execute('USE $quotedDbName');
     } catch (_) {
       // If USE fails, try to create it
       try {
         Log.info('Database $dbName does not exist. Creating...');
         await execute(
-          'CREATE DATABASE IF NOT EXISTS ? CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci',
-          [dbName],
+          'CREATE DATABASE IF NOT EXISTS $quotedDbName CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci',
         );
-        await execute('USE ?', [dbName]);
+        await execute('USE $quotedDbName');
         Log.info('Database $dbName created and selected.');
       } catch (e) {
         Log.info('ERROR: Failed to create or select database $dbName: $e');
@@ -115,6 +117,11 @@ class MySQLConnection implements DatabaseConnection {
         'Invalid database name: cannot contain backtick characters',
       );
     }
+  }
+
+  /// Safely quotes a MySQL identifier.
+  String _quoteIdentifier(String identifier) {
+    return '`${identifier.replaceAll('`', '``')}`';
   }
 
   // ===========================================================================

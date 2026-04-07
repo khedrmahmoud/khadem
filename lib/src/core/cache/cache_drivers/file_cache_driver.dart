@@ -140,11 +140,11 @@ class FileCacheDriver implements CacheDriver {
     int compressionThreshold = 1024, // 1KB
     bool enableCompression = true,
     int filePermissions = 0x644, // rw-r--r--
-  })  : _cacheDir = cacheDir.trim(),
-        _maxFileSize = maxFileSize,
-        _compressionThreshold = compressionThreshold,
-        _enableCompression = enableCompression,
-        _filePermissions = filePermissions {
+  }) : _cacheDir = cacheDir.trim(),
+       _maxFileSize = maxFileSize,
+       _compressionThreshold = compressionThreshold,
+       _enableCompression = enableCompression,
+       _filePermissions = filePermissions {
     if (_cacheDir.isEmpty) {
       throw ArgumentError('Cache directory path cannot be empty');
     }
@@ -218,25 +218,46 @@ class FileCacheDriver implements CacheDriver {
 
   /// Sanitizes cache key for safe file naming.
   ///
-  /// Replaces unsafe characters with safe alternatives and ensures
-  /// the filename is valid for the filesystem.
+  /// Uses deterministic encoding to avoid directory traversal and
+  /// platform-dependent filename issues.
   String _sanitizeKey(String key) {
     if (key.isEmpty) {
       throw ArgumentError('Cache key cannot be empty');
     }
 
-    // Replace unsafe characters
-    return key
-        .replaceAll('/', '_')
-        .replaceAll('\\', '_')
-        .replaceAll(':', '_')
-        .replaceAll('*', '_')
-        .replaceAll('?', '_')
-        .replaceAll('"', '_')
-        .replaceAll('<', '_')
-        .replaceAll('>', '_')
-        .replaceAll('|', '_')
-        .replaceAll(' ', '_');
+    final normalizedKey = key.trim();
+    if (normalizedKey.isEmpty) {
+      throw ArgumentError('Cache key cannot be empty');
+    }
+
+    if (normalizedKey.length > 2048) {
+      throw ArgumentError('Cache key exceeds maximum supported length');
+    }
+
+    final encoded = base64UrlEncode(
+      utf8.encode(normalizedKey),
+    ).replaceAll('=', '');
+
+    // Keep filenames manageable on Windows and Linux filesystems.
+    if (encoded.length <= 180) {
+      return encoded;
+    }
+
+    return '${encoded.substring(0, 160)}_${_fnv1a64Hex(normalizedKey)}';
+  }
+
+  String _fnv1a64Hex(String input) {
+    const int offsetBasis = 0xcbf29ce484222325;
+    const int prime = 0x100000001b3;
+    const int mask64 = 0xFFFFFFFFFFFFFFFF;
+
+    var hash = offsetBasis;
+    for (final unit in utf8.encode(input)) {
+      hash ^= unit;
+      hash = (hash * prime) & mask64;
+    }
+
+    return hash.toRadixString(16).padLeft(16, '0');
   }
 
   /// Gets the full file path for a cache key.
@@ -276,8 +297,9 @@ class FileCacheDriver implements CacheDriver {
   @override
   Future<int> increment(String key, [int amount = 1]) async {
     final value = await get(key);
-    final int currentValue =
-        (value is int) ? value : int.tryParse(value.toString()) ?? 0;
+    final int currentValue = (value is int)
+        ? value
+        : int.tryParse(value.toString()) ?? 0;
     final newValue = currentValue + amount;
     await put(key, newValue, const Duration(days: 365 * 100));
     return newValue;
@@ -348,10 +370,10 @@ class FileCacheDriver implements CacheDriver {
 
     // Set file permissions if supported (Unix systems)
     try {
-      await Process.run(
-        'chmod',
-        ['${_filePermissions.toRadixString(8)}', filePath],
-      );
+      await Process.run('chmod', [
+        '${_filePermissions.toRadixString(8)}',
+        filePath,
+      ]);
     } catch (e) {
       // Silently fail if chmod is not available (e.g., on Windows)
     }
@@ -378,8 +400,9 @@ class FileCacheDriver implements CacheDriver {
 
     try {
       var encodedData = await file.readAsString();
-      final isCompressed =
-          encodedData.startsWith('H4sI'); // Gzip magic bytes in base64
+      final isCompressed = encodedData.startsWith(
+        'H4sI',
+      ); // Gzip magic bytes in base64
 
       Map<String, dynamic> data;
 

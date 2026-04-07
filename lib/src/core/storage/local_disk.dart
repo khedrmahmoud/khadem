@@ -1,15 +1,47 @@
 import 'dart:io';
 
 import 'package:mime/mime.dart';
+import 'package:path/path.dart' as p;
 
 import '../../contracts/storage/storage_disk.dart';
 
 class LocalDisk implements StorageDisk {
   final String basePath;
+  final String _resolvedBasePath;
 
-  LocalDisk({required this.basePath});
+  LocalDisk({required this.basePath})
+    : _resolvedBasePath = p.normalize(p.absolute(basePath));
 
-  File _file(String path) => File('$basePath/$path');
+  File _file(String path) => File(_resolvePath(path));
+
+  Directory _directory(String path) =>
+      Directory(_resolvePath(path, allowBaseDirectory: true));
+
+  String _resolvePath(String relativePath, {bool allowBaseDirectory = false}) {
+    final normalizedInput = relativePath.trim().replaceAll('\\', '/');
+
+    if (normalizedInput.isEmpty) {
+      if (allowBaseDirectory) {
+        return _resolvedBasePath;
+      }
+      throw ArgumentError('Path cannot be empty');
+    }
+
+    if (p.isAbsolute(normalizedInput)) {
+      throw ArgumentError('Absolute paths are not allowed: $relativePath');
+    }
+
+    final resolved = p.normalize(
+      p.absolute(p.join(_resolvedBasePath, normalizedInput)),
+    );
+
+    if (resolved != _resolvedBasePath &&
+        !p.isWithin(_resolvedBasePath, resolved)) {
+      throw ArgumentError('Path traversal detected: $relativePath');
+    }
+
+    return resolved;
+  }
 
   @override
   Future<void> put(String path, List<int> bytes) async {
@@ -60,13 +92,13 @@ class LocalDisk implements StorageDisk {
 
   @override
   Future<void> makeDirectory(String path) async {
-    final dir = Directory('$basePath/$path');
+    final dir = _directory(path);
     await dir.create(recursive: true);
   }
 
   @override
   Future<void> deleteDirectory(String path) async {
-    final dir = Directory('$basePath/$path');
+    final dir = _directory(path);
     if (await dir.exists()) {
       await dir.delete(recursive: true);
     }
@@ -113,12 +145,15 @@ class LocalDisk implements StorageDisk {
 
   @override
   Future<List<String>> listFiles(String directoryPath) async {
-    final dir = Directory('$basePath/$directoryPath');
+    final dir = _directory(directoryPath);
     if (!await dir.exists()) return [];
     return dir
         .list()
         .where((e) => e is File)
-        .map((e) => e.path.replaceFirst('$basePath/', ''))
+        .map(
+          (e) =>
+              p.relative(e.path, from: _resolvedBasePath).replaceAll('\\', '/'),
+        )
         .toList();
   }
 

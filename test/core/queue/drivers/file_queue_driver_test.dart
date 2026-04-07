@@ -216,6 +216,36 @@ void main() {
       expect(content, equals('[]'));
     });
 
+    test('should skip jobs that are not in allowed job types list', () async {
+      final jobsFile = File('$storagePath/jobs.json');
+      final encodedJobs = [
+        {
+          'id': 'blocked_1',
+          'jobType': 'TestQueueJob',
+          'queuedAt': DateTime.now().toIso8601String(),
+          'scheduledFor': null,
+          'attempts': 0,
+          'status': 'pending',
+          'metadata': <String, dynamic>{},
+          'payload': {'name': 'blocked', 'type': 'TestQueueJob'},
+        },
+      ];
+
+      await jobsFile.create(recursive: true);
+      await jobsFile.writeAsString(jsonEncode(encodedJobs));
+
+      final restrictedDriver = FileStorageDriver(
+        config: const DriverConfig(name: 'restricted-file'),
+        storagePath: storagePath,
+        allowedJobTypes: {'SomeOtherJob'},
+      );
+
+      await restrictedDriver.process();
+
+      final pending = await restrictedDriver.pendingJobsCount;
+      expect(pending, equals(0));
+    });
+
     test('should get queue statistics', () async {
       final stats = await driver.getStats();
 

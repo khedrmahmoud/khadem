@@ -61,6 +61,10 @@ class RedisStorageDriver extends BaseQueueDriver {
   final int port;
   final String? password;
   final String queueName;
+  final Set<String> _allowedJobTypes;
+  final int _maxPayloadDepth;
+  final int _maxPayloadNodes;
+  final int _maxSerializedJobBytes;
   Command? _command;
   bool _isConnected = false;
 
@@ -78,6 +82,10 @@ class RedisStorageDriver extends BaseQueueDriver {
     int? port,
     String? password,
     String? queueName,
+    Set<String>? allowedJobTypes,
+    int maxPayloadDepth = 10,
+    int maxPayloadNodes = 2000,
+    int maxSerializedJobBytes = 1024 * 1024,
   }) : host =
            host ??
            config.driverSpecificConfig['host'] as String? ??
@@ -88,7 +96,34 @@ class RedisStorageDriver extends BaseQueueDriver {
        queueName =
            queueName ??
            config.driverSpecificConfig['queueName'] as String? ??
-           'default';
+           'default',
+       _allowedJobTypes =
+           allowedJobTypes ??
+           _parseAllowedJobTypes(
+             config.driverSpecificConfig['allowedJobTypes'],
+           ),
+       _maxPayloadDepth = maxPayloadDepth,
+       _maxPayloadNodes = maxPayloadNodes,
+       _maxSerializedJobBytes = maxSerializedJobBytes;
+
+  static Set<String> _parseAllowedJobTypes(dynamic raw) {
+    if (raw is Iterable) {
+      return raw
+          .map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toSet();
+    }
+
+    if (raw is String) {
+      return raw
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toSet();
+    }
+
+    return <String>{};
+  }
 
   Future<Command> _getConnection() async {
     if (_command != null && _isConnected) {
@@ -113,10 +148,18 @@ class RedisStorageDriver extends BaseQueueDriver {
 
   @override
   Future<void> push(QueueJob job, {Duration? delay}) async {
+    final jobType = job.runtimeType.toString();
+    _validateJobType(jobType);
+
+    final payload = _asMap(job.toJson()) ?? <String, dynamic>{};
+    if (!_isSafePayload(payload)) {
+      throw QueueException('Rejected unsafe job payload for type $jobType');
+    }
+
     final context = createJobContext(job, delay: delay);
     final command = await _getConnection();
 
-    final jobData = {...context.toJson(), 'payload': job.toJson()};
+    final jobData = {...context.toJson(), 'payload': payload};
 
     // Track metrics
     if (metrics != null) {
@@ -203,6 +246,12 @@ class RedisStorageDriver extends BaseQueueDriver {
         throw QueueException('Invalid Redis queue payload: empty job data');
       }
 
+      if (utf8.encode(jobJson).length > _maxSerializedJobBytes) {
+        throw QueueException(
+          'Invalid Redis queue payload: job envelope too large',
+        );
+      }
+
       final decoded = jsonDecode(jobJson);
       if (decoded is! Map) {
         throw QueueException('Invalid Redis queue payload: expected JSON map');
@@ -228,8 +277,14 @@ class RedisStorageDriver extends BaseQueueDriver {
           );
         }
 
+        _validateJobType(jobType);
+
+        if (!_isSafePayload(payload)) {
+          throw QueueException('Rejected unsafe job payload for type $jobType');
+        }
+
         if (!QueueJobRegistry.isRegistered(jobType)) {
-          throw Exception(
+          throw QueueException(
             'Job type "$jobType" not registered in QueueJobRegistry',
           );
         }
@@ -454,5 +509,66 @@ class RedisStorageDriver extends BaseQueueDriver {
     }
 
     return DateTime.tryParse(text);
+  }
+
+  void _validateJobType(String jobType) {
+    final jobTypePattern = RegExp(r'^[A-Za-z][A-Za-z0-9_]{0,99}$');
+    if (!jobTypePattern.hasMatch(jobType)) {
+      throw QueueException('Invalid job type format: $jobType');
+    }
+
+    if (_allowedJobTypes.isNotEmpty && !_allowedJobTypes.contains(jobType)) {
+      throw QueueException('Job type "$jobType" is not allowed for this queue');
+    }
+  }
+
+  bool _isSafePayload(Map<String, dynamic> payload) {
+    var visitedNodes = 0;
+
+    bool validate(dynamic value, int depth) {
+      if (depth > _maxPayloadDepth) {
+        return false;
+      }
+
+      visitedNodes++;
+      if (visitedNodes > _maxPayloadNodes) {
+        return false;
+      }
+
+      if (value == null || value is num || value is bool) {
+        return true;
+      }
+
+      if (value is String) {
+        return value.length <= 100000;
+      }
+
+      if (value is List) {
+        if (value.length > 5000) return false;
+        for (final item in value) {
+          if (!validate(item, depth + 1)) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      if (value is Map) {
+        if (value.length > 5000) return false;
+        for (final entry in value.entries) {
+          if (entry.key.toString().length > 256) {
+            return false;
+          }
+          if (!validate(entry.value, depth + 1)) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      return false;
+    }
+
+    return validate(payload, 0);
   }
 }
