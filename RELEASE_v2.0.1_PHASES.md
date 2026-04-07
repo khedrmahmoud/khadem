@@ -23,8 +23,8 @@ This document outlines the structured remediation plan for the 12 newly discover
 *Targeting data leaks and session persistence.*
 * **Branch Prefix:** `fix/`
 
-- [ ] **Session Fixation**: Introduce session ID regeneration upon privilege changes (e.g., login, logout) to prevent fixation hijacking.
-- [ ] **Sensitive Data in Logs**: Implement a log sanitizer/masker array to strip `Authorization` headers, `password`, `token`, and secret fields before flushing logs to disk or terminal.
+- [x] **Session Fixation**: Introduced session ID regeneration on web guard privilege changes (login/logout).
+- [x] **Sensitive Data in Logs**: Added URI query redaction for sensitive keys (authorization/password/token/secret/api_key) in logging middleware.
 
 ## 🟢 Phase 4: Core Stability & Container Logic
 *Targeting broken state engines and asynchronous startup.*
