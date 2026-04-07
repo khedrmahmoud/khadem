@@ -64,7 +64,8 @@ class WebGuard extends Guard {
     final driverName = guardConfig['driver'] as String;
 
     // Use provided provider key, or get default provider
-    final effectiveProviderKey = providerKey ??
+    final effectiveProviderKey =
+        providerKey ??
         guardConfig['provider'] as String? ??
         _getDefaultProviderKey(config);
 
@@ -168,7 +169,7 @@ class WebGuard extends Guard {
   @override
   Future<void> logout(String sessionId) async {
     if (_sessionManager != null) {
-      await _clearUserFromSession(sessionId);
+      await logoutWithSessionId(sessionId);
     }
   }
 
@@ -184,12 +185,19 @@ class WebGuard extends Guard {
     // Generate tokens using driver
     final authResponse = await driver.generateTokens(user);
 
+    var activeSessionId = sessionId;
+
     // Store user ID in session
     if (_sessionManager != null) {
-      await _storeUserInSessionById(sessionId, user.getAuthIdentifier());
+      activeSessionId = await _sessionManager.regenerateSession(sessionId);
+      await _storeUserInSessionById(activeSessionId, user.getAuthIdentifier());
     }
 
-    return authResponse;
+    return _withSessionMetadata(
+      authResponse,
+      activeSessionId,
+      sessionRegenerated: _sessionManager != null,
+    );
   }
 
   /// Logs in user with remember me and stores in specific session
@@ -204,10 +212,12 @@ class WebGuard extends Guard {
     bool remember = false,
   }) async {
     final authResponse = await loginWithSessionId(user, sessionId);
+    final activeSessionId =
+        authResponse.metadata?['session_id']?.toString() ?? sessionId;
 
     if (remember && _sessionManager != null) {
       final rememberToken = await _generateRememberToken(user);
-      await _storeRememberTokenInSessionById(sessionId, rememberToken);
+      await _storeRememberTokenInSessionById(activeSessionId, rememberToken);
     }
 
     return authResponse;
@@ -219,7 +229,29 @@ class WebGuard extends Guard {
   Future<void> logoutWithSessionId(String sessionId) async {
     if (_sessionManager != null) {
       await _clearUserFromSession(sessionId);
+      // Rotate session identifier after privilege downgrade (logout).
+      await _sessionManager.regenerateSession(sessionId);
     }
+  }
+
+  AuthResponse _withSessionMetadata(
+    AuthResponse authResponse,
+    String sessionId, {
+    required bool sessionRegenerated,
+  }) {
+    return AuthResponse(
+      user: authResponse.user,
+      accessToken: authResponse.accessToken,
+      refreshToken: authResponse.refreshToken,
+      tokenType: authResponse.tokenType,
+      expiresIn: authResponse.expiresIn,
+      refreshExpiresIn: authResponse.refreshExpiresIn,
+      metadata: {
+        ...?authResponse.metadata,
+        'session_id': sessionId,
+        'session_regenerated': sessionRegenerated,
+      },
+    );
   }
 
   /// Gets user ID from session
@@ -248,7 +280,10 @@ class WebGuard extends Guard {
     if (_sessionManager == null) return;
 
     await _sessionManager.setSessionValue(
-        sessionId, _sessionRememberKey, token);
+      sessionId,
+      _sessionRememberKey,
+      token,
+    );
   }
 
   /// Clears user from session
