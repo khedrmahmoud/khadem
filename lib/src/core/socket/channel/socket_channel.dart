@@ -21,10 +21,7 @@ class SocketChannel {
   SocketChannel(this.name);
 
   /// Register an event handler.
-  void on(
-    String event,
-    SocketEventHandler handler,
-  ) {
+  void on(String event, SocketEventHandler handler) {
     _handlers[event] = SocketEventEntry(handler);
   }
 

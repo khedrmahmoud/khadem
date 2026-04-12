@@ -42,24 +42,26 @@ class ObjectTestRule extends Rule {
 
 void main() {
   group('Flexible InputValidator', () {
-    test('should support List<dynamic> rules with mixed strings and objects',
-        () async {
-      final validator = InputValidator(
-        {'age': 25, 'name': 'John'},
-        {
-          'age': ['required', ObjectTestRule(20)], // 25 > 20, should fail
-          'name': ['required', AsyncTestRule()],
-        },
-      );
+    test(
+      'should support List<dynamic> rules with mixed strings and objects',
+      () async {
+        final validator = InputValidator(
+          {'age': 25, 'name': 'John'},
+          {
+            'age': ['required', ObjectTestRule(20)], // 25 > 20, should fail
+            'name': ['required', AsyncTestRule()],
+          },
+        );
 
-      expect(await validator.passes(), isFalse);
-      expect(validator.errors, contains('age'));
-      expect(
-        validator.errors['age'],
-        contains('max_error'),
-      ); // Assuming default formatting uses key
-      expect(validator.errors, isNot(contains('name')));
-    });
+        expect(await validator.passes(), isFalse);
+        expect(validator.errors, contains('age'));
+        expect(
+          validator.errors['age'],
+          contains('max_error'),
+        ); // Assuming default formatting uses key
+        expect(validator.errors, isNot(contains('name')));
+      },
+    );
 
     test('should support async rules', () async {
       final validator = InputValidator(
@@ -92,10 +94,7 @@ void main() {
 
     test('should support RuleBuilder', () async {
       final rules = RuleBuilder().required().min(5).build();
-      final validator = InputValidator(
-        {'name': 'abc'},
-        {'name': rules},
-      );
+      final validator = InputValidator({'name': 'abc'}, {'name': rules});
       expect(await validator.passes(), isFalse);
       // 'abc' is length 3, min(5) fails. required passes.
       expect(validator.errors['name']?.length, equals(1));

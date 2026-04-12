@@ -9,10 +9,8 @@ class DatabaseSessionDriver implements SessionDriver {
   final DatabaseConnection _connection;
   final String _tableName;
 
-  DatabaseSessionDriver(
-    this._connection, {
-    String tableName = 'sessions',
-  }) : _tableName = tableName;
+  DatabaseSessionDriver(this._connection, {String tableName = 'sessions'})
+    : _tableName = tableName;
 
   @override
   Future<void> write(String sessionId, Map<String, dynamic> data) async {
@@ -20,12 +18,14 @@ class DatabaseSessionDriver implements SessionDriver {
     final lastActivity =
         data['last_activity'] ?? DateTime.now().toIso8601String();
 
-    final queryBuilder =
-        _connection.queryBuilder<Map<String, dynamic>>(_tableName);
+    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(
+      _tableName,
+    );
 
     // Check if session exists
-    final exists =
-        await queryBuilder.where('session_id', '=', sessionId).exists();
+    final exists = await queryBuilder
+        .where('session_id', '=', sessionId)
+        .exists();
 
     if (exists) {
       // Update existing session
@@ -45,8 +45,9 @@ class DatabaseSessionDriver implements SessionDriver {
 
   @override
   Future<Map<String, dynamic>?> read(String sessionId) async {
-    final queryBuilder =
-        _connection.queryBuilder<Map<String, dynamic>>(_tableName);
+    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(
+      _tableName,
+    );
 
     final result = await queryBuilder
         .select(['payload'])
@@ -68,8 +69,9 @@ class DatabaseSessionDriver implements SessionDriver {
 
   @override
   Future<void> delete(String sessionId) async {
-    final queryBuilder =
-        _connection.queryBuilder<Map<String, dynamic>>(_tableName);
+    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(
+      _tableName,
+    );
 
     await queryBuilder.where('session_id', '=', sessionId).delete();
   }
@@ -77,8 +79,9 @@ class DatabaseSessionDriver implements SessionDriver {
   @override
   Future<void> cleanup(Duration maxAge) async {
     final cutoffTime = DateTime.now().subtract(maxAge);
-    final queryBuilder =
-        _connection.queryBuilder<Map<String, dynamic>>(_tableName);
+    final queryBuilder = _connection.queryBuilder<Map<String, dynamic>>(
+      _tableName,
+    );
 
     await queryBuilder
         .where('last_activity', '<', cutoffTime.toIso8601String())
@@ -95,7 +98,8 @@ class DatabaseSessionDriver implements SessionDriver {
   /// updated to use the SchemaBuilder for better database abstraction.
   Future<void> createTable() async {
     // Use database-agnostic SQL that works across different database types
-    final createTableSql = '''
+    final createTableSql =
+        '''
       CREATE TABLE IF NOT EXISTS $_tableName (
         session_id VARCHAR(255) PRIMARY KEY,
         payload TEXT NOT NULL,

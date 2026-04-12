@@ -15,8 +15,8 @@ abstract class MorphOneOrMany<Related extends KhademModel<Related>, Parent>
     this.morphTypeField,
     this.morphIdField,
     String localKey,
-  )   : morphType = parent.runtimeType.toString(),
-        super(query, parent, relatedFactory, morphIdField, localKey);
+  ) : morphType = parent.runtimeType.toString(),
+      super(query, parent, relatedFactory, morphIdField, localKey);
 
   @override
   void addConstraints() {

@@ -139,11 +139,7 @@ abstract class EventSystemInterface {
   /// ```dart
   /// await events.emit('user.updated', {'userId': 123, 'changes': {...}});
   /// ```
-  Future<void> emit(
-    String event, [
-    dynamic payload,
-    bool queue = false,
-  ]);
+  Future<void> emit(String event, [dynamic payload, bool queue = false]);
 
   /// Emits all events within a named group.
   ///

@@ -22,10 +22,10 @@ class EmailJob extends QueueJob with SerializableJob {
 
   @override
   Map<String, dynamic> toJson() => {
-        'email': email,
-        'subject': subject,
-        'body': body,
-      };
+    'email': email,
+    'subject': subject,
+    'body': body,
+  };
 
   @override
   Future<void> handle() async {
@@ -58,10 +58,10 @@ class PaymentJob extends SerializableQueueJob {
 
   @override
   Map<String, dynamic> toJson() => {
-        'orderId': orderId,
-        'amount': amount,
-        'currency': currency,
-      };
+    'orderId': orderId,
+    'amount': amount,
+    'currency': currency,
+  };
 
   @override
   Future<void> handle() async {
@@ -94,10 +94,10 @@ class DataProcessingJob extends SerializableQueueJob {
 
   @override
   Map<String, dynamic> toJson() => {
-        'items': items,
-        'config': config,
-        'scheduledAt': scheduledAt.toIso8601String(),
-      };
+    'items': items,
+    'config': config,
+    'scheduledAt': scheduledAt.toIso8601String(),
+  };
 
   @override
   Future<void> handle() async {
@@ -131,10 +131,7 @@ class NotificationJob extends SerializableQueueJob {
 
   @override
   Map<String, dynamic> toJson() {
-    final data = <String, dynamic>{
-      'userId': userId,
-      'message': message,
-    };
+    final data = <String, dynamic>{'userId': userId, 'message': message};
 
     if (title != null) data['title'] = title;
     if (metadata != null) data['metadata'] = metadata;
@@ -155,11 +152,7 @@ class NotificationJob extends SerializableQueueJob {
 void main() {
   group('SerializableJob Mixin', () {
     test('should serialize job to JSON', () {
-      final job = EmailJob(
-        'test@example.com',
-        'Welcome',
-        'Hello World',
-      );
+      final job = EmailJob('test@example.com', 'Welcome', 'Hello World');
 
       final json = job.toJson();
 
@@ -231,11 +224,7 @@ void main() {
     });
 
     test('should deserialize job from JSON', () {
-      final json = {
-        'orderId': 'ORD-456',
-        'amount': 149.99,
-        'currency': 'GBP',
-      };
+      final json = {'orderId': 'ORD-456', 'amount': 149.99, 'currency': 'GBP'};
 
       final job = PaymentJob.fromJson(json);
 
@@ -245,10 +234,7 @@ void main() {
     });
 
     test('should use default values for optional parameters', () {
-      final json = {
-        'orderId': 'ORD-789',
-        'amount': 25.00,
-      };
+      final json = {'orderId': 'ORD-789', 'amount': 25.00};
 
       final job = PaymentJob.fromJson(json);
 
@@ -269,11 +255,7 @@ void main() {
     });
 
     test('should execute job after deserialization', () async {
-      final json = {
-        'orderId': 'ORD-111',
-        'amount': 50.00,
-        'currency': 'USD',
-      };
+      final json = {'orderId': 'ORD-111', 'amount': 50.00, 'currency': 'USD'};
 
       final job = PaymentJob.fromJson(json);
       await job.handle();
@@ -320,11 +302,7 @@ void main() {
     test('should serialize Maps', () {
       final job = DataProcessingJob(
         ['item'],
-        {
-          'threshold': 100,
-          'enabled': true,
-          'name': 'test',
-        },
+        {'threshold': 100, 'enabled': true, 'name': 'test'},
         DateTime(2024),
       );
 
@@ -338,10 +316,7 @@ void main() {
     test('should deserialize Maps', () {
       final json = {
         'items': ['test'],
-        'config': {
-          'retries': 3,
-          'timeout': 30,
-        },
+        'config': {'retries': 3, 'timeout': 30},
         'scheduledAt': '2024-01-01T00:00:00.000',
       };
 
@@ -382,9 +357,7 @@ void main() {
         ['item1', 'item2'],
         {
           'nested': {
-            'deep': {
-              'value': 42,
-            },
+            'deep': {'value': 42},
           },
           'list': [1, 2, 3],
         },
@@ -446,10 +419,7 @@ void main() {
     });
 
     test('should deserialize with only required fields', () {
-      final json = {
-        'userId': 'user-000',
-        'message': 'Minimal message',
-      };
+      final json = {'userId': 'user-000', 'message': 'Minimal message'};
 
       final job = NotificationJob.fromJson(json);
 
@@ -460,10 +430,7 @@ void main() {
     });
 
     test('should handle null values in serialization round-trip', () {
-      final original = NotificationJob(
-        'user-111',
-        'Message',
-      );
+      final original = NotificationJob('user-111', 'Message');
 
       final json = original.toJson();
       final restored = NotificationJob.fromJson(json);
@@ -545,11 +512,7 @@ void main() {
 
   group('Job Execution After Serialization', () {
     test('should maintain job behavior after serialization', () async {
-      final original = EmailJob(
-        'test@example.com',
-        'Subject',
-        'Body',
-      );
+      final original = EmailJob('test@example.com', 'Subject', 'Body');
 
       // Serialize
       final json = original.toJson();

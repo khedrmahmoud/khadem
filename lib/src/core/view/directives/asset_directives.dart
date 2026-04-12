@@ -76,8 +76,10 @@ class JsDirective implements ViewDirective {
 }
 
 class InlineCssDirective implements ViewDirective {
-  static final _inlineCssRegex =
-      RegExp(r'@inlineCss\s*\(\s*(.+?)\s*\)(.*?)@endInlineCss', dotAll: true);
+  static final _inlineCssRegex = RegExp(
+    r'@inlineCss\s*\(\s*(.+?)\s*\)(.*?)@endInlineCss',
+    dotAll: true,
+  );
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
@@ -92,8 +94,10 @@ class InlineCssDirective implements ViewDirective {
 }
 
 class InlineJsDirective implements ViewDirective {
-  static final _inlineJsRegex =
-      RegExp(r'@inlineJs\s*\(\s*(.+?)\s*\)(.*?)@endInlineJs', dotAll: true);
+  static final _inlineJsRegex = RegExp(
+    r'@inlineJs\s*\(\s*(.+?)\s*\)(.*?)@endInlineJs',
+    dotAll: true,
+  );
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {

@@ -23,18 +23,13 @@ abstract class SessionDriver {
 /// Defines the contract for session management operations.
 abstract class ISessionManager {
   /// Create a new session
-  Future<String> createSession([
-    Map<String, dynamic> initialData = const {},
-  ]);
+  Future<String> createSession([Map<String, dynamic> initialData = const {}]);
 
   /// Get session data
   Future<Map<String, dynamic>?> getSession(String sessionId);
 
   /// Update session data
-  Future<void> updateSession(
-    String sessionId,
-    Map<String, dynamic> newData,
-  );
+  Future<void> updateSession(String sessionId, Map<String, dynamic> newData);
 
   /// Get session value
   Future<dynamic> getSessionValue(String sessionId, String key);

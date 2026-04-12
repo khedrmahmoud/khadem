@@ -16,19 +16,21 @@ class RouteHandler {
         final result = await exceptionHandler.handle(e, stackTrace);
 
         if (!res.sent) {
-          res.status(result.statusCode).problem(
-            title: result.title,
-            status: result.statusCode,
-            detail: result.message,
-            type: result.type,
-            instance: result.instance,
-            extensions: {
-              if (result.details != null) 'details': result.details,
-              if (result.stackTrace != null)
-                'stack_trace': result.stackTrace.toString(),
-              ...result.extensions,
-            },
-          );
+          res
+              .status(result.statusCode)
+              .problem(
+                title: result.title,
+                status: result.statusCode,
+                detail: result.message,
+                type: result.type,
+                instance: result.instance,
+                extensions: {
+                  if (result.details != null) 'details': result.details,
+                  if (result.stackTrace != null)
+                    'stack_trace': result.stackTrace.toString(),
+                  ...result.extensions,
+                },
+              );
         }
       }
     };

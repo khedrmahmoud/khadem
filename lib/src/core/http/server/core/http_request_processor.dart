@@ -44,18 +44,16 @@ class HttpRequestProcessor {
 
     // Execute route-specific middleware and then the handler
     // We use the optimized static execute method to avoid allocations
-    await MiddlewarePipeline.execute(
-      match.middleware,
-      req,
-      res,
-      (request, response) {
-        if (response is! Response) {
-          throw StateError(
-            'HTTP route handlers require a concrete Response instance.',
-          );
-        }
-        return match.handler(request, response);
-      },
-    );
+    await MiddlewarePipeline.execute(match.middleware, req, res, (
+      request,
+      response,
+    ) {
+      if (response is! Response) {
+        throw StateError(
+          'HTTP route handlers require a concrete Response instance.',
+        );
+      }
+      return match.handler(request, response);
+    });
   }
 }

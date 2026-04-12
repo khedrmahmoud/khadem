@@ -15,20 +15,16 @@ import '../../core/session/session_manager.dart';
 class SessionMiddleware extends Middleware {
   final SessionManager _sessionManager;
 
-  SessionMiddleware({
-    SessionManager? sessionManager,
-  })  : _sessionManager = sessionManager ?? _createDefaultSessionManager(),
-        super(_handleSession);
+  SessionMiddleware({SessionManager? sessionManager})
+    : _sessionManager = sessionManager ?? _createDefaultSessionManager(),
+      super(_handleSession);
 
   /// Creates a default session manager with file-based storage
   static SessionManager _createDefaultSessionManager() {
     final registry = SessionDriverRegistry();
     final fileDriver = FileSessionDriver('storage/sessions');
     registry.registerDriver('file', fileDriver);
-    return SessionManager(
-      driverRegistry: registry,
-      driverName: 'file',
-    );
+    return SessionManager(driverRegistry: registry, driverName: 'file');
   }
 
   /// Handles session management for the request
@@ -114,10 +110,7 @@ class CookieMiddleware extends Middleware {
 
     // Add cookie helper methods to request (HTTP only)
     if (res is Response) {
-      req.setAttribute(
-        'response_cookies',
-        Cookies.response(res.raw.response),
-      );
+      req.setAttribute('response_cookies', Cookies.response(res.raw.response));
     }
 
     // Continue to next middleware/route handler

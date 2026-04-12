@@ -13,10 +13,7 @@ class MySQLSchemaBuilder implements SchemaBuilder {
 
     final columnSQLs = blueprint.columns.map(_columnToSQL).toList();
     final constraints = _generateConstraints(blueprint, tableName);
-    final fullSQL = [
-      ...columnSQLs,
-      ...constraints,
-    ].join(', ');
+    final fullSQL = [...columnSQLs, ...constraints].join(', ');
 
     _queries.add('CREATE TABLE `$tableName` ($fullSQL);');
   }
@@ -143,10 +140,7 @@ class MySQLSchemaBuilder implements SchemaBuilder {
   }
 
   /// Handles indexes and foreign keys separately
-  List<String> _generateConstraints(
-    Blueprint blueprint,
-    String tableName,
-  ) {
+  List<String> _generateConstraints(Blueprint blueprint, String tableName) {
     final constraints = <String>[];
 
     for (final column in blueprint.columns) {
@@ -282,10 +276,7 @@ class MySQLSchemaBuilder implements SchemaBuilder {
 
     final columnSQLs = blueprint.columns.map(_columnToSQL).toList();
     final constraints = _generateConstraints(blueprint, tableName);
-    final fullSQL = [
-      ...columnSQLs,
-      ...constraints,
-    ].join(', ');
+    final fullSQL = [...columnSQLs, ...constraints].join(', ');
 
     _queries.add('CREATE TABLE IF NOT EXISTS `$tableName` ($fullSQL);');
   }

@@ -11,7 +11,7 @@ class SocketManager {
   final SocketAdapter _adapter;
 
   SocketManager({SocketAdapter? adapter})
-      : _adapter = adapter ?? InMemorySocketAdapter();
+    : _adapter = adapter ?? InMemorySocketAdapter();
 
   /// Add a new client to the manager.
   void addClient(SocketClient client) {

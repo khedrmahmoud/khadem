@@ -74,10 +74,7 @@ class QueueConfigLoader implements IQueueConfigLoader {
       case 'file':
       case 'file_storage':
         final path = settings['path'] as String? ?? './storage/queue';
-        return FileStorageDriver(
-          config: config,
-          storagePath: path,
-        );
+        return FileStorageDriver(config: config, storagePath: path);
 
       case 'redis':
       case 'redis_storage':

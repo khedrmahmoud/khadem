@@ -31,8 +31,9 @@ void main() {
       // Register dummy logger to avoid Service Not Found error
       ContainerProvider.instance.singleton<Logger>((_) => DummyLogger());
       // Register ExceptionHandler
-      ContainerProvider.instance
-          .singleton<ExceptionHandlerContract>((_) => ExceptionHandler());
+      ContainerProvider.instance.singleton<ExceptionHandlerContract>(
+        (_) => ExceptionHandler(),
+      );
       // Register Env
       ContainerProvider.instance.singleton<EnvInterface>((_) => DummyEnv());
 
@@ -67,8 +68,9 @@ void main() {
 
       ws.add(jsonEncode({'event': 'ping', 'data': {}}));
 
-      final response =
-          await completer.future.timeout(const Duration(seconds: 2));
+      final response = await completer.future.timeout(
+        const Duration(seconds: 2),
+      );
       expect(response['event'], equals('pong'));
       expect(response['data']['message'], equals('pong'));
 
@@ -80,11 +82,9 @@ void main() {
         router.channel('/').on('join', (context) {
           context.client.joinRoom('test_room');
           // Broadcast to everyone in the room
-          manager.broadcastToRoom(
-            'test_room',
-            'new_user',
-            {'id': context.client.id},
-          );
+          manager.broadcastToRoom('test_room', 'new_user', {
+            'id': context.client.id,
+          });
         });
       });
 
@@ -119,8 +119,10 @@ void main() {
     test('should enforce maxMessageBytes', () async {
       await server.stop();
       manager = SocketManager();
-      const config =
-          SocketConfig(port: 0, maxMessageBytes: 10); // Very small limit
+      const config = SocketConfig(
+        port: 0,
+        maxMessageBytes: 10,
+      ); // Very small limit
       server = SocketServer(config, manager: manager);
       await server.start();
 
@@ -139,8 +141,9 @@ void main() {
         }),
       );
 
-      final response =
-          await completer.future.timeout(const Duration(seconds: 2));
+      final response = await completer.future.timeout(
+        const Duration(seconds: 2),
+      );
       expect(response['event'], equals('error'));
       expect(response['data']['status'], equals(413)); // Payload Too Large
 

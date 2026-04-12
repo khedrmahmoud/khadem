@@ -16,7 +16,7 @@ class QueueWorkerConfig {
   final void Function(QueueJob job)? onJobStart;
   final void Function(QueueJob job, dynamic result)? onJobComplete;
   final void Function(QueueJob job, dynamic error, StackTrace stack)?
-      onJobError;
+  onJobError;
   final void Function()? onShutdown;
   final FailedJobHandler? failedJobHandler;
 
@@ -186,9 +186,9 @@ class QueueWorkerPool {
     required QueueDriver driver,
     int workerCount = 4,
     QueueWorkerConfig? config,
-  })  : _driver = driver,
-        _workerCount = workerCount,
-        _config = config ?? const QueueWorkerConfig();
+  }) : _driver = driver,
+       _workerCount = workerCount,
+       _config = config ?? const QueueWorkerConfig();
 
   /// Start the worker pool
   Future<void> start() async {

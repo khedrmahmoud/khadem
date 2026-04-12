@@ -12,8 +12,10 @@ class Blueprint {
 
   /// Primary Auto-Increment ID
   ColumnDefinition id([String name = 'id']) {
-    final col =
-        ColumnDefinition(name, 'BIGINT').primary().autoIncrement().unsigned();
+    final col = ColumnDefinition(
+      name,
+      'BIGINT',
+    ).primary().autoIncrement().unsigned();
     columns.add(col);
     return col;
   }

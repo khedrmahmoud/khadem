@@ -38,7 +38,7 @@ class MailManager implements MailerInterface {
   MailAddress? _defaultFrom;
 
   MailManager(this._config, {QueueManager? queueManager})
-      : _queueManager = queueManager {
+    : _queueManager = queueManager {
     _loadConfiguration();
   }
 
@@ -123,10 +123,7 @@ class MailManager implements MailerInterface {
   MailerInterface html(String content) => defaultMailer.html(content);
 
   @override
-  Future<MailerInterface> view(
-    String viewName, [
-    Map<String, dynamic>? data,
-  ]) =>
+  Future<MailerInterface> view(String viewName, [Map<String, dynamic>? data]) =>
       defaultMailer.view(viewName, data);
 
   @override
@@ -134,11 +131,7 @@ class MailManager implements MailerInterface {
       defaultMailer.attach(path, name: name, mimeType: mimeType);
 
   @override
-  MailerInterface attachData(
-    List<int> data,
-    String name, {
-    String? mimeType,
-  }) =>
+  MailerInterface attachData(List<int> data, String name, {String? mimeType}) =>
       defaultMailer.attachData(data, name, mimeType: mimeType);
 
   @override

@@ -78,7 +78,6 @@ void main() {
       final customHandler = SessionCookieHandler(
         cookieName: 'custom_session',
         defaultMaxAge: const Duration(hours: 12),
-        secure: true,
         httpOnly: false,
         sameSite: 'strict',
         domain: 'example.com',

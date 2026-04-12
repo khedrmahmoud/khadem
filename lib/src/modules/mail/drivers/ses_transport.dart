@@ -27,7 +27,7 @@ class SesTransport implements TransportInterface {
   final http.Client _client;
 
   SesTransport(this._config, {http.Client? client})
-      : _client = client ?? http.Client();
+    : _client = client ?? http.Client();
 
   @override
   String get name => 'ses';
@@ -44,9 +44,7 @@ class SesTransport implements TransportInterface {
       // Build request payload
       final payload = {
         'Content': {
-          'Raw': {
-            'Data': base64Encode(utf8.encode(emailContent)),
-          },
+          'Raw': {'Data': base64Encode(utf8.encode(emailContent))},
         },
         if (_config.configurationSet != null)
           'ConfigurationSetName': _config.configurationSet,
@@ -91,10 +89,7 @@ class SesTransport implements TransportInterface {
         'https://email.${_config.region}.amazonaws.com/v2/email/account',
       );
 
-      final response = await _client.get(
-        url,
-        headers: _buildHeaders({}),
-      );
+      final response = await _client.get(url, headers: _buildHeaders({}));
 
       return response.statusCode == 200;
     } catch (e) {

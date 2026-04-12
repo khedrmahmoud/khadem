@@ -50,10 +50,7 @@ void main() {
       };
 
       expect(
-        validator.isExpired(
-          dataWithInvalidActivity,
-          const Duration(hours: 24),
-        ),
+        validator.isExpired(dataWithInvalidActivity, const Duration(hours: 24)),
         isFalse,
       );
     });

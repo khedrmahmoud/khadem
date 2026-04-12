@@ -20,10 +20,7 @@ class SocketContext {
   /// Context-specific attributes (local to this message processing).
   final Map<String, dynamic> _attributes = {};
 
-  SocketContext({
-    required this.client,
-    required this.packet,
-  }) {
+  SocketContext({required this.client, required this.packet}) {
     // Initialize attributes with message data for convenience
     _attributes['__event'] = packet.event;
     _attributes['__data'] = packet.data;

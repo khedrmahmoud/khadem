@@ -246,10 +246,7 @@ abstract class QueryBuilderInterface<T> {
   ]);
 
   /// Process results in chunks
-  Future<void> chunk(
-    int size,
-    Future<void> Function(List<T> items) callback,
-  );
+  Future<void> chunk(int size, Future<void> Function(List<T> items) callback);
 
   /// Process results in chunks by ID (more efficient for large datasets)
   Future<void> chunkById(
@@ -265,10 +262,7 @@ abstract class QueryBuilderInterface<T> {
   // ---------------------------- Advanced Pagination & Locking ----------------------------
 
   /// Simple pagination without total count (faster)
-  Future<Map<String, dynamic>> simplePaginate({
-    int perPage = 15,
-    int page = 1,
-  });
+  Future<Map<String, dynamic>> simplePaginate({int perPage = 15, int page = 1});
 
   /// Cursor-based pagination for efficient large dataset navigation
   Future<Map<String, dynamic>> cursorPaginate({

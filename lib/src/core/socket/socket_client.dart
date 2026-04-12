@@ -91,12 +91,7 @@ class SocketClient {
   }
 
   /// Acknowledge a received event with optional data.
-  void ack(
-    String id, {
-    required String event,
-    int status = 200,
-    dynamic data,
-  }) {
+  void ack(String id, {required String event, int status = 200, dynamic data}) {
     sendPacket(
       SocketPacket(
         event: 'ack',

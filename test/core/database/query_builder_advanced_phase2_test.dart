@@ -230,10 +230,7 @@ void main() {
       });
 
       test('handles empty rows', () async {
-        final affected = await queryBuilder.upsert(
-          [],
-          uniqueBy: ['email'],
-        );
+        final affected = await queryBuilder.upsert([], uniqueBy: ['email']);
 
         expect(affected, equals(0));
       });
@@ -550,9 +547,10 @@ void main() {
     });
 
     test('clone preserves all new features', () {
-      queryBuilder
-          .join('posts', 'users.id', '=', 'posts.user_id')
-          .whereIn('status', ['active']).sharedLock();
+      queryBuilder.join('posts', 'users.id', '=', 'posts.user_id').whereIn(
+        'status',
+        ['active'],
+      ).sharedLock();
 
       final cloned = queryBuilder.clone();
       final originalSql = queryBuilder.toSql();

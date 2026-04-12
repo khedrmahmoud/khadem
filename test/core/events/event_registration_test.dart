@@ -30,14 +30,20 @@ void main() {
       });
 
       test('should default once to false', () {
-        final reg =
-            EventRegistration((payload) async {}, EventPriority.normal, false);
+        final reg = EventRegistration(
+          (payload) async {},
+          EventPriority.normal,
+          false,
+        );
         expect(reg.once, isFalse);
       });
 
       test('should default removed to false', () {
-        final reg =
-            EventRegistration((payload) async {}, EventPriority.normal, false);
+        final reg = EventRegistration(
+          (payload) async {},
+          EventPriority.normal,
+          false,
+        );
         expect(reg.removed, isFalse);
       });
     });
@@ -100,10 +106,16 @@ void main() {
         ];
 
         for (var i = 0; i < priorities.length - 1; i++) {
-          final lower =
-              EventRegistration((payload) async {}, priorities[i], false);
-          final higher =
-              EventRegistration((payload) async {}, priorities[i + 1], false);
+          final lower = EventRegistration(
+            (payload) async {},
+            priorities[i],
+            false,
+          );
+          final higher = EventRegistration(
+            (payload) async {},
+            priorities[i + 1],
+            false,
+          );
 
           expect(lower.compareTo(higher), greaterThan(0));
           expect(higher.compareTo(lower), lessThan(0));

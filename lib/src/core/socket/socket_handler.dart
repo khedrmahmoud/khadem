@@ -22,11 +22,11 @@ class SocketHandler {
     required SocketManager manager,
     required SocketRouter router,
     int? maxMessageBytes,
-  })  : _client = client,
-        _manager = manager,
-        _router = router,
-        _exceptionHandler = resolve<ExceptionHandlerContract>(),
-        _maxMessageBytes = maxMessageBytes;
+  }) : _client = client,
+       _manager = manager,
+       _router = router,
+       _exceptionHandler = resolve<ExceptionHandlerContract>(),
+       _maxMessageBytes = maxMessageBytes;
 
   void init() {
     _client.socket.listen(

@@ -277,8 +277,7 @@ class FakeResponse implements Response {
     bool httpOnly = false,
     bool secure = false,
     String? sameSite,
-  }) =>
-      this;
+  }) => this;
 
   @override
   Response gzip() => this;
@@ -389,8 +388,7 @@ class FakeResponse implements Response {
     String? exposeHeaders,
     bool allowCredentials = false,
     int? maxAge,
-  }) =>
-      this;
+  }) => this;
 
   @override
   Response security({
@@ -399,8 +397,7 @@ class FakeResponse implements Response {
     bool enableXFrameOptions = true,
     bool enableXContentTypeOptions = true,
     String? cspPolicy,
-  }) =>
-      this;
+  }) => this;
 
   @override
   Response cache(String value) => this;
@@ -417,9 +414,9 @@ class FakeResponse implements Response {
 
 class MockRouteMatchResult extends RouteMatchResult {
   MockRouteMatchResult(Map<String, String> params)
-      : super(
-          handler: (Request req, Response res) async {},
-          params: params,
-          middleware: [],
-        );
+    : super(
+        handler: (Request req, Response res) async {},
+        params: params,
+        middleware: [],
+      );
 }

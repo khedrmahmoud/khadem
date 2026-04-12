@@ -36,16 +36,18 @@ void main() {
         expect(config.get<String>('app.name'), equals('TestApp'));
       });
 
-      test('should throw ConfigException for non-existent config directory',
-          () {
-        expect(
-          () => ConfigSystem(
-            configPath: '${tempDir.path}/non_existent',
-            environment: 'production',
-          ),
-          throwsA(isA<ConfigException>()),
-        );
-      });
+      test(
+        'should throw ConfigException for non-existent config directory',
+        () {
+          expect(
+            () => ConfigSystem(
+              configPath: '${tempDir.path}/non_existent',
+              environment: 'production',
+            ),
+            throwsA(isA<ConfigException>()),
+          );
+        },
+      );
 
       test('should handle empty config directory', () {
         final config = ConfigSystem(
@@ -638,10 +640,7 @@ void main() {
           ..writeAsStringSync('{invalid json}');
 
         expect(
-          () => ConfigSystem(
-            configPath: configPath,
-            environment: 'production',
-          ),
+          () => ConfigSystem(configPath: configPath, environment: 'production'),
           throwsA(isA<FormatException>()),
         );
       });
@@ -652,10 +651,7 @@ void main() {
           ..writeAsStringSync('name: TestApp');
 
         expect(
-          () => ConfigSystem(
-            configPath: configPath,
-            environment: 'production',
-          ),
+          () => ConfigSystem(configPath: configPath, environment: 'production'),
           throwsA(isA<ConfigException>()),
         );
       });

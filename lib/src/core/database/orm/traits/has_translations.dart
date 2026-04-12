@@ -158,8 +158,9 @@ mixin HasTranslations {
   bool isTranslationComplete(String locale) {
     if (translatableFields.isEmpty) return true;
     final localeTranslations = translations[locale] ?? {};
-    return translatableFields
-        .every((field) => localeTranslations.containsKey(field));
+    return translatableFields.every(
+      (field) => localeTranslations.containsKey(field),
+    );
   }
 
   /// Get missing translation fields for a locale

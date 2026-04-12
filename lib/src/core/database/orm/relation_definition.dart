@@ -65,8 +65,10 @@ class RelationDefinition<T extends KhademModel<T>> {
   });
 
   Relation<T, KhademModel> toRelation(KhademModel parent, String relationName) {
-    final q = Khadem.db
-        .table(relatedTable, modelFactory: (data) => factory()..fromJson(data));
+    final q = Khadem.db.table(
+      relatedTable,
+      modelFactory: (data) => factory()..fromJson(data),
+    );
     if (query != null) {
       query!(q);
     }

@@ -91,12 +91,11 @@ class Request {
     String key, {
     String separator = ',',
     List<String>? defaultValue,
-  }) =>
-      _metadata.queryList(
-        key,
-        separator: separator,
-        defaultValue: defaultValue,
-      );
+  }) => _metadata.queryList(
+    key,
+    separator: separator,
+    defaultValue: defaultValue,
+  );
 
   /// Gets a query parameter with custom parsing function.
   T? queryWith<T>(String key, T? Function(String) parser, {T? defaultValue}) =>
@@ -223,15 +222,13 @@ class Request {
   Future<Map<String, dynamic>> validate(
     Map<String, dynamic> rules, {
     Map<String, String>? messages,
-  }) =>
-      _validator.validateBody(rules, messages: messages);
+  }) => _validator.validateBody(rules, messages: messages);
 
   /// Validates specific data
   Future<Map<String, dynamic>> validateData(
     Map<String, dynamic> data,
     Map<String, dynamic> rules,
-  ) =>
-      _validator.validateData(data, rules);
+  ) => _validator.validateData(data, rules);
 
   // ===== Path Parameters =====
 

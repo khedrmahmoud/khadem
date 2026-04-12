@@ -114,9 +114,7 @@ class StartsWithRule extends Rule implements RuleMessageParametersProvider {
 
   @override
   Map<String, dynamic> messageParameters(ValidationContext context) {
-    return {
-      'values': context.parameters.join(', '),
-    };
+    return {'values': context.parameters.join(', ')};
   }
 }
 
@@ -146,9 +144,7 @@ class EndsWithRule extends Rule implements RuleMessageParametersProvider {
 
   @override
   Map<String, dynamic> messageParameters(ValidationContext context) {
-    return {
-      'values': context.parameters.join(', '),
-    };
+    return {'values': context.parameters.join(', ')};
   }
 }
 

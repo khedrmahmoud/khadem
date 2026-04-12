@@ -98,11 +98,11 @@ class CacheManager implements ICacheManager {
     required ICacheTagManager tagManager,
     required ICacheConfigLoader configLoader,
     required ICacheValidator validator,
-  })  : _driverRegistry = driverRegistry,
-        _statisticsManager = statisticsManager,
-        _tagManager = tagManager,
-        _configLoader = configLoader,
-        _validator = validator;
+  }) : _driverRegistry = driverRegistry,
+       _statisticsManager = statisticsManager,
+       _tagManager = tagManager,
+       _configLoader = configLoader,
+       _validator = validator;
 
   /// Registers a cache driver with the given name.
   ///

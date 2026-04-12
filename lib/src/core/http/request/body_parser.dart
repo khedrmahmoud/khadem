@@ -79,26 +79,29 @@ class BodyParser {
     final completer = Completer<String>();
     final buffer = StringBuffer();
 
-    _raw.cast<List<int>>().transform(utf8.decoder).listen(
-      (chunk) {
-        bytesRead += chunk.length;
-        if (bytesRead > maxBodySize) {
-          throw const FormatException('Request body too large');
-        }
-        buffer.write(chunk);
-      },
-      onError: (Object e) {
-        if (!completer.isCompleted) {
-          completer.completeError(e);
-        }
-      },
-      onDone: () {
-        if (!completer.isCompleted) {
-          completer.complete(buffer.toString());
-        }
-      },
-      cancelOnError: true,
-    );
+    _raw
+        .cast<List<int>>()
+        .transform(utf8.decoder)
+        .listen(
+          (chunk) {
+            bytesRead += chunk.length;
+            if (bytesRead > maxBodySize) {
+              throw const FormatException('Request body too large');
+            }
+            buffer.write(chunk);
+          },
+          onError: (Object e) {
+            if (!completer.isCompleted) {
+              completer.completeError(e);
+            }
+          },
+          onDone: () {
+            if (!completer.isCompleted) {
+              completer.complete(buffer.toString());
+            }
+          },
+          cancelOnError: true,
+        );
 
     return completer.future;
   }

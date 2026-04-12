@@ -27,8 +27,10 @@ class ForDirective implements ViewDirective {
           ];
 
           for (var pattern in variablePatterns) {
-            rendered =
-                rendered.replaceAllMapped(pattern, (_) => item.toString());
+            rendered = rendered.replaceAllMapped(
+              pattern,
+              (_) => item.toString(),
+            );
           }
 
           buffer.write(rendered);

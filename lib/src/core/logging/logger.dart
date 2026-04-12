@@ -31,9 +31,9 @@ class Logger implements LoggerContract {
   Logger({
     LogLevel minimumLevel = LogLevel.debug,
     LogChannelManager? channelManager,
-  })  : _channelManager = channelManager ?? LogChannelManager(),
-        _minimumLevel = minimumLevel,
-        _defaultChannel = 'app';
+  }) : _channelManager = channelManager ?? LogChannelManager(),
+       _minimumLevel = minimumLevel,
+       _defaultChannel = 'app';
 
   @override
   LogLevel get minimumLevel => _minimumLevel;

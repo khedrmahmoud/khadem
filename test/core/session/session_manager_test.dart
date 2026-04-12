@@ -79,16 +79,20 @@ void main() {
 
       // Get values
       final userId = await sessionManager.getSessionValue(sessionId, 'user_id');
-      final username =
-          await sessionManager.getSessionValue(sessionId, 'username');
+      final username = await sessionManager.getSessionValue(
+        sessionId,
+        'username',
+      );
 
       expect(userId, equals(456));
       expect(username, equals('johndoe'));
     });
 
     test('should remove session values', () async {
-      final sessionId = await sessionManager
-          .createSession({'key1': 'value1', 'key2': 'value2'});
+      final sessionId = await sessionManager.createSession({
+        'key1': 'value1',
+        'key2': 'value2',
+      });
 
       // Remove one value
       await sessionManager.removeSessionValue(sessionId, 'key1');
@@ -167,8 +171,10 @@ void main() {
       expect(error, equals('Something went wrong'));
 
       // Data should be cleared after retrieval
-      final messageAgain =
-          await sessionManager.getFlashed(sessionId, 'message');
+      final messageAgain = await sessionManager.getFlashed(
+        sessionId,
+        'message',
+      );
       expect(messageAgain, isNull);
     });
 
@@ -199,15 +205,17 @@ void main() {
       await sessionManager.destroySession(sessionId);
 
       // Should not be valid anymore
-      final isValidAfterDestroy =
-          await sessionManager.hasValidSession(sessionId);
+      final isValidAfterDestroy = await sessionManager.hasValidSession(
+        sessionId,
+      );
       expect(isValidAfterDestroy, isFalse);
     });
 
     test('should cleanup expired sessions', () async {
       // Create sessions with different ages
-      final expiredSessionId =
-          await sessionManager.createSession({'expired': true});
+      final expiredSessionId = await sessionManager.createSession({
+        'expired': true,
+      });
 
       // Manually modify the session file to make it old
       final fileDriver = FileSessionDriver(tempDir.path);
@@ -222,15 +230,17 @@ void main() {
       };
       await fileDriver.write(expiredSessionId, expiredData);
 
-      final validSessionId =
-          await sessionManager.createSession({'valid': true});
+      final validSessionId = await sessionManager.createSession({
+        'valid': true,
+      });
 
       // Cleanup expired sessions
       await sessionManager.cleanupExpiredSessions();
 
       // Expired session should be gone
-      final expiredExists =
-          await sessionManager.hasValidSession(expiredSessionId);
+      final expiredExists = await sessionManager.hasValidSession(
+        expiredSessionId,
+      );
       expect(expiredExists, isFalse);
 
       // Valid session should still exist
@@ -256,10 +266,12 @@ void main() {
     late SessionDriverRegistry registry;
 
     setUp(() async {
-      tempDir1 =
-          await Directory.systemTemp.createTemp('session_manager_test_1_');
-      tempDir2 =
-          await Directory.systemTemp.createTemp('session_manager_test_2_');
+      tempDir1 = await Directory.systemTemp.createTemp(
+        'session_manager_test_1_',
+      );
+      tempDir2 = await Directory.systemTemp.createTemp(
+        'session_manager_test_2_',
+      );
       registry = SessionDriverRegistry();
 
       final fileDriver1 = FileSessionDriver(tempDir1.path);

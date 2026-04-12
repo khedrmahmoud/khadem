@@ -27,8 +27,9 @@ class LoggingConfiguration {
     final channels = <String, List<LogHandler>>{};
 
     // Try new channels configuration first
-    final channelsConfig =
-        _config.get<Map<String, dynamic>>('logging.channels');
+    final channelsConfig = _config.get<Map<String, dynamic>>(
+      'logging.channels',
+    );
 
     if (channelsConfig != null) {
       // First pass: create non-stack handlers
@@ -64,8 +65,10 @@ class LoggingConfiguration {
       }
     } else {
       // Fallback to legacy handlers configuration
-      final handlersConfig =
-          _config.get<Map<String, dynamic>>('logging.handlers', {});
+      final handlersConfig = _config.get<Map<String, dynamic>>(
+        'logging.handlers',
+        {},
+      );
       if (handlersConfig != null) {
         // Configure file handler
         final fileConfig = handlersConfig['file'] as Map<String, dynamic>?;
@@ -81,10 +84,7 @@ class LoggingConfiguration {
         }
 
         // For legacy config, 'app' channel includes all enabled handlers
-        channels['app'] = [
-          ...?channels['file'],
-          ...?channels['console'],
-        ];
+        channels['app'] = [...?channels['file'], ...?channels['console']];
       }
     }
 
@@ -111,8 +111,9 @@ class LoggingConfiguration {
   /// Creates a file log handler from configuration.
   FileLogHandler _createFileHandler(Map<String, dynamic> config) {
     final levelStr = config['level'] as String?;
-    final level =
-        levelStr != null ? LogLevel.fromString(levelStr) : minimumLevel;
+    final level = levelStr != null
+        ? LogLevel.fromString(levelStr)
+        : minimumLevel;
 
     final driver = config['driver'] as String?;
     final isDaily =
@@ -132,8 +133,9 @@ class LoggingConfiguration {
   /// Creates a console log handler from configuration.
   ConsoleLogHandler _createConsoleHandler(Map<String, dynamic> config) {
     final levelStr = config['level'] as String?;
-    final level =
-        levelStr != null ? LogLevel.fromString(levelStr) : minimumLevel;
+    final level = levelStr != null
+        ? LogLevel.fromString(levelStr)
+        : minimumLevel;
 
     return ConsoleLogHandler(
       colorize: config['colorize'] as bool? ?? true,

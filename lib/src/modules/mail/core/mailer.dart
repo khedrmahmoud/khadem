@@ -23,8 +23,8 @@ class Mailer implements MailerInterface {
     this._transport, {
     QueueManager? queueManager,
     MailAddress? defaultFrom,
-  })  : _queueManager = queueManager,
-        _defaultFrom = defaultFrom {
+  }) : _queueManager = queueManager,
+       _defaultFrom = defaultFrom {
     // Set default from address if provided
     if (_defaultFrom != null) {
       _message.setFrom(_defaultFrom.email, _defaultFrom.name);
@@ -85,10 +85,7 @@ class Mailer implements MailerInterface {
     Map<String, dynamic>? data,
   ]) async {
     final renderer = ViewRenderer.instance;
-    final htmlContent = await renderer.render(
-      viewName,
-      context: data ?? {},
-    );
+    final htmlContent = await renderer.render(viewName, context: data ?? {});
     _message.setHtmlBody(htmlContent);
 
     // Also set text body as stripped HTML (basic implementation)
@@ -116,11 +113,7 @@ class Mailer implements MailerInterface {
   }
 
   @override
-  MailerInterface attachData(
-    List<int> data,
-    String name, {
-    String? mimeType,
-  }) {
+  MailerInterface attachData(List<int> data, String name, {String? mimeType}) {
     _message.addAttachment(
       MailAttachment(
         data: data,
@@ -138,12 +131,7 @@ class Mailer implements MailerInterface {
       throw MailException('Embed file not found: $path');
     }
 
-    _message.addEmbedded(
-      MailEmbedded(
-        path: path,
-        cid: cid,
-      ),
-    );
+    _message.addEmbedded(MailEmbedded(path: path, cid: cid));
     return this;
   }
 
@@ -305,11 +293,10 @@ class _MailJob extends QueueJob {
 
   @override
   Map<String, dynamic> toJson() => {
-        'type': 'mail',
-        'to':
-            message.to.map((a) => {'email': a.email, 'name': a.name}).toList(),
-        'subject': message.subject,
-      };
+    'type': 'mail',
+    'to': message.to.map((a) => {'email': a.email, 'name': a.name}).toList(),
+    'subject': message.subject,
+  };
 
   @override
   String get displayName => 'SendEmail(${message.subject})';
@@ -337,10 +324,10 @@ class _MailableJob extends QueueJob {
 
   @override
   Map<String, dynamic> toJson() => {
-        'type': 'mailable',
-        'mailable': mailable.displayName,
-        'subject': message.subject,
-      };
+    'type': 'mailable',
+    'mailable': mailable.displayName,
+    'subject': message.subject,
+  };
 
   @override
   String get displayName => 'SendMailable(${mailable.displayName})';

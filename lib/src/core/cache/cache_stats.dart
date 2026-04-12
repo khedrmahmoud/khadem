@@ -143,13 +143,6 @@ class CacheStats {
 
   @override
   int get hashCode {
-    return Object.hash(
-      hits,
-      misses,
-      sets,
-      deletions,
-      expirations,
-      clears,
-    );
+    return Object.hash(hits, misses, sets, deletions, expirations, clears);
   }
 }

@@ -34,13 +34,10 @@ void main() {
     });
 
     test('putMany should store multiple values', () async {
-      await driver.putMany(
-        {
-          'key1': 'value1',
-          'key2': 'value2',
-        },
-        const Duration(minutes: 1),
-      );
+      await driver.putMany({
+        'key1': 'value1',
+        'key2': 'value2',
+      }, const Duration(minutes: 1));
 
       expect(await driver.get('key1'), equals('value1'));
       expect(await driver.get('key2'), equals('value2'));

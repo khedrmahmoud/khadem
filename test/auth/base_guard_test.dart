@@ -40,17 +40,19 @@ void main() {
       expect(() => ApiGuard, isNotNull);
     });
 
-    test('should validate that configuration fix prevents password in fields',
-        () {
-      // This test validates that our configuration fix is correct
-      // The fields array should NOT contain 'password'
-      final providerConfig = {
-        'table': 'users',
-        'fields': ['email'], // Correct - only identifier fields
-      };
+    test(
+      'should validate that configuration fix prevents password in fields',
+      () {
+        // This test validates that our configuration fix is correct
+        // The fields array should NOT contain 'password'
+        final providerConfig = {
+          'table': 'users',
+          'fields': ['email'], // Correct - only identifier fields
+        };
 
-      expect(providerConfig['fields'], isNot(contains('password')));
-      expect(providerConfig['fields'], equals(['email']));
-    });
+        expect(providerConfig['fields'], isNot(contains('password')));
+        expect(providerConfig['fields'], equals(['email']));
+      },
+    );
   });
 }

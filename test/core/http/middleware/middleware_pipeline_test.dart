@@ -32,12 +32,9 @@ void main() {
 
     group('Adding Middleware', () {
       test('should add middleware handler', () {
-        pipeline.add(
-          (req, res, next) async {
-            await next();
-          },
-          name: 'test',
-        );
+        pipeline.add((req, res, next) async {
+          await next();
+        }, name: 'test');
 
         expect(pipeline.middleware.length, equals(1));
         expect(pipeline.hasMiddleware('test'), isTrue);
@@ -45,12 +42,9 @@ void main() {
       });
 
       test('should add middleware object', () {
-        final middleware = Middleware(
-          (req, res, next) async {
-            await next();
-          },
-          name: 'test',
-        );
+        final middleware = Middleware((req, res, next) async {
+          await next();
+        }, name: 'test');
 
         pipeline.addMiddleware(middleware);
 
@@ -90,10 +84,7 @@ void main() {
 
     group('Middleware Ordering', () {
       test('should sort middleware by priority', () {
-        pipeline.add(
-          (req, res, next) async => await next(),
-          name: 'business',
-        );
+        pipeline.add((req, res, next) async => await next(), name: 'business');
         pipeline.add(
           (req, res, next) async => await next(),
           priority: MiddlewarePriority.global,
@@ -178,23 +169,17 @@ void main() {
       test('should process request through middleware chain', () async {
         final order = <String>[];
 
-        pipeline.add(
-          (req, res, next) async {
-            order.add('first');
-            await next();
-            order.add('first-after');
-          },
-          name: 'first',
-        );
+        pipeline.add((req, res, next) async {
+          order.add('first');
+          await next();
+          order.add('first-after');
+        }, name: 'first');
 
-        pipeline.add(
-          (req, res, next) async {
-            order.add('second');
-            await next();
-            order.add('second-after');
-          },
-          name: 'second',
-        );
+        pipeline.add((req, res, next) async {
+          order.add('second');
+          await next();
+          order.add('second-after');
+        }, name: 'second');
 
         await pipeline.process(request, response);
 
@@ -207,20 +192,14 @@ void main() {
       test('should handle middleware that does not call next', () async {
         var called = false;
 
-        pipeline.add(
-          (req, res, next) async {
-            called = true;
-            // Does not call next
-          },
-          name: 'blocking',
-        );
+        pipeline.add((req, res, next) async {
+          called = true;
+          // Does not call next
+        }, name: 'blocking');
 
-        pipeline.add(
-          (req, res, next) async {
-            fail('Should not be reached');
-          },
-          name: 'never-called',
-        );
+        pipeline.add((req, res, next) async {
+          fail('Should not be reached');
+        }, name: 'never-called');
 
         await pipeline.process(request, response);
 
@@ -248,19 +227,20 @@ void main() {
           throw Exception('Test error');
         });
 
-        expect(
-          () => pipeline.process(request, response),
-          throwsException,
-        );
+        expect(() => pipeline.process(request, response), throwsException);
       });
     });
 
     group('Middleware Groups', () {
       test('should register and use middleware group', () {
-        final m1 =
-            Middleware((req, res, next) async => await next(), name: 'm1');
-        final m2 =
-            Middleware((req, res, next) async => await next(), name: 'm2');
+        final m1 = Middleware(
+          (req, res, next) async => await next(),
+          name: 'm1',
+        );
+        final m2 = Middleware(
+          (req, res, next) async => await next(),
+          name: 'm2',
+        );
 
         pipeline.group('api', [m1, m2]);
         pipeline.useGroup('api');
@@ -287,8 +267,10 @@ void main() {
       });
 
       test('should get middleware by name', () {
-        final middleware =
-            Middleware((req, res, next) async => await next(), name: 'test');
+        final middleware = Middleware(
+          (req, res, next) async => await next(),
+          name: 'test',
+        );
         pipeline.addMiddleware(middleware);
 
         final retrieved = pipeline.getByName('test');

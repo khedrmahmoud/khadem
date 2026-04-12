@@ -14,7 +14,5 @@ class MorphedByMany<Related extends KhademModel<Related>, Parent>
     super.relatedKey,
     super.morphTypeField,
     super.morphClass,
-  ) : super(
-          inverse: true,
-        );
+  ) : super(inverse: true);
 }

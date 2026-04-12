@@ -42,9 +42,7 @@ void main() {
     late FailingQueueJob failingJob;
 
     setUp(() {
-      driver = InMemoryDriver(
-        config: const DriverConfig(name: 'test-memory'),
-      );
+      driver = InMemoryDriver(config: const DriverConfig(name: 'test-memory'));
       testJob = TestQueueJob('test');
       failingJob = FailingQueueJob('failing');
     });

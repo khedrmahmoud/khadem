@@ -51,13 +51,7 @@ class MakeListenerCommand extends KhademCommand {
     final file = File(relativePath);
     await file.create(recursive: true);
 
-    await file.writeAsString(
-      _listenerStub(
-        className,
-        listenerBase,
-        folder,
-      ),
-    );
+    await file.writeAsString(_listenerStub(className, listenerBase, folder));
 
     logger.info('✅ Listener "$className" created at "$relativePath"');
     exitCode = 0;

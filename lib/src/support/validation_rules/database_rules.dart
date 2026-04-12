@@ -1,7 +1,7 @@
-import '../exceptions/validation_exception.dart';
 import 'dart:async';
 
 import '../../contracts/validation/rule.dart';
+import '../exceptions/validation_exception.dart';
 import '../facades/db.dart';
 
 /// Validates that a value is unique in a database table.
@@ -62,16 +62,15 @@ class UniqueRule extends Rule {
       // Extra where clauses: key,value pairs starting from index 4
       for (int i = 4; i < args.length; i += 2) {
         if (i + 1 < args.length) {
-          extraClauses.add({
-            'column': args[i],
-            'value': args[i + 1],
-          });
+          extraClauses.add({'column': args[i], 'value': args[i + 1]});
         }
       }
     }
 
     if (tableName == null) {
-      throw ValidationException({'general': ["UniqueRule requires a table name."]});
+      throw ValidationException({
+        'general': ["UniqueRule requires a table name."],
+      });
     }
 
     final db = DB.table(tableName);
@@ -149,16 +148,15 @@ class ExistsRule extends Rule {
       // Extra where clauses: key,value pairs starting from index 2
       for (int i = 2; i < args.length; i += 2) {
         if (i + 1 < args.length) {
-          extraClauses.add({
-            'column': args[i],
-            'value': args[i + 1],
-          });
+          extraClauses.add({'column': args[i], 'value': args[i + 1]});
         }
       }
     }
 
     if (tableName == null) {
-      throw ValidationException({'general': ["ExistsRule requires a table name."]});
+      throw ValidationException({
+        'general': ["ExistsRule requires a table name."],
+      });
     }
 
     final db = DB.table(tableName);

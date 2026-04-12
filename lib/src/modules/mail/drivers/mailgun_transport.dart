@@ -27,7 +27,7 @@ class MailgunTransport implements TransportInterface {
   final http.Client _client;
 
   MailgunTransport(this._config, {http.Client? client})
-      : _client = client ?? http.Client();
+    : _client = client ?? http.Client();
 
   @override
   String get name => 'mailgun';
@@ -39,8 +39,9 @@ class MailgunTransport implements TransportInterface {
       message.validate();
 
       // Build request
-      final url =
-          Uri.parse('${_config.endpoint}/v3/${_config.domain}/messages');
+      final url = Uri.parse(
+        '${_config.endpoint}/v3/${_config.domain}/messages',
+      );
 
       // Prepare multipart request
       final request = http.MultipartRequest('POST', url);

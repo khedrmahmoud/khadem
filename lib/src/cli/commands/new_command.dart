@@ -73,24 +73,22 @@ class NewCommand extends KhademCommand {
     final frameworkVersion = KhademPackageMetadataLoader.loadSync().version;
     // We target a branch or tag that matches the framework version, or fallback if unknown.
     // E.g., if version is 2.0.0, we try to clone branch/tag 'v2.0.0'.
-    final branchName =
-        frameworkVersion != 'unknown' ? 'v$frameworkVersion' : 'main';
+    final branchName = frameworkVersion != 'unknown'
+        ? 'v$frameworkVersion'
+        : 'main';
 
     logger.debug('Cloning template version: $branchName');
 
     // Clone the template repository
-    final result = await Process.run(
-      'git',
-      [
-        'clone',
-        '-b',
-        branchName,
-        '--depth',
-        '1',
-        'https://github.com/khadem-framework/khadem-template.git',
-        targetPath,
-      ],
-    );
+    final result = await Process.run('git', [
+      'clone',
+      '-b',
+      branchName,
+      '--depth',
+      '1',
+      'https://github.com/khadem-framework/khadem-template.git',
+      targetPath,
+    ]);
 
     if (result.exitCode != 0) {
       throw Exception(
@@ -289,8 +287,10 @@ POSTMARK_MESSAGE_STREAM=outbound
     const chars =
         'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final rand = Random.secure();
-    return List.generate(length, (_) => chars[rand.nextInt(chars.length)])
-        .join();
+    return List.generate(
+      length,
+      (_) => chars[rand.nextInt(chars.length)],
+    ).join();
   }
 
   Future<bool> _isBinaryFile(File file) async {

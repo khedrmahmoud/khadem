@@ -2,8 +2,10 @@ import 'package:khadem/src/contracts/views/directive_contract.dart';
 
 /// Component directives
 class ComponentDirective implements ViewDirective {
-  static final _componentRegex =
-      RegExp(r'@component\s*\(\s*(.+?)\s*\)(.*?)@endComponent', dotAll: true);
+  static final _componentRegex = RegExp(
+    r'@component\s*\(\s*(.+?)\s*\)(.*?)@endComponent',
+    dotAll: true,
+  );
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
@@ -12,8 +14,9 @@ class ComponentDirective implements ViewDirective {
       final componentContent = match.group(2)!;
 
       // Remove quotes if present
-      final cleanComponentName =
-          componentName.replaceAll('"', '').replaceAll("'", '');
+      final cleanComponentName = componentName
+          .replaceAll('"', '')
+          .replaceAll("'", '');
 
       // In a real implementation, this would render a component
       // For now, wrap the content in a div with component class
@@ -53,8 +56,10 @@ class ClassDirective implements ViewDirective {
         if (trimmedPair.contains(':')) {
           final parts = trimmedPair.split(':');
           if (parts.length == 2) {
-            final className =
-                parts[0].trim().replaceAll('"', '').replaceAll("'", '');
+            final className = parts[0]
+                .trim()
+                .replaceAll('"', '')
+                .replaceAll("'", '');
             final condition = parts[1].trim();
 
             // Evaluate the condition

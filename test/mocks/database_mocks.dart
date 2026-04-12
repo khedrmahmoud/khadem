@@ -36,8 +36,7 @@ class FakeQueryBuilder<T> implements QueryBuilderInterface<T> {
     String column,
     String operator, [
     dynamic value,
-  ]) =>
-      this;
+  ]) => this;
 
   @override
   QueryBuilderInterface<T> whereNotNull(String column) => this;

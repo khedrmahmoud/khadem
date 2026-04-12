@@ -162,10 +162,7 @@ class MockTokenService implements TokenService {
 class TestAuthConfig implements AuthConfig {
   @override
   Map<String, dynamic> getProvider(String providerKey) {
-    return {
-      'table': 'users',
-      'primary_key': 'id',
-    };
+    return {'table': 'users', 'primary_key': 'id'};
   }
 
   @override
@@ -181,8 +178,9 @@ class TestAuthConfig implements AuthConfig {
   }
 
   @override
-  List<Map<String, dynamic>> getProvidersForGuard(String guardName) =>
-      [getProvider('users')];
+  List<Map<String, dynamic>> getProvidersForGuard(String guardName) => [
+    getProvider('users'),
+  ];
 
   @override
   List<String> getAllProviderKeys() => ['users'];
@@ -233,14 +231,11 @@ void main() {
         tokenService: mockTokenService,
       );
 
-      testUser = DatabaseAuthenticatable.fromProviderConfig(
-        {
-          'id': 1,
-          'email': 'test@example.com',
-          'name': 'Test User',
-        },
-        authConfig.getProvider('users'),
-      );
+      testUser = DatabaseAuthenticatable.fromProviderConfig({
+        'id': 1,
+        'email': 'test@example.com',
+        'name': 'Test User',
+      }, authConfig.getProvider('users'));
     });
 
     test('tokens maintain session correlation', () async {
@@ -249,8 +244,9 @@ void main() {
 
       // Extract session IDs
       final accessTokenSessionId = getSessionId(tokens.accessToken!);
-      final refreshTokenSessionId =
-          getRefreshTokenSessionId(tokens.refreshToken!);
+      final refreshTokenSessionId = getRefreshTokenSessionId(
+        tokens.refreshToken!,
+      );
 
       // Verify session correlation
       expect(accessTokenSessionId, isNotNull);
@@ -258,51 +254,56 @@ void main() {
       expect(accessTokenSessionId, equals(refreshTokenSessionId));
 
       // Verify refresh token is stored with correct format
-      final storedToken =
-          await mockTokenService.findToken(tokens.refreshToken!);
+      final storedToken = await mockTokenService.findToken(
+        tokens.refreshToken!,
+      );
       expect(storedToken, isNotNull);
       expect(storedToken!['type'], equals('refresh'));
       expect(storedToken['token'], startsWith('$accessTokenSessionId::'));
     });
 
-    test('invalidateToken preserves refresh tokens for multi-device sessions',
-        () async {
-      // Generate tokens for device 1
-      final device1Tokens = await jwtDriver.generateTokens(testUser);
-      final device1SessionId = getSessionId(device1Tokens.accessToken!);
+    test(
+      'invalidateToken preserves refresh tokens for multi-device sessions',
+      () async {
+        // Generate tokens for device 1
+        final device1Tokens = await jwtDriver.generateTokens(testUser);
+        final device1SessionId = getSessionId(device1Tokens.accessToken!);
 
-      // Generate tokens for device 2 (simulating another device)
-      final device2Tokens = await jwtDriver.generateTokens(testUser);
-      final device2SessionId = getSessionId(device2Tokens.accessToken!);
+        // Generate tokens for device 2 (simulating another device)
+        final device2Tokens = await jwtDriver.generateTokens(testUser);
+        final device2SessionId = getSessionId(device2Tokens.accessToken!);
 
-      // Verify different session IDs
-      expect(device1SessionId, isNot(equals(device2SessionId)));
+        // Verify different session IDs
+        expect(device1SessionId, isNot(equals(device2SessionId)));
 
-      // Logout from device 1 only (single device logout)
-      await jwtDriver.invalidateToken(device1Tokens.accessToken!);
+        // Logout from device 1 only (single device logout)
+        await jwtDriver.invalidateToken(device1Tokens.accessToken!);
 
-      // Device 1 access token should be blacklisted
-      expect(
-        await mockTokenService.isTokenBlacklisted(device1Tokens.accessToken!),
-        isTrue,
-      );
+        // Device 1 access token should be blacklisted
+        expect(
+          await mockTokenService.isTokenBlacklisted(device1Tokens.accessToken!),
+          isTrue,
+        );
 
-      // Device 2 access token should NOT be blacklisted
-      expect(
-        await mockTokenService.isTokenBlacklisted(device2Tokens.accessToken!),
-        isFalse,
-      );
+        // Device 2 access token should NOT be blacklisted
+        expect(
+          await mockTokenService.isTokenBlacklisted(device2Tokens.accessToken!),
+          isFalse,
+        );
 
-      // Device 1 refresh token should be deleted
-      final device1RefreshToken =
-          await mockTokenService.findToken(device1Tokens.refreshToken!);
-      expect(device1RefreshToken, isNull);
+        // Device 1 refresh token should be deleted
+        final device1RefreshToken = await mockTokenService.findToken(
+          device1Tokens.refreshToken!,
+        );
+        expect(device1RefreshToken, isNull);
 
-      // Device 2 refresh token should still exist
-      final device2RefreshToken =
-          await mockTokenService.findToken(device2Tokens.refreshToken!);
-      expect(device2RefreshToken, isNotNull);
-    });
+        // Device 2 refresh token should still exist
+        final device2RefreshToken = await mockTokenService.findToken(
+          device2Tokens.refreshToken!,
+        );
+        expect(device2RefreshToken, isNotNull);
+      },
+    );
 
     test('logoutFromAllDevices invalidates all tokens', () async {
       // Generate tokens for multiple devices
@@ -338,61 +339,65 @@ void main() {
         testUser.getAuthIdentifier(),
         'users',
       );
-      final refreshTokens =
-          userTokens.where((t) => t['type'] == 'refresh').toList();
+      final refreshTokens = userTokens
+          .where((t) => t['type'] == 'refresh')
+          .toList();
       expect(refreshTokens, isEmpty);
     });
 
     test(
-        'invalidateToken with single device logout removes only the correlated refresh token',
-        () async {
-      // Generate tokens for multiple devices
-      final device1Tokens = await jwtDriver.generateTokens(testUser);
-      final device2Tokens = await jwtDriver.generateTokens(testUser);
+      'invalidateToken with single device logout removes only the correlated refresh token',
+      () async {
+        // Generate tokens for multiple devices
+        final device1Tokens = await jwtDriver.generateTokens(testUser);
+        final device2Tokens = await jwtDriver.generateTokens(testUser);
 
-      // Extract session IDs for verification
-      final device1SessionId = getSessionId(device1Tokens.accessToken!);
-      final device2SessionId = getSessionId(device2Tokens.accessToken!);
+        // Extract session IDs for verification
+        final device1SessionId = getSessionId(device1Tokens.accessToken!);
+        final device2SessionId = getSessionId(device2Tokens.accessToken!);
 
-      // Verify we have different sessions for each device
-      expect(device1SessionId, isNotNull);
-      expect(device2SessionId, isNotNull);
-      expect(device1SessionId, isNot(equals(device2SessionId)));
+        // Verify we have different sessions for each device
+        expect(device1SessionId, isNotNull);
+        expect(device2SessionId, isNotNull);
+        expect(device1SessionId, isNot(equals(device2SessionId)));
 
-      // Verify refresh tokens have correct session correlation
-      expect(
-        getRefreshTokenSessionId(device1Tokens.refreshToken!),
-        equals(device1SessionId),
-      );
-      expect(
-        getRefreshTokenSessionId(device2Tokens.refreshToken!),
-        equals(device2SessionId),
-      );
+        // Verify refresh tokens have correct session correlation
+        expect(
+          getRefreshTokenSessionId(device1Tokens.refreshToken!),
+          equals(device1SessionId),
+        );
+        expect(
+          getRefreshTokenSessionId(device2Tokens.refreshToken!),
+          equals(device2SessionId),
+        );
 
-      // Logout from device 1 using access token
-      await jwtDriver.invalidateToken(device1Tokens.accessToken!);
+        // Logout from device 1 using access token
+        await jwtDriver.invalidateToken(device1Tokens.accessToken!);
 
-      // Device 1 refresh token should be deleted (same session)
-      final device1RefreshToken =
-          await mockTokenService.findToken(device1Tokens.refreshToken!);
-      expect(device1RefreshToken, isNull);
+        // Device 1 refresh token should be deleted (same session)
+        final device1RefreshToken = await mockTokenService.findToken(
+          device1Tokens.refreshToken!,
+        );
+        expect(device1RefreshToken, isNull);
 
-      // Device 2 refresh token should still exist (different session)
-      final device2RefreshToken =
-          await mockTokenService.findToken(device2Tokens.refreshToken!);
-      expect(device2RefreshToken, isNotNull);
+        // Device 2 refresh token should still exist (different session)
+        final device2RefreshToken = await mockTokenService.findToken(
+          device2Tokens.refreshToken!,
+        );
+        expect(device2RefreshToken, isNotNull);
 
-      // Device 1 access token should be blacklisted
-      expect(
-        await mockTokenService.isTokenBlacklisted(device1Tokens.accessToken!),
-        isTrue,
-      );
+        // Device 1 access token should be blacklisted
+        expect(
+          await mockTokenService.isTokenBlacklisted(device1Tokens.accessToken!),
+          isTrue,
+        );
 
-      // Device 2 access token should NOT be blacklisted
-      expect(
-        await mockTokenService.isTokenBlacklisted(device2Tokens.accessToken!),
-        isFalse,
-      );
-    });
+        // Device 2 access token should NOT be blacklisted
+        expect(
+          await mockTokenService.isTokenBlacklisted(device2Tokens.accessToken!),
+          isFalse,
+        );
+      },
+    );
   });
 }

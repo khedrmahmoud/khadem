@@ -22,8 +22,9 @@ class MakeExceptionCommand extends KhademCommand {
   Future<void> handle(List<String> args) async {
     final input = argResults?['name'] as String?;
     if (input == null || input.trim().isEmpty) {
-      logger
-          .error('❌ Usage: khadem make:exception --name=InvalidOrderException');
+      logger.error(
+        '❌ Usage: khadem make:exception --name=InvalidOrderException',
+      );
       exitCode = 1;
       return;
     }

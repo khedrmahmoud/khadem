@@ -27,10 +27,7 @@ void main() {
       });
 
       test('should get parameter with default value', () {
-        expect(
-          params.paramOr('nonexistent', 'default'),
-          equals('default'),
-        );
+        expect(params.paramOr('nonexistent', 'default'), equals('default'));
         params.setParam('existing', 'value');
         expect(params.paramOr('existing', 'default'), equals('value'));
       });

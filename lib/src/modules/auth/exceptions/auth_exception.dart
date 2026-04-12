@@ -29,13 +29,10 @@ class AuthException extends AppException {
   /// [message] A human-readable description of the authentication error
   /// [statusCode] HTTP status code (defaults to 401 for auth errors)
   /// [stackTrace] Optional stack trace for debugging purposes
-  AuthException(
-    super.message, {
-    super.statusCode = 401,
-    String? stackTrace,
-  }) : super(
-          title: 'Authentication Error',
-          type: 'auth_error',
-          details: stackTrace,
-        );
+  AuthException(super.message, {super.statusCode = 401, String? stackTrace})
+    : super(
+        title: 'Authentication Error',
+        type: 'auth_error',
+        details: stackTrace,
+      );
 }

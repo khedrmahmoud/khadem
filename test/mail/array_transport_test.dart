@@ -70,8 +70,9 @@ void main() {
         final message = _createTestMessage(subject: 'Test Subject');
         await transport.send(message);
 
-        final result =
-            transport.wasSent((msg) => msg.subject == 'Test Subject');
+        final result = transport.wasSent(
+          (msg) => msg.subject == 'Test Subject',
+        );
 
         expect(result, isTrue);
       });
@@ -145,22 +146,13 @@ void main() {
       test('should handle complex queries', () async {
         // Send various emails
         await transport.send(
-          _createTestMessage(
-            to: 'admin@example.com',
-            subject: 'Admin Alert',
-          ),
+          _createTestMessage(to: 'admin@example.com', subject: 'Admin Alert'),
         );
         await transport.send(
-          _createTestMessage(
-            to: 'user@example.com',
-            subject: 'Welcome',
-          ),
+          _createTestMessage(to: 'user@example.com', subject: 'Welcome'),
         );
         await transport.send(
-          _createTestMessage(
-            to: 'admin@example.com',
-            subject: 'Another Alert',
-          ),
+          _createTestMessage(to: 'admin@example.com', subject: 'Another Alert'),
         );
 
         // Find all admin emails
@@ -184,10 +176,7 @@ void main() {
 
         // Act - simulate sending welcome email
         await transport.send(
-          _createTestMessage(
-            to: userEmail,
-            subject: 'Welcome to our app!',
-          ),
+          _createTestMessage(to: userEmail, subject: 'Welcome to our app!'),
         );
 
         // Assert
@@ -203,10 +192,7 @@ void main() {
 }
 
 /// Helper function to create test messages
-MailMessage _createTestMessage({
-  String? to,
-  String? subject,
-}) {
+MailMessage _createTestMessage({String? to, String? subject}) {
   final message = MailMessage();
   message.addTo(to ?? 'test@example.com');
   message.setSubject(subject ?? 'Test Email');

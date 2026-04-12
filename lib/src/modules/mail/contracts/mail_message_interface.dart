@@ -29,9 +29,9 @@ class MailAttachment {
     this.data,
     this.mimeType,
   }) : assert(
-          path != null || data != null,
-          'Either path or data must be provided',
-        );
+         path != null || data != null,
+         'Either path or data must be provided',
+       );
 
   bool get isFilePath => path != null;
   bool get isRawData => data != null;
@@ -43,11 +43,7 @@ class MailEmbedded {
   final String cid;
   final String? mimeType;
 
-  const MailEmbedded({
-    required this.path,
-    required this.cid,
-    this.mimeType,
-  });
+  const MailEmbedded({required this.path, required this.cid, this.mimeType});
 }
 
 /// Represents an email message that can be sent.

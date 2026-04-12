@@ -187,7 +187,6 @@ class Cookies {
       maxAge: maxAge,
       httpOnly: httpOnly,
       secure: secure,
-      sameSite: 'lax',
     );
   }
 
@@ -204,7 +203,6 @@ class Cookies {
       jsonEncode(flashData),
       maxAge: const Duration(seconds: 30), // Short-lived
       secure: secure,
-      sameSite: 'lax',
     );
   }
 

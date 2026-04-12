@@ -122,11 +122,7 @@ class EventSystem implements EventSystemInterface {
   /// [queue] - Whether to execute listeners asynchronously in separate futures
   /// Returns a Future that completes when all listeners have finished executing
   @override
-  Future<void> emit(
-    String event, [
-    dynamic payload,
-    bool queue = false,
-  ]) async {
+  Future<void> emit(String event, [dynamic payload, bool queue = false]) async {
     final listeners = _listeners[event];
 
     if (listeners == null || listeners.isEmpty) return;

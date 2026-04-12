@@ -64,14 +64,11 @@ class AuthManager {
   /// [provider] The authentication provider to use (optional)
   /// [authConfig] Optional auth config implementation
   /// Throws [AuthException] if auth configuration is missing or invalid
-  AuthManager({
-    String? guard,
-    String? provider,
-    AuthConfig? authConfig,
-  })  : _authConfig = authConfig ?? KhademAuthConfig(),
-        _guard = guard ?? (authConfig ?? KhademAuthConfig()).getDefaultGuard(),
-        _provider = provider ??
-            (authConfig ?? KhademAuthConfig()).getDefaultProvider() {
+  AuthManager({String? guard, String? provider, AuthConfig? authConfig})
+    : _authConfig = authConfig ?? KhademAuthConfig(),
+      _guard = guard ?? (authConfig ?? KhademAuthConfig()).getDefaultGuard(),
+      _provider =
+          provider ?? (authConfig ?? KhademAuthConfig()).getDefaultProvider() {
     _guardInstance = _getOrCreateGuard(_guard, _provider!);
   }
 
@@ -194,10 +191,7 @@ class AuthManager {
   /// [guardName] The guard to use for verification
   /// [token] The token to verify
   /// Returns the authenticated user
-  Future<Authenticatable> userWithGuard(
-    String guardName,
-    String token,
-  ) async {
+  Future<Authenticatable> userWithGuard(String guardName, String token) async {
     final guard = _getOrCreateGuard(guardName);
     return guard.user(token);
   }
@@ -296,5 +290,5 @@ class AuthManager {
 
   /// Custom guard factories
   static final Map<String, Guard Function(AuthConfig, String)>
-      _customGuardFactories = {};
+  _customGuardFactories = {};
 }

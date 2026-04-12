@@ -12,8 +12,8 @@ class ConsoleLogHandler implements LogHandler {
   ConsoleLogHandler({
     bool colorize = true,
     LogLevel minimumLevel = LogLevel.debug,
-  })  : _colorize = colorize,
-        _minimumLevel = minimumLevel;
+  }) : _colorize = colorize,
+       _minimumLevel = minimumLevel;
 
   @override
   LogLevel get minimumLevel => _minimumLevel;

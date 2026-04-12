@@ -15,22 +15,26 @@ void main() {
       loggingConfig = LoggingConfiguration(config);
 
       // Default stubs
-      when(config.get<String>('logging.minimum_level', 'debug'))
-          .thenReturn('debug');
-      when(config.get<Map<String, dynamic>>('logging.channels'))
-          .thenReturn(null);
+      when(
+        config.get<String>('logging.minimum_level', 'debug'),
+      ).thenReturn('debug');
+      when(
+        config.get<Map<String, dynamic>>('logging.channels'),
+      ).thenReturn(null);
     });
 
     test('should get default minimum level', () {
-      when(config.get<String>('logging.minimum_level', 'debug'))
-          .thenReturn('debug');
+      when(
+        config.get<String>('logging.minimum_level', 'debug'),
+      ).thenReturn('debug');
 
       expect(loggingConfig.minimumLevel, LogLevel.debug);
     });
 
     test('should parse minimum level from config', () {
-      when(config.get<String>('logging.minimum_level', 'debug'))
-          .thenReturn('error');
+      when(
+        config.get<String>('logging.minimum_level', 'debug'),
+      ).thenReturn('error');
 
       expect(loggingConfig.minimumLevel, LogLevel.error);
     });
@@ -48,20 +52,19 @@ void main() {
     });
 
     test('should get empty handlers list when no handlers configured', () {
-      when(config.get<Map<String, dynamic>>('logging.handlers', {}))
-          .thenReturn({});
+      when(
+        config.get<Map<String, dynamic>>('logging.handlers', {}),
+      ).thenReturn({});
 
       expect(loggingConfig.handlers, isEmpty);
     });
 
     test('should create console handler from config', () {
-      when(config.get<Map<String, dynamic>>('logging.handlers', {}))
-          .thenReturn({
-        'console': {
-          'enabled': true,
-          'colorize': false,
+      when(config.get<Map<String, dynamic>>('logging.handlers', {})).thenReturn(
+        {
+          'console': {'enabled': true, 'colorize': false},
         },
-      });
+      );
 
       final handlers = loggingConfig.handlers;
       expect(handlers, hasLength(1));
@@ -70,61 +73,68 @@ void main() {
     });
 
     test('should create file handler from config', () {
-      when(config.get<Map<String, dynamic>>('logging.handlers', {}))
-          .thenReturn({
-        'file': {
-          'enabled': true,
-          'path': 'custom.log',
-          'format_json': false,
-          'rotate_on_size': false,
-          'max_size': 1024,
-          'max_backups': 3,
+      when(config.get<Map<String, dynamic>>('logging.handlers', {})).thenReturn(
+        {
+          'file': {
+            'enabled': true,
+            'path': 'custom.log',
+            'format_json': false,
+            'rotate_on_size': false,
+            'max_size': 1024,
+            'max_backups': 3,
+          },
         },
-      });
+      );
 
       final handlers = loggingConfig.handlers;
       expect(handlers, hasLength(1));
     });
 
     test('should skip disabled handlers', () {
-      when(config.get<Map<String, dynamic>>('logging.handlers', {}))
-          .thenReturn({
-        'console': {'enabled': false},
-        'file': {'enabled': false},
-      });
+      when(config.get<Map<String, dynamic>>('logging.handlers', {})).thenReturn(
+        {
+          'console': {'enabled': false},
+          'file': {'enabled': false},
+        },
+      );
 
       expect(loggingConfig.handlers, isEmpty);
     });
 
     test('should create both handlers when enabled', () {
-      when(config.get<Map<String, dynamic>>('logging.handlers', {}))
-          .thenReturn({
-        'console': {'enabled': true},
-        'file': {'enabled': true, 'path': 'test.log'},
-      });
+      when(config.get<Map<String, dynamic>>('logging.handlers', {})).thenReturn(
+        {
+          'console': {'enabled': true},
+          'file': {'enabled': true, 'path': 'test.log'},
+        },
+      );
 
       final handlers = loggingConfig.handlers;
       expect(handlers, hasLength(2));
     });
 
     test('should validate valid configuration', () {
-      when(config.get<String>('logging.minimum_level', 'debug'))
-          .thenReturn('info');
+      when(
+        config.get<String>('logging.minimum_level', 'debug'),
+      ).thenReturn('info');
       when(config.get<String>('logging.default', 'app')).thenReturn('test');
-      when(config.get<Map<String, dynamic>>('logging.handlers', {}))
-          .thenReturn({
-        'console': {'enabled': true},
-      });
+      when(config.get<Map<String, dynamic>>('logging.handlers', {})).thenReturn(
+        {
+          'console': {'enabled': true},
+        },
+      );
 
       expect(() => loggingConfig.validate(), returnsNormally);
     });
 
     test('should handle invalid minimum level gracefully', () {
-      when(config.get<String>('logging.minimum_level', 'debug'))
-          .thenReturn('invalid');
+      when(
+        config.get<String>('logging.minimum_level', 'debug'),
+      ).thenReturn('invalid');
       when(config.get<String>('logging.default', 'app')).thenReturn('test');
-      when(config.get<Map<String, dynamic>>('logging.handlers', {}))
-          .thenReturn({});
+      when(
+        config.get<Map<String, dynamic>>('logging.handlers', {}),
+      ).thenReturn({});
 
       // The configuration should handle invalid levels by falling back to defaults
       // This tests the robustness of the configuration system
@@ -132,11 +142,13 @@ void main() {
     });
 
     test('should throw on empty default channel', () {
-      when(config.get<String>('logging.minimum_level', 'debug'))
-          .thenReturn('debug');
+      when(
+        config.get<String>('logging.minimum_level', 'debug'),
+      ).thenReturn('debug');
       when(config.get<String>('logging.default', 'app')).thenReturn('');
-      when(config.get<Map<String, dynamic>>('logging.handlers', {}))
-          .thenReturn({});
+      when(
+        config.get<Map<String, dynamic>>('logging.handlers', {}),
+      ).thenReturn({});
 
       expect(() => loggingConfig.validate(), throwsArgumentError);
     });

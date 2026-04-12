@@ -46,8 +46,7 @@ class Cache {
     String key,
     Duration ttl,
     Future<dynamic> Function() callback,
-  ) =>
-      _instance.remember(key, ttl, callback);
+  ) => _instance.remember(key, ttl, callback);
 
   static Future<void> tag(String key, List<String> tags) =>
       _instance.tag(key, tags);

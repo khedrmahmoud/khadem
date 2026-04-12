@@ -28,8 +28,9 @@ void main(List<String> args) async {
 
   final runner = CommandRunner('khadem', 'Khadem Dart CLI');
 
-  runner
-      .addCommand(CommandsCommand(logger: logger, commands: registry.commands));
+  runner.addCommand(
+    CommandsCommand(logger: logger, commands: registry.commands),
+  );
 
   // Add all commands (core + custom)
   for (final command in registry.commands) {

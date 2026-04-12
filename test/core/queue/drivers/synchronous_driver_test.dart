@@ -41,9 +41,7 @@ void main() {
     late SynchronousDriver driver;
 
     setUp(() {
-      driver = SynchronousDriver(
-        config: const DriverConfig(name: 'test-sync'),
-      );
+      driver = SynchronousDriver(config: const DriverConfig(name: 'test-sync'));
     });
 
     test('should execute job immediately on push', () async {

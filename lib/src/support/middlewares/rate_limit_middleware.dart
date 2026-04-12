@@ -14,29 +14,29 @@ class RateLimitMiddleware implements Middleware {
 
   @override
   MiddlewareHandler get handler => (req, res, next) async {
-        final ip = req.ip;
+    final ip = req.ip;
 
-        if (_store.isRateLimited(ip, maxRequests)) {
-          res.status(429).sendJson({
-            'error': 'Too Many Requests',
-            'message': 'You have exceeded the rate limit.',
-            'retry_after': _store.getRetryAfter(ip).inSeconds,
-          });
-          return;
-        }
+    if (_store.isRateLimited(ip, maxRequests)) {
+      res.status(429).sendJson({
+        'error': 'Too Many Requests',
+        'message': 'You have exceeded the rate limit.',
+        'retry_after': _store.getRetryAfter(ip).inSeconds,
+      });
+      return;
+    }
 
-        _store.increment(ip);
+    _store.increment(ip);
 
-        // Add rate limit headers
-        final remaining = maxRequests - _store.getRequestCount(ip);
-        final reset = _store.getResetTime(ip).millisecondsSinceEpoch ~/ 1000;
+    // Add rate limit headers
+    final remaining = maxRequests - _store.getRequestCount(ip);
+    final reset = _store.getResetTime(ip).millisecondsSinceEpoch ~/ 1000;
 
-        res.header('X-RateLimit-Limit', maxRequests.toString());
-        res.header('X-RateLimit-Remaining', remaining.toString());
-        res.header('X-RateLimit-Reset', reset.toString());
+    res.header('X-RateLimit-Limit', maxRequests.toString());
+    res.header('X-RateLimit-Remaining', remaining.toString());
+    res.header('X-RateLimit-Reset', reset.toString());
 
-        await next();
-      };
+    await next();
+  };
 
   @override
   String get name => "RateLimit";
@@ -65,8 +65,9 @@ class _RateLimitStore {
     final windowStart = now.subtract(window);
 
     // Filter out old requests
-    _requests[ip] =
-        _requests[ip]!.where((time) => time.isAfter(windowStart)).toList();
+    _requests[ip] = _requests[ip]!
+        .where((time) => time.isAfter(windowStart))
+        .toList();
 
     return _requests[ip]!.length >= maxRequests;
   }
@@ -102,8 +103,9 @@ class _RateLimitStore {
     if (now.difference(_lastCleanup).inMinutes >= 1) {
       final windowStart = now.subtract(window);
       _requests.removeWhere((key, times) {
-        final validTimes =
-            times.where((time) => time.isAfter(windowStart)).toList();
+        final validTimes = times
+            .where((time) => time.isAfter(windowStart))
+            .toList();
         if (validTimes.isEmpty) return true;
         _requests[key] = validTimes;
         return false;

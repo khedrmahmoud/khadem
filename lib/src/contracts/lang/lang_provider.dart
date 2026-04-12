@@ -203,10 +203,7 @@ abstract class LangProvider {
   ///
   /// - [replacer]: Function that takes key, value, and parameters, returns replaced string.
   void addParameterReplacer(
-    String Function(
-      String key,
-      dynamic value,
-      Map<String, dynamic> parameters,
-    ) replacer,
+    String Function(String key, dynamic value, Map<String, dynamic> parameters)
+    replacer,
   );
 }

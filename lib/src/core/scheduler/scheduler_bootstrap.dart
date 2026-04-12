@@ -42,8 +42,9 @@ void startSchedulers({
 
     for (var configItem in configTasks) {
       try {
-        final task =
-            ScheduledTask.fromConfig(configItem as Map<String, dynamic>);
+        final task = ScheduledTask.fromConfig(
+          configItem as Map<String, dynamic>,
+        );
         scheduler.add(task);
       } catch (e) {
         logger.error('❌ Failed to load task from config: $e');

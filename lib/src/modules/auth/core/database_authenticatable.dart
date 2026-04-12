@@ -20,8 +20,8 @@ class DatabaseAuthenticatable implements Authenticatable {
     this._data, {
     required String primaryKey,
     String passwordField = 'password',
-  })  : _primaryKey = primaryKey,
-        _passwordField = passwordField;
+  }) : _primaryKey = primaryKey,
+       _passwordField = passwordField;
 
   /// Factory constructor that creates instance from provider config
   factory DatabaseAuthenticatable.fromProviderConfig(

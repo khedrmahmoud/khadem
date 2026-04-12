@@ -56,10 +56,12 @@ class ResponseBody {
   void sendJson(dynamic data, {String? contentType}) {
     if (_sent) return;
 
-    _headers
-        .setContentTypeString(contentType ?? 'application/json; charset=utf-8');
-    final jsonString =
-        data is String ? data : JsonEncoder(_defaultToEncodable).convert(data);
+    _headers.setContentTypeString(
+      contentType ?? 'application/json; charset=utf-8',
+    );
+    final jsonString = data is String
+        ? data
+        : JsonEncoder(_defaultToEncodable).convert(data);
     if (_compression) {
       _response.add(gzip.encode(_safeUtf8Encode(jsonString)));
     } else {
@@ -176,7 +178,8 @@ class ResponseBody {
     });
 
     // Use default converter for common types
-    final converter = toBytes ??
+    final converter =
+        toBytes ??
         (T data) {
           if (data is List<int>) return data;
           if (data is String) return _safeUtf8Encode(data);

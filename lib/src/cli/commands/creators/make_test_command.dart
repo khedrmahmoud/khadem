@@ -5,16 +5,8 @@ import '../../utils/cli_naming.dart';
 
 class MakeTestCommand extends KhademCommand {
   MakeTestCommand({required super.logger}) {
-    argParser.addOption(
-      'name',
-      abbr: 'n',
-      help: 'Test name (e.g. UserTest)',
-    );
-    argParser.addFlag(
-      'unit',
-      abbr: 'u',
-      help: 'Create a unit test',
-    );
+    argParser.addOption('name', abbr: 'n', help: 'Test name (e.g. UserTest)');
+    argParser.addFlag('unit', abbr: 'u', help: 'Create a unit test');
   }
 
   @override

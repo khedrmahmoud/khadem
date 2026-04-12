@@ -18,7 +18,7 @@ class SQLiteConnection implements DatabaseConnection {
   Database? _db;
 
   SQLiteConnection(Map<String, dynamic> config)
-      : _path = config['database'] ?? 'khadem.db';
+    : _path = config['database'] ?? 'khadem.db';
 
   // ===========================================================================
   // Connection Management
@@ -86,18 +86,20 @@ class SQLiteConnection implements DatabaseConnection {
 
       try {
         // Simple heuristic: check if it starts with SELECT (case insensitive)
-        final isSelect = sql.trim().toUpperCase().startsWith('SELECT') ||
+        final isSelect =
+            sql.trim().toUpperCase().startsWith('SELECT') ||
             sql.trim().toUpperCase().startsWith('PRAGMA');
 
         if (isSelect) {
           final result = stmt.select(preparedBindings);
-          
-          final data =
-              result.map((row) => Map<String, dynamic>.from(row)).toList();
+
+          final data = result
+              .map((row) => Map<String, dynamic>.from(row))
+              .toList();
           return DatabaseResponse(data: data);
         } else {
           stmt.execute(preparedBindings);
-          
+
           return DatabaseResponse(
             data: [],
             insertId: _db!.lastInsertRowId,

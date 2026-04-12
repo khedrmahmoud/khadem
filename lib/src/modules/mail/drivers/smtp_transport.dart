@@ -105,8 +105,8 @@ class SmtpTransport implements TransportInterface {
       final heloName = _config.host.isNotEmpty
           ? _config.host
           : (Platform.localHostname.isNotEmpty
-              ? Platform.localHostname
-              : InternetAddress.loopbackIPv4.host);
+                ? Platform.localHostname
+                : InternetAddress.loopbackIPv4.host);
 
       if (_config.encryption == 'ssl') {
         // Direct SSL connection
@@ -445,10 +445,7 @@ class SmtpTransport implements TransportInterface {
   }
 
   /// Sends a command to the SMTP server.
-  Future<String> _sendCommand(
-    String command, {
-    int? expectedCode,
-  }) async {
+  Future<String> _sendCommand(String command, {int? expectedCode}) async {
     _lastCommand = command;
     await _write('$command\r\n');
     final response = await _readResponse();
@@ -556,8 +553,10 @@ class SmtpTransport implements TransportInterface {
     final offset = date.timeZoneOffset;
     final offsetSign = offset.isNegative ? '-' : '+';
     final offsetHours = offset.abs().inHours.toString().padLeft(2, '0');
-    final offsetMinutes =
-        (offset.abs().inMinutes % 60).toString().padLeft(2, '0');
+    final offsetMinutes = (offset.abs().inMinutes % 60).toString().padLeft(
+      2,
+      '0',
+    );
 
     return '$weekday, ${date.day} $month ${date.year} '
         '${date.hour.toString().padLeft(2, '0')}:'
@@ -597,8 +596,9 @@ class SmtpTransport implements TransportInterface {
         lineLength++;
       } else {
         // Encode as =XX
-        buffer
-            .write('=${byte.toRadixString(16).toUpperCase().padLeft(2, '0')}');
+        buffer.write(
+          '=${byte.toRadixString(16).toUpperCase().padLeft(2, '0')}',
+        );
         lineLength += 3;
       }
 

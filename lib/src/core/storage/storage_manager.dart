@@ -3,9 +3,8 @@ import '../../support/exceptions/not_found_exception.dart';
 import '../../support/exceptions/storage_exception.dart';
 import 'local_disk.dart';
 
-typedef StorageDriverFactory = StorageDisk Function(
-  Map<String, dynamic> options,
-);
+typedef StorageDriverFactory =
+    StorageDisk Function(Map<String, dynamic> options);
 
 class StorageManager {
   final Map<String, StorageDisk> _disks;
@@ -16,9 +15,9 @@ class StorageManager {
     String defaultDisk = 'local',
     Map<String, StorageDisk>? initialDisks,
     Map<String, StorageDriverFactory>? customDrivers,
-  })  : _disks = initialDisks ?? {},
-        _drivers = customDrivers ?? {},
-        _defaultDisk = defaultDisk {
+  }) : _disks = initialDisks ?? {},
+       _drivers = customDrivers ?? {},
+       _defaultDisk = defaultDisk {
     _registerDefaultDrivers();
   }
 

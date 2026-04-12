@@ -25,8 +25,11 @@ class Server {
     _router = Router();
     _serverMiddleware = ServerMiddleware();
     _staticHandler = ServerStatic();
-    _serverLifecycle =
-        ServerLifecycle(_router, _serverMiddleware, _staticHandler);
+    _serverLifecycle = ServerLifecycle(
+      _router,
+      _serverMiddleware,
+      _staticHandler,
+    );
   }
 
   /// Configures server settings.

@@ -25,15 +25,14 @@ class QueueServiceProvider extends ServiceProvider {
   }
 
   @override
-
   /// Initializes the [QueueManager] by calling its [init] method.
   Future<void> boot(ContainerInterface container) async {
     final queue = container.resolve<QueueManager>();
     final config = container.resolve<ConfigInterface>();
     queue.loadFromConfig();
-    container
-        .resolve<Logger>()
-        .info('✅ Queue system initialized (${queue.defaultDriverName})');
+    container.resolve<Logger>().info(
+      '✅ Queue system initialized (${queue.defaultDriverName})',
+    );
     if (config.get<bool?>('queue.auto_start') ?? false) {
       queue.startWorker(
         maxJobs: config.get<int?>('queue.max_jobs'),

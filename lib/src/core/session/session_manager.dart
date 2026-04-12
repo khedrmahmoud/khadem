@@ -23,12 +23,12 @@ class SessionManager implements ISessionManager {
     SessionCookieHandler? cookieHandler,
     SessionValidator? validator,
     Duration maxAge = const Duration(hours: 24),
-  })  : _idGenerator = idGenerator ?? SessionIdGenerator(),
-        _cookieHandler = cookieHandler ?? SessionCookieHandler(),
-        _validator = validator ?? SessionValidator(),
-        _driverRegistry = driverRegistry,
-        _maxAge = maxAge,
-        _currentDriverName = driverName {
+  }) : _idGenerator = idGenerator ?? SessionIdGenerator(),
+       _cookieHandler = cookieHandler ?? SessionCookieHandler(),
+       _validator = validator ?? SessionValidator(),
+       _driverRegistry = driverRegistry,
+       _maxAge = maxAge,
+       _currentDriverName = driverName {
     if (!_driverRegistry.hasDriver(driverName)) {
       throw ArgumentError('Session driver "$driverName" is not registered');
     }
@@ -94,10 +94,7 @@ class SessionManager implements ISessionManager {
 
     final updatedData = {
       ...existingData,
-      'data': {
-        ...(existingData['data'] as Map<String, dynamic>),
-        ...newData,
-      },
+      'data': {...(existingData['data'] as Map<String, dynamic>), ...newData},
     };
     _validator.updateLastAccessed(updatedData);
 
@@ -124,14 +121,12 @@ class SessionManager implements ISessionManager {
     final data = await getSession(sessionId);
     if (data == null) return;
 
-    final sessionData =
-        Map<String, dynamic>.from(data['data'] as Map<String, dynamic>);
+    final sessionData = Map<String, dynamic>.from(
+      data['data'] as Map<String, dynamic>,
+    );
     sessionData[key] = value;
 
-    final updatedData = {
-      ...data,
-      'data': sessionData,
-    };
+    final updatedData = {...data, 'data': sessionData};
     _validator.updateLastAccessed(updatedData);
 
     await _currentDriver.write(sessionId, updatedData);
@@ -143,14 +138,12 @@ class SessionManager implements ISessionManager {
     final data = await getSession(sessionId);
     if (data == null) return;
 
-    final sessionData =
-        Map<String, dynamic>.from(data['data'] as Map<String, dynamic>);
+    final sessionData = Map<String, dynamic>.from(
+      data['data'] as Map<String, dynamic>,
+    );
     sessionData.remove(key);
 
-    final updatedData = {
-      ...data,
-      'data': sessionData,
-    };
+    final updatedData = {...data, 'data': sessionData};
     _validator.updateLastAccessed(updatedData);
 
     await _currentDriver.write(sessionId, updatedData);

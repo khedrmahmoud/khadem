@@ -330,10 +330,7 @@ void main() {
     });
 
     test('should create data attachment', () {
-      const attachment = MailAttachment(
-        data: [1, 2, 3],
-        filename: 'data.bin',
-      );
+      const attachment = MailAttachment(data: [1, 2, 3], filename: 'data.bin');
 
       expect(attachment.isFilePath, isFalse);
       expect(attachment.isRawData, isTrue);

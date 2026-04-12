@@ -10,7 +10,7 @@ class PriorityQueueMetrics {
     _processedByPriority[priority] = (_processedByPriority[priority] ?? 0) + 1;
     _totalProcessingTimeByPriority[priority] =
         (_totalProcessingTimeByPriority[priority] ?? Duration.zero) +
-            processingTime;
+        processingTime;
   }
 
   void recordJobFailed(JobPriority priority) {
@@ -35,8 +35,9 @@ class PriorityQueueMetrics {
       result[priority.name] = {
         'processed': _processedByPriority[priority] ?? 0,
         'failed': _failedByPriority[priority] ?? 0,
-        'averageProcessingTimeMs':
-            averageProcessingTime(priority).inMilliseconds,
+        'averageProcessingTimeMs': averageProcessingTime(
+          priority,
+        ).inMilliseconds,
       };
     }
 

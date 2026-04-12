@@ -53,8 +53,9 @@ class FailedJobHandler implements FailedJobHandlerContract {
 
   @override
   Future<int> prune({Duration? olderThan}) async {
-    final cutoff =
-        DateTime.now().subtract(olderThan ?? const Duration(days: 7));
+    final cutoff = DateTime.now().subtract(
+      olderThan ?? const Duration(days: 7),
+    );
     final oldJobs = await _dlq.getByDateRange(
       DateTime.fromMillisecondsSinceEpoch(0),
       cutoff,

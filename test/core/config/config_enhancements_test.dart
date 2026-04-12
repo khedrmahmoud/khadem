@@ -11,13 +11,11 @@ void main() {
 
     setUp(() {
       tempDir = Directory.systemTemp.createTempSync('config_test_');
-      File('${tempDir.path}/app.json')
-          .writeAsStringSync('{"name": "TestApp", "debug": true}');
+      File(
+        '${tempDir.path}/app.json',
+      ).writeAsStringSync('{"name": "TestApp", "debug": true}');
 
-      config = ConfigSystem(
-        configPath: tempDir.path,
-        environment: 'testing',
-      );
+      config = ConfigSystem(configPath: tempDir.path, environment: 'testing');
     });
 
     tearDown(() {

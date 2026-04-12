@@ -8,11 +8,9 @@ class StreamLogHandler implements LogHandler {
   final StreamController<LogEntry> _controller;
   final LogLevel _minimumLevel;
 
-  StreamLogHandler({
-    bool sync = false,
-    LogLevel minimumLevel = LogLevel.debug,
-  })  : _controller = StreamController<LogEntry>.broadcast(sync: sync),
-        _minimumLevel = minimumLevel;
+  StreamLogHandler({bool sync = false, LogLevel minimumLevel = LogLevel.debug})
+    : _controller = StreamController<LogEntry>.broadcast(sync: sync),
+      _minimumLevel = minimumLevel;
 
   /// The stream of log entries.
   Stream<LogEntry> get stream => _controller.stream;

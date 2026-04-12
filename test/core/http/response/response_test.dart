@@ -228,9 +228,7 @@ void main() {
       });
 
       test('should provide security convenience methods', () {
-        response.security(
-          enableHsts: true,
-        );
+        response.security(enableHsts: true);
         expect(response.headers, isNotNull);
       });
 

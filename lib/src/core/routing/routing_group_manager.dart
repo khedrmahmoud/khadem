@@ -18,12 +18,10 @@ class RouteGroupManager {
 
     for (final route in groupRegistry.routes) {
       final newPath = '$prefix${route.path}';
-      _registry.register(
-        route.method,
-        newPath,
-        route.handler,
-        [...middleware, ...route.middleware],
-      );
+      _registry.register(route.method, newPath, route.handler, [
+        ...middleware,
+        ...route.middleware,
+      ]);
     }
   }
 }

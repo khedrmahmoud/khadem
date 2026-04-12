@@ -5,10 +5,10 @@ class MissingServerContextException extends AppException {
     String message = 'Server context is not available in the current zone.',
     dynamic details,
   }) : super(
-          message,
-          statusCode: 500,
-          title: 'Missing Server Context',
-          type: 'missing_server_context',
-          details: details,
-        );
+         message,
+         statusCode: 500,
+         title: 'Missing Server Context',
+         type: 'missing_server_context',
+         details: details,
+       );
 }

@@ -105,8 +105,9 @@ class DirectiveRegistry {
         content = await directive.apply(content, context);
       } catch (e) {
         // Log error but continue processing other directives
-        Khadem.logger
-            .error('Error applying directive ${directive.runtimeType}: $e');
+        Khadem.logger.error(
+          'Error applying directive ${directive.runtimeType}: $e',
+        );
       }
     }
     return content;

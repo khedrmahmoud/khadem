@@ -64,8 +64,10 @@ class UnsetDirective implements ViewDirective {
 }
 
 class PushDirective implements ViewDirective {
-  static final _pushRegex =
-      RegExp(r'@push\s*\(\s*(\w+)\s*\)(.*?)@endPush', dotAll: true);
+  static final _pushRegex = RegExp(
+    r'@push\s*\(\s*(\w+)\s*\)(.*?)@endPush',
+    dotAll: true,
+  );
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {

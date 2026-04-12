@@ -37,16 +37,14 @@ abstract class Guard {
     required this.providerKey,
     AuthRepository? repository,
     PasswordVerifier? passwordVerifier,
-  })  : repository = repository ?? DatabaseAuthRepository(),
-        passwordVerifier = passwordVerifier ?? HashPasswordVerifier();
+  }) : repository = repository ?? DatabaseAuthRepository(),
+       passwordVerifier = passwordVerifier ?? HashPasswordVerifier();
 
   /// Attempts to authenticate a user with credentials
   ///
   /// [credentials] User login credentials
   /// Returns authentication response
-  Future<AuthResponse> attempt(
-    Map<String, dynamic> credentials,
-  ) async {
+  Future<AuthResponse> attempt(Map<String, dynamic> credentials) async {
     // Validate credentials
     await _validateCredentials(credentials);
 

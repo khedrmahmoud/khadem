@@ -5,12 +5,6 @@ import '../../contracts/exceptions/app_exception.dart';
 /// This exception is typically thrown when authentication is required
 /// but the user is not logged in or their session has expired.
 class UnauthorizedException extends AppException {
-  UnauthorizedException(
-    super.message, {
-    super.details,
-  }) : super(
-          statusCode: 401,
-          title: 'Unauthorized',
-          type: 'unauthorized',
-        );
+  UnauthorizedException(super.message, {super.details})
+    : super(statusCode: 401, title: 'Unauthorized', type: 'unauthorized');
 }

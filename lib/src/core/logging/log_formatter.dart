@@ -40,11 +40,9 @@ class TextLogFormatter implements LogFormatter {
   final bool _includeTimestamp;
   final bool _includeLevel;
 
-  TextLogFormatter({
-    bool includeTimestamp = true,
-    bool includeLevel = true,
-  })  : _includeTimestamp = includeTimestamp,
-        _includeLevel = includeLevel;
+  TextLogFormatter({bool includeTimestamp = true, bool includeLevel = true})
+    : _includeTimestamp = includeTimestamp,
+      _includeLevel = includeLevel;
 
   @override
   String format(

@@ -39,13 +39,13 @@ abstract class AppException implements Exception {
 
   /// Converts the exception to a serializable response map (RFC 7807).
   Map<String, dynamic> toResponse() => {
-        'type': type,
-        'title': title,
-        'status': statusCode,
-        'detail': message,
-        if (instance != null) 'instance': instance,
-        if (details != null) 'extensions': details,
-      };
+    'type': type,
+    'title': title,
+    'status': statusCode,
+    'detail': message,
+    if (instance != null) 'instance': instance,
+    if (details != null) 'extensions': details,
+  };
 
   @override
   String toString() => '$title: $message (Status: $statusCode)';

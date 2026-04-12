@@ -52,8 +52,6 @@ class MaxRule extends Rule implements RuleMessageParametersProvider {
   Map<String, dynamic> messageParameters(ValidationContext context) {
     final args = context.parameters;
     final max = _max ?? num.tryParse(args.isNotEmpty ? args[0] : '') ?? 9999;
-    return {
-      'max': max,
-    };
+    return {'max': max};
   }
 }

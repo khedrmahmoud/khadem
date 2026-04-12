@@ -16,50 +16,47 @@ class TestUser extends KhademModel<TestUser> {
 
   @override
   Map<String, dynamic> get appends => {
-        // Synchronous computed property
-        'full_name': () =>
-            '${getAttribute('first_name')} ${getAttribute('last_name')}',
+    // Synchronous computed property
+    'full_name': () =>
+        '${getAttribute('first_name')} ${getAttribute('last_name')}',
 
-        // Async computed property with Future
-        'greeting': () async {
-          await Future.delayed(const Duration(milliseconds: 10));
-          return 'Hello, ${getAttribute('first_name')}!';
-        },
+    // Async computed property with Future
+    'greeting': () async {
+      await Future.delayed(const Duration(milliseconds: 10));
+      return 'Hello, ${getAttribute('first_name')}!';
+    },
 
-        // Async computed property using relations
-        'post_summary': () async {
-          // Only try to load if not already loaded
-          if (!relationLoaded('posts')) {
-            return 'No posts loaded';
-          }
-          final posts = getRelation('posts') as List<TestPost>? ?? [];
-          return '${posts.length} posts';
-        },
+    // Async computed property using relations
+    'post_summary': () async {
+      // Only try to load if not already loaded
+      if (!relationLoaded('posts')) {
+        return 'No posts loaded';
+      }
+      final posts = getRelation('posts') as List<TestPost>? ?? [];
+      return '${posts.length} posts';
+    },
 
-        // Mixed - can return sync or async based on condition
-        'dynamic_value': () {
-          final count = getAttribute('post_count');
-          if (count != null && count > 0) {
-            return count; // Sync
-          }
-          // Async
-          return Future.delayed(
-            const Duration(milliseconds: 5),
-            () => 0,
-          );
-        },
-      };
+    // Mixed - can return sync or async based on condition
+    'dynamic_value': () {
+      final count = getAttribute('post_count');
+      if (count != null && count > 0) {
+        return count; // Sync
+      }
+      // Async
+      return Future.delayed(const Duration(milliseconds: 5), () => 0);
+    },
+  };
 
   @override
   Map<String, RelationDefinition> get relations => {
-        'posts': RelationDefinition<TestPost>(
-          type: RelationType.hasMany,
-          relatedTable: 'posts',
-          foreignKey: 'user_id',
-          localKey: 'id',
-          factory: () => TestPost(),
-        ),
-      };
+    'posts': RelationDefinition<TestPost>(
+      type: RelationType.hasMany,
+      relatedTable: 'posts',
+      foreignKey: 'user_id',
+      localKey: 'id',
+      factory: () => TestPost(),
+    ),
+  };
 
   @override
   TestUser newFactory(Map<String, dynamic> data) {
@@ -210,20 +207,22 @@ void main() {
       expect(map['post_summary'], isA<Future>()); // Async returns Future
     });
 
-    test('toJsonAsync properly resolves all async computed properties',
-        () async {
-      final user = TestUser()
-        ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
+    test(
+      'toJsonAsync properly resolves all async computed properties',
+      () async {
+        final user = TestUser()
+          ..fromJson({'id': 1, 'first_name': 'John', 'last_name': 'Doe'});
 
-      // Manually set relation
-      user.setRelation('posts', <TestPost>[]);
+        // Manually set relation
+        user.setRelation('posts', <TestPost>[]);
 
-      final json = await user.toJsonAsync();
+        final json = await user.toJsonAsync();
 
-      expect(json['full_name'], equals('John Doe'));
-      expect(json['greeting'], equals('Hello, John!'));
-      expect(json['post_summary'], equals('0 posts'));
-    });
+        expect(json['full_name'], equals('John Doe'));
+        expect(json['greeting'], equals('Hello, John!'));
+        expect(json['post_summary'], equals('0 posts'));
+      },
+    );
 
     test('toJsonAsync handles relations correctly', () async {
       final user = TestUser()

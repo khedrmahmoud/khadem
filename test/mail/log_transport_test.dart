@@ -116,16 +116,10 @@ void main() {
       message.setSubject('Test');
       message.setTextBody('Content');
       message.addAttachment(
-        const MailAttachment(
-          data: [1, 2, 3],
-          filename: 'file1.pdf',
-        ),
+        const MailAttachment(data: [1, 2, 3], filename: 'file1.pdf'),
       );
       message.addAttachment(
-        const MailAttachment(
-          data: [4, 5, 6],
-          filename: 'file2.pdf',
-        ),
+        const MailAttachment(data: [4, 5, 6], filename: 'file2.pdf'),
       );
 
       await verboseTransport.send(message);
@@ -146,10 +140,7 @@ void main() {
       message.setSubject('Test');
       message.setTextBody('Content');
       message.addEmbedded(
-        const MailEmbedded(
-          path: '/path/to/logo.png',
-          cid: 'logo',
-        ),
+        const MailEmbedded(path: '/path/to/logo.png', cid: 'logo'),
       );
 
       await verboseTransport.send(message);

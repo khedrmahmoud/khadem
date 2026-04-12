@@ -1,6 +1,6 @@
-import '../../../../support/exceptions/database_exception.dart';
 import '../../../../application/khadem.dart';
 import '../../../../contracts/database/query_builder_interface.dart';
+import '../../../../support/exceptions/database_exception.dart';
 import '../../orm/model_lifecycle.dart';
 import 'has_attributes.dart';
 import 'has_events.dart';
@@ -69,10 +69,14 @@ mixin InteractsWithDatabase<T> {
       }
 
       if (this is HasEvents) {
-        await (this as HasEvents)
-            .fireModelEvent(ModelLifecycle.updated, halt: false);
-        await (this as HasEvents)
-            .fireModelEvent(ModelLifecycle.saved, halt: false);
+        await (this as HasEvents).fireModelEvent(
+          ModelLifecycle.updated,
+          halt: false,
+        );
+        await (this as HasEvents).fireModelEvent(
+          ModelLifecycle.saved,
+          halt: false,
+        );
       }
 
       if (this is HasAttributes) {
@@ -105,10 +109,14 @@ mixin InteractsWithDatabase<T> {
       }
 
       if (this is HasEvents) {
-        await (this as HasEvents)
-            .fireModelEvent(ModelLifecycle.created, halt: false);
-        await (this as HasEvents)
-            .fireModelEvent(ModelLifecycle.saved, halt: false);
+        await (this as HasEvents).fireModelEvent(
+          ModelLifecycle.created,
+          halt: false,
+        );
+        await (this as HasEvents).fireModelEvent(
+          ModelLifecycle.saved,
+          halt: false,
+        );
       }
 
       if (this is HasAttributes) {
@@ -135,8 +143,10 @@ mixin InteractsWithDatabase<T> {
     await query.where(primaryKey, '=', getKey()).delete();
 
     if (this is HasEvents) {
-      await (this as HasEvents)
-          .fireModelEvent(ModelLifecycle.deleted, halt: false);
+      await (this as HasEvents).fireModelEvent(
+        ModelLifecycle.deleted,
+        halt: false,
+      );
     }
 
     exists = false;

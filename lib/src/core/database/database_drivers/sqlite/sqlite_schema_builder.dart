@@ -16,10 +16,7 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
     final columnSQLs = blueprint.columns.map(_columnToSQL).toList();
     final constraints = _generateTableConstraints(blueprint, tableName);
 
-    final fullSQL = [
-      ...columnSQLs,
-      ...constraints,
-    ].join(', ');
+    final fullSQL = [...columnSQLs, ...constraints].join(', ');
 
     _queries.add('CREATE TABLE "$tableName" ($fullSQL);');
 
@@ -50,10 +47,7 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
     final columnSQLs = blueprint.columns.map(_columnToSQL).toList();
     final constraints = _generateTableConstraints(blueprint, tableName);
 
-    final fullSQL = [
-      ...columnSQLs,
-      ...constraints,
-    ].join(', ');
+    final fullSQL = [...columnSQLs, ...constraints].join(', ');
 
     _queries.add('CREATE TABLE IF NOT EXISTS "$tableName" ($fullSQL);');
 
@@ -69,8 +63,9 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
     for (final idx in blueprint.indexes) {
       final name = idx.name ?? '${tableName}_${idx.columns.join('_')}_index';
       final cols = idx.columns.map((c) => '"$c"').join(', ');
-      _queries
-          .add('CREATE INDEX IF NOT EXISTS "$name" ON "$tableName" ($cols);');
+      _queries.add(
+        'CREATE INDEX IF NOT EXISTS "$name" ON "$tableName" ($cols);',
+      );
     }
   }
 
@@ -207,8 +202,14 @@ class SQLiteSchemaBuilder implements SchemaBuilder {
 
   bool _isInteger(ColumnDefinition column) {
     final type = column.type.toUpperCase();
-    return ['INT', 'INTEGER', 'BIGINT', 'TINYINT', 'SMALLINT', 'MEDIUMINT']
-        .contains(type);
+    return [
+      'INT',
+      'INTEGER',
+      'BIGINT',
+      'TINYINT',
+      'SMALLINT',
+      'MEDIUMINT',
+    ].contains(type);
   }
 
   String _compileDefault(ColumnDefinition column) {

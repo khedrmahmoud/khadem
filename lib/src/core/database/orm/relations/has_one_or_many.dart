@@ -45,7 +45,9 @@ abstract class HasOneOrMany<Related extends KhademModel<Related>, Parent>
     final relatedTable = query.table;
     final parentTable = parentQuery.table;
 
-    return query.select(columns).whereColumn(
+    return query
+        .select(columns)
+        .whereColumn(
           '$relatedTable.$foreignKey',
           '=',
           '$parentTable.$localKey',

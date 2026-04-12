@@ -31,8 +31,10 @@ void main() {
     late FakeBodyParser fakeBodyParser;
 
     setUp(() {
-      fakeBodyParser =
-          FakeBodyParser({'name': 'John', 'email': 'john@example.com'});
+      fakeBodyParser = FakeBodyParser({
+        'name': 'John',
+        'email': 'john@example.com',
+      });
       validator = RequestValidator(fakeBodyParser as dynamic);
     });
 

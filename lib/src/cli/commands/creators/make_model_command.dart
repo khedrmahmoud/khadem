@@ -45,7 +45,8 @@ class MakeModelCommand extends KhademCommand {
 
     await file.create(recursive: true);
 
-    final classCode = '''
+    final classCode =
+        '''
 import 'package:khadem/database/orm.dart';
 
 class $className extends KhademModel<$className> with Timestamps {

@@ -104,8 +104,11 @@ class MiddlewarePipeline {
     }
 
     final target = _namedMiddleware[targetName]!;
-    final middleware =
-        Middleware(handler, priority: target.priority, name: name);
+    final middleware = Middleware(
+      handler,
+      priority: target.priority,
+      name: name,
+    );
     final index = _middleware.indexOf(target);
     _middleware.insert(index, middleware);
 
@@ -123,8 +126,11 @@ class MiddlewarePipeline {
     }
 
     final target = _namedMiddleware[targetName]!;
-    final middleware =
-        Middleware(handler, priority: target.priority, name: name);
+    final middleware = Middleware(
+      handler,
+      priority: target.priority,
+      name: name,
+    );
     final index = _middleware.indexOf(target);
     _middleware.insert(index + 1, middleware);
 

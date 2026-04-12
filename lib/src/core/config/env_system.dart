@@ -1,7 +1,7 @@
-import '../../support/exceptions/config_exception.dart';
 import 'dart:io';
 
 import '../../contracts/env/env_interface.dart';
+import '../../support/exceptions/config_exception.dart';
 
 /// The default environment variable manager used by Khadem.
 ///
@@ -75,9 +75,6 @@ class EnvSystem implements EnvInterface {
   /// Whether to load process environment variables.
   final bool _useProcessEnv;
 
-  /// List of allowed variables for substitution (whitelisting).
-  final List<String>? _allowedVariables;
-
   /// Creates a new environment system.
   ///
   /// [useProcessEnv] determines whether to load system environment variables
@@ -90,8 +87,7 @@ class EnvSystem implements EnvInterface {
   /// final env = EnvSystem(useProcessEnv: false); // Only .env
   /// ```
   EnvSystem({bool useProcessEnv = true, List<String>? allowedVariables})
-    : _useProcessEnv = useProcessEnv,
-      _allowedVariables = allowedVariables {
+    : _useProcessEnv = useProcessEnv {
     if (_useProcessEnv) {
       _loadFromProcessEnv();
     }

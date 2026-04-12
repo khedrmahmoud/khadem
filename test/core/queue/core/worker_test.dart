@@ -42,9 +42,7 @@ void main() {
     late InMemoryDriver driver;
 
     setUp(() {
-      driver = InMemoryDriver(
-        config: const DriverConfig(name: 'test-worker'),
-      );
+      driver = InMemoryDriver(config: const DriverConfig(name: 'test-worker'));
     });
 
     test('should process jobs with delay', () async {
@@ -56,10 +54,7 @@ void main() {
 
       final worker = QueueWorker(
         driver,
-        const QueueWorkerConfig(
-          maxJobs: 2,
-          delay: Duration(milliseconds: 100),
-        ),
+        const QueueWorkerConfig(maxJobs: 2, delay: Duration(milliseconds: 100)),
       );
 
       await worker.start();
@@ -75,10 +70,7 @@ void main() {
 
       final worker = QueueWorker(
         driver,
-        const QueueWorkerConfig(
-          maxJobs: 5,
-          delay: Duration(milliseconds: 10),
-        ),
+        const QueueWorkerConfig(maxJobs: 5, delay: Duration(milliseconds: 10)),
       );
 
       await worker.start();
@@ -139,9 +131,7 @@ void main() {
     test('should track running job count', () async {
       final worker = QueueWorker(
         driver,
-        const QueueWorkerConfig(
-          delay: Duration(milliseconds: 10),
-        ),
+        const QueueWorkerConfig(delay: Duration(milliseconds: 10)),
       );
 
       expect(worker.runningJobCount, equals(0));
@@ -152,9 +142,7 @@ void main() {
     late InMemoryDriver driver;
 
     setUp(() {
-      driver = InMemoryDriver(
-        config: const DriverConfig(name: 'test-pool'),
-      );
+      driver = InMemoryDriver(config: const DriverConfig(name: 'test-pool'));
     });
 
     test('should start multiple workers', () async {
@@ -164,9 +152,7 @@ void main() {
 
       final pool = QueueWorkerPool(
         driver: driver,
-        config: const QueueWorkerConfig(
-          delay: Duration(milliseconds: 10),
-        ),
+        config: const QueueWorkerConfig(delay: Duration(milliseconds: 10)),
       );
 
       await pool.start();
@@ -181,10 +167,7 @@ void main() {
     });
 
     test('should get pool stats', () async {
-      final pool = QueueWorkerPool(
-        driver: driver,
-        workerCount: 3,
-      );
+      final pool = QueueWorkerPool(driver: driver, workerCount: 3);
 
       await pool.start();
 
@@ -201,10 +184,7 @@ void main() {
         await driver.push(TestJob('job$i'));
       }
 
-      final pool = QueueWorkerPool(
-        driver: driver,
-        workerCount: 2,
-      );
+      final pool = QueueWorkerPool(driver: driver, workerCount: 2);
 
       await pool.start();
 
@@ -224,10 +204,7 @@ void main() {
         await driver.push(SlowJob(const Duration(milliseconds: 100)));
       }
 
-      final pool = QueueWorkerPool(
-        driver: driver,
-        workerCount: 2,
-      );
+      final pool = QueueWorkerPool(driver: driver, workerCount: 2);
 
       await pool.start();
 

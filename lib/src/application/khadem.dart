@@ -1,8 +1,8 @@
 import 'package:khadem/container.dart';
+import 'package:khadem/contracts.dart';
 import 'package:khadem/service_provider.dart';
 
 import '../../logging.dart';
-import '../contracts/index.dart';
 import '../core/database/index.dart';
 import '../core/http/index.dart';
 import '../core/queue/index.dart';
@@ -28,8 +28,9 @@ class Khadem {
   static T make<T>([String? context]) => container.resolve<T>(context);
 
   /// Returns the service provider manager.
-  static final ServiceProviderManager _providerManager =
-      ServiceProviderManager(container);
+  static final ServiceProviderManager _providerManager = ServiceProviderManager(
+    container,
+  );
 
   static ServiceProviderManager get providers => _providerManager;
 

@@ -90,8 +90,9 @@ class InMemoryDriver extends BaseQueueDriver {
   @override
   Future<void> retryJob(JobContext context, {required Duration delay}) async {
     // Update scheduled time for retry
-    context.metadata['scheduledFor'] =
-        DateTime.now().add(delay).toIso8601String();
+    context.metadata['scheduledFor'] = DateTime.now()
+        .add(delay)
+        .toIso8601String();
 
     // Job is already in queue, just update its scheduled time
     // No need to re-add

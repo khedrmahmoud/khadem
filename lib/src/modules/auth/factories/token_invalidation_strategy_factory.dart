@@ -3,10 +3,7 @@ import '../contracts/token_service.dart';
 import '../strategies/logout_strategies.dart';
 
 /// Types of logout strategies available
-enum LogoutType {
-  singleDevice,
-  allDevices,
-}
+enum LogoutType { singleDevice, allDevices }
 
 /// Factory for creating token invalidation strategies
 ///

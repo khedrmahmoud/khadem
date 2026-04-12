@@ -77,11 +77,9 @@ class BelongsToMany<Related extends KhademModel<Related>, Parent>
 
     final parentTable = parentQuery.table;
 
-    return query.select(columns).whereColumn(
-          '$table.$foreignPivotKey',
-          '=',
-          '$parentTable.$parentKey',
-        );
+    return query
+        .select(columns)
+        .whereColumn('$table.$foreignPivotKey', '=', '$parentTable.$parentKey');
   }
 
   @override

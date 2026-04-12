@@ -8,15 +8,12 @@ class TooManyRequestsException extends AppException {
   /// Number of seconds to wait before retrying
   final int? retryAfter;
 
-  TooManyRequestsException(
-    super.message, {
-    this.retryAfter,
-    super.details,
-  }) : super(
-          statusCode: 429,
-          title: 'Too Many Requests',
-          type: 'too_many_requests',
-        );
+  TooManyRequestsException(super.message, {this.retryAfter, super.details})
+    : super(
+        statusCode: 429,
+        title: 'Too Many Requests',
+        type: 'too_many_requests',
+      );
 
   @override
   Map<String, dynamic> toResponse() {

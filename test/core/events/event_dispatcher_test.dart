@@ -100,8 +100,10 @@ void main() {
     registry.registerDriver('mock', queueDriver);
     registry.setDefaultDriver('mock');
 
-    final queueManager =
-        QueueManager(container.resolve<ConfigInterface>(), registry: registry);
+    final queueManager = QueueManager(
+      container.resolve<ConfigInterface>(),
+      registry: registry,
+    );
     container.instance<QueueManager>(queueManager);
 
     dispatcher = EventDispatcher(container);

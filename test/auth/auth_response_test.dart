@@ -130,10 +130,7 @@ void main() {
       final response1 = AuthResponse(user: {'id': 1});
       expect(response1.authorizationHeader, isNull);
 
-      final response2 = AuthResponse(
-        user: {'id': 1},
-        accessToken: 'token123',
-      );
+      final response2 = AuthResponse(user: {'id': 1}, accessToken: 'token123');
       expect(response2.authorizationHeader, equals('Bearer token123'));
 
       final response3 = AuthResponse(

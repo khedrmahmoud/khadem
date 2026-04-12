@@ -9,10 +9,13 @@ class MySQLGrammar extends Grammar {
     // Don't wrap if already wrapped or contains spaces/dots (simple heuristic)
     // Actually, we should split by dot and wrap each part.
     if (value.contains('.')) {
-      return value.split('.').map((part) {
-        if (part == '*') return part;
-        return '`$part`';
-      }).join('.');
+      return value
+          .split('.')
+          .map((part) {
+            if (part == '*') return part;
+            return '`$part`';
+          })
+          .join('.');
     }
     return '`$value`';
   }
@@ -29,10 +32,12 @@ class MySQLGrammar extends Grammar {
     if (columns == null || columns.isEmpty) {
       components.add('$select *');
     } else {
-      components.add('$select ${columns.map((c) {
-        if (c is Map && c['type'] == 'Raw') return c['sql'];
-        return wrap(c.toString());
-      }).join(', ')}');
+      components.add(
+        '$select ${columns.map((c) {
+          if (c is Map && c['type'] == 'Raw') return c['sql'];
+          return wrap(c.toString());
+        }).join(', ')}',
+      );
     }
 
     // From
@@ -127,8 +132,9 @@ class MySQLGrammar extends Grammar {
   ) {
     final table = wrapTable(query['table']);
     final columns = values.keys.map((key) => '${wrap(key)} = ?').join(', ');
-    final wheres =
-        query['wheres'] != null ? compileWheres(query['wheres']) : '';
+    final wheres = query['wheres'] != null
+        ? compileWheres(query['wheres'])
+        : '';
 
     return 'UPDATE $table SET $columns $wheres'.trim();
   }
@@ -136,8 +142,9 @@ class MySQLGrammar extends Grammar {
   @override
   String compileDelete(Map<String, dynamic> query) {
     final table = wrapTable(query['table']);
-    final wheres =
-        query['wheres'] != null ? compileWheres(query['wheres']) : '';
+    final wheres = query['wheres'] != null
+        ? compileWheres(query['wheres'])
+        : '';
 
     return 'DELETE FROM $table $wheres'.trim();
   }
@@ -149,8 +156,9 @@ class MySQLGrammar extends Grammar {
     int amount,
   ) {
     final table = wrapTable(query['table']);
-    final wheres =
-        query['wheres'] != null ? compileWheres(query['wheres']) : '';
+    final wheres = query['wheres'] != null
+        ? compileWheres(query['wheres'])
+        : '';
     final wrappedColumn = wrap(column);
     final operator = amount >= 0 ? '+' : '-';
     final absAmount = amount.abs();
@@ -168,9 +176,11 @@ class MySQLGrammar extends Grammar {
     final first = values.first;
     final columns = first.keys.map(wrap).join(', ');
 
-    final placeholders = values.map((row) {
-      return '(${List.filled(row.length, '?').join(', ')})';
-    }).join(', ');
+    final placeholders = values
+        .map((row) {
+          return '(${List.filled(row.length, '?').join(', ')})';
+        })
+        .join(', ');
 
     return 'INSERT INTO $table ($columns) VALUES $placeholders';
   }
@@ -184,13 +194,16 @@ class MySQLGrammar extends Grammar {
   ]) {
     final sql = compileInsertMany(query, values);
 
-    final updateColumns = update ??
+    final updateColumns =
+        update ??
         values.first.keys.where((k) => !uniqueBy.contains(k)).toList();
 
-    final updates = updateColumns.map((col) {
-      final wrapped = wrap(col);
-      return '$wrapped = VALUES($wrapped)';
-    }).join(', ');
+    final updates = updateColumns
+        .map((col) {
+          final wrapped = wrap(col);
+          return '$wrapped = VALUES($wrapped)';
+        })
+        .join(', ');
 
     return '$sql ON DUPLICATE KEY UPDATE $updates';
   }
@@ -202,8 +215,9 @@ class MySQLGrammar extends Grammar {
     Map<String, dynamic> extras,
   ) {
     final table = wrapTable(query['table']);
-    final wheres =
-        query['wheres'] != null ? compileWheres(query['wheres']) : '';
+    final wheres = query['wheres'] != null
+        ? compileWheres(query['wheres'])
+        : '';
 
     final columnUpdates = columns.entries.map((e) {
       final wrapped = wrap(e.key);

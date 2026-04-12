@@ -21,15 +21,15 @@ class FailedJob {
   }) : metadata = metadata ?? {};
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'jobType': jobType,
-        'payload': payload,
-        'error': error,
-        'stackTrace': stackTrace,
-        'failedAt': failedAt.toIso8601String(),
-        'attempts': attempts,
-        'metadata': metadata,
-      };
+    'id': id,
+    'jobType': jobType,
+    'payload': payload,
+    'error': error,
+    'stackTrace': stackTrace,
+    'failedAt': failedAt.toIso8601String(),
+    'attempts': attempts,
+    'metadata': metadata,
+  };
 
   factory FailedJob.fromJson(Map<String, dynamic> json) {
     return FailedJob(

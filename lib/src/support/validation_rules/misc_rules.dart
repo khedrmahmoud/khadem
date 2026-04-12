@@ -86,9 +86,7 @@ class PhoneRule extends Rule {
     if (value is! String) return false;
 
     // E.164 compliant (ish) + optional spaces/dashes
-    final phoneRegex = RegExp(
-      r'^\+?[1-9]\d{1,14}$',
-    );
+    final phoneRegex = RegExp(r'^\+?[1-9]\d{1,14}$');
     // Sanitize
     final sanitized = value.replaceAll(RegExp(r'[\s\-\(\)]'), '');
     return phoneRegex.hasMatch(sanitized);
@@ -220,10 +218,7 @@ class ProhibitedIfRule extends Rule implements RuleMessageParametersProvider {
     final args = context.parameters;
     if (args.length < 2) return const {};
 
-    return {
-      'other': FieldName(args[0]),
-      'value': args[1],
-    };
+    return {'other': FieldName(args[0]), 'value': args[1]};
   }
 }
 
@@ -267,9 +262,6 @@ class RequiredIfRule extends Rule implements RuleMessageParametersProvider {
     final args = context.parameters;
     if (args.length < 2) return const {};
 
-    return {
-      'other': FieldName(args[0]),
-      'value': args[1],
-    };
+    return {'other': FieldName(args[0]), 'value': args[1]};
   }
 }

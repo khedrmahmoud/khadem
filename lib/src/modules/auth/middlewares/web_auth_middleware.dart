@@ -55,8 +55,11 @@ class WebAuthMiddleware {
       final authManager = AuthManager(guard: guard, provider: 'users');
 
       // Check if user is authenticated via session
-      final isAuthenticated =
-          await _checkWithGuard(authManager, guard, sessionId);
+      final isAuthenticated = await _checkWithGuard(
+        authManager,
+        guard,
+        sessionId,
+      );
 
       if (!isAuthenticated) {
         await _handleUnauthenticated(request, response, redirectTo);
@@ -159,8 +162,10 @@ class WebAuthMiddleware {
         // Check admin role (simplified)
         final role = user['role'] as String?;
         if (role != 'admin') {
-          request.session
-              .flash('message', 'Access denied. Admin privileges required.');
+          request.session.flash(
+            'message',
+            'Access denied. Admin privileges required.',
+          );
           if (response is Response) {
             await response.redirect('/dashboard');
           }

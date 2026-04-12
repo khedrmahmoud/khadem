@@ -33,8 +33,6 @@ class InRule extends Rule implements RuleMessageParametersProvider {
   Map<String, dynamic> messageParameters(ValidationContext context) {
     final options =
         _values?.map((e) => e.toString()).toList() ?? context.parameters;
-    return {
-      'values': options.join(', '),
-    };
+    return {'values': options.join(', ')};
   }
 }

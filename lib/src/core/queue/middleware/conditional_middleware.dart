@@ -6,10 +6,7 @@ class ConditionalMiddleware implements QueueMiddleware {
   final bool Function(QueueJobContext context) condition;
   final QueueMiddleware middleware;
 
-  ConditionalMiddleware({
-    required this.condition,
-    required this.middleware,
-  });
+  ConditionalMiddleware({required this.condition, required this.middleware});
 
   @override
   Future<void> handle(QueueJobContext context, Next next) async {

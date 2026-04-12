@@ -37,18 +37,13 @@ class SocketServer {
   FutureOr<void> Function(SocketClient client)? _onConnectCallback;
   FutureOr<void> Function(SocketClient client)? _onDisconnectCallback;
 
-  SocketServer(
-    this.config, {
-    SocketManager? manager,
-  }) {
+  SocketServer(this.config, {SocketManager? manager}) {
     _manager = manager ?? Khadem.socket;
   }
 
   /// Add a middleware to run during the handshake phase (before upgrade).
   /// This is useful for authentication, CORS, etc.
-  void useHandshakeMiddleware(
-    List<Middleware> middlewares,
-  ) {
+  void useHandshakeMiddleware(List<Middleware> middlewares) {
     _handshakeMiddlewares.addAll(middlewares);
   }
 
@@ -99,14 +94,12 @@ class SocketServer {
           try {
             final res = Response(request);
 
-            await MiddlewarePipeline.execute(
-              _handshakeMiddlewares,
+            await MiddlewarePipeline.execute(_handshakeMiddlewares, req, res, (
               req,
               res,
-              (req, res) async {
-                // Handshake passed
-              },
-            );
+            ) async {
+              // Handshake passed
+            });
 
             if (res.sent) return;
 

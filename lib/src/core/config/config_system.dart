@@ -110,10 +110,10 @@ class ConfigSystem implements ConfigInterface {
     required String environment,
     bool useCache = true,
     Duration cacheTtl = const Duration(minutes: 5),
-  })  : _configPath = configPath,
-        _environment = StringBuffer(environment),
-        _useCache = useCache,
-        _cacheTtl = cacheTtl {
+  }) : _configPath = configPath,
+       _environment = StringBuffer(environment),
+       _useCache = useCache,
+       _cacheTtl = cacheTtl {
     _loadConfigurations();
   }
 

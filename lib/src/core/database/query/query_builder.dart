@@ -1,6 +1,6 @@
-import '../../../support/exceptions/database_exception.dart';
 import '../../../contracts/database/database_connection.dart';
 import '../../../contracts/database/query_builder_interface.dart';
+import '../../../support/exceptions/database_exception.dart';
 import '../model_base/khadem_model.dart';
 import '../orm/eager_loader.dart';
 import '../orm/paginated_result.dart';

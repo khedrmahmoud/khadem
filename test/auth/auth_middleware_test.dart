@@ -33,8 +33,9 @@ void main() {
     });
 
     test('should create middleware with permissions', () {
-      final middleware =
-          AuthMiddleware.bearer().withPermissions(['user.create']);
+      final middleware = AuthMiddleware.bearer().withPermissions([
+        'user.create',
+      ]);
       expect(middleware, isNotNull);
       expect(middleware.name, equals('auth-bearer'));
     });

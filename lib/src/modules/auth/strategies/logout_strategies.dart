@@ -53,7 +53,6 @@ class SingleDeviceLogoutStrategy implements TokenInvalidationStrategy {
         await _tokenService.deleteToken(context.refreshToken!);
       }
     }
-
     // For stateful tokens, simply delete the access token
     else if (context.accessToken != null) {
       await _tokenService.deleteToken(context.accessToken!);

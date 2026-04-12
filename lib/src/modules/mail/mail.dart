@@ -68,24 +68,21 @@ class Mail {
   static Future<MailerInterface> view(
     String viewName, [
     Map<String, dynamic>? data,
-  ]) =>
-      manager.view(viewName, data);
+  ]) => manager.view(viewName, data);
 
   /// Attaches a file.
   static MailerInterface attach(
     String path, {
     String? name,
     String? mimeType,
-  }) =>
-      manager.attach(path, name: name, mimeType: mimeType);
+  }) => manager.attach(path, name: name, mimeType: mimeType);
 
   /// Attaches raw data.
   static MailerInterface attachData(
     List<int> data,
     String name, {
     String? mimeType,
-  }) =>
-      manager.attachData(data, name, mimeType: mimeType);
+  }) => manager.attachData(data, name, mimeType: mimeType);
 
   /// Embeds an inline image.
   static MailerInterface embed(String path, String cid) =>

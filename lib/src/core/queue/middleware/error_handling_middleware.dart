@@ -6,10 +6,7 @@ class ErrorHandlingMiddleware implements QueueMiddleware {
   final void Function(dynamic job, dynamic error, StackTrace stack)? onError;
   final bool rethrowErrors;
 
-  ErrorHandlingMiddleware({
-    this.onError,
-    this.rethrowErrors = true,
-  });
+  ErrorHandlingMiddleware({this.onError, this.rethrowErrors = true});
 
   @override
   Future<void> handle(QueueJobContext context, Next next) async {

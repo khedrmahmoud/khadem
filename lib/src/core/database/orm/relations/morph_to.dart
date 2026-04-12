@@ -22,13 +22,13 @@ class MorphTo<Related extends KhademModel<Related>, Parent>
     String ownerKey,
     String relationName,
   ) : super(
-          query,
-          parent,
-          relatedFactory,
-          morphIdField,
-          ownerKey,
-          relationName,
-        );
+        query,
+        parent,
+        relatedFactory,
+        morphIdField,
+        ownerKey,
+        relationName,
+      );
 
   bool _matchesMorphType(KhademModel model) {
     return model.getAttribute(morphTypeField) == morphClass;

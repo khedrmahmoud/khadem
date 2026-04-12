@@ -18,8 +18,5 @@ class JobDefinition {
   /// A function that returns a [ScheduledJob] instance using provided config.
   final ScheduledJob Function(Map<String, dynamic> config) factory;
 
-  JobDefinition({
-    required this.name,
-    required this.factory,
-  });
+  JobDefinition({required this.name, required this.factory});
 }

@@ -68,10 +68,7 @@ class MailFromConfig {
   final String address;
   final String? name;
 
-  const MailFromConfig({
-    required this.address,
-    this.name,
-  });
+  const MailFromConfig({required this.address, this.name});
 
   factory MailFromConfig.fromMap(Map<String, dynamic> map) {
     return MailFromConfig(
@@ -81,10 +78,7 @@ class MailFromConfig {
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      'address': address,
-      if (name != null) 'name': name,
-    };
+    return {'address': address, if (name != null) 'name': name};
   }
 }
 
@@ -150,11 +144,7 @@ class MailgunConfig {
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      'apiKey': apiKey,
-      'domain': domain,
-      'endpoint': endpoint,
-    };
+    return {'apiKey': apiKey, 'domain': domain, 'endpoint': endpoint};
   }
 }
 

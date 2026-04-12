@@ -52,7 +52,7 @@ class AuthMiddleware extends Middleware {
 
   /// Creates an authentication middleware with custom configuration
   AuthMiddleware._(this._config, MiddlewareHandler handler)
-      : super(handler, priority: _config.priority, name: _config.name);
+    : super(handler, priority: _config.priority, name: _config.name);
 
   /// Creates a Bearer token authentication middleware
   factory AuthMiddleware.bearer({
@@ -218,9 +218,7 @@ class AuthMiddleware extends Middleware {
     final token = authHeader.replaceFirst('Bearer ', '').trim();
 
     if (token.isEmpty) {
-      throw AuthException(
-        'Empty token provided in authorization header.',
-      );
+      throw AuthException('Empty token provided in authorization header.');
     }
 
     return {'token': token, 'type': 'bearer'};
@@ -231,9 +229,7 @@ class AuthMiddleware extends Middleware {
     final authHeader = request.header('authorization');
 
     if (authHeader == null || !authHeader.startsWith('Basic ')) {
-      throw AuthException(
-        'Basic authentication required.',
-      );
+      throw AuthException('Basic authentication required.');
     }
 
     try {
@@ -245,11 +241,7 @@ class AuthMiddleware extends Middleware {
         throw AuthException('Invalid Basic authentication format.');
       }
 
-      return {
-        'username': parts[0],
-        'password': parts[1],
-        'type': 'basic',
-      };
+      return {'username': parts[0], 'password': parts[1], 'type': 'basic'};
     } catch (e) {
       throw AuthException('Invalid Basic authentication format.');
     }
@@ -264,9 +256,7 @@ class AuthMiddleware extends Middleware {
     final apiKey = request.header(headerName.toLowerCase());
 
     if (apiKey == null || apiKey.isEmpty) {
-      throw AuthException(
-        'Missing API key in $headerName header.',
-      );
+      throw AuthException('Missing API key in $headerName header.');
     }
 
     return {'api_key': apiKey, 'type': 'api_key'};
@@ -315,8 +305,9 @@ class AuthMiddleware extends Middleware {
     if (config.permissions.isNotEmpty) {
       final userPermissions =
           (userData['permissions'] as List<dynamic>?)?.cast<String>() ?? [];
-      final hasAllPermissions = config.permissions
-          .every((permission) => userPermissions.contains(permission));
+      final hasAllPermissions = config.permissions.every(
+        (permission) => userPermissions.contains(permission),
+      );
 
       if (!hasAllPermissions) {
         throw AuthException(
@@ -354,9 +345,7 @@ class AuthMiddleware extends Middleware {
       throw error;
     } else {
       // Wrap unexpected errors
-      throw AuthException(
-        'Authentication failed: ${error.toString()}',
-      );
+      throw AuthException('Authentication failed: ${error.toString()}');
     }
   }
 
@@ -451,9 +440,4 @@ class AuthMiddlewareConfig {
 }
 
 /// Authentication types supported by the middleware
-enum AuthType {
-  bearer,
-  basic,
-  apiKey,
-  custom,
-}
+enum AuthType { bearer, basic, apiKey, custom }

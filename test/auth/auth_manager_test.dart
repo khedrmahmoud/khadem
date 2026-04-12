@@ -20,15 +20,9 @@ class TestAuthConfig implements AuthConfig {
   Map<String, dynamic> getGuard(String guardName) {
     switch (guardName) {
       case 'api':
-        return {
-          'driver': 'token',
-          'provider': 'users',
-        };
+        return {'driver': 'token', 'provider': 'users'};
       case 'web':
-        return {
-          'driver': 'session',
-          'provider': 'users',
-        };
+        return {'driver': 'session', 'provider': 'users'};
       default:
         throw AuthException('Guard not found');
     }
@@ -98,21 +92,29 @@ void main() {
     });
 
     test('guard caching works', () {
-      final authManager1 =
-          AuthManager(guard: 'api', authConfig: testAuthConfig);
-      final authManager2 =
-          AuthManager(guard: 'api', authConfig: testAuthConfig);
+      final authManager1 = AuthManager(
+        guard: 'api',
+        authConfig: testAuthConfig,
+      );
+      final authManager2 = AuthManager(
+        guard: 'api',
+        authConfig: testAuthConfig,
+      );
 
       // Should return the same guard instance from cache
       expect(authManager1.guardInstance, authManager2.guardInstance);
     });
 
     test('clears guard cache', () {
-      final authManager1 =
-          AuthManager(guard: 'api', authConfig: testAuthConfig);
+      final authManager1 = AuthManager(
+        guard: 'api',
+        authConfig: testAuthConfig,
+      );
       AuthManager.clearGuardCache();
-      final authManager2 =
-          AuthManager(guard: 'api', authConfig: testAuthConfig);
+      final authManager2 = AuthManager(
+        guard: 'api',
+        authConfig: testAuthConfig,
+      );
 
       // Should be different instances after cache clear
       expect(authManager1.guardInstance, isNot(authManager2.guardInstance));

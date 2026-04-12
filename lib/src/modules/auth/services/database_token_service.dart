@@ -9,7 +9,7 @@ class DatabaseTokenService implements TokenService {
   final DatabaseAuthRepository _repository;
 
   DatabaseTokenService({DatabaseAuthRepository? repository})
-      : _repository = repository ?? DatabaseAuthRepository();
+    : _repository = repository ?? DatabaseAuthRepository();
 
   @override
   Future<Map<String, dynamic>> storeToken(

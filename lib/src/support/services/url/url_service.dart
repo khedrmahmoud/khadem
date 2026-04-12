@@ -10,9 +10,9 @@ class UrlService {
     String? assetBaseUrl,
     bool forceHttps = false,
     Map<String, String>? namedRoutes,
-  })  : _assetBaseUrl = assetBaseUrl ?? '',
-        _forceHttps = forceHttps,
-        _namedRoutes = namedRoutes ?? {};
+  }) : _assetBaseUrl = assetBaseUrl ?? '',
+       _forceHttps = forceHttps,
+       _namedRoutes = namedRoutes ?? {};
 
   static String _normalizeBaseUrl(String url) {
     var normalized = url.trim();
@@ -190,17 +190,19 @@ class UrlService {
   }
 
   String _buildQueryString(Map<String, dynamic> query) {
-    return query.entries.map((e) {
-      final value = e.value;
-      if (value is List) {
-        return value
-            .map(
-              (v) =>
-                  '${Uri.encodeComponent(e.key)}[]=${Uri.encodeComponent(v.toString())}',
-            )
-            .join('&');
-      }
-      return '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(value.toString())}';
-    }).join('&');
+    return query.entries
+        .map((e) {
+          final value = e.value;
+          if (value is List) {
+            return value
+                .map(
+                  (v) =>
+                      '${Uri.encodeComponent(e.key)}[]=${Uri.encodeComponent(v.toString())}',
+                )
+                .join('&');
+          }
+          return '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(value.toString())}';
+        })
+        .join('&');
   }
 }

@@ -11,5 +11,5 @@ enum ModelLifecycle {
   restoring,
   restored,
   forceDeleting,
-  forceDeleted;
+  forceDeleted,
 }

@@ -57,11 +57,7 @@ class MakeMiddlewareCommand extends KhademCommand {
 
     await file.create(recursive: true);
     await file.writeAsString(
-      _template(
-        className,
-        middlewareName.replaceAll('Middleware', ''),
-        folder,
-      ),
+      _template(className, middlewareName.replaceAll('Middleware', ''), folder),
     );
 
     logger.info('✅ Middleware "$className" created at "$relativePath"');

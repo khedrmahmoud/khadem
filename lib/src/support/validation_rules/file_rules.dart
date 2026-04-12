@@ -135,7 +135,8 @@ class MimesRule extends Rule implements RuleMessageParametersProvider {
   FutureOr<bool> passes(ValidationContext context) async {
     final args = context.parameters;
     final value = context.value;
-    final allowedTypes = _types?.map((e) => e.trim().toLowerCase()).toList() ??
+    final allowedTypes =
+        _types?.map((e) => e.trim().toLowerCase()).toList() ??
         args.map((e) => e.trim().toLowerCase()).toList();
 
     if (value == null || allowedTypes.isEmpty) return false;
@@ -216,12 +217,11 @@ class MimesRule extends Rule implements RuleMessageParametersProvider {
   @override
   Map<String, dynamic> messageParameters(ValidationContext context) {
     final args = context.parameters;
-    final allowedTypes = _types?.map((e) => e.trim()).toList() ??
+    final allowedTypes =
+        _types?.map((e) => e.trim()).toList() ??
         args.map((e) => e.trim()).toList();
 
-    return {
-      'values': allowedTypes.join(', '),
-    };
+    return {'values': allowedTypes.join(', ')};
   }
 }
 

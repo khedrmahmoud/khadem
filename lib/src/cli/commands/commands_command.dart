@@ -7,8 +7,8 @@ class CommandsCommand extends KhademCommand {
     required super.logger,
     required List<KhademCommand> commands,
   }) : _commands = commands
-            .map((c) => (name: c.name, description: c.description))
-            .toList();
+           .map((c) => (name: c.name, description: c.description))
+           .toList();
 
   @override
   String get name => 'commands';

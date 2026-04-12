@@ -13,9 +13,7 @@ class TimeoutMiddleware implements QueueMiddleware {
     await next().timeout(
       timeout,
       onTimeout: () {
-        throw TimeoutException(
-          'Job execution exceeded timeout of $timeout',
-        );
+        throw TimeoutException('Job execution exceeded timeout of $timeout');
       },
     );
   }

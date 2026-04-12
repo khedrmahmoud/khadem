@@ -1,5 +1,5 @@
-import '../../../../support/exceptions/database_exception.dart';
 import '../../../../contracts/database/query_builder_interface.dart';
+import '../../../../support/exceptions/database_exception.dart';
 import '../../orm/eager_loader.dart';
 import '../../orm/relation_definition.dart';
 import '../../orm/relation_type.dart';
@@ -52,8 +52,9 @@ mixin HasRelations<T> {
 
   /// Load the given relations if they are not already loaded.
   Future<T> loadMissing(List<String> relations) async {
-    final relationsToLoad =
-        relations.where((name) => !relationLoaded(name)).toList();
+    final relationsToLoad = relations
+        .where((name) => !relationLoaded(name))
+        .toList();
     if (relationsToLoad.isNotEmpty) {
       await load(relationsToLoad);
     }

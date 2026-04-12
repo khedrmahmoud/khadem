@@ -181,16 +181,19 @@ class InputValidator {
       // But better to be strict.
       // We can't throw easily here without breaking flow, but let's assume it exists.
       // If not found, we might want to throw an exception to the developer.
-      throw ValidationException({'general': ["Validation rule '$ruleName' not found."]});
+      throw ValidationException({
+        'general': ["Validation rule '$ruleName' not found."],
+      });
     }
     return _RuleItem(rule, ruleName, ruleArgs);
   }
 
   List<String> _expandFieldPattern(String pattern, [int depth = 0]) {
-    if (depth > 10)
+    if (depth > 10) {
       throw ValidationException({
         pattern: ['Maximum payload recursion depth exceeded.'],
       });
+    }
     // Recursively expand patterns containing '.*' into concrete field paths.
     final results = <String>[];
 

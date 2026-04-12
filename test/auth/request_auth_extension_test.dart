@@ -323,10 +323,7 @@ void main() {
     });
 
     test('should provide auth context correctly', () {
-      final userData = {
-        'id': 1,
-        'email': 'test@example.com',
-      };
+      final userData = {'id': 1, 'email': 'test@example.com'};
       request.setUser(userData);
       request.setGuard('api');
 

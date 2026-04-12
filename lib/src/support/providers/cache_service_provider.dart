@@ -34,9 +34,7 @@ class CacheServiceProvider implements ServiceProvider {
   @override
   void register(ContainerInterface container) {
     // Register cache driver registry
-    container.singleton<ICacheDriverRegistry>(
-      (c) => CacheDriverRegistry(),
-    );
+    container.singleton<ICacheDriverRegistry>((c) => CacheDriverRegistry());
 
     // Register cache statistics manager
     container.singleton<ICacheStatisticsManager>(
@@ -44,19 +42,13 @@ class CacheServiceProvider implements ServiceProvider {
     );
 
     // Register cache tag manager
-    container.singleton<ICacheTagManager>(
-      (c) => CacheTagManager(),
-    );
+    container.singleton<ICacheTagManager>((c) => CacheTagManager());
 
     // Register cache validator
-    container.singleton<ICacheValidator>(
-      (c) => CacheValidator(),
-    );
+    container.singleton<ICacheValidator>((c) => CacheValidator());
 
     // Register cache config loader
-    container.singleton<ICacheConfigLoader>(
-      (c) => CacheConfigLoader(),
-    );
+    container.singleton<ICacheConfigLoader>((c) => CacheConfigLoader());
 
     // Register cache manager with all dependencies
     container.singleton<CacheManager>(
@@ -70,9 +62,7 @@ class CacheServiceProvider implements ServiceProvider {
     );
 
     // Register interface bindings for easier resolution
-    container.bind<ICacheManager>(
-      (c) => c.resolve<CacheManager>(),
-    );
+    container.bind<ICacheManager>((c) => c.resolve<CacheManager>());
   }
 
   @override
@@ -96,12 +86,12 @@ class CacheServiceProvider implements ServiceProvider {
 
   @override
   List<Type> get provides => [
-        ICacheDriverRegistry,
-        ICacheStatisticsManager,
-        ICacheTagManager,
-        ICacheValidator,
-        ICacheConfigLoader,
-        CacheManager,
-        ICacheManager,
-      ];
+    ICacheDriverRegistry,
+    ICacheStatisticsManager,
+    ICacheTagManager,
+    ICacheValidator,
+    ICacheConfigLoader,
+    CacheManager,
+    ICacheManager,
+  ];
 }

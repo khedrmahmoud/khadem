@@ -61,8 +61,6 @@ class MinRule extends Rule implements RuleMessageParametersProvider {
   Map<String, dynamic> messageParameters(ValidationContext context) {
     final args = context.parameters;
     final min = _min ?? num.tryParse(args.isNotEmpty ? args[0] : '') ?? 0;
-    return {
-      'min': min,
-    };
+    return {'min': min};
   }
 }

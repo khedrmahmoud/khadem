@@ -165,14 +165,15 @@ abstract class Grammar {
           sql = 'NOT EXISTS ($subquery)';
           break;
         case 'FullText':
-          final columns =
-              (where['columns'] as List<String>).map(wrap).join(', ');
+          final columns = (where['columns'] as List<String>)
+              .map(wrap)
+              .join(', ');
           final mode = where['mode'] == 'boolean'
               ? 'IN BOOLEAN MODE'
               : where['mode'] == 'query_expansion' ||
-                      where['mode'] == 'expansion'
-                  ? 'WITH QUERY EXPANSION'
-                  : 'IN NATURAL LANGUAGE MODE';
+                    where['mode'] == 'expansion'
+              ? 'WITH QUERY EXPANSION'
+              : 'IN NATURAL LANGUAGE MODE';
           sql = 'MATCH ($columns) AGAINST (? $mode)';
           break;
         case 'BetweenColumns':
@@ -215,15 +216,17 @@ abstract class Grammar {
 
   /// Compile the "join" portion of the query.
   String compileJoins(List<Map<String, dynamic>> joins) {
-    return joins.map((join) {
-      final table = wrapTable(join['table']);
-      final type = join['type'];
-      final first = wrap(join['first']);
-      final operator = join['operator'];
-      final second = wrap(join['second']);
+    return joins
+        .map((join) {
+          final table = wrapTable(join['table']);
+          final type = join['type'];
+          final first = wrap(join['first']);
+          final operator = join['operator'];
+          final second = wrap(join['second']);
 
-      return '$type JOIN $table ON $first $operator $second';
-    }).join(' ');
+          return '$type JOIN $table ON $first $operator $second';
+        })
+        .join(' ');
   }
 
   /// Compile the "group by" portion of the query.
@@ -235,11 +238,13 @@ abstract class Grammar {
   /// Compile the "having" portion of the query.
   String compileHavings(List<Map<String, dynamic>> havings) {
     if (havings.isEmpty) return '';
-    final sql = havings.map((having) {
-      final column = wrap(having['column']);
-      final operator = having['operator'];
-      return '$column $operator ?';
-    }).join(' AND ');
+    final sql = havings
+        .map((having) {
+          final column = wrap(having['column']);
+          final operator = having['operator'];
+          return '$column $operator ?';
+        })
+        .join(' AND ');
 
     return 'HAVING $sql';
   }

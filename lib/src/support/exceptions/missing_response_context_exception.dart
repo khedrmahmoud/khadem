@@ -5,10 +5,10 @@ class MissingResponseContextException extends AppException {
     String message = 'Response is not available in the current context (zone).',
     dynamic details,
   }) : super(
-          message,
-          statusCode: 500,
-          title: 'Missing Response Context',
-          type: 'missing_response_context',
-          details: details,
-        );
+         message,
+         statusCode: 500,
+         title: 'Missing Response Context',
+         type: 'missing_response_context',
+         details: details,
+       );
 }

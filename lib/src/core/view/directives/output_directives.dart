@@ -81,8 +81,10 @@ class DdDirective implements ViewDirective {
 }
 
 class CommentDirective implements ViewDirective {
-  static final _commentRegex =
-      RegExp(r'@comment(.*?)@endComment', dotAll: true);
+  static final _commentRegex = RegExp(
+    r'@comment(.*?)@endComment',
+    dotAll: true,
+  );
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {

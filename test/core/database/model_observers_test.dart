@@ -18,12 +18,12 @@ class TestUser extends KhademModel<TestUser> {
 
   @override
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'email': email,
-        'status': status,
-        'is_admin': isAdmin,
-      };
+    'id': id,
+    'name': name,
+    'email': email,
+    'status': status,
+    'is_admin': isAdmin,
+  };
 
   @override
   TestUser fromJson(Map<String, dynamic> json) {
@@ -48,11 +48,7 @@ class TestPost extends KhademModel<TestPost> {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'status': status,
-      };
+  Map<String, dynamic> toJson() => {'id': id, 'title': title, 'status': status};
 
   @override
   TestPost fromJson(Map<String, dynamic> json) {

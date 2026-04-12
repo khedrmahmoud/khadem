@@ -192,7 +192,8 @@ class _TaskState {
       nextRun: _nextRun,
       successCount: _successCount,
       failureCount: _failureCount,
-      averageExecutionTime: _totalExecutionTime.inMilliseconds /
+      averageExecutionTime:
+          _totalExecutionTime.inMilliseconds /
           (_successCount + _failureCount).clamp(1, double.infinity),
       status: _getStatus(),
     );

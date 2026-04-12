@@ -21,8 +21,8 @@ class QueueManager {
     String? driverName,
     IQueueDriverRegistry? registry,
     QueueConfigLoader? configLoader,
-  })  : _registry = registry ?? QueueDriverRegistry(),
-        _configLoader = configLoader ?? QueueConfigLoader() {
+  }) : _registry = registry ?? QueueDriverRegistry(),
+       _configLoader = configLoader ?? QueueConfigLoader() {
     if (driver != null) {
       _defaultDriver = driver;
       _defaultDriverName = driverName ?? 'mock';

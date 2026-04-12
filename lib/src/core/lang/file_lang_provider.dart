@@ -106,11 +106,9 @@ class FileLangProvider implements LangProvider {
 
   /// Custom parameter replacers.
   final List<
-      String Function(
-        String key,
-        dynamic value,
-        Map<String, dynamic> parameters,
-      )> _replacers = [];
+    String Function(String key, dynamic value, Map<String, dynamic> parameters)
+  >
+  _replacers = [];
 
   /// Cache for loaded locales to avoid re-reading files.
   final Set<String> _loadedLocales = {};
@@ -160,7 +158,8 @@ class FileLangProvider implements LangProvider {
 
     // Fallback to fallback locale
     if (msg == null && loc != _fallbackLocale) {
-      msg = _getTranslation(key, _fallbackLocale, ns) ??
+      msg =
+          _getTranslation(key, _fallbackLocale, ns) ??
           _getTranslation(key, _fallbackLocale, '');
     }
 
@@ -191,7 +190,8 @@ class FileLangProvider implements LangProvider {
         _getTranslation(key, loc, ns) ?? _getTranslation(key, loc, '');
 
     if (msg == null && loc != _fallbackLocale) {
-      msg = _getTranslation(key, _fallbackLocale, ns) ??
+      msg =
+          _getTranslation(key, _fallbackLocale, ns) ??
           _getTranslation(key, _fallbackLocale, '');
     }
 
@@ -235,7 +235,7 @@ class FileLangProvider implements LangProvider {
         _getTranslation(key, loc, '') ??
         (loc != _fallbackLocale
             ? (_getTranslation(key, _fallbackLocale, ns) ??
-                _getTranslation(key, _fallbackLocale, ''))
+                  _getTranslation(key, _fallbackLocale, ''))
             : null);
   }
 
@@ -273,11 +273,8 @@ class FileLangProvider implements LangProvider {
 
   @override
   void addParameterReplacer(
-    String Function(
-      String key,
-      dynamic value,
-      Map<String, dynamic> parameters,
-    ) replacer,
+    String Function(String key, dynamic value, Map<String, dynamic> parameters)
+    replacer,
   ) {
     _replacers.add(replacer);
   }
@@ -332,9 +329,7 @@ class FileLangProvider implements LangProvider {
 
         // Load into global namespace by default
         final translations = Map<String, String>.from(
-          data.map(
-            (k, v) => MapEntry(k, v.toString()),
-          ),
+          data.map((k, v) => MapEntry(k, v.toString())),
         );
         // Get the namespace from the file name
         String namespace = file.uri.pathSegments.last.split('.').first;

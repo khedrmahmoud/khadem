@@ -16,7 +16,9 @@ class QueueLoggingMiddleware implements QueueMiddleware {
     try {
       await next();
 
-      log('✅ [Queue] Job completed: ${context.job.displayName} (${context.elapsed.inMilliseconds}ms)');
+      log(
+        '✅ [Queue] Job completed: ${context.job.displayName} (${context.elapsed.inMilliseconds}ms)',
+      );
     } catch (e) {
       log('❌ [Queue] Job failed: ${context.job.displayName} - $e');
       rethrow;

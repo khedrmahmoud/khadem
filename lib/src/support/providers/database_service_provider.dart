@@ -11,12 +11,6 @@ import '../../core/database/migration/seeder.dart';
 /// migrations, and seeders.
 class DatabaseServiceProvider extends ServiceProvider {
   @override
-  bool get isDeferred => true;
-
-  @override
-  List<Type> get provides => [DatabaseManager, Migrator, SeederManager];
-
-  @override
   void register(ContainerInterface container) {
     // Register the Database Manager
     container.lazySingleton<DatabaseManager>(
@@ -24,8 +18,9 @@ class DatabaseServiceProvider extends ServiceProvider {
     );
 
     // Register the Migrator
-    container
-        .lazySingleton<Migrator>((c) => Migrator(c.resolve<DatabaseManager>()));
+    container.lazySingleton<Migrator>(
+      (c) => Migrator(c.resolve<DatabaseManager>()),
+    );
 
     // Register the Seeder Manager
     container.lazySingleton<SeederManager>((c) => SeederManager());

@@ -102,9 +102,10 @@ void main() {
       });
 
       test('chains with other WHERE clauses', () {
-        queryBuilder
-            .where('active', '=', true)
-            .whereIn('role', ['admin', 'editor']);
+        queryBuilder.where('active', '=', true).whereIn('role', [
+          'admin',
+          'editor',
+        ]);
 
         final sql = queryBuilder.toSql();
         expect(sql, contains('`active` = ?'));
@@ -169,11 +170,7 @@ void main() {
       });
 
       test('builds correct SQL for BETWEEN with dates', () {
-        queryBuilder.whereBetween(
-          'created_at',
-          '2024-01-01',
-          '2024-12-31',
-        );
+        queryBuilder.whereBetween('created_at', '2024-01-01', '2024-12-31');
 
         final sql = queryBuilder.toSql();
         expect(sql, contains('WHERE `created_at` BETWEEN ? AND ?'));
@@ -244,10 +241,7 @@ void main() {
             .where('active', '=', true);
 
         final sql = queryBuilder.toSql();
-        expect(
-          sql,
-          contains('DATE(`created_at`) = ? AND `active` = ?'),
-        );
+        expect(sql, contains('DATE(`created_at`) = ? AND `active` = ?'));
       });
     });
 
@@ -346,11 +340,7 @@ void main() {
       });
 
       test('builds correct SQL with path', () {
-        queryBuilder.whereJsonDoesntContain(
-          'options',
-          'disabled',
-          'features',
-        );
+        queryBuilder.whereJsonDoesntContain('options', 'disabled', 'features');
 
         final sql = queryBuilder.toSql();
         expect(sql, contains('NOT JSON_CONTAINS(`options`, ?, ?)'));
@@ -385,10 +375,7 @@ void main() {
         queryBuilder.whereJsonContainsKey('metadata', 'settings');
 
         final sql = queryBuilder.toSql();
-        expect(
-          sql,
-          contains("WHERE JSON_CONTAINS_PATH(`metadata`, 'one', ?)"),
-        );
+        expect(sql, contains("WHERE JSON_CONTAINS_PATH(`metadata`, 'one', ?)"));
       });
 
       test('handles nested paths', () {
@@ -408,9 +395,7 @@ void main() {
         final sql = queryBuilder.toSql();
         expect(
           sql,
-          contains(
-            'WHERE (`name` LIKE ? OR `email` LIKE ? OR `phone` LIKE ?)',
-          ),
+          contains('WHERE (`name` LIKE ? OR `email` LIKE ? OR `phone` LIKE ?)'),
         );
       });
 
@@ -457,10 +442,7 @@ void main() {
 
     group('whereNone', () {
       test('builds correct SQL for NOT conditions', () {
-        queryBuilder.whereNone({
-          'banned': true,
-          'deleted': true,
-        });
+        queryBuilder.whereNone({'banned': true, 'deleted': true});
 
         final sql = queryBuilder.toSql();
         expect(sql, contains('WHERE NOT (`banned` = ? OR `deleted` = ?)'));

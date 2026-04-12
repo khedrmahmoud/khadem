@@ -34,9 +34,7 @@ class TestModel extends KhademModel<TestModel> {
   List<String> get fillable => ['name'];
 
   @override
-  Map<String, dynamic> get appends => {
-        'computed_name': _getComputedName,
-      };
+  Map<String, dynamic> get appends => {'computed_name': _getComputedName};
 
   String _getComputedName() {
     _evaluationCount++;

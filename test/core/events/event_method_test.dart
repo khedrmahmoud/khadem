@@ -19,10 +19,7 @@ void main() {
         final handler = (payload) async => 'result';
         const eventName = 'required.event';
 
-        final method = EventMethod(
-          eventName: eventName,
-          handler: handler,
-        );
+        final method = EventMethod(eventName: eventName, handler: handler);
 
         expect(method.eventName, equals(eventName));
         expect(method.handler, same(handler));
@@ -249,10 +246,7 @@ void main() {
 
     group('Edge cases', () {
       test('should handle empty event names', () {
-        final method = EventMethod(
-          eventName: '',
-          handler: (payload) async {},
-        );
+        final method = EventMethod(eventName: '', handler: (payload) async {});
 
         expect(method.eventName, isEmpty);
       });

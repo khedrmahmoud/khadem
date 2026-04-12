@@ -6,7 +6,7 @@ mixin QueryScopes<T> on InteractsWithDatabase<T> {
   /// Apply multiple scope functions in sequence
   QueryBuilderInterface<T> applyScopes(
     List<QueryBuilderInterface<T> Function(QueryBuilderInterface<T>)>
-        scopeFunctions,
+    scopeFunctions,
   ) {
     var currentQuery = query;
     for (final scopeFunction in scopeFunctions) {

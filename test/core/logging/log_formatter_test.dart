@@ -20,8 +20,11 @@ void main() {
 
     test('should format message with context', () {
       final context = {'user': 'john', 'action': 'login'};
-      final result =
-          formatter.format(LogLevel.warning, 'User action', context: context);
+      final result = formatter.format(
+        LogLevel.warning,
+        'User action',
+        context: context,
+      );
 
       expect(result, contains('User action'));
       expect(result, contains('WARNING'));
@@ -89,8 +92,11 @@ void main() {
 
     test('should format message with context', () {
       final context = {'key': 'value', 'number': 42};
-      final result =
-          formatter.format(LogLevel.debug, 'Debug message', context: context);
+      final result = formatter.format(
+        LogLevel.debug,
+        'Debug message',
+        context: context,
+      );
 
       expect(result, contains('[DEBUG] Debug message'));
       expect(result, contains('Context:'));
@@ -114,15 +120,21 @@ void main() {
 
     test('should format message with custom timestamp', () {
       final timestamp = DateTime(2023, 1, 1, 12);
-      final result =
-          formatter.format(LogLevel.info, 'Test message', timestamp: timestamp);
+      final result = formatter.format(
+        LogLevel.info,
+        'Test message',
+        timestamp: timestamp,
+      );
 
       expect(result, contains('2023-01-01T12:00:00'));
     });
 
     test('should handle empty context', () {
-      final result =
-          formatter.format(LogLevel.info, 'Test message', context: {});
+      final result = formatter.format(
+        LogLevel.info,
+        'Test message',
+        context: {},
+      );
 
       expect(result, contains('[INFO] Test message'));
       expect(result, isNot(contains('Context:')));

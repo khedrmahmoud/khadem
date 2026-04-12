@@ -32,14 +32,14 @@ class FileLogHandler implements LogHandler {
     bool rotateDaily = false,
     bool formatJson = true,
     LogLevel minimumLevel = LogLevel.debug,
-  })  : _logFile = File(filePath),
-        _maxFileSizeBytes = maxFileSizeBytes,
-        _maxBackupCount = maxBackupCount,
-        _rotateOnSize = rotateOnSize,
-        _rotateDaily = rotateDaily,
-        _formatJson = formatJson,
-        _minimumLevel = minimumLevel,
-        _lastRotationDate = DateTime.now() {
+  }) : _logFile = File(filePath),
+       _maxFileSizeBytes = maxFileSizeBytes,
+       _maxBackupCount = maxBackupCount,
+       _rotateOnSize = rotateOnSize,
+       _rotateDaily = rotateDaily,
+       _formatJson = formatJson,
+       _minimumLevel = minimumLevel,
+       _lastRotationDate = DateTime.now() {
     _initialize();
   }
 

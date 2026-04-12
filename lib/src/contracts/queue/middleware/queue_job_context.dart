@@ -9,11 +9,9 @@ class QueueJobContext {
   dynamic error;
   StackTrace? stackTrace;
 
-  QueueJobContext({
-    required this.job,
-    Map<String, dynamic>? metadata,
-  })  : metadata = metadata ?? {},
-        startedAt = DateTime.now();
+  QueueJobContext({required this.job, Map<String, dynamic>? metadata})
+    : metadata = metadata ?? {},
+      startedAt = DateTime.now();
 
   /// Duration since job started
   Duration get elapsed => DateTime.now().difference(startedAt);

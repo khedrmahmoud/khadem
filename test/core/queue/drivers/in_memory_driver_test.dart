@@ -45,10 +45,7 @@ void main() {
     setUp(() {
       metrics = QueueMetrics();
       driver = InMemoryDriver(
-        config: const DriverConfig(
-          name: 'test-memory',
-          useDLQ: false,
-        ),
+        config: const DriverConfig(name: 'test-memory', useDLQ: false),
         metrics: metrics,
       );
     });

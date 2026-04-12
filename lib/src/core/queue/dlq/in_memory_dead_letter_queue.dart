@@ -85,15 +85,15 @@ class InMemoryDeadLetterQueue implements DeadLetterQueue {
       'oldestFailure': _jobs.isEmpty
           ? null
           : _jobs.values
-              .reduce((a, b) => a.failedAt.isBefore(b.failedAt) ? a : b)
-              .failedAt
-              .toIso8601String(),
+                .reduce((a, b) => a.failedAt.isBefore(b.failedAt) ? a : b)
+                .failedAt
+                .toIso8601String(),
       'newestFailure': _jobs.isEmpty
           ? null
           : _jobs.values
-              .reduce((a, b) => a.failedAt.isAfter(b.failedAt) ? a : b)
-              .failedAt
-              .toIso8601String(),
+                .reduce((a, b) => a.failedAt.isAfter(b.failedAt) ? a : b)
+                .failedAt
+                .toIso8601String(),
     };
   }
 }

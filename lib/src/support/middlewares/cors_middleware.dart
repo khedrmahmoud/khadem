@@ -21,25 +21,25 @@ class CorsMiddleware implements Middleware {
 
   @override
   MiddlewareHandler get handler => (req, res, next) async {
-        // Set CORS headers
+    // Set CORS headers
 
-        res.cors(
-          allowOrigin: allowOrigin,
-          allowMethods: allowMethods,
-          allowHeaders: allowHeaders,
-          exposeHeaders: exposeHeaders,
-          allowCredentials: allowCredentials,
-          maxAge: maxAge,
-        );
+    res.cors(
+      allowOrigin: allowOrigin,
+      allowMethods: allowMethods,
+      allowHeaders: allowHeaders,
+      exposeHeaders: exposeHeaders,
+      allowCredentials: allowCredentials,
+      maxAge: maxAge,
+    );
 
-        // Handle preflight requests
-        if (req.method == 'OPTIONS') {
-          res.status(204).empty();
-          return;
-        }
+    // Handle preflight requests
+    if (req.method == 'OPTIONS') {
+      res.status(204).empty();
+      return;
+    }
 
-        await next();
-      };
+    await next();
+  };
 
   @override
   String get name => "Cors";

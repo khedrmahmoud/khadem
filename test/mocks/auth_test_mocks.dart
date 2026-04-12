@@ -70,8 +70,9 @@ class TestSetup {
     when(mockContainer.resolve<DatabaseManager>()).thenReturn(mockDb);
 
     // Mock environment values
-    when(mockEnv.get('JWT_SECRET'))
-        .thenReturn('test_jwt_secret_key_for_testing');
+    when(
+      mockEnv.get('JWT_SECRET'),
+    ).thenReturn('test_jwt_secret_key_for_testing');
     when(mockEnv.get('JWT_ALGORITHM')).thenReturn('HS256');
     when(mockEnv.get('DB_CONNECTION')).thenReturn('test');
 
@@ -79,10 +80,7 @@ class TestSetup {
     when(mockConfig.section('auth')).thenReturn({
       'default': 'api',
       'guards': {
-        'api': {
-          'driver': 'token',
-          'provider': 'users',
-        },
+        'api': {'driver': 'token', 'provider': 'users'},
       },
       'providers': {
         'users': {
@@ -100,10 +98,9 @@ class TestSetup {
       'fields': ['email'], // Only identifier fields, NOT password
     });
 
-    when(mockAuthConfig.getGuard('api')).thenReturn({
-      'driver': 'token',
-      'provider': 'users',
-    });
+    when(
+      mockAuthConfig.getGuard('api'),
+    ).thenReturn({'driver': 'token', 'provider': 'users'});
 
     when(mockAuthConfig.getDefaultGuard()).thenReturn('api');
   }

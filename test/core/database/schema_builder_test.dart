@@ -85,10 +85,9 @@ void main() {
     test('handles enums', () {
       builder.createIfNotExists('orders', (table) {
         table.id();
-        table.enumColumn(
-          'status',
-          ['pending', 'completed', 'failed'],
-        ).defaultsTo('pending');
+        table
+            .enumColumn('status', ['pending', 'completed', 'failed'])
+            .defaultsTo('pending');
       });
 
       final sql = builder.queries.first;

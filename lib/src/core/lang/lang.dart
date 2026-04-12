@@ -244,11 +244,8 @@ class Lang {
 
   /// Adds a custom parameter replacer.
   static void addParameterReplacer(
-    String Function(
-      String key,
-      dynamic value,
-      Map<String, dynamic> parameters,
-    ) replacer,
+    String Function(String key, dynamic value, Map<String, dynamic> parameters)
+    replacer,
   ) {
     _provider.addParameterReplacer(replacer);
   }

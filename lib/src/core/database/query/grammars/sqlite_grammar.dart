@@ -8,10 +8,13 @@ class SQLiteGrammar extends Grammar {
     if (value.startsWith('(')) return value; // Subquery or expression
 
     if (value.contains('.')) {
-      return value.split('.').map((part) {
-        if (part == '*') return part;
-        return '"$part"';
-      }).join('.');
+      return value
+          .split('.')
+          .map((part) {
+            if (part == '*') return part;
+            return '"$part"';
+          })
+          .join('.');
     }
     return '"$value"';
   }
@@ -28,10 +31,12 @@ class SQLiteGrammar extends Grammar {
     if (columns == null || columns.isEmpty) {
       components.add('$select *');
     } else {
-      components.add('$select ${columns.map((c) {
-        if (c is Map && c['type'] == 'Raw') return c['sql'];
-        return wrap(c.toString());
-      }).join(', ')}');
+      components.add(
+        '$select ${columns.map((c) {
+          if (c is Map && c['type'] == 'Raw') return c['sql'];
+          return wrap(c.toString());
+        }).join(', ')}',
+      );
     }
 
     // From
@@ -99,15 +104,17 @@ class SQLiteGrammar extends Grammar {
 
   @override
   String compileJoins(List<Map<String, dynamic>> joins) {
-    return joins.map((join) {
-      final table = wrapTable(join['table']);
-      final type = join['type'];
-      final first = wrap(join['first']);
-      final operator = join['operator'];
-      final second = wrap(join['second']);
+    return joins
+        .map((join) {
+          final table = wrapTable(join['table']);
+          final type = join['type'];
+          final first = wrap(join['first']);
+          final operator = join['operator'];
+          final second = wrap(join['second']);
 
-      return '$type JOIN $table ON $first $operator $second';
-    }).join(' ');
+          return '$type JOIN $table ON $first $operator $second';
+        })
+        .join(' ');
   }
 
   @override
@@ -201,10 +208,12 @@ class SQLiteGrammar extends Grammar {
   String compileHavings(List<Map<String, dynamic>> havings) {
     if (havings.isEmpty) return '';
     // Similar to wheres but for HAVING
-    final sql = havings.map((having) {
-      final boolean = having['boolean'];
-      return '$boolean ${wrap(having['column'])} ${having['operator']} ?';
-    }).join(' ');
+    final sql = havings
+        .map((having) {
+          final boolean = having['boolean'];
+          return '$boolean ${wrap(having['column'])} ${having['operator']} ?';
+        })
+        .join(' ');
 
     return 'HAVING ' + sql.replaceFirst(RegExp(r'^(AND|OR) '), '');
   }
@@ -262,10 +271,12 @@ class SQLiteGrammar extends Grammar {
     final sql = compileInsertMany(query, values);
     final columns = update ?? values.first.keys.toList();
 
-    final updateSql = columns.map((col) {
-      final wrapped = wrap(col);
-      return '$wrapped = excluded.$wrapped';
-    }).join(', ');
+    final updateSql = columns
+        .map((col) {
+          final wrapped = wrap(col);
+          return '$wrapped = excluded.$wrapped';
+        })
+        .join(', ');
 
     final conflictCols = uniqueBy.map(wrap).join(', ');
 

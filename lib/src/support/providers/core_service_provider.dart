@@ -33,8 +33,9 @@ class CoreServiceProvider extends ServiceProvider {
   }
 
   void _registerBaseServices(ContainerInterface container) {
-    container
-        .lazySingleton<ExceptionHandlerContract>((c) => ExceptionHandler());
+    container.lazySingleton<ExceptionHandlerContract>(
+      (c) => ExceptionHandler(),
+    );
     container.lazySingleton<Router>((c) => Router());
     container.lazySingleton<EventSystemInterface>((c) => EventSystem());
     container.lazySingleton<Dispatcher>((c) => EventDispatcher(c));
@@ -42,8 +43,10 @@ class CoreServiceProvider extends ServiceProvider {
     container.lazySingleton<ConfigInterface>(
       (c) => ConfigSystem(
         configPath: 'config',
-        environment:
-            c.resolve<EnvInterface>().getOrDefault('APP_ENV', 'development'),
+        environment: c.resolve<EnvInterface>().getOrDefault(
+          'APP_ENV',
+          'development',
+        ),
       ),
     );
     container.lazySingleton<Logger>((c) => Logger());

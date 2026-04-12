@@ -141,8 +141,10 @@ class LangDirective implements ViewDirective {
         if (part.startsWith('locale:')) {
           result['locale'] = _resolveValue(part.substring(7).trim(), context);
         } else if (part.startsWith('namespace:')) {
-          result['namespace'] =
-              _resolveValue(part.substring(10).trim(), context);
+          result['namespace'] = _resolveValue(
+            part.substring(10).trim(),
+            context,
+          );
         } else if (part.startsWith('parameters:')) {
           final paramStr = part.substring(11).trim();
           result['parameters'] = _parseParameterMap(paramStr, context);
@@ -168,8 +170,10 @@ class LangDirective implements ViewDirective {
     if (content.trim().isEmpty) return map;
 
     // Simple parsing for key-value pairs
-    final pairs =
-        content.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty);
+    final pairs = content
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty);
 
     for (final pair in pairs) {
       final colonIndex = pair.indexOf(':');

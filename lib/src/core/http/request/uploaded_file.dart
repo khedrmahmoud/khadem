@@ -20,8 +20,8 @@ class UploadedFile {
     this.contentType,
     String? tempFilePath,
     List<int>? data,
-  })  : _tempFilePath = tempFilePath,
-        _memoryData = data;
+  }) : _tempFilePath = tempFilePath,
+       _memoryData = data;
 
   /// Gets the file size in bytes.
   int get size {
@@ -125,12 +125,12 @@ class UploadedFile {
 
   /// Gets file details as a map.
   Map<String, dynamic> toMap() => {
-        'filename': filename,
-        'field_name': fieldName,
-        'content_type': contentType,
-        'size': size,
-        'extension': extension,
-        'is_memory_based': isMemoryBased,
-        'is_disk_based': isDiskBased,
-      };
+    'filename': filename,
+    'field_name': fieldName,
+    'content_type': contentType,
+    'size': size,
+    'extension': extension,
+    'is_memory_based': isMemoryBased,
+    'is_disk_based': isDiskBased,
+  };
 }

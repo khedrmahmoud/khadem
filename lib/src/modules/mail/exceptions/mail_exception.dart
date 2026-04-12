@@ -10,34 +10,22 @@ class MailException extends AppException {
     dynamic originalError,
     StackTrace? stackTrace,
   }) : super(
-          details: {
-            if (originalError != null)
-              'original_error': originalError.toString(),
-            if (stackTrace != null) 'stack_trace': stackTrace.toString(),
-          },
-        );
+         details: {
+           if (originalError != null)
+             'original_error': originalError.toString(),
+           if (stackTrace != null) 'stack_trace': stackTrace.toString(),
+         },
+       );
 }
 
 /// Exception thrown when mail configuration is invalid.
 class MailConfigException extends MailException {
-  MailConfigException(
-    super.message, {
-    super.originalError,
-    super.stackTrace,
-  }) : super(
-          title: 'Mail Configuration Error',
-          type: 'mail_config_error',
-        );
+  MailConfigException(super.message, {super.originalError, super.stackTrace})
+    : super(title: 'Mail Configuration Error', type: 'mail_config_error');
 }
 
 /// Exception thrown when mail transport fails.
 class MailTransportException extends MailException {
-  MailTransportException(
-    super.message, {
-    super.originalError,
-    super.stackTrace,
-  }) : super(
-          title: 'Mail Transport Error',
-          type: 'mail_transport_error',
-        );
+  MailTransportException(super.message, {super.originalError, super.stackTrace})
+    : super(title: 'Mail Transport Error', type: 'mail_transport_error');
 }

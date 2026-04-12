@@ -32,10 +32,7 @@ class ServerContext {
   /// Custom data storage for this request
   final Map<String, dynamic> _data = {};
 
-  ServerContext({
-    required this.request,
-    this.response,
-  });
+  ServerContext({required this.request, this.response});
 
   /// Get the current server context from the zone.
   static ServerContext get current {

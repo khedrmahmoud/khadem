@@ -18,9 +18,9 @@ class Route {
   bool get isNamed => name != null && name!.isNotEmpty;
 
   Route(this.method, String path, this.handler, this.middleware, {this.name})
-      : path = _normalizePath(path),
-        matcher = _createMatcher(_normalizePath(path)),
-        paramNames = _extractParamNames(path);
+    : path = _normalizePath(path),
+      matcher = _createMatcher(_normalizePath(path)),
+      paramNames = _extractParamNames(path);
 
   /// Normalizes a path by removing trailing slashes
   /// Preserves root path '/' as-is
@@ -38,7 +38,7 @@ class Route {
     // Escape literal parts of the path to prevent RegExp DoS
     final buffer = StringBuffer();
     final paramRegex = RegExp(r':(\w+)');
-    
+
     int lastEnd = 0;
     for (final match in paramRegex.allMatches(path)) {
       final literalPart = path.substring(lastEnd, match.start);
@@ -46,10 +46,10 @@ class Route {
       buffer.write('(?<_${match.group(1)}>[^/]+)');
       lastEnd = match.end;
     }
-    
+
     final finalLiteralPart = path.substring(lastEnd);
     buffer.write(RegExp.escape(finalLiteralPart));
-    
+
     return RegExp('^${buffer.toString()}\$');
   }
 

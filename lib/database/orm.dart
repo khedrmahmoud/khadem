@@ -20,7 +20,6 @@ export '../src/core/database/orm/paginated_result.dart';
 export '../src/core/database/orm/relation_definition.dart';
 export '../src/core/database/orm/relation_meta.dart';
 export '../src/core/database/orm/relation_type.dart';
-export '../src/core/database/orm/with.dart';
 // Relations
 export '../src/core/database/orm/relations/belongs_to.dart';
 export '../src/core/database/orm/relations/belongs_to_many.dart';
@@ -43,3 +42,4 @@ export '../src/core/database/orm/traits/query_scopes.dart';
 export '../src/core/database/orm/traits/soft_deletes.dart';
 export '../src/core/database/orm/traits/timestamps.dart';
 export '../src/core/database/orm/traits/uuid_primary_key.dart';
+export '../src/core/database/orm/with.dart';

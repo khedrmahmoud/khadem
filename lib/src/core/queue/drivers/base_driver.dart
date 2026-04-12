@@ -55,14 +55,14 @@ class JobContext {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'jobType': job.runtimeType.toString(),
-        'queuedAt': queuedAt.toIso8601String(),
-        'scheduledFor': scheduledFor?.toIso8601String(),
-        'attempts': attempts,
-        'status': status.name,
-        'metadata': metadata,
-      };
+    'id': id,
+    'jobType': job.runtimeType.toString(),
+    'queuedAt': queuedAt.toIso8601String(),
+    'scheduledFor': scheduledFor?.toIso8601String(),
+    'attempts': attempts,
+    'status': status.name,
+    'metadata': metadata,
+  };
 }
 
 /// Configuration for queue drivers

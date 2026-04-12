@@ -36,82 +36,68 @@ void main() {
       );
     });
 
-    test('verifyToken throws AuthException(401) when token is expired',
-        () async {
-      // Create an expired token
-      final jwt = JWT(
-        {'sub': 1},
-        issuer: 'khadem',
-      );
-      // Sign with past expiration
-      final token = jwt.sign(
-        SecretKey(secret),
-        expiresIn: const Duration(seconds: -1),
-      );
+    test(
+      'verifyToken throws AuthException(401) when token is expired',
+      () async {
+        // Create an expired token
+        final jwt = JWT({'sub': 1}, issuer: 'khadem');
+        // Sign with past expiration
+        final token = jwt.sign(
+          SecretKey(secret),
+          expiresIn: const Duration(seconds: -1),
+        );
 
-      when(mockTokenService.isTokenBlacklisted(any))
-          .thenAnswer((_) async => false);
+        when(
+          mockTokenService.isTokenBlacklisted(any),
+        ).thenAnswer((_) async => false);
 
-      expect(
-        () => driver.verifyToken(token),
-        throwsA(
-          isA<AuthException>()
-              .having(
-                (e) => e.statusCode,
-                'statusCode',
-                401,
-              )
-              .having(
-                (e) => e.message,
-                'message',
-                contains('expired'),
-              ),
-        ),
-      );
-    });
-
-    test('verifyToken throws AuthException(401) when signature is invalid',
-        () async {
-      // Create a token signed with different secret
-      final jwt = JWT({'sub': 1});
-      final token = jwt.sign(SecretKey('wrong-secret'));
-
-      when(mockTokenService.isTokenBlacklisted(any))
-          .thenAnswer((_) async => false);
-
-      expect(
-        () => driver.verifyToken(token),
-        throwsA(
-          isA<AuthException>()
-              .having(
-                (e) => e.statusCode,
-                'statusCode',
-                401,
-              )
-              .having(
-                (e) => e.message,
-                'message',
-                contains('Invalid token'),
-              ),
-        ),
-      );
-    });
-
-    test('verifyToken throws AuthException(401) when token is malformed',
-        () async {
-      when(mockTokenService.isTokenBlacklisted(any))
-          .thenAnswer((_) async => false);
-
-      expect(
-        () => driver.verifyToken('malformed.token'),
-        throwsA(
-          isA<AuthException>().having(
-            (e) => e.statusCode,
-            'statusCode',
-            401,
+        expect(
+          () => driver.verifyToken(token),
+          throwsA(
+            isA<AuthException>()
+                .having((e) => e.statusCode, 'statusCode', 401)
+                .having((e) => e.message, 'message', contains('expired')),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
+
+    test(
+      'verifyToken throws AuthException(401) when signature is invalid',
+      () async {
+        // Create a token signed with different secret
+        final jwt = JWT({'sub': 1});
+        final token = jwt.sign(SecretKey('wrong-secret'));
+
+        when(
+          mockTokenService.isTokenBlacklisted(any),
+        ).thenAnswer((_) async => false);
+
+        expect(
+          () => driver.verifyToken(token),
+          throwsA(
+            isA<AuthException>()
+                .having((e) => e.statusCode, 'statusCode', 401)
+                .having((e) => e.message, 'message', contains('Invalid token')),
+          ),
+        );
+      },
+    );
+
+    test(
+      'verifyToken throws AuthException(401) when token is malformed',
+      () async {
+        when(
+          mockTokenService.isTokenBlacklisted(any),
+        ).thenAnswer((_) async => false);
+
+        expect(
+          () => driver.verifyToken('malformed.token'),
+          throwsA(
+            isA<AuthException>().having((e) => e.statusCode, 'statusCode', 401),
+          ),
+        );
+      },
+    );
   });
 }

@@ -58,11 +58,7 @@ void main() {
       logger.info('Info message');
 
       verify(
-        channelManager.logToChannel(
-          'app',
-          LogLevel.info,
-          'Info message',
-        ),
+        channelManager.logToChannel('app', LogLevel.info, 'Info message'),
       ).called(1);
     });
 
@@ -124,27 +120,15 @@ void main() {
       logger.warning('Warning message');
 
       verifyNever(
-        channelManager.logToChannel(
-          'app',
-          LogLevel.debug,
-          'Debug message',
-        ),
+        channelManager.logToChannel('app', LogLevel.debug, 'Debug message'),
       );
 
       verifyNever(
-        channelManager.logToChannel(
-          'app',
-          LogLevel.info,
-          'Info message',
-        ),
+        channelManager.logToChannel('app', LogLevel.info, 'Info message'),
       );
 
       verify(
-        channelManager.logToChannel(
-          'app',
-          LogLevel.warning,
-          'Warning message',
-        ),
+        channelManager.logToChannel('app', LogLevel.warning, 'Warning message'),
       ).called(1);
     });
 
@@ -165,14 +149,16 @@ void main() {
     });
 
     test('should load configuration successfully', () {
-      when(config.get<String>('logging.minimum_level', 'debug'))
-          .thenReturn('info');
+      when(
+        config.get<String>('logging.minimum_level', 'debug'),
+      ).thenReturn('info');
       when(config.get<String>('logging.default', 'app')).thenReturn('custom');
-      when(config.get<Map<String, dynamic>>('logging.handlers', {}))
-          .thenReturn({
-        'console': {'enabled': true, 'colorize': false},
-        'file': {'enabled': false},
-      });
+      when(config.get<Map<String, dynamic>>('logging.handlers', {})).thenReturn(
+        {
+          'console': {'enabled': true, 'colorize': false},
+          'file': {'enabled': false},
+        },
+      );
 
       logger.loadFromConfig(config);
 
@@ -181,11 +167,13 @@ void main() {
     });
 
     test('should handle configuration errors gracefully', () {
-      when(config.get<String>('logging.minimum_level', 'debug'))
-          .thenReturn('invalid');
+      when(
+        config.get<String>('logging.minimum_level', 'debug'),
+      ).thenReturn('invalid');
       when(config.get<String>('logging.default', 'app')).thenReturn('test');
-      when(config.get<Map<String, dynamic>>('logging.handlers', {}))
-          .thenReturn({});
+      when(
+        config.get<Map<String, dynamic>>('logging.handlers', {}),
+      ).thenReturn({});
 
       // The logger should handle configuration errors gracefully
       // In a real implementation, this might log a warning and use defaults

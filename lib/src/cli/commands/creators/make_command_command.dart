@@ -38,10 +38,10 @@ class MakeCommandCommand extends KhademCommand {
 
     final classBase = raw.contains(':')
         ? raw
-            .split(':')
-            .where((p) => p.isNotEmpty)
-            .map(CliNaming.toPascalCase)
-            .join()
+              .split(':')
+              .where((p) => p.isNotEmpty)
+              .map(CliNaming.toPascalCase)
+              .join()
         : CliNaming.toPascalCase(raw);
 
     final className = CliNaming.ensureSuffix(classBase, 'Command');

@@ -8,13 +8,12 @@ class CallbackLogHandler implements LogHandler {
     String message,
     Map<String, dynamic>? context,
     StackTrace? stackTrace,
-  ) _callback;
+  )
+  _callback;
   final LogLevel _minimumLevel;
 
-  CallbackLogHandler(
-    this._callback, {
-    LogLevel minimumLevel = LogLevel.debug,
-  }) : _minimumLevel = minimumLevel;
+  CallbackLogHandler(this._callback, {LogLevel minimumLevel = LogLevel.debug})
+    : _minimumLevel = minimumLevel;
 
   @override
   LogLevel get minimumLevel => _minimumLevel;

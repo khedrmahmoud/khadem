@@ -94,15 +94,10 @@ class RequestContext {
   static R run<R>(Request request, R Function() body) {
     final stopwatch = Stopwatch()..start();
     try {
-      return runZoned(
-        () {
-          final result = body();
-          return result;
-        },
-        zoneValues: {
-          ServerContext.zoneKey: ServerContext(request: request),
-        },
-      );
+      return runZoned(() {
+        final result = body();
+        return result;
+      }, zoneValues: {ServerContext.zoneKey: ServerContext(request: request)});
     } finally {
       stopwatch.stop();
       // Optional: Log slow requests

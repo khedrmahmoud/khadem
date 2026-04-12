@@ -26,8 +26,11 @@ class RequestValidator {
       input.addAll(_bodyParser.files as Map<String, dynamic>);
     }
 
-    final validator =
-        InputValidator(input, rules, customMessages: messages ?? {});
+    final validator = InputValidator(
+      input,
+      rules,
+      customMessages: messages ?? {},
+    );
 
     if (!await validator.passes()) {
       throw ValidationException(validator.errors);

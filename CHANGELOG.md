@@ -1,3 +1,12 @@
+## 2.1.0
+
+### ??? Security & Architectual Hardening
+- **Router Hardening**: Strict validation for route definitions enforcing correct HTTP Methods, syntactically secure paths, and duplicate route rejection to prevent misconfigurations.
+- **Exception Sanitization**: Automatically redacts sensitive fields (Credentials, Tokens) from logged exception context, including HTTP headers, bodies, and URIs.
+- **Database Driver Security**: Fixed SQL Injection vectors. MySQL Database names are now strictly validated and identifier-quoted (ackticks) via DatabaseIdentifier utility.
+- **Cookie Security Defaults**: The framework now enforces secure HTTP attributes for cookies (HttpOnly, Secure, SameSite) by default.
+- **Header Integrity**: Defends against HTTP Response Splitting and CRLF Injection by strictly validating all outgoing headers.
+- **Cache Thread Safety**: Re-architected FileCacheDriver to perform atomic, race-condition-free cache clearing with OS-specific handle safeguards (e.g. Windows file locking).
 ## 2.0.0
 
 ### 🎉 Major Release: Complete Framework Overhaul
@@ -149,3 +158,4 @@
 - Core framework features included
 
 ```
+

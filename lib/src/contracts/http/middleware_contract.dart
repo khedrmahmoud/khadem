@@ -3,11 +3,12 @@ import '../../core/http/request/request.dart';
 import 'response_contract.dart';
 
 /// Signature of a middleware function.
-typedef MiddlewareHandler = FutureOr<void> Function(
-  Request request,
-  ResponseContract response,
-  NextFunction next,
-);
+typedef MiddlewareHandler =
+    FutureOr<void> Function(
+      Request request,
+      ResponseContract response,
+      NextFunction next,
+    );
 
 /// Signature for "next" callback in middleware chain.
 typedef NextFunction = FutureOr<void> Function();
@@ -19,7 +20,7 @@ enum MiddlewarePriority {
   auth,
   preprocessing,
   business,
-  terminating
+  terminating,
 }
 
 /// Class representing a named and prioritized middleware instance.
@@ -32,8 +33,8 @@ class Middleware {
     this._handler, {
     MiddlewarePriority priority = MiddlewarePriority.business,
     String? name,
-  })  : _priority = priority,
-        _name = name ?? 'anonymous-${DateTime.now().millisecondsSinceEpoch}';
+  }) : _priority = priority,
+       _name = name ?? 'anonymous-${DateTime.now().millisecondsSinceEpoch}';
 
   MiddlewareHandler get handler => _handler;
   MiddlewarePriority get priority => _priority;

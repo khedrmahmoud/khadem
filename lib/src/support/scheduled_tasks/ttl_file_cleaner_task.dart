@@ -30,14 +30,16 @@ class TTLFileCleanerJob implements ScheduledJob {
           final stat = await file.stat();
 
           if (ttl != null &&
-              stat.modified
-                  .isBefore(DateTime.now().subtract(Duration(seconds: ttl)))) {
+              stat.modified.isBefore(
+                DateTime.now().subtract(Duration(seconds: ttl)),
+              )) {
             await file.delete();
             Khadem.logger.info('🧹 Removed expired cache file: ${file.path}');
           }
         } catch (e) {
-          Khadem.logger
-              .warning('⚠️ Could not process cache file ${file.path}: $e');
+          Khadem.logger.warning(
+            '⚠️ Could not process cache file ${file.path}: $e',
+          );
         }
       }
     }

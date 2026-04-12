@@ -35,8 +35,8 @@ abstract class BaseModel<T> {
   Map<String, dynamic> get computed => {};
 
   T newFactory(Map<String, dynamic> data) => throw UnimplementedError(
-        'newFactory must be implemented in the child model',
-      );
+    'newFactory must be implemented in the child model',
+  );
 
   /// Create query builder using current default connection.
   QueryBuilderInterface<T> get query =>
@@ -73,9 +73,7 @@ abstract class BaseModel<T> {
   /// Converts model to JSON for API responses.
   /// This respects `hidden`, `appends`, and `computed`.
   Map<String, dynamic> toJson() {
-    final data = <String, dynamic>{
-      if (id != null) 'id': id,
-    };
+    final data = <String, dynamic>{if (id != null) 'id': id};
 
     for (final key in _rawData.keys) {
       if (!hidden.contains(key)) {

@@ -47,9 +47,9 @@ mixin SoftDeletes<T>
     if (touch) {
       await save();
     } else {
-      await query
-          .where(primaryKey, '=', getKey())
-          .update({deletedAtColumn: null});
+      await query.where(primaryKey, '=', getKey()).update({
+        deletedAtColumn: null,
+      });
       (this as HasAttributes).syncOriginal();
     }
 

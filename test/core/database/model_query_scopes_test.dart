@@ -100,8 +100,13 @@ class TestUser extends KhademModel<TestUser> with QueryScopes<TestUser> {
   }
 
   @override
-  List<String> get fillable =>
-      ['name', 'email', 'active', 'email_verified_at', 'role'];
+  List<String> get fillable => [
+    'name',
+    'email',
+    'active',
+    'email_verified_at',
+    'role',
+  ];
 }
 
 void main() {

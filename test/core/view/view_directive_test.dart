@@ -103,10 +103,7 @@ void main() {
         You have @choice("items", itemCount) in your cart.
         Full name: @field("name")
       ''';
-      const context = <String, dynamic>{
-        'appName': 'MyApp',
-        'itemCount': 2,
-      };
+      const context = <String, dynamic>{'appName': 'MyApp', 'itemCount': 2};
 
       final result = await directive.apply(template, context);
 

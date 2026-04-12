@@ -25,7 +25,7 @@ class ExceptionHandler implements ExceptionHandlerContract {
 
   /// Registry of custom exception handlers
   final Map<Type, Future<ErrorResult> Function(dynamic, StackTrace?)>
-      _handlers = {};
+  _handlers = {};
 
   /// Configure exception handling settings
   void configure({
@@ -44,10 +44,7 @@ class ExceptionHandler implements ExceptionHandlerContract {
   }
 
   @override
-  Future<ErrorResult> handle(
-    Object error, [
-    StackTrace? stackTrace,
-  ]) async {
+  Future<ErrorResult> handle(Object error, [StackTrace? stackTrace]) async {
     // Build context for reporting
     final context = _buildRequestContext();
 
@@ -72,10 +69,7 @@ class ExceptionHandler implements ExceptionHandlerContract {
   }
 
   /// Map AppException to ErrorResult
-  ErrorResult _mapAppException(
-    AppException error,
-    StackTrace? stackTrace,
-  ) {
+  ErrorResult _mapAppException(AppException error, StackTrace? stackTrace) {
     final isServerError = error.statusCode >= 500;
     final detail = (!_showDetailedErrors && isServerError)
         ? 'An internal error occurred.'
@@ -96,10 +90,7 @@ class ExceptionHandler implements ExceptionHandlerContract {
   }
 
   /// Map generic exception to ErrorResult
-  ErrorResult _mapGenericException(
-    Object error,
-    StackTrace? stackTrace,
-  ) {
+  ErrorResult _mapGenericException(Object error, StackTrace? stackTrace) {
     return ErrorResult(
       statusCode: 500,
       title: 'Internal Server Error',

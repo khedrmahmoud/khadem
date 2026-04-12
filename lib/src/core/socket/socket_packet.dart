@@ -8,12 +8,7 @@ class SocketPacket {
   final String? id;
   final String? namespace;
 
-  const SocketPacket({
-    required this.event,
-    this.data,
-    this.id,
-    this.namespace,
-  });
+  const SocketPacket({required this.event, this.data, this.id, this.namespace});
 
   factory SocketPacket.fromMap(Map<String, dynamic> map) {
     final event = map['event'];

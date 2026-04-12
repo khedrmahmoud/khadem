@@ -75,11 +75,7 @@ abstract interface class MailerInterface {
   /// [data] is the file content as bytes.
   /// [name] is the attachment filename.
   /// [mimeType] is the MIME type of the attachment.
-  MailerInterface attachData(
-    List<int> data,
-    String name, {
-    String? mimeType,
-  });
+  MailerInterface attachData(List<int> data, String name, {String? mimeType});
 
   /// Embeds an inline image in the email.
   ///

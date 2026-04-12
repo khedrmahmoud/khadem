@@ -29,49 +29,49 @@ class MockModel extends KhademModel<MockModel> {
 
   @override
   Map<String, RelationDefinition> get definedRelations => {
-        'posts': RelationDefinition<MockPost>(
-          type: RelationType.hasMany,
-          relatedTable: 'posts',
-          localKey: 'id',
-          foreignKey: 'user_id',
-          factory: () => MockPost(),
-        ),
-        'comments': RelationDefinition<MockComment>(
-          type: RelationType.hasMany,
-          relatedTable: 'comments',
-          localKey: 'id',
-          foreignKey: 'user_id',
-          factory: () => MockComment(),
-        ),
-        'permissions': RelationDefinition<MockPost>(
-          type: RelationType.hasMany,
-          relatedTable: 'permissions',
-          localKey: 'id',
-          foreignKey: 'user_id',
-          factory: () => MockPost(),
-        ),
-        'subscriptions': RelationDefinition<MockPost>(
-          type: RelationType.hasMany,
-          relatedTable: 'subscriptions',
-          localKey: 'id',
-          foreignKey: 'user_id',
-          factory: () => MockPost(),
-        ),
-        'violations': RelationDefinition<MockPost>(
-          type: RelationType.hasMany,
-          relatedTable: 'violations',
-          localKey: 'id',
-          foreignKey: 'user_id',
-          factory: () => MockPost(),
-        ),
-        'verifications': RelationDefinition<MockPost>(
-          type: RelationType.hasMany,
-          relatedTable: 'verifications',
-          localKey: 'id',
-          foreignKey: 'user_id',
-          factory: () => MockPost(),
-        ),
-      };
+    'posts': RelationDefinition<MockPost>(
+      type: RelationType.hasMany,
+      relatedTable: 'posts',
+      localKey: 'id',
+      foreignKey: 'user_id',
+      factory: () => MockPost(),
+    ),
+    'comments': RelationDefinition<MockComment>(
+      type: RelationType.hasMany,
+      relatedTable: 'comments',
+      localKey: 'id',
+      foreignKey: 'user_id',
+      factory: () => MockComment(),
+    ),
+    'permissions': RelationDefinition<MockPost>(
+      type: RelationType.hasMany,
+      relatedTable: 'permissions',
+      localKey: 'id',
+      foreignKey: 'user_id',
+      factory: () => MockPost(),
+    ),
+    'subscriptions': RelationDefinition<MockPost>(
+      type: RelationType.hasMany,
+      relatedTable: 'subscriptions',
+      localKey: 'id',
+      foreignKey: 'user_id',
+      factory: () => MockPost(),
+    ),
+    'violations': RelationDefinition<MockPost>(
+      type: RelationType.hasMany,
+      relatedTable: 'violations',
+      localKey: 'id',
+      foreignKey: 'user_id',
+      factory: () => MockPost(),
+    ),
+    'verifications': RelationDefinition<MockPost>(
+      type: RelationType.hasMany,
+      relatedTable: 'verifications',
+      localKey: 'id',
+      foreignKey: 'user_id',
+      factory: () => MockPost(),
+    ),
+  };
 }
 
 class MockDatabaseManager implements DatabaseManager {
@@ -184,9 +184,10 @@ void main() {
 
   group('OR WHERE Variants', () {
     test('orWhereIn adds OR IN clause', () {
-      final sql = query
-          .where('role', '=', 'admin')
-          .orWhereIn('status', ['active', 'pending']).toSql();
+      final sql = query.where('role', '=', 'admin').orWhereIn('status', [
+        'active',
+        'pending',
+      ]).toSql();
 
       expect(sql, contains('`role` = ?'));
       expect(sql, contains('OR `status` IN (?, ?)'));
@@ -200,17 +201,21 @@ void main() {
     });
 
     test('orWhereNotIn adds OR NOT IN clause', () {
-      final sql = query
-          .where('active', '=', true)
-          .orWhereNotIn('id', [5, 10, 15]).toSql();
+      final sql = query.where('active', '=', true).orWhereNotIn('id', [
+        5,
+        10,
+        15,
+      ]).toSql();
 
       expect(sql, contains('`active` = ?'));
       expect(sql, contains('OR `id` NOT IN (?, ?, ?)'));
     });
 
     test('orWhereNull adds OR IS NULL clause', () {
-      final sql =
-          query.where('active', '=', true).orWhereNull('deleted_at').toSql();
+      final sql = query
+          .where('active', '=', true)
+          .orWhereNull('deleted_at')
+          .toSql();
 
       expect(sql, contains('`active` = ?'));
       expect(sql, contains('OR `deleted_at` IS NULL'));
@@ -227,8 +232,10 @@ void main() {
     });
 
     test('orWhereBetween adds OR BETWEEN clause', () {
-      final sql =
-          query.where('age', '<', 18).orWhereBetween('age', 65, 100).toSql();
+      final sql = query
+          .where('age', '<', 18)
+          .orWhereBetween('age', 65, 100)
+          .toSql();
 
       expect(sql, contains('`age` < ?'));
       expect(sql, contains('OR `age` BETWEEN ? AND ?'));
@@ -295,16 +302,20 @@ void main() {
     });
 
     test('orWhereMonth adds OR MONTH clause', () {
-      final sql =
-          query.whereMonth('birthday', 1).orWhereMonth('birthday', 12).toSql();
+      final sql = query
+          .whereMonth('birthday', 1)
+          .orWhereMonth('birthday', 12)
+          .toSql();
 
       expect(sql, contains('MONTH(`birthday`) = ?'));
       expect(sql, contains('OR MONTH(`birthday`) = ?'));
     });
 
     test('orWhereDay adds OR DAY clause', () {
-      final sql =
-          query.whereDay('created_at', 1).orWhereDay('created_at', 15).toSql();
+      final sql = query
+          .whereDay('created_at', 1)
+          .orWhereDay('created_at', 15)
+          .toSql();
 
       expect(sql, contains('DAY(`created_at`) = ?'));
       expect(sql, contains('OR DAY(`created_at`) = ?'));
@@ -432,17 +443,19 @@ void main() {
     });
 
     test('complex whereHas with multiple constraints', () {
-      final sql = query.whereHas(
-        'posts',
-        (q) {
-          q
-              .where('published', '=', true)
-              .where('views', '>', 1000)
-              .whereNotNull('featured_image');
-        },
-        '>=',
-        3,
-      ).toSql();
+      final sql = query
+          .whereHas(
+            'posts',
+            (q) {
+              q
+                  .where('published', '=', true)
+                  .where('views', '>', 1000)
+                  .whereNotNull('featured_image');
+            },
+            '>=',
+            3,
+          )
+          .toSql();
 
       expect(sql, contains('COUNT(*)'));
       expect(sql, contains('`published` = ?'));
@@ -462,8 +475,9 @@ void main() {
     });
 
     test('whereNotBetweenColumns adds NOT BETWEEN columns clause', () {
-      final sql =
-          query.whereNotBetweenColumns('age', 'min_age', 'max_age').toSql();
+      final sql = query
+          .whereNotBetweenColumns('age', 'min_age', 'max_age')
+          .toSql();
 
       expect(sql, contains('`age` NOT BETWEEN `min_age` AND `max_age`'));
     });
@@ -521,10 +535,11 @@ void main() {
         'users',
       ).where('active', '=', true).select(['id', 'name']);
 
-      final sql =
-          QueryBuilder<Map<String, dynamic>>(connection, MySQLGrammar(), 'temp')
-              .fromSub(subquery, 'active_users')
-              .select(['name']).toSql();
+      final sql = QueryBuilder<Map<String, dynamic>>(
+        connection,
+        MySQLGrammar(),
+        'temp',
+      ).fromSub(subquery, 'active_users').select(['name']).toSql();
 
       expect(sql, contains('FROM ('));
       expect(sql, contains('SELECT `id`, `name` FROM `users`'));
@@ -535,7 +550,8 @@ void main() {
     test('fromRaw uses raw SQL as FROM clause', () {
       final sql = query
           .fromRaw('(SELECT * FROM users WHERE age > 18) AS adults')
-          .select(['name']).toSql();
+          .select(['name'])
+          .toSql();
 
       expect(
         sql,
@@ -576,22 +592,20 @@ void main() {
         'comments',
       ).select(['COUNT(*)']);
 
-      final sql = QueryBuilder<Map<String, dynamic>>(
-        connection,
-        MySQLGrammar(),
-        'users',
-      )
-          .select(['id'])
-          .selectSub(postsCount, 'posts_count')
-          .selectSub(commentsCount, 'comments_count')
-          .toSql();
+      final sql =
+          QueryBuilder<Map<String, dynamic>>(
+                connection,
+                MySQLGrammar(),
+                'users',
+              )
+              .select(['id'])
+              .selectSub(postsCount, 'posts_count')
+              .selectSub(commentsCount, 'comments_count')
+              .toSql();
 
       expect(sql, contains('(SELECT `COUNT(*)` FROM `posts`'));
       expect(sql, contains(') as posts_count'));
-      expect(
-        sql,
-        contains('(SELECT `COUNT(*)` FROM `comments`'),
-      );
+      expect(sql, contains('(SELECT `COUNT(*)` FROM `comments`'));
       expect(sql, contains(') as comments_count'));
     });
   });
@@ -638,11 +652,15 @@ void main() {
 
   group('Complex Combinations', () {
     test('OR variants + whereHas + nested conditions', () {
-      final sql = query.where('active', '=', true).orWhereNested((q) {
-        q.where('role', '=', 'admin').whereHas('permissions', (pq) {
-          pq.where('name', '=', 'manage_users');
-        });
-      }).orWhereIn('id', [1, 2, 3]).toSql();
+      final sql = query
+          .where('active', '=', true)
+          .orWhereNested((q) {
+            q.where('role', '=', 'admin').whereHas('permissions', (pq) {
+              pq.where('name', '=', 'manage_users');
+            });
+          })
+          .orWhereIn('id', [1, 2, 3])
+          .toSql();
 
       expect(sql, contains('`active` = ?'));
       expect(sql, contains('OR (`role` = ?'));
@@ -718,9 +736,11 @@ void main() {
     test('clone with all new features', () {
       final original = query
           .whereHas('posts')
-          .orWhereIn('status', ['active']).whereNested((q) {
-        q.wherePast('expires_at');
-      }).whereBetweenColumns('a', 'b', 'c');
+          .orWhereIn('status', ['active'])
+          .whereNested((q) {
+            q.wherePast('expires_at');
+          })
+          .whereBetweenColumns('a', 'b', 'c');
 
       final cloned = original.clone();
       final sql1 = original.toSql();

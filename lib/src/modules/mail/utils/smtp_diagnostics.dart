@@ -32,30 +32,32 @@ class SmtpDiagnostics {
       try {
         if (config.encryption == 'ssl') {
           // Try SSL connection
-          secureSocket = await SecureSocket.connect(
-            config.host,
-            config.port,
-            timeout: Duration(seconds: config.timeout),
-          ).timeout(
-            Duration(seconds: config.timeout),
-            onTimeout: () => throw TimeoutException(
-              'Connection timeout after ${config.timeout} seconds',
-            ),
-          );
+          secureSocket =
+              await SecureSocket.connect(
+                config.host,
+                config.port,
+                timeout: Duration(seconds: config.timeout),
+              ).timeout(
+                Duration(seconds: config.timeout),
+                onTimeout: () => throw TimeoutException(
+                  'Connection timeout after ${config.timeout} seconds',
+                ),
+              );
           report.portOpen = true;
           report.sslSupported = true;
         } else {
           // Try plain connection
-          socket = await Socket.connect(
-            config.host,
-            config.port,
-            timeout: Duration(seconds: config.timeout),
-          ).timeout(
-            Duration(seconds: config.timeout),
-            onTimeout: () => throw TimeoutException(
-              'Connection timeout after ${config.timeout} seconds',
-            ),
-          );
+          socket =
+              await Socket.connect(
+                config.host,
+                config.port,
+                timeout: Duration(seconds: config.timeout),
+              ).timeout(
+                Duration(seconds: config.timeout),
+                onTimeout: () => throw TimeoutException(
+                  'Connection timeout after ${config.timeout} seconds',
+                ),
+              );
           report.portOpen = true;
 
           // Check if STARTTLS is available
@@ -141,8 +143,9 @@ class SmtpDiagnostics {
       buffer.writeln('• Try increasing the timeout value');
     } else if (report.success) {
       buffer.writeln('• Connection successful! The SMTP server is reachable.');
-      buffer
-          .writeln('• If authentication still fails, check username/password');
+      buffer.writeln(
+        '• If authentication still fails, check username/password',
+      );
     }
 
     buffer.writeln();

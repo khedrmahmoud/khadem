@@ -24,15 +24,17 @@ class EnvDirective implements ViewDirective {
 
         // If not found and default value provided, return it
         if (defaultValue != null) {
-          final cleanDefault =
-              defaultValue.replaceAll('"', '').replaceAll("'", '');
+          final cleanDefault = defaultValue
+              .replaceAll('"', '')
+              .replaceAll("'", '');
           return cleanDefault;
         }
       } catch (_) {
         // If there's an error, return default value
         if (defaultValue != null) {
-          final cleanDefault =
-              defaultValue.replaceAll('"', '').replaceAll("'", '');
+          final cleanDefault = defaultValue
+              .replaceAll('"', '')
+              .replaceAll("'", '');
           return cleanDefault;
         }
       }
@@ -43,8 +45,9 @@ class EnvDirective implements ViewDirective {
 }
 
 class ConfigDirective implements ViewDirective {
-  static final _configRegex =
-      RegExp(r'@config\s*\(\s*(.+?)\s*(?:,\s*(.+?)\s*)?\)');
+  static final _configRegex = RegExp(
+    r'@config\s*\(\s*(.+?)\s*(?:,\s*(.+?)\s*)?\)',
+  );
 
   @override
   Future<String> apply(String content, Map<String, dynamic> context) async {
@@ -64,15 +67,17 @@ class ConfigDirective implements ViewDirective {
 
         // If not found and default value provided, return it
         if (defaultValue != null) {
-          final cleanDefault =
-              defaultValue.replaceAll('"', '').replaceAll("'", '');
+          final cleanDefault = defaultValue
+              .replaceAll('"', '')
+              .replaceAll("'", '');
           return cleanDefault;
         }
       } catch (_) {
         // If there's an error, return default value
         if (defaultValue != null) {
-          final cleanDefault =
-              defaultValue.replaceAll('"', '').replaceAll("'", '');
+          final cleanDefault = defaultValue
+              .replaceAll('"', '')
+              .replaceAll("'", '');
           return cleanDefault;
         }
       }
@@ -274,8 +279,11 @@ class MathDirective implements ViewDirective {
         return 0; // Division by zero
       }
 
-      cleanExpr =
-          cleanExpr.replaceRange(match.start, match.end, result.toString());
+      cleanExpr = cleanExpr.replaceRange(
+        match.start,
+        match.end,
+        result.toString(),
+      );
       match = mulDivRegex.firstMatch(cleanExpr);
     }
 
@@ -294,8 +302,11 @@ class MathDirective implements ViewDirective {
         result = left - right;
       }
 
-      cleanExpr =
-          cleanExpr.replaceRange(match.start, match.end, result.toString());
+      cleanExpr = cleanExpr.replaceRange(
+        match.start,
+        match.end,
+        result.toString(),
+      );
       match = addSubRegex.firstMatch(cleanExpr);
     }
 

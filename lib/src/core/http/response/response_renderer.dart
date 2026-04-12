@@ -42,9 +42,7 @@ class ResponseRenderer {
   Future<Map<String, dynamic>> _buildViewContext(
     Map<String, dynamic> userData,
   ) async {
-    final context = <String, dynamic>{
-      ...userData,
-    };
+    final context = <String, dynamic>{...userData};
 
     // Try to get request from context if not set
     if (_request == null) {
@@ -155,8 +153,10 @@ class ResponseRenderer {
       'content': content,
     });
 
-    final fullContent =
-        await renderer.render(layoutName, context: layoutContext);
+    final fullContent = await renderer.render(
+      layoutName,
+      context: layoutContext,
+    );
 
     _headers.setContentType(ContentType.html);
     _body.sendHtml(fullContent);

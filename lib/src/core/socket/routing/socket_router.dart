@@ -17,10 +17,7 @@ class SocketRouter {
   }
 
   /// Register an event handler on the global channel.
-  void on(
-    String event,
-    SocketEventHandler handler,
-  ) {
+  void on(String event, SocketEventHandler handler) {
     _global.on(event, handler);
   }
 

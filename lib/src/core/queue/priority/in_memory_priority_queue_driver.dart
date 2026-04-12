@@ -17,11 +17,7 @@ class InMemoryPriorityQueueDriver {
   }) async {
     final id = 'job_${DateTime.now().millisecondsSinceEpoch}_${_idCounter++}';
 
-    final prioritizedJob = PrioritizedJob(
-      job: job,
-      priority: priority,
-      id: id,
-    );
+    final prioritizedJob = PrioritizedJob(job: job, priority: priority, id: id);
 
     if (delay != null && delay > Duration.zero) {
       // Schedule delayed job

@@ -27,7 +27,7 @@ class PostmarkTransport implements TransportInterface {
   final http.Client _client;
 
   PostmarkTransport(this._config, {http.Client? client})
-      : _client = client ?? http.Client();
+    : _client = client ?? http.Client();
 
   @override
   String get name => 'postmark';

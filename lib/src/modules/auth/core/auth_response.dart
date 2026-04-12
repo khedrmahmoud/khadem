@@ -98,9 +98,7 @@ class AuthResponse {
 
   /// Creates a user-only response (for stateless authentication)
   factory AuthResponse.userOnly(Map<String, dynamic> user) {
-    return AuthResponse(
-      user: user,
-    );
+    return AuthResponse(user: user);
   }
 
   /// Checks if the response contains tokens

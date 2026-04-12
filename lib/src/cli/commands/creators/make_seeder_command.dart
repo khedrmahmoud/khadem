@@ -31,8 +31,10 @@ class MakeSeederCommand extends KhademCommand {
     final folder = parts.folder;
     final raw = parts.name;
 
-    final classBase =
-        CliNaming.ensureSuffix(CliNaming.toPascalCase(raw), 'Seeder');
+    final classBase = CliNaming.ensureSuffix(
+      CliNaming.toPascalCase(raw),
+      'Seeder',
+    );
     final fileBaseRaw = CliNaming.toSnakeCase(raw);
     final fileBase = fileBaseRaw.endsWith('_seeder')
         ? fileBaseRaw
@@ -83,14 +85,16 @@ class $classBase extends Seeder {
       await dir.create(recursive: true);
     }
 
-    final files = dir
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where(
-          (f) => f.path.endsWith('.dart') && !f.path.endsWith('seeders.dart'),
-        )
-        .toList()
-      ..sort((a, b) => a.path.compareTo(b.path));
+    final files =
+        dir
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where(
+              (f) =>
+                  f.path.endsWith('.dart') && !f.path.endsWith('seeders.dart'),
+            )
+            .toList()
+          ..sort((a, b) => a.path.compareTo(b.path));
 
     final buffer = StringBuffer();
     buffer.writeln("import 'package:khadem/contracts.dart' show Seeder;\n");

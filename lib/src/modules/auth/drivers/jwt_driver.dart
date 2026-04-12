@@ -56,17 +56,18 @@ class JWTDriver implements AuthDriver {
     TokenGenerator? tokenGenerator,
     TokenService? tokenService,
     TokenInvalidationStrategyFactory? strategyFactory,
-  })  : _secret = secret,
-        _accessTokenExpiry = accessTokenExpiry,
-        _refreshTokenExpiry = refreshTokenExpiry,
-        _tokenGenerator = tokenGenerator ?? SecureTokenGenerator(),
-        _tokenService = tokenService ?? DatabaseTokenService(),
-        _strategyFactory = strategyFactory ??
-            TokenInvalidationStrategyFactory(
-              tokenService ?? DatabaseTokenService(),
-            ),
-        _config = config,
-        _providerKey = providerKey;
+  }) : _secret = secret,
+       _accessTokenExpiry = accessTokenExpiry,
+       _refreshTokenExpiry = refreshTokenExpiry,
+       _tokenGenerator = tokenGenerator ?? SecureTokenGenerator(),
+       _tokenService = tokenService ?? DatabaseTokenService(),
+       _strategyFactory =
+           strategyFactory ??
+           TokenInvalidationStrategyFactory(
+             tokenService ?? DatabaseTokenService(),
+           ),
+       _config = config,
+       _providerKey = providerKey;
 
   /// Factory constructor with config and dependency injection
   factory JWTDriver.fromConfig(
@@ -88,12 +89,15 @@ class JWTDriver implements AuthDriver {
       );
     }
 
-    final accessSeconds = (provider['access_token_expiry'] ??
-        driverConfig['access_token_expiry']) as int?;
+    final accessSeconds =
+        (provider['access_token_expiry'] ?? driverConfig['access_token_expiry'])
+            as int?;
     final accessExpiry = Duration(seconds: accessSeconds ?? 3600);
 
-    final refreshSeconds = (provider['refresh_token_expiry'] ??
-        driverConfig['refresh_token_expiry']) as int?;
+    final refreshSeconds =
+        (provider['refresh_token_expiry'] ??
+                driverConfig['refresh_token_expiry'])
+            as int?;
     final refreshExpiry = Duration(seconds: refreshSeconds ?? 604800);
 
     // Create token service instance first to ensure it's not null
@@ -110,12 +114,11 @@ class JWTDriver implements AuthDriver {
     // Create strategy factory with the guaranteed non-null service
     late final TokenInvalidationStrategyFactory strategyFactoryInstance;
     try {
-      strategyFactoryInstance = strategyFactory ??
+      strategyFactoryInstance =
+          strategyFactory ??
           TokenInvalidationStrategyFactory(tokenServiceInstance);
     } catch (e) {
-      throw StateError(
-        'Failed to create TokenInvalidationStrategyFactory: $e',
-      );
+      throw StateError('Failed to create TokenInvalidationStrategyFactory: $e');
     }
 
     return JWTDriver(
@@ -166,8 +169,11 @@ class JWTDriver implements AuthDriver {
       // For user verification, we still need to access the repository directly
       // This could be improved by creating a UserService interface
       final repository = DatabaseAuthRepository();
-      final currentUserData =
-          await repository.findUserById(userId, table, primaryKey);
+      final currentUserData = await repository.findUserById(
+        userId,
+        table,
+        primaryKey,
+      );
       if (currentUserData == null) {
         throw AuthException('User not found or deactivated');
       }
@@ -277,10 +283,7 @@ class JWTDriver implements AuthDriver {
       throw AuthException('User not found');
     }
 
-    final user = DatabaseAuthenticatable.fromProviderConfig(
-      userData,
-      provider,
-    );
+    final user = DatabaseAuthenticatable.fromProviderConfig(userData, provider);
 
     // Generate new access token reusing the same session ID
     final now = DateTime.now();

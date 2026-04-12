@@ -97,12 +97,12 @@ class User extends KhademModel<User> {
 
   @override
   Map<String, RelationDefinition> get definedRelations => {
-        'posts': hasMany<Post>(
-          foreignKey: 'user_id',
-          relatedTable: 'posts',
-          factory: () => Post(),
-        ),
-      };
+    'posts': hasMany<Post>(
+      foreignKey: 'user_id',
+      relatedTable: 'posts',
+      factory: () => Post(),
+    ),
+  };
 }
 
 class UserWithDefaultCount extends User {
@@ -121,8 +121,9 @@ void main() {
   setUp(() {
     mockConnection = _MockConnection();
     mockDatabaseManager = TestDatabaseManager(mockConnection);
-    ContainerProvider.instance
-        .singleton<DatabaseManager>((_) => mockDatabaseManager);
+    ContainerProvider.instance.singleton<DatabaseManager>(
+      (_) => mockDatabaseManager,
+    );
   });
 
   tearDown(() {

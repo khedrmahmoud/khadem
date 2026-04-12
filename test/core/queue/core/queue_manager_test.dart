@@ -45,8 +45,11 @@ void main() {
     test('should initialize with config', () {
       final config = MockConfig();
       final mockDriver = ManualMockQueueDriver();
-      final manager =
-          QueueManager(config, driver: mockDriver, driverName: 'mock');
+      final manager = QueueManager(
+        config,
+        driver: mockDriver,
+        driverName: 'mock',
+      );
 
       expect(manager, isNotNull);
     });
@@ -54,8 +57,11 @@ void main() {
     test('should initialize driver', () async {
       final config = MockConfig();
       final mockDriver = ManualMockQueueDriver();
-      final manager =
-          QueueManager(config, driver: mockDriver, driverName: 'mock');
+      final manager = QueueManager(
+        config,
+        driver: mockDriver,
+        driverName: 'mock',
+      );
 
       // No init method needed - driver is set in constructor
       expect(manager.driver, isNotNull);
@@ -65,8 +71,11 @@ void main() {
     test('should dispatch job successfully', () async {
       final config = MockConfig();
       final mockDriver = ManualMockQueueDriver();
-      final manager =
-          QueueManager(config, driver: mockDriver, driverName: 'mock');
+      final manager = QueueManager(
+        config,
+        driver: mockDriver,
+        driverName: 'mock',
+      );
       final testJob = TestQueueJob('test');
 
       mockDriver.pushCallback = (job, delay) => Future.value();
@@ -77,8 +86,11 @@ void main() {
     test('should dispatch job with delay', () async {
       final config = MockConfig();
       final mockDriver = ManualMockQueueDriver();
-      final manager =
-          QueueManager(config, driver: mockDriver, driverName: 'mock');
+      final manager = QueueManager(
+        config,
+        driver: mockDriver,
+        driverName: 'mock',
+      );
       final testJob = TestQueueJob('test');
       const delay = Duration(seconds: 30);
 
@@ -90,12 +102,15 @@ void main() {
     test('should handle dispatch errors', () async {
       final config = MockConfig();
       final mockDriver = ManualMockQueueDriver();
-      final manager =
-          QueueManager(config, driver: mockDriver, driverName: 'mock');
+      final manager = QueueManager(
+        config,
+        driver: mockDriver,
+        driverName: 'mock',
+      );
       final testJob = TestQueueJob('test');
 
-      mockDriver.pushCallback =
-          (job, delay) => Future.error(Exception('Dispatch failed'));
+      mockDriver.pushCallback = (job, delay) =>
+          Future.error(Exception('Dispatch failed'));
 
       expect(() => manager.dispatch(testJob), throwsException);
     });
@@ -103,8 +118,11 @@ void main() {
     test('should process jobs', () async {
       final config = MockConfig();
       final mockDriver = ManualMockQueueDriver();
-      final manager =
-          QueueManager(config, driver: mockDriver, driverName: 'mock');
+      final manager = QueueManager(
+        config,
+        driver: mockDriver,
+        driverName: 'mock',
+      );
 
       mockDriver.processCallback = () => Future.value();
 
@@ -114,8 +132,11 @@ void main() {
     test('should start worker with default config', () async {
       final config = MockConfig();
       final mockDriver = ManualMockQueueDriver();
-      final manager =
-          QueueManager(config, driver: mockDriver, driverName: 'mock');
+      final manager = QueueManager(
+        config,
+        driver: mockDriver,
+        driverName: 'mock',
+      );
 
       mockDriver.processCallback = () => Future.value();
 
@@ -125,8 +146,11 @@ void main() {
     test('should start worker with custom config', () async {
       final config = MockConfig();
       final mockDriver = ManualMockQueueDriver();
-      final manager =
-          QueueManager(config, driver: mockDriver, driverName: 'mock');
+      final manager = QueueManager(
+        config,
+        driver: mockDriver,
+        driverName: 'mock',
+      );
 
       mockDriver.processCallback = () => Future.value();
 
@@ -143,8 +167,11 @@ void main() {
     test('should get metrics', () async {
       final config = MockConfig();
       final mockDriver = ManualMockQueueDriver();
-      final manager =
-          QueueManager(config, driver: mockDriver, driverName: 'mock');
+      final manager = QueueManager(
+        config,
+        driver: mockDriver,
+        driverName: 'mock',
+      );
 
       final metrics = manager.getMetrics();
       expect(metrics, isA<Map<String, dynamic>?>());

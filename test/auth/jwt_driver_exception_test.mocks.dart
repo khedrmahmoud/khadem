@@ -33,123 +33,93 @@ class MockAuthConfig extends _i1.Mock implements _i2.AuthConfig {
   }
 
   @override
-  Map<String, dynamic> getDriver(String driverName) => (super.noSuchMethod(
-        Invocation.method(
-          #getDriver,
-          [driverName],
-        ),
-        returnValue: <String, dynamic>{},
-      ) as Map<String, dynamic>);
+  Map<String, dynamic> getDriver(String driverName) =>
+      (super.noSuchMethod(
+            Invocation.method(#getDriver, [driverName]),
+            returnValue: <String, dynamic>{},
+          )
+          as Map<String, dynamic>);
 
   @override
-  Map<String, dynamic> getProvider(String? providerKey) => (super.noSuchMethod(
-        Invocation.method(
-          #getProvider,
-          [providerKey],
-        ),
-        returnValue: <String, dynamic>{},
-      ) as Map<String, dynamic>);
+  Map<String, dynamic> getProvider(String? providerKey) =>
+      (super.noSuchMethod(
+            Invocation.method(#getProvider, [providerKey]),
+            returnValue: <String, dynamic>{},
+          )
+          as Map<String, dynamic>);
 
   @override
   List<Map<String, dynamic>> getProvidersForGuard(String? guardName) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #getProvidersForGuard,
-          [guardName],
-        ),
-        returnValue: <Map<String, dynamic>>[],
-      ) as List<Map<String, dynamic>>);
+            Invocation.method(#getProvidersForGuard, [guardName]),
+            returnValue: <Map<String, dynamic>>[],
+          )
+          as List<Map<String, dynamic>>);
 
   @override
-  List<String> getAllProviderKeys() => (super.noSuchMethod(
-        Invocation.method(
-          #getAllProviderKeys,
-          [],
-        ),
-        returnValue: <String>[],
-      ) as List<String>);
-
-  @override
-  Map<String, dynamic> getGuard(String? guardName) => (super.noSuchMethod(
-        Invocation.method(
-          #getGuard,
-          [guardName],
-        ),
-        returnValue: <String, dynamic>{},
-      ) as Map<String, dynamic>);
-
-  @override
-  String getDefaultGuard() => (super.noSuchMethod(
-        Invocation.method(
-          #getDefaultGuard,
-          [],
-        ),
-        returnValue: _i3.dummyValue<String>(
-          this,
-          Invocation.method(
-            #getDefaultGuard,
-            [],
-          ),
-        ),
-      ) as String);
-
-  @override
-  String getDefaultProvider() => (super.noSuchMethod(
-        Invocation.method(
-          #getDefaultProvider,
-          [],
-        ),
-        returnValue: _i3.dummyValue<String>(
-          this,
-          Invocation.method(
-            #getDefaultProvider,
-            [],
-          ),
-        ),
-      ) as String);
-
-  @override
-  T getOrDefault<T>(
-    String? key,
-    T? defaultValue,
-  ) =>
+  List<String> getAllProviderKeys() =>
       (super.noSuchMethod(
-        Invocation.method(
-          #getOrDefault,
-          [
-            key,
-            defaultValue,
-          ],
-        ),
-        returnValue: _i3.dummyValue<T>(
-          this,
-          Invocation.method(
-            #getOrDefault,
-            [
-              key,
-              defaultValue,
-            ],
-          ),
-        ),
-      ) as T);
+            Invocation.method(#getAllProviderKeys, []),
+            returnValue: <String>[],
+          )
+          as List<String>);
 
   @override
-  bool hasProvider(String? providerKey) => (super.noSuchMethod(
-        Invocation.method(
-          #hasProvider,
-          [providerKey],
-        ),
-        returnValue: false,
-      ) as bool);
+  Map<String, dynamic> getGuard(String? guardName) =>
+      (super.noSuchMethod(
+            Invocation.method(#getGuard, [guardName]),
+            returnValue: <String, dynamic>{},
+          )
+          as Map<String, dynamic>);
 
   @override
-  bool hasGuard(String? guardName) => (super.noSuchMethod(
-        Invocation.method(
-          #hasGuard,
-          [guardName],
-        ),
-        returnValue: false,
-      ) as bool);
+  String getDefaultGuard() =>
+      (super.noSuchMethod(
+            Invocation.method(#getDefaultGuard, []),
+            returnValue: _i3.dummyValue<String>(
+              this,
+              Invocation.method(#getDefaultGuard, []),
+            ),
+          )
+          as String);
+
+  @override
+  String getDefaultProvider() =>
+      (super.noSuchMethod(
+            Invocation.method(#getDefaultProvider, []),
+            returnValue: _i3.dummyValue<String>(
+              this,
+              Invocation.method(#getDefaultProvider, []),
+            ),
+          )
+          as String);
+
+  @override
+  T getOrDefault<T>(String? key, T? defaultValue) =>
+      (super.noSuchMethod(
+            Invocation.method(#getOrDefault, [key, defaultValue]),
+            returnValue: _i3.dummyValue<T>(
+              this,
+              Invocation.method(#getOrDefault, [key, defaultValue]),
+            ),
+          )
+          as T);
+
+  @override
+  bool hasProvider(String? providerKey) =>
+      (super.noSuchMethod(
+            Invocation.method(#hasProvider, [providerKey]),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
+  bool hasGuard(String? guardName) =>
+      (super.noSuchMethod(
+            Invocation.method(#hasGuard, [guardName]),
+            returnValue: false,
+          )
+          as bool);
 }
 
 /// A class which mocks [TokenService].
@@ -162,25 +132,23 @@ class MockTokenService extends _i1.Mock implements _i4.TokenService {
 
   @override
   _i5.Future<Map<String, dynamic>> storeToken(
-          Map<String, dynamic>? tokenData) =>
+    Map<String, dynamic>? tokenData,
+  ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #storeToken,
-          [tokenData],
-        ),
-        returnValue:
-            _i5.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
-      ) as _i5.Future<Map<String, dynamic>>);
+            Invocation.method(#storeToken, [tokenData]),
+            returnValue: _i5.Future<Map<String, dynamic>>.value(
+              <String, dynamic>{},
+            ),
+          )
+          as _i5.Future<Map<String, dynamic>>);
 
   @override
   _i5.Future<Map<String, dynamic>?> findToken(String? token) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #findToken,
-          [token],
-        ),
-        returnValue: _i5.Future<Map<String, dynamic>?>.value(),
-      ) as _i5.Future<Map<String, dynamic>?>);
+            Invocation.method(#findToken, [token]),
+            returnValue: _i5.Future<Map<String, dynamic>?>.value(),
+          )
+          as _i5.Future<Map<String, dynamic>?>);
 
   @override
   _i5.Future<List<Map<String, dynamic>>> findTokensByUser(
@@ -188,25 +156,20 @@ class MockTokenService extends _i1.Mock implements _i4.TokenService {
     String? guard,
   ]) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #findTokensByUser,
-          [
-            userId,
-            guard,
-          ],
-        ),
-        returnValue: _i5.Future<List<Map<String, dynamic>>>.value(
-            <Map<String, dynamic>>[]),
-      ) as _i5.Future<List<Map<String, dynamic>>>);
+            Invocation.method(#findTokensByUser, [userId, guard]),
+            returnValue: _i5.Future<List<Map<String, dynamic>>>.value(
+              <Map<String, dynamic>>[],
+            ),
+          )
+          as _i5.Future<List<Map<String, dynamic>>>);
 
   @override
-  _i5.Future<int> deleteToken(String? token) => (super.noSuchMethod(
-        Invocation.method(
-          #deleteToken,
-          [token],
-        ),
-        returnValue: _i5.Future<int>.value(0),
-      ) as _i5.Future<int>);
+  _i5.Future<int> deleteToken(String? token) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteToken, [token]),
+            returnValue: _i5.Future<int>.value(0),
+          )
+          as _i5.Future<int>);
 
   @override
   _i5.Future<int> deleteUserTokens(
@@ -215,16 +178,14 @@ class MockTokenService extends _i1.Mock implements _i4.TokenService {
     Map<String, dynamic>? filter,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #deleteUserTokens,
-          [userId],
-          {
-            #guard: guard,
-            #filter: filter,
-          },
-        ),
-        returnValue: _i5.Future<int>.value(0),
-      ) as _i5.Future<int>);
+            Invocation.method(
+              #deleteUserTokens,
+              [userId],
+              {#guard: guard, #filter: filter},
+            ),
+            returnValue: _i5.Future<int>.value(0),
+          )
+          as _i5.Future<int>);
 
   @override
   _i5.Future<List<Map<String, dynamic>>> findTokensBySession(
@@ -233,61 +194,46 @@ class MockTokenService extends _i1.Mock implements _i4.TokenService {
     String? type,
   ]) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #findTokensBySession,
-          [
-            sessionId,
-            guard,
-            type,
-          ],
-        ),
-        returnValue: _i5.Future<List<Map<String, dynamic>>>.value(
-            <Map<String, dynamic>>[]),
-      ) as _i5.Future<List<Map<String, dynamic>>>);
+            Invocation.method(#findTokensBySession, [sessionId, guard, type]),
+            returnValue: _i5.Future<List<Map<String, dynamic>>>.value(
+              <Map<String, dynamic>>[],
+            ),
+          )
+          as _i5.Future<List<Map<String, dynamic>>>);
 
   @override
-  _i5.Future<int> invalidateSession(
-    String? sessionId, [
-    String? guard,
-  ]) =>
+  _i5.Future<int> invalidateSession(String? sessionId, [String? guard]) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #invalidateSession,
-          [
-            sessionId,
-            guard,
-          ],
-        ),
-        returnValue: _i5.Future<int>.value(0),
-      ) as _i5.Future<int>);
+            Invocation.method(#invalidateSession, [sessionId, guard]),
+            returnValue: _i5.Future<int>.value(0),
+          )
+          as _i5.Future<int>);
 
   @override
-  _i5.Future<int> cleanupExpiredTokens() => (super.noSuchMethod(
-        Invocation.method(
-          #cleanupExpiredTokens,
-          [],
-        ),
-        returnValue: _i5.Future<int>.value(0),
-      ) as _i5.Future<int>);
+  _i5.Future<int> cleanupExpiredTokens() =>
+      (super.noSuchMethod(
+            Invocation.method(#cleanupExpiredTokens, []),
+            returnValue: _i5.Future<int>.value(0),
+          )
+          as _i5.Future<int>);
 
   @override
   _i5.Future<Map<String, dynamic>> blacklistToken(
-          Map<String, dynamic>? tokenData) =>
+    Map<String, dynamic>? tokenData,
+  ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #blacklistToken,
-          [tokenData],
-        ),
-        returnValue:
-            _i5.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
-      ) as _i5.Future<Map<String, dynamic>>);
+            Invocation.method(#blacklistToken, [tokenData]),
+            returnValue: _i5.Future<Map<String, dynamic>>.value(
+              <String, dynamic>{},
+            ),
+          )
+          as _i5.Future<Map<String, dynamic>>);
 
   @override
-  _i5.Future<bool> isTokenBlacklisted(String? token) => (super.noSuchMethod(
-        Invocation.method(
-          #isTokenBlacklisted,
-          [token],
-        ),
-        returnValue: _i5.Future<bool>.value(false),
-      ) as _i5.Future<bool>);
+  _i5.Future<bool> isTokenBlacklisted(String? token) =>
+      (super.noSuchMethod(
+            Invocation.method(#isTokenBlacklisted, [token]),
+            returnValue: _i5.Future<bool>.value(false),
+          )
+          as _i5.Future<bool>);
 }

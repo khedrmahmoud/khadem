@@ -21,8 +21,9 @@ void main() {
     });
 
     test('should initialize with custom duration', () {
-      final customMiddleware =
-          CacheMiddleware(duration: const Duration(minutes: 5));
+      final customMiddleware = CacheMiddleware(
+        duration: const Duration(minutes: 5),
+      );
       expect(customMiddleware.name, equals('MemoryCache'));
     });
   });

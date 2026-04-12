@@ -240,16 +240,16 @@ class RequestMetadata {
 
   /// Converts metadata to map.
   Map<String, dynamic> toMap() => {
-        'method': method,
-        'path': path,
-        'ip': ip,
-        'port': port,
-        'protocol': protocol,
-        'is_secure': isSecure,
-        'is_ajax': isAjax,
-        'wants_json': wantsJson,
-        'host': host,
-        'user_agent': userAgent,
-        'content_length': contentLength,
-      };
+    'method': method,
+    'path': path,
+    'ip': ip,
+    'port': port,
+    'protocol': protocol,
+    'is_secure': isSecure,
+    'is_ajax': isAjax,
+    'wants_json': wantsJson,
+    'host': host,
+    'user_agent': userAgent,
+    'content_length': contentLength,
+  };
 }

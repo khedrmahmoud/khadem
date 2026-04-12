@@ -195,8 +195,9 @@ class CommandRegistry {
   /// Load the package name from pubspec.yaml.
   Future<void> _loadPackageName() async {
     try {
-      final pubspecFile =
-          File(path.join(Directory.current.path, 'pubspec.yaml'));
+      final pubspecFile = File(
+        path.join(Directory.current.path, 'pubspec.yaml'),
+      );
       if (!await pubspecFile.exists()) {
         _packageName = path.basename(Directory.current.path);
         return;
@@ -285,8 +286,9 @@ class CommandRegistry {
 
     // Walk up the inheritance hierarchy
     while (currentClass.superclass != null) {
-      final superClassName =
-          MirrorSystem.getName(currentClass.superclass!.simpleName);
+      final superClassName = MirrorSystem.getName(
+        currentClass.superclass!.simpleName,
+      );
 
       if (superClassName == 'KhademCommand') {
         return true;
@@ -306,11 +308,9 @@ class CommandRegistry {
 
       // Strategy 1: Try with named parameter {logger: logger}
       try {
-        instance = classMirror.newInstance(
-          const Symbol(''),
-          [],
-          {const Symbol('logger'): logger},
-        );
+        instance = classMirror.newInstance(const Symbol(''), [], {
+          const Symbol('logger'): logger,
+        });
       } catch (e) {
         // Strategy 2: Try with positional parameter [logger]
         try {

@@ -111,10 +111,7 @@ class QueueMetrics {
   /// Record queue depth snapshot
   void recordQueueDepth(int depth) {
     _queueDepthHistory.add(
-      _QueueDepthSnapshot(
-        timestamp: DateTime.now(),
-        depth: depth,
-      ),
+      _QueueDepthSnapshot(timestamp: DateTime.now(), depth: depth),
     );
 
     if (_queueDepthHistory.length > _maxDepthSnapshots) {
@@ -214,13 +211,11 @@ class QueueMetrics {
     if (_processingTimes.isEmpty) return Duration.zero;
 
     final avg = averageProcessingTime.inMilliseconds;
-    final variance = _processingTimes.fold<double>(
-          0.0,
-          (sum, d) {
-            final diff = d.inMilliseconds - avg;
-            return sum + (diff * diff);
-          },
-        ) /
+    final variance =
+        _processingTimes.fold<double>(0.0, (sum, d) {
+          final diff = d.inMilliseconds - avg;
+          return sum + (diff * diff);
+        }) /
         _processingTimes.length;
 
     return Duration(milliseconds: sqrt(variance).round());

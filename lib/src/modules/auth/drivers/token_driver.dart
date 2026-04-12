@@ -55,17 +55,18 @@ class TokenDriver implements AuthDriver {
     TokenInvalidationStrategyFactory? strategyFactory,
     Duration? tokenExpiry,
     Duration? refreshTokenExpiry,
-  })  : _repository = repository ?? DatabaseAuthRepository(),
-        _tokenService = tokenService ?? DatabaseTokenService(),
-        _tokenGenerator = tokenGenerator ?? SecureTokenGenerator(),
-        _strategyFactory = strategyFactory ??
-            TokenInvalidationStrategyFactory(
-              tokenService ?? DatabaseTokenService(),
-            ),
-        _tokenExpiry = tokenExpiry,
-        _refreshTokenExpiry = refreshTokenExpiry,
-        _providerKey = providerKey,
-        _config = config;
+  }) : _repository = repository ?? DatabaseAuthRepository(),
+       _tokenService = tokenService ?? DatabaseTokenService(),
+       _tokenGenerator = tokenGenerator ?? SecureTokenGenerator(),
+       _strategyFactory =
+           strategyFactory ??
+           TokenInvalidationStrategyFactory(
+             tokenService ?? DatabaseTokenService(),
+           ),
+       _tokenExpiry = tokenExpiry,
+       _refreshTokenExpiry = refreshTokenExpiry,
+       _providerKey = providerKey,
+       _config = config;
 
   /// Factory constructor with config and dependency injection
   factory TokenDriver.fromConfig(
@@ -79,15 +80,20 @@ class TokenDriver implements AuthDriver {
     final provider = config.getProvider(providerKey);
     final driverConfig = config.getDriver('token');
 
-    final accessSeconds = (provider['access_token_expiry'] ??
-        driverConfig['access_token_expiry']) as int?;
-    final refreshSeconds = (provider['refresh_token_expiry'] ??
-        driverConfig['refresh_token_expiry']) as int?;
+    final accessSeconds =
+        (provider['access_token_expiry'] ?? driverConfig['access_token_expiry'])
+            as int?;
+    final refreshSeconds =
+        (provider['refresh_token_expiry'] ??
+                driverConfig['refresh_token_expiry'])
+            as int?;
 
-    final tokenExpiry =
-        accessSeconds != null ? Duration(seconds: accessSeconds) : null;
-    final refreshTokenExpiry =
-        refreshSeconds != null ? Duration(seconds: refreshSeconds) : null;
+    final tokenExpiry = accessSeconds != null
+        ? Duration(seconds: accessSeconds)
+        : null;
+    final refreshTokenExpiry = refreshSeconds != null
+        ? Duration(seconds: refreshSeconds)
+        : null;
 
     final tokenServiceInstance = tokenService ?? DatabaseTokenService();
 
@@ -95,7 +101,8 @@ class TokenDriver implements AuthDriver {
       repository: repository,
       tokenService: tokenServiceInstance,
       tokenGenerator: tokenGenerator,
-      strategyFactory: strategyFactory ??
+      strategyFactory:
+          strategyFactory ??
           TokenInvalidationStrategyFactory(tokenServiceInstance),
       providerKey: providerKey,
       tokenExpiry: tokenExpiry,
@@ -142,10 +149,7 @@ class TokenDriver implements AuthDriver {
       throw AuthException('User not found');
     }
 
-    return DatabaseAuthenticatable.fromProviderConfig(
-      userData,
-      provider,
-    );
+    return DatabaseAuthenticatable.fromProviderConfig(userData, provider);
   }
 
   @override
@@ -165,8 +169,9 @@ class TokenDriver implements AuthDriver {
     };
 
     if (_tokenExpiry != null) {
-      tokenData['expires_at'] =
-          DateTime.now().add(_tokenExpiry).toIso8601String();
+      tokenData['expires_at'] = DateTime.now()
+          .add(_tokenExpiry)
+          .toIso8601String();
     }
 
     await _tokenService.storeToken(tokenData);
@@ -233,10 +238,7 @@ class TokenDriver implements AuthDriver {
       throw AuthException('User not found');
     }
 
-    final user = DatabaseAuthenticatable.fromProviderConfig(
-      userData,
-      provider,
-    );
+    final user = DatabaseAuthenticatable.fromProviderConfig(userData, provider);
 
     // Generate new tokens
     final newAccessToken = _tokenGenerator.generateToken(
@@ -253,8 +255,9 @@ class TokenDriver implements AuthDriver {
     };
 
     if (_tokenExpiry != null) {
-      accessTokenData['expires_at'] =
-          DateTime.now().add(_tokenExpiry).toIso8601String();
+      accessTokenData['expires_at'] = DateTime.now()
+          .add(_tokenExpiry)
+          .toIso8601String();
     }
 
     await _tokenService.storeToken(accessTokenData);

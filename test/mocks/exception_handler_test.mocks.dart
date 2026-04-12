@@ -31,65 +31,49 @@ class MockLogger extends _i1.Mock implements _i4.Logger {
   }
 
   @override
-  _i2.LogLevel get minimumLevel => (super.noSuchMethod(
-        Invocation.getter(#minimumLevel),
-        returnValue: _i2.LogLevel.debug,
-      ) as _i2.LogLevel);
+  _i2.LogLevel get minimumLevel =>
+      (super.noSuchMethod(
+            Invocation.getter(#minimumLevel),
+            returnValue: _i2.LogLevel.debug,
+          )
+          as _i2.LogLevel);
 
   @override
-  String get defaultChannel => (super.noSuchMethod(
-        Invocation.getter(#defaultChannel),
-        returnValue: _i3.dummyValue<String>(
-          this,
-          Invocation.getter(#defaultChannel),
-        ),
-      ) as String);
+  String get defaultChannel =>
+      (super.noSuchMethod(
+            Invocation.getter(#defaultChannel),
+            returnValue: _i3.dummyValue<String>(
+              this,
+              Invocation.getter(#defaultChannel),
+            ),
+          )
+          as String);
 
   @override
   set minimumLevel(_i2.LogLevel? level) => super.noSuchMethod(
-        Invocation.setter(
-          #minimumLevel,
-          level,
-        ),
+    Invocation.setter(#minimumLevel, level),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void loadFromConfig(_i2.ConfigInterface? config, {String? channel = 'app'}) =>
+      super.noSuchMethod(
+        Invocation.method(#loadFromConfig, [config], {#channel: channel}),
         returnValueForMissingStub: null,
       );
 
   @override
-  void loadFromConfig(
-    _i2.ConfigInterface? config, {
-    String? channel = 'app',
-  }) =>
+  void addHandler(_i2.LogHandler? handler, {String? channel = 'app'}) =>
       super.noSuchMethod(
-        Invocation.method(
-          #loadFromConfig,
-          [config],
-          {#channel: channel},
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void addHandler(
-    _i2.LogHandler? handler, {
-    String? channel = 'app',
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #addHandler,
-          [handler],
-          {#channel: channel},
-        ),
+        Invocation.method(#addHandler, [handler], {#channel: channel}),
         returnValueForMissingStub: null,
       );
 
   @override
   void setDefaultChannel(String? channel) => super.noSuchMethod(
-        Invocation.method(
-          #setDefaultChannel,
-          [channel],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#setDefaultChannel, [channel]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void debug(
@@ -97,19 +81,14 @@ class MockLogger extends _i1.Mock implements _i4.Logger {
     Map<String, dynamic>? context,
     StackTrace? stackTrace,
     String? channel,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #debug,
-          [message],
-          {
-            #context: context,
-            #stackTrace: stackTrace,
-            #channel: channel,
-          },
-        ),
-        returnValueForMissingStub: null,
-      );
+  }) => super.noSuchMethod(
+    Invocation.method(
+      #debug,
+      [message],
+      {#context: context, #stackTrace: stackTrace, #channel: channel},
+    ),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void info(
@@ -117,19 +96,14 @@ class MockLogger extends _i1.Mock implements _i4.Logger {
     Map<String, dynamic>? context,
     StackTrace? stackTrace,
     String? channel,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #info,
-          [message],
-          {
-            #context: context,
-            #stackTrace: stackTrace,
-            #channel: channel,
-          },
-        ),
-        returnValueForMissingStub: null,
-      );
+  }) => super.noSuchMethod(
+    Invocation.method(
+      #info,
+      [message],
+      {#context: context, #stackTrace: stackTrace, #channel: channel},
+    ),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void warning(
@@ -137,19 +111,14 @@ class MockLogger extends _i1.Mock implements _i4.Logger {
     Map<String, dynamic>? context,
     StackTrace? stackTrace,
     String? channel,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #warning,
-          [message],
-          {
-            #context: context,
-            #stackTrace: stackTrace,
-            #channel: channel,
-          },
-        ),
-        returnValueForMissingStub: null,
-      );
+  }) => super.noSuchMethod(
+    Invocation.method(
+      #warning,
+      [message],
+      {#context: context, #stackTrace: stackTrace, #channel: channel},
+    ),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void error(
@@ -157,19 +126,14 @@ class MockLogger extends _i1.Mock implements _i4.Logger {
     Map<String, dynamic>? context,
     StackTrace? stackTrace,
     String? channel,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #error,
-          [message],
-          {
-            #context: context,
-            #stackTrace: stackTrace,
-            #channel: channel,
-          },
-        ),
-        returnValueForMissingStub: null,
-      );
+  }) => super.noSuchMethod(
+    Invocation.method(
+      #error,
+      [message],
+      {#context: context, #stackTrace: stackTrace, #channel: channel},
+    ),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void critical(
@@ -177,19 +141,14 @@ class MockLogger extends _i1.Mock implements _i4.Logger {
     Map<String, dynamic>? context,
     StackTrace? stackTrace,
     String? channel,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #critical,
-          [message],
-          {
-            #context: context,
-            #stackTrace: stackTrace,
-            #channel: channel,
-          },
-        ),
-        returnValueForMissingStub: null,
-      );
+  }) => super.noSuchMethod(
+    Invocation.method(
+      #critical,
+      [message],
+      {#context: context, #stackTrace: stackTrace, #channel: channel},
+    ),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void log(
@@ -198,29 +157,18 @@ class MockLogger extends _i1.Mock implements _i4.Logger {
     Map<String, dynamic>? context,
     StackTrace? stackTrace,
     String? channel,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #log,
-          [
-            level,
-            message,
-          ],
-          {
-            #context: context,
-            #stackTrace: stackTrace,
-            #channel: channel,
-          },
-        ),
-        returnValueForMissingStub: null,
-      );
+  }) => super.noSuchMethod(
+    Invocation.method(
+      #log,
+      [level, message],
+      {#context: context, #stackTrace: stackTrace, #channel: channel},
+    ),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void close() => super.noSuchMethod(
-        Invocation.method(
-          #close,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#close, []),
+    returnValueForMissingStub: null,
+  );
 }

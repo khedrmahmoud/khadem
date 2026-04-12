@@ -32,16 +32,14 @@ class Asset {
     List<int> bytes, {
     String disk = 'public',
     String? filename,
-  }) =>
-      _instance.storeFile(path, bytes, disk: disk, filename: filename);
+  }) => _instance.storeFile(path, bytes, disk: disk, filename: filename);
 
   static Future<String> storeTextFile(
     String path,
     String content, {
     String disk = 'public',
     String? filename,
-  }) =>
-      _instance.storeTextFile(path, content, disk: disk, filename: filename);
+  }) => _instance.storeTextFile(path, content, disk: disk, filename: filename);
 
   static Future<void> deleteFile(String path, {String disk = 'public'}) =>
       _instance.deleteFile(path, disk: disk);
@@ -59,21 +57,18 @@ class Asset {
     String from,
     String to, {
     String disk = 'public',
-  }) =>
-      _instance.copyFile(from, to, disk: disk);
+  }) => _instance.copyFile(from, to, disk: disk);
 
   static Future<void> moveFile(
     String from,
     String to, {
     String disk = 'public',
-  }) =>
-      _instance.moveFile(from, to, disk: disk);
+  }) => _instance.moveFile(from, to, disk: disk);
 
   static Future<List<String>> listFiles(
     String directory, {
     String disk = 'public',
-  }) =>
-      _instance.listFiles(directory, disk: disk);
+  }) => _instance.listFiles(directory, disk: disk);
 
   static String generateUniqueFilename(String originalFilename) =>
       _instance.generateUniqueFilename(originalFilename);
@@ -81,8 +76,7 @@ class Asset {
   static bool isValidFileType(
     String filename,
     List<String> allowedExtensions,
-  ) =>
-      _instance.isValidFileType(filename, allowedExtensions);
+  ) => _instance.isValidFileType(filename, allowedExtensions);
 
   static String getFileExtension(String filename) =>
       _instance.getFileExtension(filename);

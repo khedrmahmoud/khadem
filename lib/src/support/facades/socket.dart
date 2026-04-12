@@ -60,11 +60,7 @@ class Socket {
   }
 
   /// Broadcast an event to all clients who have subscribed to it.
-  static void broadcast(
-    String event,
-    dynamic data, {
-    String? namespace,
-  }) {
+  static void broadcast(String event, dynamic data, {String? namespace}) {
     _manager.broadcast(event, data, namespace: namespace);
   }
 

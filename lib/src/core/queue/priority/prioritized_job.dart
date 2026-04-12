@@ -8,11 +8,8 @@ class PrioritizedJob implements Comparable<PrioritizedJob> {
   final DateTime queuedAt;
   final String id;
 
-  PrioritizedJob({
-    required this.job,
-    required this.priority,
-    required this.id,
-  }) : queuedAt = DateTime.now();
+  PrioritizedJob({required this.job, required this.priority, required this.id})
+    : queuedAt = DateTime.now();
 
   @override
   int compareTo(PrioritizedJob other) {
@@ -27,11 +24,11 @@ class PrioritizedJob implements Comparable<PrioritizedJob> {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'priority': priority.name,
-        'queuedAt': queuedAt.toIso8601String(),
-        'jobType': job.runtimeType.toString(),
-      };
+    'id': id,
+    'priority': priority.name,
+    'queuedAt': queuedAt.toIso8601String(),
+    'jobType': job.runtimeType.toString(),
+  };
 
   @override
   String toString() {

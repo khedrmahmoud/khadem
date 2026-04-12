@@ -23,8 +23,10 @@ class CliServiceProvider extends ServiceProvider {
     container.singleton<ConfigInterface>(
       (c) => ConfigSystem(
         configPath: configPath,
-        environment:
-            c.resolve<EnvInterface>().getOrDefault('APP_ENV', 'development'),
+        environment: c.resolve<EnvInterface>().getOrDefault(
+          'APP_ENV',
+          'development',
+        ),
       ),
     );
 
@@ -36,8 +38,9 @@ class CliServiceProvider extends ServiceProvider {
     container.lazySingleton<DatabaseManager>(
       (c) => DatabaseManager(c.resolve<ConfigInterface>()),
     );
-    container
-        .lazySingleton<Migrator>((c) => Migrator(c.resolve<DatabaseManager>()));
+    container.lazySingleton<Migrator>(
+      (c) => Migrator(c.resolve<DatabaseManager>()),
+    );
     container.lazySingleton<SeederManager>((c) => SeederManager());
     container.lazySingleton<QueueManager>(
       (c) => QueueManager(c.resolve<ConfigInterface>()),
@@ -69,14 +72,12 @@ class CliServiceProvider extends ServiceProvider {
     logger.info('✅ CLI services initialized');
   }
 
-  void _ensureDatabaseConfigFromEnv(
-    EnvInterface env,
-    ConfigInterface config,
-  ) {
+  void _ensureDatabaseConfigFromEnv(EnvInterface env, ConfigInterface config) {
     final driver = env.getOrDefault('DB_CONNECTION', 'mysql');
 
-    final existing =
-        config.get<Map<String, dynamic>>('database.connections.$driver');
+    final existing = config.get<Map<String, dynamic>>(
+      'database.connections.$driver',
+    );
     if (existing != null) {
       return;
     }
@@ -85,28 +86,22 @@ class CliServiceProvider extends ServiceProvider {
 
     switch (driver) {
       case 'sqlite':
-        config.set(
-          'database.connections.sqlite',
-          <String, dynamic>{
-            'driver': 'sqlite',
-            'path': env.getOrDefault('DB_DATABASE', 'storage/database.sqlite'),
-          },
-        );
+        config.set('database.connections.sqlite', <String, dynamic>{
+          'driver': 'sqlite',
+          'path': env.getOrDefault('DB_DATABASE', 'storage/database.sqlite'),
+        });
         return;
 
       case 'mysql':
       default:
-        config.set(
-          'database.connections.mysql',
-          <String, dynamic>{
-            'driver': 'mysql',
-            'host': env.getOrDefault('DB_HOST', '127.0.0.1'),
-            'port': env.getInt('DB_PORT', defaultValue: 3306),
-            'database': env.getOrDefault('DB_DATABASE', 'khadem'),
-            'username': env.getOrDefault('DB_USERNAME', 'root'),
-            'password': env.getOrDefault('DB_PASSWORD', ''),
-          },
-        );
+        config.set('database.connections.mysql', <String, dynamic>{
+          'driver': 'mysql',
+          'host': env.getOrDefault('DB_HOST', '127.0.0.1'),
+          'port': env.getInt('DB_PORT', defaultValue: 3306),
+          'database': env.getOrDefault('DB_DATABASE', 'khadem'),
+          'username': env.getOrDefault('DB_USERNAME', 'root'),
+          'password': env.getOrDefault('DB_PASSWORD', ''),
+        });
         return;
     }
   }

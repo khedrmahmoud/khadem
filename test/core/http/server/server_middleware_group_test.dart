@@ -32,8 +32,7 @@ class FakeEnv implements EnvInterface {
     String key, {
     String separator = ',',
     List<String> defaultValue = const [],
-  }) =>
-      defaultValue;
+  }) => defaultValue;
 
   @override
   void set(String key, String value) {}

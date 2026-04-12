@@ -5,11 +5,11 @@ class ValidationException extends AppException {
   final Map<String, List<String>> errors;
 
   ValidationException(this.errors, {dynamic additionalDetails})
-      : super(
-          Lang.t('validation_failed'),
-          statusCode: 422,
-          title: 'Validation Failed',
-          type: 'validation_error',
-          details: additionalDetails ?? errors,
-        );
+    : super(
+        Lang.t('validation_failed'),
+        statusCode: 422,
+        title: 'Validation Failed',
+        type: 'validation_error',
+        details: additionalDetails ?? errors,
+      );
 }

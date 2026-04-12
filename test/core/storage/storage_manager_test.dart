@@ -13,8 +13,9 @@ void main() {
 
     setUp(() {
       storageManager = StorageManager();
-      localDisk =
-          LocalDisk(basePath: Directory.systemTemp.path + '/test_storage');
+      localDisk = LocalDisk(
+        basePath: Directory.systemTemp.path + '/test_storage',
+      );
     });
 
     test('should initialize with default local driver', () {
@@ -110,10 +111,7 @@ void main() {
       final config = {
         'default': 'test',
         'disks': {
-          'test': {
-            'driver': 'local',
-            'root': './test-storage',
-          },
+          'test': {'driver': 'local', 'root': './test-storage'},
         },
       };
 
@@ -142,10 +140,7 @@ void main() {
     test('should throw when loading config with unsupported driver', () {
       final config = {
         'disks': {
-          'test': {
-            'driver': 'unsupported',
-            'root': './test-storage',
-          },
+          'test': {'driver': 'unsupported', 'root': './test-storage'},
         },
       };
 
@@ -176,9 +171,7 @@ void main() {
     });
 
     test('should handle configuration without disks', () {
-      final config = {
-        'default': 'local',
-      };
+      final config = {'default': 'local'};
 
       storageManager.fromConfig(config);
       expect(storageManager.defaultDisk, equals('local'));
@@ -187,10 +180,7 @@ void main() {
     test('should handle configuration without default', () {
       final config = {
         'disks': {
-          'local': {
-            'driver': 'local',
-            'root': './storage',
-          },
+          'local': {'driver': 'local', 'root': './storage'},
         },
       };
 

@@ -38,12 +38,10 @@ class RouteGroup {
 
     for (final route in subRouter.routes) {
       final newPath = '$prefix${route.path}';
-      router.register(
-        route.method,
-        newPath,
-        route.handler,
-        [...middleware, ...route.middleware],
-      );
+      router.register(route.method, newPath, route.handler, [
+        ...middleware,
+        ...route.middleware,
+      ]);
     }
   }
 }

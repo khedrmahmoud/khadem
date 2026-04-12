@@ -42,12 +42,12 @@ class AuthServiceProvider extends ServiceProvider {
 
   @override
   List<Type> get provides => [
-        AuthConfig,
-        AuthRepository,
-        PasswordVerifier,
-        TokenGenerator,
-        AuthManager,
-      ];
+    AuthConfig,
+    AuthRepository,
+    PasswordVerifier,
+    TokenGenerator,
+    AuthManager,
+  ];
 
   /// Registers authentication services in the container
   ///
@@ -94,9 +94,7 @@ class AuthServiceProvider extends ServiceProvider {
   /// Registers the main authentication manager
   void _registerAuthManager(ContainerInterface container) {
     container.singleton<AuthManager>(
-      (c) => AuthManager(
-        authConfig: c.resolve<AuthConfig>(),
-      ),
+      (c) => AuthManager(authConfig: c.resolve<AuthConfig>()),
     );
 
     // Note: Container doesn't support aliases, use direct resolution

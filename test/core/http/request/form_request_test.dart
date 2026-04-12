@@ -57,8 +57,11 @@ class FakeRequest implements Request {
     Map<String, String>? messages,
   }) async {
     // Use the real InputValidator for proper testing
-    final validator =
-        InputValidator(_bodyData, rules, customMessages: messages ?? {});
+    final validator = InputValidator(
+      _bodyData,
+      rules,
+      customMessages: messages ?? {},
+    );
 
     if (!await validator.passes()) {
       throw ValidationException(validator.errors);
@@ -80,20 +83,14 @@ class FakeRequest implements Request {
 class TestFormRequest extends FormRequest {
   @override
   Map<String, dynamic> rules() {
-    return {
-      'name': 'required|max:50',
-      'email': 'required|email',
-    };
+    return {'name': 'required|max:50', 'email': 'required|email'};
   }
 }
 
 class TestFormRequestWithMessages extends FormRequest {
   @override
   Map<String, dynamic> rules() {
-    return {
-      'email': 'required|email',
-      'password': 'required|min:8',
-    };
+    return {'email': 'required|email', 'password': 'required|min:8'};
   }
 
   @override
@@ -215,10 +212,7 @@ class TestFormRequestWithRequestCheck extends FormRequest {
 class TestFormRequestWithDataModification extends FormRequest {
   @override
   Map<String, dynamic> rules() {
-    return {
-      'name': 'required',
-      'email': 'required|email',
-    };
+    return {'name': 'required', 'email': 'required|email'};
   }
 
   @override
@@ -293,10 +287,7 @@ void main() {
       });
 
       test('throws ValidationException with invalid data', () async {
-        final request = FakeRequest({
-          'name': '',
-          'email': 'invalid-email',
-        });
+        final request = FakeRequest({'name': '', 'email': 'invalid-email'});
 
         final formRequest = TestFormRequest();
 
@@ -322,10 +313,7 @@ void main() {
       });
 
       test('enforces required validation', () async {
-        final request = FakeRequest({
-          'name': '',
-          'email': 'john@example.com',
-        });
+        final request = FakeRequest({'name': '', 'email': 'john@example.com'});
 
         final formRequest = TestFormRequest();
 
@@ -346,10 +334,7 @@ void main() {
       });
 
       test('handles multiple validation failures', () async {
-        final request = FakeRequest({
-          'name': '',
-          'email': 'invalid-email',
-        });
+        final request = FakeRequest({'name': '', 'email': 'invalid-email'});
 
         final formRequest = TestFormRequest();
 
@@ -424,10 +409,7 @@ void main() {
       });
 
       test('uses custom error messages when provided', () async {
-        final request = FakeRequest({
-          'email': '',
-          'password': 'abc',
-        });
+        final request = FakeRequest({'email': '', 'password': 'abc'});
 
         final formRequest = TestFormRequestWithMessages();
 
@@ -486,17 +468,19 @@ void main() {
         }
       });
 
-      test('failedValidation re-throws ValidationException by default',
-          () async {
-        final request = FakeRequest({'name': ''});
+      test(
+        'failedValidation re-throws ValidationException by default',
+        () async {
+          final request = FakeRequest({'name': ''});
 
-        final formRequest = TestFormRequestWithHooks();
+          final formRequest = TestFormRequestWithHooks();
 
-        expect(
-          () => formRequest.validate(request),
-          throwsA(isA<ValidationException>()),
-        );
-      });
+          expect(
+            () => formRequest.validate(request),
+            throwsA(isA<ValidationException>()),
+          );
+        },
+      );
 
       test('calls hooks in correct order', () async {
         final request = FakeRequest({'name': 'John Doe'});
@@ -535,8 +519,10 @@ void main() {
       });
 
       test('passedValidation can modify validated data', () async {
-        final request =
-            FakeRequest({'name': 'John Doe', 'email': 'john@example.com'});
+        final request = FakeRequest({
+          'name': 'John Doe',
+          'email': 'john@example.com',
+        });
 
         final formRequest = TestFormRequestWithDataModification();
         final validated = await formRequest.validate(request);
@@ -549,17 +535,19 @@ void main() {
     });
 
     group('Authorization', () {
-      test('throws UnauthorizedException when authorize returns false',
-          () async {
-        final request = FakeRequest({'name': 'John Doe'});
+      test(
+        'throws UnauthorizedException when authorize returns false',
+        () async {
+          final request = FakeRequest({'name': 'John Doe'});
 
-        final formRequest = TestFormRequestWithAuth(shouldAuthorize: false);
+          final formRequest = TestFormRequestWithAuth(shouldAuthorize: false);
 
-        expect(
-          () => formRequest.validate(request),
-          throwsA(isA<UnauthorizedException>()),
-        );
-      });
+          expect(
+            () => formRequest.validate(request),
+            throwsA(isA<UnauthorizedException>()),
+          );
+        },
+      );
 
       test('validates successfully when authorize returns true', () async {
         final request = FakeRequest({'name': 'John Doe'});
@@ -652,18 +640,20 @@ void main() {
         );
       });
 
-      test('validatedInput returns null for missing fields without default',
-          () async {
-        final request = FakeRequest({
-          'name': 'John Doe',
-          'email': 'john@example.com',
-        });
+      test(
+        'validatedInput returns null for missing fields without default',
+        () async {
+          final request = FakeRequest({
+            'name': 'John Doe',
+            'email': 'john@example.com',
+          });
 
-        final formRequest = TestFormRequest();
-        await formRequest.validate(request);
+          final formRequest = TestFormRequest();
+          await formRequest.validate(request);
 
-        expect(formRequest.validatedInput('missing'), isNull);
-      });
+          expect(formRequest.validatedInput('missing'), isNull);
+        },
+      );
 
       test('only returns specified fields', () async {
         final request = FakeRequest({
@@ -768,21 +758,21 @@ void main() {
         expect(formRequest.request, equals(request));
       });
 
-      test('request returns the request instance even when validation fails',
-          () async {
-        final request = FakeRequest({
-          'name': '',
-        });
+      test(
+        'request returns the request instance even when validation fails',
+        () async {
+          final request = FakeRequest({'name': ''});
 
-        final formRequest = TestFormRequest();
-        expect(formRequest.request, isNull);
+          final formRequest = TestFormRequest();
+          expect(formRequest.request, isNull);
 
-        try {
-          await formRequest.validate(request);
-        } catch (e) {
-          expect(formRequest.request, equals(request));
-        }
-      });
+          try {
+            await formRequest.validate(request);
+          } catch (e) {
+            expect(formRequest.request, equals(request));
+          }
+        },
+      );
     });
 
     group('Edge Cases', () {
@@ -809,14 +799,18 @@ void main() {
       test('validated data is updated on revalidation', () async {
         final formRequest = TestFormRequest();
 
-        final request1 =
-            FakeRequest({'name': 'John', 'email': 'john@example.com'});
+        final request1 = FakeRequest({
+          'name': 'John',
+          'email': 'john@example.com',
+        });
         await formRequest.validate(request1);
 
         final firstValidated = formRequest.validatedData;
 
-        final request2 =
-            FakeRequest({'name': 'Jane', 'email': 'jane@example.com'});
+        final request2 = FakeRequest({
+          'name': 'Jane',
+          'email': 'jane@example.com',
+        });
         await formRequest.validate(request2);
 
         final secondValidated = formRequest.validatedData;
@@ -886,10 +880,7 @@ void main() {
 
     group('Exception Handling', () {
       test('ValidationException contains field-specific errors', () async {
-        final request = FakeRequest({
-          'name': '',
-          'email': 'invalid-email',
-        });
+        final request = FakeRequest({'name': '', 'email': 'invalid-email'});
 
         final formRequest = TestFormRequest();
 

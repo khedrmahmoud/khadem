@@ -65,11 +65,9 @@ class HasManyThrough<Related extends KhademModel<Related>, Parent>
 
     final parentTable = parentQuery.table;
 
-    return query.select(columns).whereColumn(
-          '$parentTable.$localKey',
-          '=',
-          '$throughTable.$firstKey',
-        );
+    return query
+        .select(columns)
+        .whereColumn('$parentTable.$localKey', '=', '$throughTable.$firstKey');
   }
 
   @override
